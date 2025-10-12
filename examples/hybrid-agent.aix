@@ -1,0 +1,424 @@
+# Hybrid AIX Agent Example
+# Academic Research Assistant Configuration
+# Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+#
+# This example demonstrates a full-featured AI agent combining:
+# - Rich personality configuration
+# - Multiple skills
+# - API integrations
+# - MCP server tools
+# - Comprehensive memory systems
+# - Advanced security settings
+
+meta:
+  version: "1.0"
+  id: "550e8400-e29b-41d4-a716-446655440003"
+  name: "Academic Research Assistant"
+  description: "AI agent for academic research, literature review, and citation management"
+  created: "2025-01-12T12:00:00Z"
+  updated: "2025-01-12T17:30:00Z"
+  author: "Mohamed H Abdelaziz"
+  tags: ["research", "academic", "literature", "citations", "hybrid"]
+  license: "MIT"
+  homepage: "https://amrikyy.ai/agents/research-assistant"
+  repository: "https://github.com/amrikyy/research-assistant-agent"
+  documentation: "https://docs.amrikyy.ai/agents/research-assistant"
+  icon: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiPjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzQyODVGNCIvPjwvc3ZnPg=="
+  language: "en"
+  framework: "anthropic"
+  runtime_version: ">=1.0.0"
+
+persona:
+  role: "academic research assistant and literature expert"
+  tone: "scholarly, thorough, and encouraging"
+  style: "structured, evidence-based, and citation-rich"
+  instructions: |
+    You are an academic research assistant with expertise in literature review,
+    citation management, and research methodology. Your role is to:
+    
+    1. Help researchers find relevant academic papers and articles
+    2. Summarize research findings accurately and comprehensively
+    3. Manage citations in multiple formats (APA, MLA, Chicago, IEEE)
+    4. Identify research gaps and suggest future directions
+    5. Evaluate research quality and methodology
+    6. Assist with systematic literature reviews
+    7. Track research trends and emerging topics
+    
+    Always:
+    - Cite sources properly with full bibliographic information
+    - Distinguish between peer-reviewed and non-peer-reviewed sources
+    - Acknowledge limitations of studies
+    - Encourage critical thinking and methodological rigor
+    - Maintain academic integrity and ethical standards
+    
+    Never:
+    - Fabricate citations or references
+    - Plagiarize or encourage plagiarism
+    - Make absolute claims without evidence
+    - Misrepresent research findings
+  
+  constraints:
+    - "Always verify citations before providing them"
+    - "Clearly distinguish between primary and secondary sources"
+    - "Acknowledge when information is outside your knowledge cutoff"
+    - "Never generate fake DOIs or academic credentials"
+    - "Respect copyright and intellectual property"
+    - "Maintain user's research confidentiality"
+  
+  personality_traits:
+    analytical: "high"
+    thoroughness: "very high"
+    creativity: "medium"
+    patience: "high"
+    formality: "academic-professional"
+  
+  example_responses:
+    - question: "What are the latest developments in quantum computing?"
+      answer: "Based on recent literature, quantum computing has seen significant advances in three key areas: (1) error correction algorithms (Fowler et al., 2023), (2) scalable qubit architectures (Chen & Zhang, 2023), and (3) practical applications in cryptography (Johnson et al., 2024). Let me search our databases for the most recent peer-reviewed articles on these topics."
+    
+    - question: "Help me with a literature review on climate change impacts"
+      answer: "I'll help you conduct a systematic literature review. First, let's define your research question and search criteria. What specific aspects of climate change impacts are you investigating? (e.g., economic impacts, ecosystem effects, regional variations). This will help me query the appropriate databases and organize the findings effectively."
+  
+  temperature: 0.4
+  context_window: 16384
+  response_format: "structured"
+
+skills:
+  - name: "literature_search"
+    description: "Search academic databases for relevant papers"
+    enabled: true
+    parameters:
+      databases: ["semantic_scholar", "crossref", "pubmed"]
+      default_results: 20
+      sort_by: "relevance"
+    triggers:
+      - "keywords: search, find papers, literature"
+    priority: 9
+    timeout: 60
+    examples:
+      - "User: Find papers on machine learning in healthcare"
+      - "Agent: Searching Semantic Scholar and CrossRef for recent papers..."
+  
+  - name: "summarize_paper"
+    description: "Generate structured summaries of research papers"
+    enabled: true
+    parameters:
+      include_sections: ["objective", "methods", "results", "conclusions"]
+      extract_key_findings: true
+      identify_limitations: true
+    triggers:
+      - "user provides paper URL or DOI"
+    priority: 8
+    timeout: 90
+  
+  - name: "manage_citations"
+    description: "Format and manage bibliographic citations"
+    enabled: true
+    parameters:
+      supported_formats: ["APA", "MLA", "Chicago", "IEEE", "Harvard", "Vancouver"]
+      default_format: "APA"
+      include_doi: true
+    triggers:
+      - "keywords: cite, citation, bibliography, reference"
+    priority: 7
+    timeout: 30
+  
+  - name: "identify_research_gaps"
+    description: "Analyze literature to identify research gaps"
+    enabled: true
+    parameters:
+      analysis_depth: "comprehensive"
+      suggest_directions: true
+    triggers:
+      - "keywords: research gap, future work, opportunities"
+    priority: 6
+    timeout: 120
+  
+  - name: "systematic_review"
+    description: "Conduct systematic literature reviews following PRISMA guidelines"
+    enabled: true
+    parameters:
+      methodology: "PRISMA"
+      track_screening: true
+      generate_flowchart: true
+    priority: 10
+    timeout: 300
+  
+  - name: "extract_data"
+    description: "Extract structured data from research papers"
+    enabled: true
+    parameters:
+      extract_fields: ["sample_size", "methodology", "p_values", "effect_sizes"]
+      create_tables: true
+    priority: 7
+    timeout: 90
+
+apis:
+  - name: "semantic_scholar"
+    base_url: "https://api.semanticscholar.org/graph/v1"
+    description: "Semantic Scholar API for academic papers"
+    version: "1.0"
+    auth:
+      type: "api_key"
+      location: "header"
+      key_name: "x-api-key"
+    endpoints:
+      - path: "/paper/search"
+        method: "GET"
+        description: "Search for papers"
+        parameters:
+          - name: "query"
+            type: "string"
+            required: true
+          - name: "limit"
+            type: "integer"
+            default: 10
+            max: 100
+          - name: "fields"
+            type: "string"
+            default: "title,authors,year,abstract,citationCount"
+      - path: "/paper/{paperId}"
+        method: "GET"
+        description: "Get paper details"
+        parameters:
+          - name: "paperId"
+            type: "string"
+            required: true
+          - name: "fields"
+            type: "string"
+    rate_limit:
+      requests: 100
+      period: 300
+    timeout: 15
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+  
+  - name: "crossref"
+    base_url: "https://api.crossref.org"
+    description: "CrossRef API for DOI resolution and metadata"
+    version: "1.0"
+    auth:
+      type: "none"
+    endpoints:
+      - path: "/works"
+        method: "GET"
+        description: "Search for works"
+        parameters:
+          - name: "query"
+            type: "string"
+            required: true
+          - name: "rows"
+            type: "integer"
+            default: 20
+      - path: "/works/{doi}"
+        method: "GET"
+        description: "Get work by DOI"
+        parameters:
+          - name: "doi"
+            type: "string"
+            required: true
+    rate_limit:
+      requests: 50
+      period: 60
+    timeout: 10
+  
+  - name: "openalex"
+    base_url: "https://api.openalex.org"
+    description: "OpenAlex API for scholarly data"
+    version: "1.0"
+    auth:
+      type: "none"
+    endpoints:
+      - path: "/works"
+        method: "GET"
+        description: "Search works"
+        parameters:
+          - name: "search"
+            type: "string"
+          - name: "filter"
+            type: "string"
+          - name: "per-page"
+            type: "integer"
+            default: 25
+    rate_limit:
+      requests: 100000
+      period: 86400
+    timeout: 10
+
+mcp:
+  servers:
+    - name: "filesystem_server"
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "/research_library"]
+      description: "Manage research paper PDFs and notes"
+      capabilities:
+        - "read_file"
+        - "write_file"
+        - "list_directory"
+        - "search_files"
+      timeout: 30
+      auto_start: true
+      env:
+        MCP_ALLOWED_EXTENSIONS: ".pdf,.md,.bib,.txt"
+    
+    - name: "search_server"
+      command: "mcp-server-brave-search"
+      args: []
+      description: "Web search for supplementary information"
+      capabilities:
+        - "web_search"
+      timeout: 15
+      auto_start: true
+    
+    - name: "git_server"
+      command: "mcp-server-git"
+      args: ["--repo", "/research_project"]
+      description: "Version control for research notes and code"
+      capabilities:
+        - "commit"
+        - "log"
+        - "diff"
+      timeout: 20
+      auto_start: false
+    
+    - name: "database_server"
+      command: "mcp-server-sqlite"
+      args: ["--database", "/research_library/papers.db"]
+      description: "Database for paper metadata and annotations"
+      capabilities:
+        - "query"
+        - "execute"
+        - "schema"
+      timeout: 10
+      auto_start: true
+    
+    - name: "zotero_server"
+      command: "mcp-server-zotero"
+      args: []
+      description: "Integration with Zotero reference manager"
+      capabilities:
+        - "add_item"
+        - "search_items"
+        - "get_collections"
+      timeout: 15
+      auto_start: false
+      env:
+        ZOTERO_API_KEY: "${ZOTERO_API_KEY}"
+        ZOTERO_USER_ID: "${ZOTERO_USER_ID}"
+
+memory:
+  episodic:
+    enabled: true
+    max_messages: 200
+    retention_days: 90
+    storage: "database"
+    context_aware: true
+    conversation_summaries: true
+  
+  semantic:
+    enabled: true
+    embedding_model: "text-embedding-3-large"
+    vector_db: "chromadb"
+    similarity_threshold: 0.75
+    max_results: 15
+    collections:
+      - "papers_read"
+      - "research_topics"
+      - "key_findings"
+      - "methodologies"
+      - "citations"
+    index_fields:
+      - "title"
+      - "abstract"
+      - "authors"
+      - "keywords"
+  
+  procedural:
+    enabled: true
+    storage: "database"
+    max_workflows: 100
+    workflows:
+      - "systematic_review_protocol"
+      - "citation_formatting"
+      - "literature_screening"
+      - "data_extraction_process"
+      - "quality_assessment"
+  
+  persistence:
+    enabled: true
+    backend: "postgresql"
+    config:
+      host: "localhost"
+      port: 5432
+      database: "research_assistant"
+      schema: "agent_memory"
+      pool_size: 10
+      ssl: true
+      backup_enabled: true
+      backup_interval_hours: 24
+
+security:
+  checksum:
+    algorithm: "sha256"
+    value: "placeholder_will_be_calculated"
+    scope: "content"
+    exclude_sections: []
+  
+  signature:
+    algorithm: "RSA-SHA256"
+    value: ""
+    public_key: |
+      -----BEGIN PUBLIC KEY-----
+      [Public key would be inserted here in production]
+      -----END PUBLIC KEY-----
+    signer: "amrikyy@gmail.com"
+    timestamp: "2025-01-12T17:30:00Z"
+  
+  encryption:
+    encrypted: false
+    algorithm: "AES-256-GCM"
+    key_fingerprint: ""
+  
+  capabilities:
+    allowed_operations:
+      - "read_files"
+      - "write_files"
+      - "call_apis"
+      - "use_tools"
+      - "access_database"
+      - "web_search"
+    restricted_operations:
+      - "delete_files"
+      - "modify_system"
+      - "execute_code"
+    restricted_domains:
+      - "localhost"
+      - "127.0.0.1"
+      - "*.internal"
+      - "*.local"
+    allowed_api_domains:
+      - "api.semanticscholar.org"
+      - "api.crossref.org"
+      - "api.openalex.org"
+    max_api_calls_per_minute: 150
+    max_memory_mb: 2048
+    max_file_size_mb: 100
+    max_concurrent_requests: 10
+    sandbox: true
+    network_isolation: false
+    require_user_confirmation:
+      - "delete_file"
+      - "commit_changes"
+  
+  compliance:
+    standards: ["GDPR", "FERPA", "SOC2"]
+    certifications: ["ISO27001"]
+    audit_log: true
+    log_level: "info"
+    log_pii: false
+    data_retention_days: 180
+    anonymize_user_data: true
+    encryption_at_rest: true
+    encryption_in_transit: true
+

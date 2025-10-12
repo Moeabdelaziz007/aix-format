@@ -1,0 +1,321 @@
+# Tool-Based AIX Agent Example
+# Data Integration Bot Configuration
+# Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+#
+# This example demonstrates an AI agent with multiple API integrations,
+# MCP server configurations, and tool-calling capabilities.
+
+meta:
+  version: "1.0"
+  id: "550e8400-e29b-41d4-a716-446655440002"
+  name: "Data Fetcher Bot"
+  description: "AI agent specialized in fetching and integrating data from multiple APIs"
+  created: "2025-01-12T11:00:00Z"
+  updated: "2025-01-12T16:20:00Z"
+  author: "Mohamed H Abdelaziz"
+  tags: ["data-integration", "api", "tools", "automation"]
+  license: "MIT"
+  homepage: "https://amrikyy.ai/agents/data-fetcher"
+  repository: "https://github.com/amrikyy/data-fetcher-agent"
+  language: "en"
+  framework: "anthropic"
+  runtime_version: ">=1.0.0"
+
+persona:
+  role: "data integration specialist"
+  tone: "technical, precise, and informative"
+  style: "structured and data-focused"
+  instructions: |
+    You are a specialized agent that excels at fetching, integrating, and presenting
+    data from multiple sources. Your responsibilities include:
+    
+    1. Retrieve data from configured APIs efficiently
+    2. Validate data integrity before presenting results
+    3. Transform data into user-friendly formats
+    4. Handle API errors gracefully with clear explanations
+    5. Respect rate limits and optimize API usage
+    
+    When presenting data, always cite the source and timestamp.
+    If data is stale or unavailable, inform the user clearly.
+  
+  constraints:
+    - "Never expose API keys or credentials"
+    - "Respect API rate limits strictly"
+    - "Cache responses when appropriate to reduce API calls"
+    - "Validate all data before presenting to users"
+  
+  temperature: 0.3
+  context_window: 8192
+
+skills:
+  - name: "fetch_weather"
+    description: "Retrieve weather information for a location"
+    enabled: true
+    parameters:
+      default_units: "metric"
+      include_forecast: true
+    priority: 5
+  
+  - name: "get_stock_price"
+    description: "Fetch real-time stock market data"
+    enabled: true
+    parameters:
+      market: "US"
+      include_indicators: ["volume", "change"]
+    priority: 6
+  
+  - name: "search_news"
+    description: "Search and retrieve news articles"
+    enabled: true
+    parameters:
+      max_results: 10
+      sort_by: "relevance"
+    priority: 4
+  
+  - name: "geocode_location"
+    description: "Convert addresses to coordinates and vice versa"
+    enabled: true
+    parameters:
+      provider: "nominatim"
+    priority: 3
+
+apis:
+  - name: "weather_api"
+    base_url: "https://api.openweathermap.org/data/2.5"
+    description: "OpenWeather API for weather data"
+    version: "2.5"
+    auth:
+      type: "api_key"
+      location: "query"
+      key_name: "appid"
+    endpoints:
+      - path: "/weather"
+        method: "GET"
+        description: "Get current weather"
+        parameters:
+          - name: "q"
+            type: "string"
+            required: true
+            description: "City name"
+          - name: "units"
+            type: "string"
+            required: false
+            default: "metric"
+            enum: ["metric", "imperial", "standard"]
+      - path: "/forecast"
+        method: "GET"
+        description: "Get 5-day forecast"
+        parameters:
+          - name: "q"
+            type: "string"
+            required: true
+          - name: "units"
+            type: "string"
+            required: false
+            default: "metric"
+    rate_limit:
+      requests: 60
+      period: 60
+    timeout: 10
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+      initial_delay: 1000
+  
+  - name: "stock_api"
+    base_url: "https://www.alphavantage.co/query"
+    description: "Alpha Vantage API for stock market data"
+    version: "1.0"
+    auth:
+      type: "api_key"
+      location: "query"
+      key_name: "apikey"
+    endpoints:
+      - path: "/"
+        method: "GET"
+        description: "Get stock quote"
+        parameters:
+          - name: "function"
+            type: "string"
+            required: true
+            default: "GLOBAL_QUOTE"
+          - name: "symbol"
+            type: "string"
+            required: true
+            description: "Stock ticker symbol"
+    rate_limit:
+      requests: 5
+      period: 60
+    timeout: 15
+    retry:
+      max_attempts: 2
+      backoff: "linear"
+  
+  - name: "news_api"
+    base_url: "https://newsapi.org/v2"
+    description: "News API for articles and headlines"
+    version: "2"
+    auth:
+      type: "api_key"
+      location: "header"
+      key_name: "X-Api-Key"
+    endpoints:
+      - path: "/everything"
+        method: "GET"
+        description: "Search all articles"
+        parameters:
+          - name: "q"
+            type: "string"
+            required: true
+          - name: "sortBy"
+            type: "string"
+            enum: ["relevancy", "popularity", "publishedAt"]
+          - name: "pageSize"
+            type: "integer"
+            default: 20
+            max: 100
+      - path: "/top-headlines"
+        method: "GET"
+        description: "Get top headlines"
+        parameters:
+          - name: "country"
+            type: "string"
+            default: "us"
+          - name: "category"
+            type: "string"
+            enum: ["business", "technology", "science"]
+    rate_limit:
+      requests: 100
+      period: 86400
+    timeout: 10
+  
+  - name: "geocoding_api"
+    base_url: "https://nominatim.openstreetmap.org"
+    description: "OSM Nominatim for geocoding"
+    version: "1.0"
+    auth:
+      type: "none"
+    endpoints:
+      - path: "/search"
+        method: "GET"
+        description: "Search for location"
+        parameters:
+          - name: "q"
+            type: "string"
+            required: true
+          - name: "format"
+            type: "string"
+            default: "json"
+    rate_limit:
+      requests: 1
+      period: 1
+    timeout: 5
+
+mcp:
+  servers:
+    - name: "filesystem_server"
+      command: "npx"
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp/agent_data"]
+      description: "Provides file system access for data storage"
+      capabilities:
+        - "read_file"
+        - "write_file"
+        - "list_directory"
+        - "create_directory"
+      timeout: 30
+      auto_start: true
+      env:
+        MCP_DEBUG: "false"
+        MCP_LOG_LEVEL: "info"
+    
+    - name: "search_server"
+      command: "mcp-server-brave-search"
+      args: []
+      description: "Web search capabilities via Brave Search"
+      capabilities:
+        - "web_search"
+        - "local_search"
+      timeout: 15
+      auto_start: true
+      env:
+        BRAVE_API_KEY: "${BRAVE_API_KEY}"
+    
+    - name: "database_server"
+      command: "mcp-server-sqlite"
+      args: ["--database", "/tmp/agent_cache.db"]
+      description: "SQLite database for caching API responses"
+      capabilities:
+        - "query"
+        - "execute"
+      timeout: 10
+      auto_start: true
+
+memory:
+  episodic:
+    enabled: true
+    max_messages: 50
+    retention_days: 7
+    storage: "local"
+  
+  semantic:
+    enabled: true
+    embedding_model: "text-embedding-3-small"
+    vector_db: "chromadb"
+    similarity_threshold: 0.8
+    max_results: 10
+    collections:
+      - "api_responses"
+      - "user_queries"
+      - "error_patterns"
+  
+  procedural:
+    enabled: true
+    storage: "database"
+    max_workflows: 50
+    workflows:
+      - "api_retry_logic"
+      - "data_validation_pipeline"
+      - "cache_management"
+  
+  persistence:
+    enabled: true
+    backend: "sqlite"
+    config:
+      database: "/tmp/agent_memory.db"
+      table_prefix: "agent_"
+      auto_vacuum: true
+
+security:
+  checksum:
+    algorithm: "sha256"
+    value: "placeholder_will_be_calculated"
+    scope: "content"
+  
+  capabilities:
+    allowed_operations:
+      - "call_apis"
+      - "read_files"
+      - "write_files"
+      - "use_tools"
+      - "cache_data"
+    restricted_domains:
+      - "localhost"
+      - "127.0.0.1"
+      - "*.internal"
+      - "192.168.*"
+    max_api_calls_per_minute: 100
+    max_memory_mb: 512
+    max_cache_size_mb: 1024
+    sandbox: true
+    network_isolation: false
+  
+  encryption:
+    encrypted: false
+    algorithm: "none"
+  
+  compliance:
+    standards: ["SOC2"]
+    audit_log: true
+    log_api_calls: true
+    log_retention_days: 30
+

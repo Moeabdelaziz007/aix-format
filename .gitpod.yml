@@ -1,0 +1,58 @@
+# Gitpod Configuration for AIX Format Repository
+# Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+#
+# Provides a pre-configured cloud development environment
+
+image: gitpod/workspace-full:latest
+
+tasks:
+  - name: Setup
+    init: |
+      echo "🚀 Setting up AIX Format Development Environment"
+      echo ""
+      echo "   Project: AIX (Artificial Intelligence eXchange)"
+      echo "   Author: Mohamed H Abdelaziz"
+      echo "   Organization: AMRIKYY AI Solutions"
+      echo ""
+      npm install
+      echo ""
+      echo "✅ Setup complete!"
+      echo ""
+      echo "Available commands:"
+      echo "  npm test              - Run test suite"
+      echo "  npm run validate      - Validate an AIX file"
+      echo "  node bin/aix-validate.js <file>"
+      echo "  node bin/aix-convert.js <input> <output> --format <yaml|json|toml>"
+    command: |
+      echo ""
+      echo "📚 AIX Format Specification v1.0"
+      echo "   Ready for development!"
+      echo ""
+      echo "Try:"
+      echo "  node bin/aix-validate.js examples/persona-agent.aix"
+
+ports:
+  - port: 3000
+    onOpen: ignore
+    description: "Development server (if needed)"
+
+vscode:
+  extensions:
+    - dbaeumer.vscode-eslint
+    - esbenp.prettier-vscode
+    - redhat.vscode-yaml
+    - tamasfe.even-better-toml
+    - ms-vscode.vscode-json-languageservice
+    - ms-vscode.vscode-typescript-next
+    - GitHub.copilot
+
+github:
+  prebuilds:
+    master: true
+    branches: true
+    pullRequests: true
+    pullRequestsFromForks: false
+    addCheck: true
+    addComment: true
+    addBadge: true
+

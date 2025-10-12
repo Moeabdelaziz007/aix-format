@@ -1,0 +1,74 @@
+{
+  "name": "aix-format",
+  "version": "1.0.0",
+  "description": "AIX (Artificial Intelligence eXchange) - Standard file format for AI agents",
+  "main": "core/parser.js",
+  "type": "module",
+  "bin": {
+    "aix-validate": "./bin/aix-validate.js",
+    "aix-convert": "./bin/aix-convert.js"
+  },
+  "scripts": {
+    "test": "node --test tests/**/*.test.js",
+    "test:verbose": "node --test --test-reporter=spec tests/**/*.test.js",
+    "validate": "node bin/aix-validate.js",
+    "validate:examples": "node bin/aix-validate.js examples/persona-agent.aix && node bin/aix-validate.js examples/tool-agent.aix && node bin/aix-validate.js examples/hybrid-agent.aix",
+    "lint": "echo 'Linting not configured yet'",
+    "format": "echo 'Formatting not configured yet'",
+    "docs": "echo 'Documentation generation not configured yet'"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "aix",
+    "artificial-intelligence",
+    "file-format",
+    "specification",
+    "interoperability",
+    "ai-agents",
+    "llm",
+    "machine-learning",
+    "standardization"
+  ],
+  "author": {
+    "name": "Mohamed H Abdelaziz",
+    "organization": "AMRIKYY AI Solutions",
+    "email": "amrikyy@gmail.com",
+    "url": "https://amrikyy.ai"
+  },
+  "contributors": [
+    {
+      "name": "Mohamed H Abdelaziz",
+      "email": "abdela1@students.kennesaw.edu"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amrikyy/aix-format.git"
+  },
+  "bugs": {
+    "url": "https://github.com/amrikyy/aix-format/issues",
+    "email": "amrikyy@gmail.com"
+  },
+  "homepage": "https://github.com/amrikyy/aix-format#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "core/",
+    "bin/",
+    "schemas/",
+    "examples/",
+    "docs/",
+    "LICENSE.md",
+    "COPYRIGHT.md",
+    "README.md"
+  ],
+  "directories": {
+    "doc": "docs",
+    "test": "tests",
+    "example": "examples"
+  }
+}
+
