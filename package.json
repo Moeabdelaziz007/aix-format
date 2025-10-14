@@ -1,7 +1,7 @@
 {
   "name": "aix-format",
-  "version": "1.0.0",
-  "description": "AIX (Artificial Intelligence eXchange) - Standard file format for AI agents",
+  "version": "0.2.0",
+  "description": "AIX (Artificial Intelligence eXchange) - Standard file format for AI agents (Pre-release)",
   "main": "core/parser.js",
   "type": "module",
   "bin": {

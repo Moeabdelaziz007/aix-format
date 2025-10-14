@@ -1,9 +1,9 @@
 # AIX API Excellence Guide
 
-**Version:** 1.1  
+**Version:** 0.2.0 (Pre-release)  
 **Author:** Mohamed H Abdelaziz  
 **Organization:** AMRIKYY AI Solutions  
-**Date:** January 2025  
+**Date:** October 2025  
 **Contact:** amrikyy@gmail.com
 
 ---
@@ -15,7 +15,9 @@ Licensed under MIT with Attribution Requirements.
 
 ## Abstract
 
-This document specifies production-grade API integration patterns for AIX agents. It covers error handling, pagination, rate limiting, versioning, caching, and resilience patterns based on industry best practices from Netflix, AWS, Google, and Stripe.
+This document specifies **recommended** API integration patterns for AIX agents. It covers error handling, pagination, rate limiting, versioning, caching, and resilience patterns based on industry best practices from Netflix, AWS, Google, and Stripe.
+
+**Status:** These are design recommendations, not yet validated in production at scale.
 
 **Target Audience:** Agent developers, API integrators, runtime implementers
 

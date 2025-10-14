@@ -1,10 +1,22 @@
 # AIX Format Specification
 
-> **A**rtificial **I**ntelligence e**X**change - The Standard File Format for AI Agents
+> **A**rtificial **I**ntelligence e**X**change - Standard File Format for AI Agents
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/amrikyy/aix-format)
+[![Version](https://img.shields.io/badge/version-0.2.0--pre--release-orange.svg)](https://github.com/Moeabdelaziz007/aix-format)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org)
+[![Status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://github.com/Moeabdelaziz007/aix-format)
+
+---
+
+## ⚠️ **PRE-RELEASE STATUS**
+
+**Current Version:** v0.2.0 (Experimental)  
+**Development Time:** 37 hours (October 2025)  
+**Status:** 🧪 Seeking early adopters and feedback  
+**Testing:** Being validated in [Amrikyy Travel Platform](https://amrikyy.ai)
+
+**This is a pre-release version.** The API may change based on real-world usage and feedback. We'll promote to v1.0 after validation with 100+ real users.
 
 ---
 
@@ -18,16 +30,23 @@
 
 ## 📖 Overview
 
-**AIX (Artificial Intelligence eXchange)** is a comprehensive, standardized file format designed for packaging, distributing, and executing AI agents. It provides a unified structure that encompasses agent personality, capabilities, tool integrations, memory configurations, and security features—all in a single, portable file.
+**AIX (Artificial Intelligence eXchange)** is an experimental file format for packaging and distributing AI agents. Built in 37 hours of focused development, it provides a structured approach to defining agent personality, capabilities, tool integrations, memory configurations, and security features.
 
 ### Why AIX?
 
-- **🔒 Security First**: Built-in checksums, digital signatures, and encryption support
-- **🔄 Interoperable**: Works across different AI frameworks and platforms
-- **📦 Self-Contained**: Everything needed to deploy an agent in one file
-- **🎯 Human & Machine Readable**: Supports YAML, JSON, and TOML formats
+- **🔒 Security Focused**: Checksums, digital signatures, and encryption support
+- **🔄 Multi-Format**: Supports YAML, JSON, and TOML
+- **📦 Self-Contained**: Agent definition in a single file
+- **🎯 Human Readable**: Easy to write and understand
 - **🚀 Extensible**: Custom fields and future-proof design
-- **✅ Validated**: Schema-based validation ensures correctness
+- **✅ Schema Validated**: JSON Schema validation included
+
+### Current Limitations
+
+- ⚠️ **Pre-release**: API may change based on feedback
+- ⚠️ **Limited testing**: Currently being validated in one production system
+- ⚠️ **Seeking feedback**: We need real-world usage to improve
+- ⚠️ **v1.0 target**: After 100+ users validate the design
 
 ---
 
@@ -357,13 +376,20 @@ https://github.com/amrikyy/aix-format
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Roadmap to v1.0
 
-- [x] v1.0: Core specification and reference parser
-- [ ] v1.1: Python reference implementation
-- [ ] v1.2: Go reference implementation
-- [ ] v1.3: Enhanced security features
-- [ ] v2.0: Multi-agent coordination support
+**Current: v0.2.0** (Pre-release)
+
+- [x] v0.1: Initial specification and parser (37 hours)
+- [x] v0.2: Security model and error handling
+- [ ] v0.3: Get 10 early adopters to test
+- [ ] v0.5: Incorporate feedback, stabilize API
+- [ ] v0.9: Beta testing with 50+ users
+- [ ] **v1.0: First stable release** (after 100+ users validate)
+
+**Post v1.0:**
+- [ ] v1.x: Python and Go implementations
+- [ ] v2.0: Multi-agent coordination (if users need it)
 
 ---
 
@@ -378,16 +404,37 @@ Special thanks to:
 
 ## 📜 Version History
 
-- **v1.0.0** (January 2025): Initial release
-  - Complete specification
-  - Reference Node.js parser
-  - CLI tools
-  - Example agents
+- **v0.2.0** (October 14, 2025): Pre-release
+  - Complete specification (11,334 lines)
+  - Reference Node.js parser (zero dependencies)
+  - CLI tools (validate, convert)
+  - Example agents (3 realistic examples)
   - JSON Schema validation
+  - Production-grade error handling
+  - Security model with detached manifests
+  - **Development time:** 37 hours of focused work
+  - **Status:** Seeking early adopters for feedback
+
+---
+
+## 🙏 **Want to Help?**
+
+This is a **37-hour-old project** seeking validation!
+
+**Early Adopters Wanted:**
+- Try AIX in your project
+- Report what works and what doesn't
+- Suggest improvements
+- Help us reach v1.0
+
+**Feedback Channels:**
+- [GitHub Issues](https://github.com/Moeabdelaziz007/aix-format/issues)
+- [Discussions](https://github.com/Moeabdelaziz007/aix-format/discussions)
+- Email: amrikyy@gmail.com
 
 ---
 
 **Built with ❤️ by Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 
-*Making AI agents portable, secure, and interoperable.*
+*Building the future of AI agent portability - one user at a time.*
 
