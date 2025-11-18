@@ -1,0 +1,597 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://axiom.ai/schemas/axiom-aix.schema.json",
+  "title": "Axiom AIX Standard Schema",
+  "description": "Official JSON Schema for Axiom AIX (Artificial Intelligence eXchange) file format with identity and economics layers. The Digital DNA of autonomous AI agents.",
+  "type": "object",
+  "required": ["version", "metadata", "persona", "identity_layer", "economics", "superpowers"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "AIX format version (semantic versioning)",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$",
+      "examples": ["1.0.0", "1.0.0-beta.1"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Agent metadata and identification",
+      "required": ["name", "id", "created_at", "author"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Agent name",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (UUID v4)",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation timestamp (ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$",
+          "examples": ["2025-01-12T10:30:00Z"]
+        },
+        "author": {
+          "type": "string",
+          "description": "Author name or identifier",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "Last update timestamp (ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Classification tags",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "minItems": 0,
+          "maxItems": 10
+        },
+        "license": {
+          "type": "string",
+          "description": "License identifier (SPDX format)",
+          "examples": ["MIT", "Apache-2.0", "GPL-3.0"]
+        },
+        "homepage": {
+          "type": "string",
+          "description": "Agent homepage URL",
+          "format": "uri"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Source repository URL",
+          "format": "uri"
+        },
+        "documentation": {
+          "type": "string",
+          "description": "Documentation URL",
+          "format": "uri"
+        },
+        "avatar_url": {
+          "type": "string",
+          "description": "Avatar image URL (supports IPFS)",
+          "format": "uri"
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary language (ISO 639-1)",
+          "pattern": "^[a-z]{2}$",
+          "examples": ["en", "es", "fr"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "persona": {
+      "type": "object",
+      "description": "Agent personality and behavior",
+      "required": ["role", "description", "tone"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": "Agent's primary role",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed agent description",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "tone": {
+          "type": "string",
+          "description": "Communication style",
+          "examples": ["friendly", "professional", "casual", "technical"]
+        },
+        "style": {
+          "type": "string",
+          "description": "Response style",
+          "examples": ["concise", "detailed", "technical"]
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Behavioral constraints",
+          "items": {
+            "type": "string"
+          }
+        },
+        "personality_traits": {
+          "type": "object",
+          "description": "Personality attributes",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "example_responses": {
+          "type": "array",
+          "description": "Sample conversations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Sampling temperature",
+          "minimum": 0.0,
+          "maximum": 2.0
+        },
+        "context_window": {
+          "type": "integer",
+          "description": "Preferred context size",
+          "minimum": 1
+        },
+        "response_format": {
+          "type": "string",
+          "description": "Preferred output format"
+        },
+        "avatar_url": {
+          "type": "string",
+          "description": "Avatar image URL (supports IPFS)",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": true
+    },
+    "identity_layer": {
+      "type": "object",
+      "description": "Agent identity and wallet information",
+      "required": ["network", "wallet_pubkey"],
+      "properties": {
+        "network": {
+          "type": "string",
+          "description": "Blockchain network",
+          "enum": ["solana", "ethereum", "polygon", "bsc", "avalanche", "arbitrum", "optimism", "base"],
+          "default": "solana"
+        },
+        "wallet_pubkey": {
+          "type": "string",
+          "description": "Public key of the agent's wallet",
+          "minLength": 32,
+          "maxLength": 100
+        },
+        "did_document": {
+          "type": "string",
+          "description": "Decentralized Identifier (DID) document",
+          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9]+$"
+        },
+        "verifiable_credentials": {
+          "type": "array",
+          "description": "Verifiable credentials associated with the agent",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "issuer": {
+                "type": "string"
+              },
+              "issuance_date": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "expiration_date": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "credential_subject": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "economics": {
+      "type": "object",
+      "description": "Agent economic model and pricing",
+      "required": ["token", "cost_per_task"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "description": "Token used for transactions",
+          "enum": ["AXIOM", "SOL", "ETH", "USDC", "USDT"],
+          "default": "AXIOM"
+        },
+        "cost_per_task": {
+          "type": "number",
+          "description": "Cost per task in token units",
+          "minimum": 0
+        },
+        "min_reputation_required": {
+          "type": "integer",
+          "description": "Minimum reputation score required to interact with this agent",
+          "minimum": 0,
+          "default": 0
+        },
+        "subscription_model": {
+          "type": "object",
+          "description": "Subscription-based pricing model",
+          "properties": {
+            "monthly_fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "included_tasks": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "additional_task_cost": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "tiered_pricing": {
+          "type": "array",
+          "description": "Tiered pricing based on usage volume",
+          "items": {
+            "type": "object",
+            "properties": {
+              "min_tasks": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "max_tasks": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cost_per_task": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "revenue_sharing": {
+          "type": "object",
+          "description": "Revenue sharing model",
+          "properties": {
+            "percentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "recipient": {
+              "type": "string",
+              "description": "Wallet address of revenue recipient"
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "superpowers": {
+      "type": "array",
+      "description": "Agent capabilities and skills",
+      "items": {
+        "type": "object",
+        "required": ["name", "version", "type"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Superpower identifier",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "version": {
+            "type": "string",
+            "description": "Superpower version (semver)",
+            "pattern": "^\\d+\\.\\d+(\\.\\d+)?(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$"
+          },
+          "type": {
+            "type": "string",
+            "description": "Superpower type",
+            "enum": ["python_module", "llm_chain", "api_integration", "mcp_server", "custom"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Superpower description"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether superpower is active",
+            "default": true
+          },
+          "model": {
+            "type": "string",
+            "description": "LLM model name (for llm_chain type)"
+          },
+          "permissions": {
+            "type": "array",
+            "description": "Required permissions",
+            "items": {
+              "type": "string",
+              "enum": ["internet_access", "file_system", "camera", "microphone", "location"]
+            }
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Superpower-specific parameters"
+          },
+          "triggers": {
+            "type": "array",
+            "description": "Activation triggers",
+            "items": {
+              "type": "string"
+            }
+          },
+          "examples": {
+            "type": "array",
+            "description": "Usage examples",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Execution priority",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Max execution time (seconds)",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "description": "Agent resource requirements for deployment and execution",
+      "properties": {
+        "hardware": {
+          "type": "object",
+          "description": "Hardware requirements",
+          "properties": {
+            "cpu_cores": {
+              "type": "integer",
+              "description": "Minimum CPU cores required",
+              "minimum": 1
+            },
+            "memory_mb": {
+              "type": "integer",
+              "description": "Minimum RAM in MB",
+              "minimum": 1
+            },
+            "storage_mb": {
+              "type": "integer",
+              "description": "Minimum storage in MB",
+              "minimum": 1
+            },
+            "gpu_required": {
+              "type": "boolean",
+              "description": "Whether GPU is required",
+              "default": false
+            },
+            "gpu_memory_mb": {
+              "type": "integer",
+              "description": "Minimum GPU memory in MB (if GPU required)",
+              "minimum": 1
+            }
+          }
+        },
+        "software": {
+          "type": "object",
+          "description": "Software dependencies",
+          "properties": {
+            "runtime": {
+              "type": "string",
+              "description": "Required runtime environment"
+            },
+            "dependencies": {
+              "type": "array",
+              "description": "Required software dependencies",
+              "items": {
+                "type": "string"
+              }
+            },
+            "python_version": {
+              "type": "string",
+              "description": "Required Python version (if applicable)"
+            },
+            "node_version": {
+              "type": "string",
+              "description": "Required Node.js version (if applicable)"
+            }
+          }
+        },
+        "network": {
+          "type": "object",
+          "description": "Network requirements",
+          "properties": {
+            "internet_access": {
+              "type": "boolean",
+              "description": "Whether internet access is required",
+              "default": false
+            },
+            "bandwidth_mbps": {
+              "type": "number",
+              "description": "Minimum bandwidth in Mbps",
+              "minimum": 0
+            },
+            "allowed_domains": {
+              "type": "array",
+              "description": "Domains that the agent needs to access",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "description": "Security and integrity data",
+      "required": ["checksum"],
+      "properties": {
+        "checksum": {
+          "type": "object",
+          "required": ["algorithm", "value"],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["sha256", "sha512", "blake3"]
+            },
+            "value": {
+              "type": "string",
+              "description": "Hex-encoded hash value",
+              "pattern": "^[0-9a-f]+$"
+            },
+            "scope": {
+              "type": "string",
+              "description": "What is included in checksum",
+              "default": "content"
+            }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "description": "Digital signature",
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["RSA-SHA256", "Ed25519", "ECDSA-SHA256"]
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64-encoded signature"
+            },
+            "public_key": {
+              "type": "string",
+              "description": "PEM-encoded public key"
+            },
+            "signer": {
+              "type": "string",
+              "description": "Signer identifier"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "Signing timestamp (ISO 8601)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+            }
+          }
+        },
+        "encryption": {
+          "type": "object",
+          "description": "Encryption metadata",
+          "properties": {
+            "encrypted": {
+              "type": "boolean",
+              "default": false
+            },
+            "algorithm": {
+              "type": "string",
+              "enum": ["AES-256-GCM", "ChaCha20-Poly1305", "none"]
+            },
+            "key_fingerprint": {
+              "type": "string"
+            }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Capability restrictions",
+          "properties": {
+            "allowed_operations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "restricted_operations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "restricted_domains": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_api_calls_per_minute": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_memory_mb": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "sandbox": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "description": "Compliance and audit",
+          "properties": {
+            "standards": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "certifications": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "audit_log": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
