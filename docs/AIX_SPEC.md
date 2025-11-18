@@ -1,6 +1,6 @@
 # AIX File Format Specification v1.0
 
-**Title:** AIX (Artificial Intelligence eXchange) File Format Specification  
+**Title:** AIX (Artificial Intelligence e**X**change) File Format Specification  
 **Version:** 1.0  
 **Status:** Stable  
 **Date:** January 2025  
@@ -18,7 +18,7 @@ Licensed under MIT with Attribution Requirements. See [LICENSE.md](../LICENSE.md
 
 ## Abstract
 
-This document specifies the AIX (Artificial Intelligence eXchange) file format, a standardized structure for packaging, distributing, and deploying AI agents. The format encompasses agent metadata, personality configuration, capabilities, tool integrations, memory systems, and security features in a single, portable file that can be represented in YAML, JSON, or TOML formats.
+This document specifies the AIX (Artificial Intelligence e**X**change) file format, a standardized structure for packaging, distributing, and deploying AI agents. The format encompasses agent metadata, personality configuration, capabilities, tool integrations, memory systems, and security features in a single, portable file that can be represented in YAML, JSON, or TOML formats.
 
 ---
 
@@ -83,7 +83,7 @@ AIX files **MUST** use the `.aix` file extension. The MIME type **SHOULD** be `a
 
 ### 3.1 Overview
 
-An AIX file consists of nine top-level sections:
+An AIX file consists of eleven top-level sections:
 
 ```
 ┌─────────────────────────────────┐
@@ -103,23 +103,29 @@ An AIX file consists of nine top-level sections:
 ├─────────────────────────────────┤
 │ pricing     (Optional)          │  Usage pricing model
 ├─────────────────────────────────┤
+│ identity_layer (Optional)       │  Identity and wallet information
+├─────────────────────────────────┤
+│ economics   (Optional)          │  Economic model and pricing
+├─────────────────────────────────┤
 │ security    (Required)          │  Security and integrity data
 └─────────────────────────────────┘
 ```
 
 ### 3.2 Section Requirements
 
-| Section     | Required | Minimal | Standard | Full |
-|-------------|----------|---------|----------|------|
-| meta        | Yes      | ✓       | ✓        | ✓    |
-| persona     | Yes      | ✓       | ✓        | ✓    |
-| skills      | No       | -       | ✓        | ✓    |
-| apis        | No       | -       | ✓        | ✓    |
-| mcp         | No       | -       | ✓        | ✓    |
-| memory      | No       | -       | ✓        | ✓    |
-| requirements| No       | -       | ✓        | ✓    |
-| pricing     | No       | -       | ✓        | ✓    |
-| security    | Yes      | ✓       | ✓        | ✓    |
+| Section        | Required | Minimal | Standard | Full |
+|----------------|----------|---------|----------|------|
+| meta           | Yes      | ✓       | ✓        | ✓    |
+| persona        | Yes      | ✓       | ✓        | ✓    |
+| skills         | No       | -       | ✓        | ✓    |
+| apis           | No       | -       | ✓        | ✓    |
+| mcp            | No       | -       | ✓        | ✓    |
+| memory         | No       | -       | ✓        | ✓    |
+| requirements   | No       | -       | ✓        | ✓    |
+| pricing        | No       | -       | ✓        | ✓    |
+| identity_layer | No       | -       | ✓        | ✓    |
+| economics      | No       | -       | ✓        | ✓    |
+| security       | Yes      | ✓       | ✓        | ✓    |
 
 ---
 
@@ -668,7 +674,96 @@ pricing:
 
 ---
 
-### 5.9 Security Section
+### 5.9 Identity Layer Section (Axiom Standard)
+
+**Purpose**: Defines the agent's identity and wallet information for decentralized systems.
+
+**Structure:**
+
+```json
+"identity_layer": {
+  "network": string,          // Blockchain network, REQUIRED
+  "wallet_pubkey": string,    // Public key of the agent's wallet, REQUIRED
+  "did_document": string,     // Decentralized Identifier (DID) document
+  "verifiable_credentials": array  // Verifiable credentials
+}
+```
+
+**Validation Rules:**
+
+- `network` **MUST** be one of: solana, ethereum, polygon, bsc, avalanche, arbitrum, optimism, base
+- `wallet_pubkey` **MUST** be a valid public key for the specified network
+- `did_document` **SHOULD** follow DID specification format
+
+**Example:**
+
+```json
+"identity_layer": {
+  "network": "solana",
+  "wallet_pubkey": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g",
+  "did_document": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
+  "verifiable_credentials": [
+    {
+      "type": "DataAnalysisCertification",
+      "issuer": "Axiom Academy",
+      "issuance_date": "2025-01-15T10:00:00Z",
+      "expiration_date": "2026-01-15T10:00:00Z",
+      "credential_subject": {
+        "id": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
+        "skills": ["web_scraping", "data_analysis", "pattern_recognition"]
+      }
+    }
+  ]
+}
+```
+
+---
+
+### 5.10 Economics Section (Axiom Standard)
+
+**Purpose**: Defines the agent's economic model and pricing for decentralized systems.
+
+**Structure:**
+
+```json
+"economics": {
+  "token": string,                    // Token used for transactions, REQUIRED
+  "cost_per_task": number,            // Cost per task in token units, REQUIRED
+  "min_reputation_required": integer, // Minimum reputation score required
+  "subscription_model": object,       // Subscription-based pricing model
+  "tiered_pricing": array,            // Tiered pricing based on usage volume
+  "revenue_sharing": object           // Revenue sharing model
+}
+```
+
+**Validation Rules:**
+
+- `token` **MUST** be one of: AXIOM, SOL, ETH, USDC, USDT
+- `cost_per_task` **MUST** be a non-negative number
+- `min_reputation_required` **MUST** be a non-negative integer if specified
+
+**Example:**
+
+```json
+"economics": {
+  "token": "AXIOM",
+  "cost_per_task": 5,
+  "min_reputation_required": 50,
+  "subscription_model": {
+    "monthly_fee": 100,
+    "included_tasks": 50,
+    "additional_task_cost": 3
+  },
+  "revenue_sharing": {
+    "percentage": 10,
+    "recipient": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g"
+  }
+}
+```
+
+---
+
+### 5.11 Security Section
 
 **Purpose**: Contains security-related metadata including checksums, signatures, and capability restrictions.
 
@@ -971,6 +1066,7 @@ persona:
 - **[PEM]** Privacy Enhanced Mail (RFC 7468)
 - **[JWT]** JSON Web Tokens (RFC 7519)
 - **[OpenAPI]** OpenAPI Specification 3.1
+- **[DID]** Decentralized Identifiers (W3C Working Draft)
 
 ---
 
@@ -1046,6 +1142,16 @@ pricing:
     amount: 0.001
     currency: "SOL"
 
+identity_layer:
+  network: "solana"
+  wallet_pubkey: "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g"
+  did_document: "did:axiom:550e8400-e29b-41d4-a716-446655440000"
+
+economics:
+  token: "AXIOM"
+  cost_per_task: 5
+  min_reputation_required: 50
+
 security:
   checksum:
     algorithm: "sha256"
@@ -1061,6 +1167,7 @@ security:
 
 See [schemas/aix-v1.schema.json](../schemas/aix-v1.schema.json) for the complete JSON Schema definition.
 See [schemas/aix-enhanced.schema.json](../schemas/aix-enhanced.schema.json) for the enhanced schema with requirements and pricing.
+See [schemas/axiom-aix.schema.json](../schemas/axiom-aix.schema.json) for the Axiom standard schema with identity and economics layers.
 
 ---
 
@@ -1080,6 +1187,14 @@ See [schemas/aix-enhanced.schema.json](../schemas/aix-enhanced.schema.json) for 
 - Added pricing section for usage-based models
 - Updated conformance levels to include new sections
 - Enhanced examples to demonstrate new features
+
+### Version 1.2 (November 2025)
+
+- Added identity_layer section for decentralized identity
+- Added economics section for token-based economic models
+- Defined Axiom standard as Digital DNA for autonomous agents
+- Updated conformance levels to include identity and economics
+- Enhanced schema with blockchain integration support
 
 ---
 
