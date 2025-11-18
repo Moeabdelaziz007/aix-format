@@ -1,0 +1,189 @@
+# Enhanced AIX Agent Example
+# Web Scraper with Requirements and Pricing
+# Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+
+meta:
+  version: "1.0"
+  id: "550e8400-e29b-41d4-a716-446655440002"
+  name: "Web Scraper Pro"
+  description: "Advanced web scraping agent with content analysis capabilities"
+  created: "2025-01-12T10:30:00Z"
+  updated: "2025-01-12T15:45:00Z"
+  author: "Mohamed H Abdelaziz"
+  tags: ["web-scraper", "content-analysis", "data-extraction"]
+  license: "MIT"
+  homepage: "https://amrikyy.ai/agents/web-scraper"
+  language: "en"
+  framework: "python"
+
+persona:
+  role: "web scraping specialist"
+  tone: "technical and precise"
+  style: "detailed and structured"
+  instructions: |
+    You are a specialized web scraping agent designed to extract and analyze content from web pages.
+    Your primary responsibilities include:
+    
+    1. Fetching web page content using appropriate HTTP methods
+    2. Parsing HTML to extract relevant information
+    3. Analyzing content structure and identifying key elements
+    4. Handling various content types (text, images, tables, etc.)
+    5. Respecting robots.txt and rate limits
+    6. Providing structured output in JSON format
+    
+    Always ensure data accuracy and handle errors gracefully.
+  temperature: 0.3
+  context_window: 8192
+
+skills:
+  - name: "scrape_url"
+    description: "Extract content from a given URL"
+    enabled: true
+    parameters:
+      include_images: true
+      include_links: true
+      max_content_length: 50000
+    triggers:
+      - "user provides a URL to scrape"
+      - "keywords: scrape, extract, crawl"
+    priority: 9
+    timeout: 30
+    examples:
+      - "User: Please scrape https://example.com"
+      - "Agent: I'll extract the content from that URL for you..."
+
+  - name: "analyze_content"
+    description: "Analyze scraped content for key information"
+    enabled: true
+    parameters:
+      extract_entities: true
+      sentiment_analysis: true
+      keyword_extraction: true
+    triggers:
+      - "content has been scraped"
+      - "keywords: analyze, summarize, extract"
+    priority: 7
+    timeout: 45
+
+apis:
+  - name: "web_scraper_api"
+    base_url: "https://api.webscraper.io/v1"
+    description: "Web scraping service with content analysis"
+    version: "1.0"
+    auth:
+      type: "api_key"
+      location: "header"
+      key_name: "X-API-Key"
+    endpoints:
+      - path: "/scrape"
+        method: "POST"
+        description: "Scrape content from a URL"
+        parameters:
+          - name: "url"
+            type: "string"
+            required: true
+          - name: "include_images"
+            type: "boolean"
+            required: false
+          - name: "include_links"
+            type: "boolean"
+            required: false
+    rate_limit:
+      requests: 100
+      period: 60
+    timeout: 30
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+
+mcp:
+  servers:
+    - name: "web_scraper_server"
+      command: "python"
+      args: ["-m", "aix_agents.web_scraper"]
+      description: "Local web scraping server"
+      capabilities:
+        - "scrape_url"
+        - "analyze_content"
+      timeout: 30
+      auto_start: true
+      env:
+        PYTHONPATH: "./aix_agents"
+        LOG_LEVEL: "INFO"
+
+memory:
+  episodic:
+    enabled: true
+    max_messages: 50
+    retention_days: 7
+    storage: "local"
+  
+  semantic:
+    enabled: true
+    embedding_model: "text-embedding-3-small"
+    vector_db: "chromadb"
+    similarity_threshold: 0.8
+    max_results: 5
+  
+  procedural:
+    enabled: true
+    storage: "file"
+    max_workflows: 10
+  
+  persistence:
+    enabled: true
+    backend: "file"
+    config:
+      directory: "./web_scraper_memory"
+      format: "json"
+      compress: true
+
+requirements:
+  hardware:
+    cpu_cores: 2
+    memory_mb: 1024
+    storage_mb: 512
+    gpu_required: false
+  software:
+    runtime: "Python 3.9+"
+    dependencies:
+      - "requests>=2.28.0"
+      - "beautifulsoup4>=4.11.0"
+      - "lxml>=4.9.0"
+      - "selenium>=4.5.0"
+    python_version: "3.9"
+  network:
+    internet_access: true
+    bandwidth_mbps: 10
+    allowed_domains:
+      - "*.webscraper.io"
+      - "api.openai.com"
+      - "chromadb.io"
+
+pricing:
+  model: "pay_per_call"
+  cost_per_call:
+    amount: 0.001
+    currency: "SOL"
+
+security:
+  checksum:
+    algorithm: "sha256"
+    value: "placeholder_will_be_calculated"
+    scope: "content"
+  
+  capabilities:
+    allowed_operations:
+      - "read_files"
+      - "make_http_requests"
+      - "parse_html"
+    restricted_operations:
+      - "write_files"
+      - "execute_commands"
+    max_api_calls_per_minute: 60
+    max_memory_mb: 512
+    sandbox: true
+  
+  compliance:
+    standards: ["SOC2", "GDPR"]
+    audit_log: true
