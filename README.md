@@ -3,15 +3,15 @@
 > **A**rtificial **I**ntelligence e**X**change - Standard File Format for AI Agents
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.2.0--pre--release-orange.svg)](https://github.com/Moeabdelaziz007/aix-format)
-[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org)
+[![Version](https://img.shields.io/badge/version-0.3.0--pre--release-orange.svg)](https://github.com/Moeabdelaziz007/aix-format)
+[![Node](https://img.shields.io/badge/node->=18.0.0-brightgreen.svg)](https://nodejs.org)
 [![Status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://github.com/Moeabdelaziz007/aix-format)
 
 ---
 
 ## ⚠️ **PRE-RELEASE STATUS**
 
-**Current Version:** v0.2.0 (Experimental)  
+**Current Version:** v0.3.0 (Experimental)  
 **Development Time:** 37 hours (October 2025)  
 **Status:** 🧪 Seeking early adopters and feedback  
 **Testing:** Being validated in [Amrikyy Travel Platform](https://amrikyy.ai)
@@ -72,13 +72,24 @@ Write AIX files in your preferred format:
 - **Encryption Metadata**: Track encryption status
 - **Capability Restrictions**: Define allowed operations
 
-### 4. **Tool Integration**
+### 4. **Enhanced Agent Requirements**
+- **Hardware Requirements**: CPU, memory, storage, and GPU specifications
+- **Software Dependencies**: Runtime and library requirements
+- **Network Requirements**: Bandwidth and domain access specifications
+
+### 5. **Pricing Model Support**
+- **Pay-per-call**: Cost per API invocation
+- **Subscription**: Monthly fees with usage tiers
+- **Tiered Pricing**: Volume-based pricing models
+- **Multi-currency**: Support for SOL, USD, and other currencies
+
+### 6. **Tool Integration**
 - Native API integration definitions
 - MCP server configurations
 - Authentication and rate limiting
 - Custom tool parameters
 
-### 5. **Memory Systems**
+### 7. **Memory Systems**
 - Episodic memory (conversation history)
 - Semantic memory (knowledge graphs)
 - Procedural memory (workflows)
@@ -172,9 +183,11 @@ aix-format/
 ├── examples/                  # Example AIX files
 │   ├── persona-agent.aix     # Conversational agent example
 │   ├── tool-agent.aix        # API integration example
-│   └── hybrid-agent.aix      # Full-featured research assistant
+│   ├── hybrid-agent.aix      # Full-featured research assistant
+│   └── enhanced-agent.aix    # Enhanced agent with requirements/pricing
 ├── schemas/                   # Validation schemas
-│   └── aix-v1.schema.json    # JSON Schema for AIX v1.0
+│   ├── aix-v1.schema.json    # JSON Schema for AIX v1.0
+│   └── aix-enhanced.schema.json # Enhanced schema with requirements/pricing
 ├── bin/                       # CLI tools
 │   ├── aix-validate.js       # Validation utility
 │   └── aix-convert.js        # Format conversion utility
@@ -271,6 +284,47 @@ security:
       - "localhost"
       - "*.internal"
     max_api_calls_per_minute: 60
+```
+
+---
+
+## 🧩 Enhanced Features
+
+### Requirements Section
+
+Define hardware, software, and network requirements for agent deployment:
+
+```yaml
+requirements:
+  hardware:
+    cpu_cores: 2
+    memory_mb: 1024
+    storage_mb: 512
+    gpu_required: false
+  software:
+    runtime: "Python 3.9+"
+    dependencies:
+      - "requests>=2.28.0"
+      - "beautifulsoup4>=4.11.0"
+    python_version: "3.9"
+  network:
+    internet_access: true
+    bandwidth_mbps: 10
+    allowed_domains:
+      - "*.webscraper.io"
+      - "api.openai.com"
+```
+
+### Pricing Section
+
+Specify pricing models for agent usage in decentralized economies:
+
+```yaml
+pricing:
+  model: "pay_per_call"
+  cost_per_call:
+    amount: 0.001
+    currency: "SOL"
 ```
 
 ---
@@ -378,11 +432,12 @@ https://github.com/amrikyy/aix-format
 
 ## 🗺️ Roadmap to v1.0
 
-**Current: v0.2.0** (Pre-release)
+**Current: v0.3.0** (Pre-release)
 
 - [x] v0.1: Initial specification and parser (37 hours)
 - [x] v0.2: Security model and error handling
-- [ ] v0.3: Get 10 early adopters to test
+- [x] v0.3: Requirements and pricing models
+- [ ] v0.4: Get 10 early adopters to test
 - [ ] v0.5: Incorporate feedback, stabilize API
 - [ ] v0.9: Beta testing with 50+ users
 - [ ] **v1.0: First stable release** (after 100+ users validate)
@@ -403,6 +458,12 @@ Special thanks to:
 ---
 
 ## 📜 Version History
+
+- **v0.3.0** (November 18, 2025): Pre-release
+  - Enhanced schema with requirements and pricing sections
+  - New example agent with resource requirements
+  - Updated documentation and specification
+  - **Status:** Seeking early adopters for feedback
 
 - **v0.2.0** (October 14, 2025): Pre-release
   - Complete specification (11,334 lines)
@@ -437,4 +498,3 @@ This is a **37-hour-old project** seeking validation!
 **Built with ❤️ by Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 
 *Building the future of AI agent portability - one user at a time.*
-
