@@ -356,6 +356,8 @@ export class AIXParser {
     if (data.apis) this.validateAPIs(data.apis);
     if (data.mcp) this.validateMCP(data.mcp);
     if (data.memory) this.validateMemory(data.memory);
+    if (data.requirements) this.validateRequirements(data.requirements);
+    if (data.pricing) this.validatePricing(data.pricing);
   }
 
   /**
@@ -632,6 +634,111 @@ export class AIXParser {
   }
 
   /**
+   * Validate requirements section
+   */
+  validateRequirements(requirements) {
+    if (requirements.hardware) {
+      const hw = requirements.hardware;
+      if (hw.cpu_cores !== undefined && (!Number.isInteger(hw.cpu_cores) || hw.cpu_cores < 1)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.hardware',
+          field: 'cpu_cores',
+          message: 'CPU cores must be a positive integer'
+        });
+      }
+      
+      if (hw.memory_mb !== undefined && (!Number.isInteger(hw.memory_mb) || hw.memory_mb < 1)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.hardware',
+          field: 'memory_mb',
+          message: 'Memory MB must be a positive integer'
+        });
+      }
+      
+      if (hw.storage_mb !== undefined && (!Number.isInteger(hw.storage_mb) || hw.storage_mb < 1)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.hardware',
+          field: 'storage_mb',
+          message: 'Storage MB must be a positive integer'
+        });
+      }
+      
+      if (hw.gpu_memory_mb !== undefined && (!Number.isInteger(hw.gpu_memory_mb) || hw.gpu_memory_mb < 1)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.hardware',
+          field: 'gpu_memory_mb',
+          message: 'GPU memory MB must be a positive integer'
+        });
+      }
+    }
+    
+    if (requirements.network) {
+      const net = requirements.network;
+      if (net.bandwidth_mbps !== undefined && (typeof net.bandwidth_mbps !== 'number' || net.bandwidth_mbps < 0)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'requirements.network',
+          field: 'bandwidth_mbps',
+          message: 'Bandwidth must be a non-negative number'
+        });
+      }
+    }
+  }
+
+  /**
+   * Validate pricing section
+   */
+  validatePricing(pricing) {
+    const validModels = ['pay_per_call', 'subscription', 'freemium', 'tiered'];
+    if (pricing.model && !validModels.includes(pricing.model)) {
+      this.errors.push({
+        code: 'INVALID_VALUE',
+        section: 'pricing',
+        field: 'model',
+        message: `Pricing model must be one of: ${validModels.join(', ')}`
+      });
+    }
+    
+    if (pricing.cost_per_call) {
+      const cost = pricing.cost_per_call;
+      if (cost.amount !== undefined && (typeof cost.amount !== 'number' || cost.amount < 0)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'pricing.cost_per_call',
+          field: 'amount',
+          message: 'Cost amount must be a non-negative number'
+        });
+      }
+    }
+    
+    if (pricing.subscription) {
+      const sub = pricing.subscription;
+      if (sub.monthly_fee && sub.monthly_fee.amount !== undefined && 
+          (typeof sub.monthly_fee.amount !== 'number' || sub.monthly_fee.amount < 0)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'pricing.subscription.monthly_fee',
+          field: 'amount',
+          message: 'Monthly fee amount must be a non-negative number'
+        });
+      }
+      
+      if (sub.included_calls !== undefined && (!Number.isInteger(sub.included_calls) || sub.included_calls < 0)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'pricing.subscription',
+          field: 'included_calls',
+          message: 'Included calls must be a non-negative integer'
+        });
+      }
+    }
+  }
+
+  /**
    * Validate security (checksums and signatures)
    */
   validateSecurity(data, content) {
@@ -746,6 +853,8 @@ export class AIXAgent {
   get apis() { return this.data.apis || []; }
   get mcp() { return this.data.mcp; }
   get memory() { return this.data.memory; }
+  get requirements() { return this.data.requirements; }
+  get pricing() { return this.data.pricing; }
   get security() { return this.data.security; }
 
   /**
@@ -799,4 +908,3 @@ export class AIXAgent {
     return `AIX Agent: ${this.meta.name} (${this.meta.id})`;
   }
 }
-
