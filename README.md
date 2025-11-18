@@ -3,7 +3,7 @@
 > **A**rtificial **I**ntelligence e**X**change - Standard File Format for AI Agents
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.3.0--pre--release-orange.svg)](https://github.com/Moeabdelaziz007/aix-format)
+[![Version](https://img.shields.io/badge/version-0.4.0--pre--release-orange.svg)](https://github.com/Moeabdelaziz007/aix-format)
 [![Node](https://img.shields.io/badge/node->=18.0.0-brightgreen.svg)](https://nodejs.org)
 [![Status](https://img.shields.io/badge/status-experimental-yellow.svg)](https://github.com/Moeabdelaziz007/aix-format)
 
@@ -11,7 +11,7 @@
 
 ## ⚠️ **PRE-RELEASE STATUS**
 
-**Current Version:** v0.3.0 (Experimental)  
+**Current Version:** v0.4.0 (Experimental)  
 **Development Time:** 37 hours (October 2025)  
 **Status:** 🧪 Seeking early adopters and feedback  
 **Testing:** Being validated in [Amrikyy Travel Platform](https://amrikyy.ai)
@@ -30,7 +30,7 @@
 
 ## 📖 Overview
 
-**AIX (Artificial Intelligence eXchange)** is an experimental file format for packaging and distributing AI agents. Built in 37 hours of focused development, it provides a structured approach to defining agent personality, capabilities, tool integrations, memory configurations, and security features.
+**AIX (Artificial Intelligence e**X**change)** is an experimental file format for packaging and distributing AI agents. Built in 37 hours of focused development, it provides a structured approach to defining agent personality, capabilities, tool integrations, memory configurations, and security features.
 
 ### Why AIX?
 
@@ -83,13 +83,25 @@ Write AIX files in your preferred format:
 - **Tiered Pricing**: Volume-based pricing models
 - **Multi-currency**: Support for SOL, USD, and other currencies
 
-### 6. **Tool Integration**
+### 6. **Identity Layer (Axiom Standard)**
+- **Blockchain Integration**: Native Solana support
+- **Wallet Management**: Public key identification
+- **Decentralized Identifiers**: DID document support
+- **Verifiable Credentials**: Certification verification
+
+### 7. **Economic Layer (Axiom Standard)**
+- **Token Economics**: AXIOM token support
+- **Task Pricing**: Cost-per-task models
+- **Reputation Systems**: Minimum reputation requirements
+- **Revenue Sharing**: Distribution models
+
+### 8. **Tool Integration**
 - Native API integration definitions
 - MCP server configurations
 - Authentication and rate limiting
 - Custom tool parameters
 
-### 7. **Memory Systems**
+### 9. **Memory Systems**
 - Episodic memory (conversation history)
 - Semantic memory (knowledge graphs)
 - Procedural memory (workflows)
@@ -184,10 +196,12 @@ aix-format/
 │   ├── persona-agent.aix     # Conversational agent example
 │   ├── tool-agent.aix        # API integration example
 │   ├── hybrid-agent.aix      # Full-featured research assistant
-│   └── enhanced-agent.aix    # Enhanced agent with requirements/pricing
+│   ├── enhanced-agent.aix    # Enhanced agent with requirements/pricing
+│   └── axiom-agent.aix.json  # Axiom standard agent example
 ├── schemas/                   # Validation schemas
 │   ├── aix-v1.schema.json    # JSON Schema for AIX v1.0
-│   └── aix-enhanced.schema.json # Enhanced schema with requirements/pricing
+│   ├── aix-enhanced.schema.json # Enhanced schema with requirements/pricing
+│   └── axiom-aix.schema.json # Axiom standard schema (Digital DNA)
 ├── bin/                       # CLI tools
 │   ├── aix-validate.js       # Validation utility
 │   └── aix-convert.js        # Format conversion utility
@@ -327,6 +341,30 @@ pricing:
     currency: "SOL"
 ```
 
+### Identity Layer (Axiom Standard)
+
+Define agent identity and wallet information:
+
+```json
+"identity_layer": {
+  "network": "solana",
+  "wallet_pubkey": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g",
+  "did_document": "did:axiom:12345"
+}
+```
+
+### Economic Layer (Axiom Standard)
+
+Specify agent economic models:
+
+```json
+"economics": {
+  "token": "AXIOM",
+  "cost_per_task": 5,
+  "min_reputation_required": 50
+}
+```
+
 ---
 
 ## 📚 Documentation
@@ -432,13 +470,14 @@ https://github.com/amrikyy/aix-format
 
 ## 🗺️ Roadmap to v1.0
 
-**Current: v0.3.0** (Pre-release)
+**Current: v0.4.0** (Pre-release)
 
 - [x] v0.1: Initial specification and parser (37 hours)
 - [x] v0.2: Security model and error handling
 - [x] v0.3: Requirements and pricing models
-- [ ] v0.4: Get 10 early adopters to test
-- [ ] v0.5: Incorporate feedback, stabilize API
+- [x] v0.4: Axiom standard with identity and economics layers
+- [ ] v0.5: Get 10 early adopters to test
+- [ ] v0.6: Incorporate feedback, stabilize API
 - [ ] v0.9: Beta testing with 50+ users
 - [ ] **v1.0: First stable release** (after 100+ users validate)
 
@@ -458,6 +497,13 @@ Special thanks to:
 ---
 
 ## 📜 Version History
+
+- **v0.4.0** (November 18, 2025): Pre-release
+  - Axiom standard with identity and economics layers
+  - New axiom-aix.schema.json for Digital DNA
+  - Example Axiom agent with complete specification
+  - Updated documentation and specification
+  - **Status:** Seeking early adopters for feedback
 
 - **v0.3.0** (November 18, 2025): Pre-release
   - Enhanced schema with requirements and pricing sections
@@ -489,8 +535,8 @@ This is a **37-hour-old project** seeking validation!
 - Help us reach v1.0
 
 **Feedback Channels:**
-- [GitHub Issues](https://github.com/Moeabdelaziz007/aix-format/issues)
-- [Discussions](https://github.com/Moeabdelaziz007/aix-format/discussions)
+- [GitHub Issues](https://github.com/amrikyy/aix-format/issues)
+- [Discussions](https://github.com/amrikyy/aix-format/discussions)
 - Email: amrikyy@gmail.com
 
 ---
