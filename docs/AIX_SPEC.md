@@ -83,7 +83,7 @@ AIX files **MUST** use the `.aix` file extension. The MIME type **SHOULD** be `a
 
 ### 3.1 Overview
 
-An AIX file consists of seven top-level sections:
+An AIX file consists of nine top-level sections:
 
 ```
 ┌─────────────────────────────────┐
@@ -99,21 +99,27 @@ An AIX file consists of seven top-level sections:
 ├─────────────────────────────────┤
 │ memory      (Optional)          │  Memory configuration
 ├─────────────────────────────────┤
+│ requirements (Optional)         │  Deployment requirements
+├─────────────────────────────────┤
+│ pricing     (Optional)          │  Usage pricing model
+├─────────────────────────────────┤
 │ security    (Required)          │  Security and integrity data
 └─────────────────────────────────┘
 ```
 
 ### 3.2 Section Requirements
 
-| Section  | Required | Minimal | Standard | Full |
-|----------|----------|---------|----------|------|
-| meta     | Yes      | ✓       | ✓        | ✓    |
-| persona  | Yes      | ✓       | ✓        | ✓    |
-| skills   | No       | -       | ✓        | ✓    |
-| apis     | No       | -       | ✓        | ✓    |
-| mcp      | No       | -       | ✓        | ✓    |
-| memory   | No       | -       | ✓        | ✓    |
-| security | Yes      | ✓       | ✓        | ✓    |
+| Section     | Required | Minimal | Standard | Full |
+|-------------|----------|---------|----------|------|
+| meta        | Yes      | ✓       | ✓        | ✓    |
+| persona     | Yes      | ✓       | ✓        | ✓    |
+| skills      | No       | -       | ✓        | ✓    |
+| apis        | No       | -       | ✓        | ✓    |
+| mcp         | No       | -       | ✓        | ✓    |
+| memory      | No       | -       | ✓        | ✓    |
+| requirements| No       | -       | ✓        | ✓    |
+| pricing     | No       | -       | ✓        | ✓    |
+| security    | Yes      | ✓       | ✓        | ✓    |
 
 ---
 
@@ -534,7 +540,135 @@ memory:
 
 ---
 
-### 5.7 Security Section
+### 5.7 Requirements Section
+
+**Purpose**: Defines the agent's deployment and execution requirements.
+
+**Structure:**
+
+```yaml
+requirements:
+  hardware:              # Hardware requirements
+    cpu_cores: integer
+    memory_mb: integer
+    storage_mb: integer
+    gpu_required: boolean
+    gpu_memory_mb: integer
+    
+  software:              # Software dependencies
+    runtime: string
+    dependencies: array
+    python_version: string
+    node_version: string
+    
+  network:               # Network requirements
+    internet_access: boolean
+    bandwidth_mbps: number
+    allowed_domains: array
+```
+
+**Validation Rules:**
+
+- All integer fields **MUST** be positive if specified
+- `bandwidth_mbps` **MUST** be a non-negative number
+- `dependencies` **MUST** be an array of strings if specified
+
+**Example:**
+
+```yaml
+requirements:
+  hardware:
+    cpu_cores: 2
+    memory_mb: 1024
+    storage_mb: 512
+    gpu_required: false
+    
+  software:
+    runtime: "Python 3.9+"
+    dependencies:
+      - "requests>=2.28.0"
+      - "beautifulsoup4>=4.11.0"
+      - "lxml>=4.9.0"
+      - "selenium>=4.5.0"
+    python_version: "3.9"
+    
+  network:
+    internet_access: true
+    bandwidth_mbps: 10
+    allowed_domains:
+      - "*.webscraper.io"
+      - "api.openai.com"
+      - "chromadb.io"
+```
+
+---
+
+### 5.8 Pricing Section
+
+**Purpose**: Defines the agent's usage pricing model.
+
+**Structure:**
+
+```yaml
+pricing:
+  model: string          # "pay_per_call", "subscription", "freemium", "tiered"
+  
+  cost_per_call:         # Pay-per-call pricing
+    amount: number
+    currency: string     # ISO 4217 currency code
+    
+  subscription:          # Subscription pricing
+    monthly_fee:
+      amount: number
+      currency: string
+    included_calls: integer
+    additional_call_cost:
+      amount: number
+      currency: string
+      
+  tiered_pricing:        # Tiered pricing
+    - min_calls: integer
+      max_calls: integer
+      cost_per_call:
+        amount: number
+        currency: string
+```
+
+**Validation Rules:**
+
+- `model` **MUST** be one of: pay_per_call, subscription, freemium, tiered
+- `amount` fields **MUST** be non-negative numbers
+- `currency` **SHOULD** follow ISO 4217 currency codes
+- For tiered pricing, tiers **MUST** be contiguous and non-overlapping
+
+**Example:**
+
+```yaml
+pricing:
+  model: "pay_per_call"
+  cost_per_call:
+    amount: 0.001
+    currency: "SOL"
+```
+
+Another example with subscription model:
+
+```yaml
+pricing:
+  model: "subscription"
+  subscription:
+    monthly_fee:
+      amount: 10
+      currency: "SOL"
+    included_calls: 1000
+    additional_call_cost:
+      amount: 0.0005
+      currency: "SOL"
+```
+
+---
+
+### 5.9 Security Section
 
 **Purpose**: Contains security-related metadata including checksums, signatures, and capability restrictions.
 
@@ -897,6 +1031,21 @@ memory:
     enabled: true
     vector_db: "chromadb"
 
+requirements:
+  hardware:
+    cpu_cores: 2
+    memory_mb: 512
+  software:
+    runtime: "Node.js 18+"
+  network:
+    internet_access: true
+
+pricing:
+  model: "pay_per_call"
+  cost_per_call:
+    amount: 0.001
+    currency: "SOL"
+
 security:
   checksum:
     algorithm: "sha256"
@@ -911,6 +1060,7 @@ security:
 ## Appendix B: JSON Schema
 
 See [schemas/aix-v1.schema.json](../schemas/aix-v1.schema.json) for the complete JSON Schema definition.
+See [schemas/aix-enhanced.schema.json](../schemas/aix-enhanced.schema.json) for the enhanced schema with requirements and pricing.
 
 ---
 
@@ -924,6 +1074,13 @@ See [schemas/aix-v1.schema.json](../schemas/aix-v1.schema.json) for the complete
 - Defined security model
 - Established conformance levels
 
+### Version 1.1 (November 2025)
+
+- Added requirements section for deployment specifications
+- Added pricing section for usage-based models
+- Updated conformance levels to include new sections
+- Enhanced examples to demonstrate new features
+
 ---
 
 **End of Specification**
@@ -931,4 +1088,3 @@ See [schemas/aix-v1.schema.json](../schemas/aix-v1.schema.json) for the complete
 For questions or clarifications, contact: amrikyy@gmail.com
 
 **Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
-
