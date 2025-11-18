@@ -1,0 +1,778 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/aix-enhanced.schema.json",
+  "title": "Enhanced AIX Format Schema",
+  "description": "Enhanced JSON Schema for AIX (Artificial Intelligence eXchange) file format with requirements and pricing fields. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2025",
+  "type": "object",
+  "required": ["meta", "persona", "security"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Agent metadata and identification",
+      "required": ["version", "id", "name", "created", "author"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "AIX format version (semantic versioning)",
+          "pattern": "^\\d+\\.\\d+(\\.\\d+)?(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$",
+          "examples": ["1.0", "1.0.0", "1.0.0-beta.1"]
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (UUID v4)",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Agent name",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "created": {
+          "type": "string",
+          "description": "Creation timestamp (ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$",
+          "examples": ["2025-01-12T10:30:00Z"]
+        },
+        "updated": {
+          "type": "string",
+          "description": "Last update timestamp (ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author name or identifier",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "description": "Classification tags",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "minItems": 0,
+          "maxItems": 10
+        },
+        "license": {
+          "type": "string",
+          "description": "License identifier (SPDX format)",
+          "examples": ["MIT", "Apache-2.0", "GPL-3.0"]
+        },
+        "homepage": {
+          "type": "string",
+          "description": "Agent homepage URL",
+          "format": "uri"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Source repository URL",
+          "format": "uri"
+        },
+        "documentation": {
+          "type": "string",
+          "description": "Documentation URL",
+          "format": "uri"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Base64-encoded icon or URL"
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary language (ISO 639-1)",
+          "pattern": "^[a-z]{2}$",
+          "examples": ["en", "es", "fr"]
+        },
+        "framework": {
+          "type": "string",
+          "description": "Target AI framework",
+          "examples": ["openai", "anthropic", "cohere"]
+        },
+        "runtime_version": {
+          "type": "string",
+          "description": "Required runtime version"
+        }
+      },
+      "additionalProperties": true
+    },
+    "persona": {
+      "type": "object",
+      "description": "Agent personality and behavior",
+      "required": ["role", "instructions"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": "Agent's primary role",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "tone": {
+          "type": "string",
+          "description": "Communication style",
+          "examples": ["friendly", "professional", "casual"]
+        },
+        "style": {
+          "type": "string",
+          "description": "Response style",
+          "examples": ["concise", "detailed", "technical"]
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Core behavioral instructions",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Behavioral constraints",
+          "items": {
+            "type": "string"
+          }
+        },
+        "personality_traits": {
+          "type": "object",
+          "description": "Personality attributes",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "example_responses": {
+          "type": "array",
+          "description": "Sample conversations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Sampling temperature",
+          "minimum": 0.0,
+          "maximum": 2.0
+        },
+        "context_window": {
+          "type": "integer",
+          "description": "Preferred context size",
+          "minimum": 1
+        },
+        "response_format": {
+          "type": "string",
+          "description": "Preferred output format"
+        }
+      },
+      "additionalProperties": true
+    },
+    "skills": {
+      "type": "array",
+      "description": "Agent capabilities",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Skill identifier",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "description": {
+            "type": "string",
+            "description": "Skill description"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether skill is active",
+            "default": true
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Skill-specific parameters"
+          },
+          "triggers": {
+            "type": "array",
+            "description": "Activation triggers",
+            "items": {
+              "type": "string"
+            }
+          },
+          "examples": {
+            "type": "array",
+            "description": "Usage examples",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Execution priority",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Max execution time (seconds)",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "apis": {
+      "type": "array",
+      "description": "API integrations",
+      "items": {
+        "type": "object",
+        "required": ["name", "base_url"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "API identifier"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "API base URL",
+            "format": "uri"
+          },
+          "description": {
+            "type": "string",
+            "description": "API purpose"
+          },
+          "version": {
+            "type": "string",
+            "description": "API version"
+          },
+          "auth": {
+            "type": "object",
+            "description": "Authentication configuration",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["bearer", "api_key", "oauth2", "basic", "none"]
+              },
+              "location": {
+                "type": "string",
+                "enum": ["header", "query", "body"]
+              },
+              "key_name": {
+                "type": "string"
+              }
+            }
+          },
+          "endpoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+                },
+                "description": {
+                  "type": "string"
+                },
+                "parameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "rate_limit": {
+            "type": "object",
+            "properties": {
+              "requests": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "period": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "retry": {
+            "type": "object",
+            "properties": {
+              "max_attempts": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "backoff": {
+                "type": "string",
+                "enum": ["exponential", "linear", "constant"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "description": "Model Context Protocol configuration",
+      "properties": {
+        "servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "command"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Server identifier"
+              },
+              "command": {
+                "type": "string",
+                "description": "Executable command"
+              },
+              "args": {
+                "type": "array",
+                "description": "Command arguments",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "env": {
+                "type": "object",
+                "description": "Environment variables",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "description": {
+                "type": "string"
+              },
+              "capabilities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "timeout": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "auto_start": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "description": "Memory system configuration",
+      "properties": {
+        "episodic": {
+          "type": "object",
+          "description": "Conversation history",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "max_messages": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "retention_days": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "storage": {
+              "type": "string",
+              "enum": ["local", "cloud", "vector_db", "database"]
+            }
+          }
+        },
+        "semantic": {
+          "type": "object",
+          "description": "Knowledge graphs",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "embedding_model": {
+              "type": "string"
+            },
+            "vector_db": {
+              "type": "string"
+            },
+            "similarity_threshold": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "max_results": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "procedural": {
+          "type": "object",
+          "description": "Workflows and processes",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "storage": {
+              "type": "string"
+            },
+            "max_workflows": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "backend": {
+              "type": "string",
+              "enum": ["file", "database", "redis", "s3", "postgresql", "sqlite"]
+            },
+            "config": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "description": "Agent resource requirements for deployment and execution",
+      "properties": {
+        "hardware": {
+          "type": "object",
+          "description": "Hardware requirements",
+          "properties": {
+            "cpu_cores": {
+              "type": "integer",
+              "description": "Minimum CPU cores required",
+              "minimum": 1
+            },
+            "memory_mb": {
+              "type": "integer",
+              "description": "Minimum RAM in MB",
+              "minimum": 1
+            },
+            "storage_mb": {
+              "type": "integer",
+              "description": "Minimum storage in MB",
+              "minimum": 1
+            },
+            "gpu_required": {
+              "type": "boolean",
+              "description": "Whether GPU is required",
+              "default": false
+            },
+            "gpu_memory_mb": {
+              "type": "integer",
+              "description": "Minimum GPU memory in MB (if GPU required)",
+              "minimum": 1
+            }
+          }
+        },
+        "software": {
+          "type": "object",
+          "description": "Software dependencies",
+          "properties": {
+            "runtime": {
+              "type": "string",
+              "description": "Required runtime environment"
+            },
+            "dependencies": {
+              "type": "array",
+              "description": "Required software dependencies",
+              "items": {
+                "type": "string"
+              }
+            },
+            "python_version": {
+              "type": "string",
+              "description": "Required Python version (if applicable)"
+            },
+            "node_version": {
+              "type": "string",
+              "description": "Required Node.js version (if applicable)"
+            }
+          }
+        },
+        "network": {
+          "type": "object",
+          "description": "Network requirements",
+          "properties": {
+            "internet_access": {
+              "type": "boolean",
+              "description": "Whether internet access is required",
+              "default": false
+            },
+            "bandwidth_mbps": {
+              "type": "number",
+              "description": "Minimum bandwidth in Mbps",
+              "minimum": 0
+            },
+            "allowed_domains": {
+              "type": "array",
+              "description": "Domains that the agent needs to access",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "pricing": {
+      "type": "object",
+      "description": "Pricing model for agent usage",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "Pricing model type",
+          "enum": ["pay_per_call", "subscription", "freemium", "tiered"],
+          "default": "pay_per_call"
+        },
+        "cost_per_call": {
+          "type": "object",
+          "description": "Cost per API call",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "description": "Cost amount",
+              "minimum": 0
+            },
+            "currency": {
+              "type": "string",
+              "description": "Currency code (ISO 4217)",
+              "default": "SOL",
+              "examples": ["SOL", "USD", "EUR"]
+            }
+          }
+        },
+        "subscription": {
+          "type": "object",
+          "description": "Subscription pricing",
+          "properties": {
+            "monthly_fee": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "default": "SOL"
+                }
+              }
+            },
+            "included_calls": {
+              "type": "integer",
+              "description": "Number of calls included in subscription",
+              "minimum": 0
+            },
+            "additional_call_cost": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "default": "SOL"
+                }
+              }
+            }
+          }
+        },
+        "tiered_pricing": {
+          "type": "array",
+          "description": "Tiered pricing based on usage",
+          "items": {
+            "type": "object",
+            "properties": {
+              "min_calls": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "max_calls": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cost_per_call": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "SOL"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "description": "Security and integrity data",
+      "required": ["checksum"],
+      "properties": {
+        "checksum": {
+          "type": "object",
+          "required": ["algorithm", "value"],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["sha256", "sha512", "blake3"]
+            },
+            "value": {
+              "type": "string",
+              "description": "Hex-encoded hash value",
+              "pattern": "^[0-9a-f]+$"
+            },
+            "scope": {
+              "type": "string",
+              "description": "What is included in checksum",
+              "default": "content"
+            }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "description": "Digital signature",
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["RSA-SHA256", "Ed25519", "ECDSA-SHA256"]
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64-encoded signature"
+            },
+            "public_key": {
+              "type": "string",
+              "description": "PEM-encoded public key"
+            },
+            "signer": {
+              "type": "string",
+              "description": "Signer identifier"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "Signing timestamp (ISO 8601)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+            }
+          }
+        },
+        "encryption": {
+          "type": "object",
+          "description": "Encryption metadata",
+          "properties": {
+            "encrypted": {
+              "type": "boolean",
+              "default": false
+            },
+            "algorithm": {
+              "type": "string",
+              "enum": ["AES-256-GCM", "ChaCha20-Poly1305", "none"]
+            },
+            "key_fingerprint": {
+              "type": "string"
+            }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Capability restrictions",
+          "properties": {
+            "allowed_operations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "restricted_operations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "restricted_domains": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_api_calls_per_minute": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_memory_mb": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "sandbox": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "description": "Compliance and audit",
+          "properties": {
+            "standards": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "certifications": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "audit_log": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
