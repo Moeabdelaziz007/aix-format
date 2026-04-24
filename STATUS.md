@@ -21,6 +21,11 @@
 
 ## ✅ What's Been Built (37 Hours)
 
+### Latest Weekly Audit
+- ✅ **AxiomID Integration**: Full schema support for `did:axiom:axiomid.app:<id>` with cryptographic verification via Ed25519 and secp256k1 signatures.
+- ✅ **Cyber-Physical Alignment**: `vla` payload schemas for Vision-Language-Action execution targeting `openpi` and `π0.7` robotics runtimes.
+
+
 ### Day 1 (October 13, 2025)
 
 **Hours 1-12: Core Foundation**

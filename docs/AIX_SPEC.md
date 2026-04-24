@@ -571,6 +571,12 @@ requirements:
     internet_access: boolean
     bandwidth_mbps: number
     allowed_domains: array
+
+  vla:                   # Vision-Language-Action payload requirements
+    adapter: string      # "openpi", "pi0.7", "generic", REQUIRED
+    vision: object       # Visual perception inputs
+    language: object     # Natural language instruction or context
+    action: object       # Motor or decision action outputs
 ```
 
 **Validation Rules:**
@@ -676,44 +682,47 @@ pricing:
 
 ### 5.9 Identity Layer Section (Axiom Standard)
 
-**Purpose**: Defines the agent's identity and wallet information for decentralized systems.
+**Purpose**: Defines the agent's identity and cryptographic verification metadata for the Sovereign Protocol. `axiomid.app` is the Root Authority for all issued identities.
 
 **Structure:**
 
 ```json
 "identity_layer": {
-  "network": string,          // Blockchain network, REQUIRED
-  "wallet_pubkey": string,    // Public key of the agent's wallet, REQUIRED
-  "did_document": string,     // Decentralized Identifier (DID) document
-  "verifiable_credentials": array  // Verifiable credentials
+  "id": string,               // Unique Axiom identifier (UUID v4 or DID format), REQUIRED
+  "authority": string,        // Root authority domain, must be "axiomid.app", REQUIRED
+  "issuedAt": string,         // ISO 8601 timestamp of issuance, REQUIRED
+  "expiresAt": string,        // ISO 8601 timestamp of expiration, OPTIONAL
+  "publicKey": object,        // Public key material for cryptographic verification
+  "signature": object         // Cryptographic signature over the canonical payload hash
 }
 ```
 
 **Validation Rules:**
 
-- `network` **MUST** be one of: solana, ethereum, polygon, bsc, avalanche, arbitrum, optimism, base
-- `wallet_pubkey` **MUST** be a valid public key for the specified network
-- `did_document` **SHOULD** follow DID specification format
+- `id` **MUST** be a valid UUID v4 or `did:axiom` identifier (`did:axiom:axiomid.app:<id>`).
+- `authority` **MUST** resolve to `axiomid.app`.
+- `issuedAt` **MUST** be a valid ISO 8601 date-time string.
+- `publicKey.algorithm` **MUST** be one of: `Ed25519`, `secp256k1`.
+- `signature.algorithm` **MUST** be one of: `Ed25519`, `secp256k1`.
+- `signature.canonicalization` **SHOULD** be `JCS` or `RFC8785`.
 
 **Example:**
 
 ```json
 "identity_layer": {
-  "network": "solana",
-  "wallet_pubkey": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g",
-  "did_document": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
-  "verifiable_credentials": [
-    {
-      "type": "DataAnalysisCertification",
-      "issuer": "Axiom Academy",
-      "issuance_date": "2026-04-24T10:00:00Z",
-      "expiration_date": "2026-01-15T10:00:00Z",
-      "credential_subject": {
-        "id": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
-        "skills": ["web_scraping", "data_analysis", "pattern_recognition"]
-      }
-    }
-  ]
+  "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+  "authority": "axiomid.app",
+  "issuedAt": "2026-04-24T10:30:00Z",
+  "publicKey": {
+    "algorithm": "Ed25519",
+    "value": "base64url-encoded-key",
+    "encoding": "base64url"
+  },
+  "signature": {
+    "algorithm": "Ed25519",
+    "value": "base64url-encoded-signature",
+    "canonicalization": "JCS"
+  }
 }
 ```
 

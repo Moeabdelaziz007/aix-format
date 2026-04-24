@@ -463,6 +463,39 @@
         }
       }
     },
+    "requirements": {
+      "type": "object",
+      "description": "Agent resource requirements for deployment and execution",
+      "properties": {
+        "vla": {
+          "type": "object",
+          "description": "Vision-Language-Action payload requirements",
+          "required": ["adapter"],
+          "properties": {
+            "adapter": {
+              "type": "string",
+              "enum": ["openpi", "pi0.7", "generic"],
+              "description": "Identifies which VLA runtime adapter should process this payload."
+            },
+            "vision": {
+              "type": "object",
+              "description": "Visual perception inputs.",
+              "additionalProperties": true
+            },
+            "language": {
+              "type": "object",
+              "description": "Natural language instruction or context.",
+              "additionalProperties": true
+            },
+            "action": {
+              "type": "object",
+              "description": "Motor or decision action outputs.",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
     "security": {
       "type": "object",
       "description": "Security and integrity data",
@@ -587,6 +620,76 @@
             "audit_log": {
               "type": "boolean",
               "default": false
+            }
+          }
+        }
+      }
+    },
+    "identity_layer": {
+      "type": "object",
+      "description": "AxiomID Identity block. axiomid.app is the Root Authority for all issued identities.",
+      "required": ["id", "authority", "issuedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Axiom identifier (UUID v4 or DID format).",
+          "pattern": "^(did:axiom:(axiomid\\.app:)?[a-zA-Z0-9._\\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$"
+        },
+        "authority": {
+          "type": "string",
+          "description": "Root authority domain. Must resolve to axiomid.app.",
+          "const": "axiomid.app"
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of identity issuance."
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional expiry timestamp for ephemeral identities."
+        },
+        "publicKey": {
+          "type": "object",
+          "description": "Public key material for cryptographic verification.",
+          "required": ["algorithm", "value"],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["Ed25519", "secp256k1"],
+              "description": "Cryptographic algorithm used to generate the key pair."
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64url-encoded public key bytes."
+            },
+            "encoding": {
+              "type": "string",
+              "enum": ["base64url", "hex"],
+              "default": "base64url"
+            }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "description": "Cryptographic signature over the canonical payload hash.",
+          "required": ["algorithm", "value"],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["Ed25519", "secp256k1"],
+              "description": "Algorithm used to produce the signature."
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64url-encoded signature bytes."
+            },
+            "canonicalization": {
+              "type": "string",
+              "enum": ["JCS", "RFC8785"],
+              "default": "JCS",
+              "description": "JSON canonicalization scheme used before signing."
             }
           }
         }

@@ -326,6 +326,71 @@ describe('AIXParser', () => {
     });
   });
 
+  describe('Validation - Identity Layer', () => {
+    it('should reject missing required fields in identity_layer', () => {
+      const parser = new AIXParser();
+      const identity_layer = { id: 'did:axiom:test' }; // Missing authority and issuedAt
+      parser.validateIdentityLayer(identity_layer);
+      assert(parser.errors.some(e =>
+        e.code === 'MISSING_FIELD' && e.field === 'authority'
+      ));
+      assert(parser.errors.some(e =>
+        e.code === 'MISSING_FIELD' && e.field === 'issuedAt'
+      ));
+    });
+
+    it('should reject invalid authority in identity_layer', () => {
+      const parser = new AIXParser();
+      const identity_layer = {
+        id: 'did:axiom:test',
+        authority: 'invalid.app',
+        issuedAt: '2026-04-24T10:30:00Z'
+      };
+      parser.validateIdentityLayer(identity_layer);
+      assert(parser.errors.some(e =>
+        e.code === 'INVALID_AUTHORITY' && e.field === 'authority'
+      ));
+    });
+
+    it('should accept valid identity_layer', () => {
+      const parser = new AIXParser();
+      const identity_layer = {
+        id: 'did:axiom:axiomid.app:123',
+        authority: 'axiomid.app',
+        issuedAt: '2026-04-24T10:30:00Z'
+      };
+      parser.validateIdentityLayer(identity_layer);
+      assert(!parser.errors.some(e => e.section === 'identity_layer'));
+    });
+  });
+
+  describe('Validation - Requirements (VLA)', () => {
+    it('should reject missing adapter in vla', () => {
+      const parser = new AIXParser();
+      const requirements = { vla: { vision: {} } };
+      parser.validateRequirements(requirements);
+      assert(parser.errors.some(e =>
+        e.code === 'MISSING_FIELD' && e.field === 'adapter'
+      ));
+    });
+
+    it('should reject invalid adapter in vla', () => {
+      const parser = new AIXParser();
+      const requirements = { vla: { adapter: 'invalid-adapter' } };
+      parser.validateRequirements(requirements);
+      assert(parser.errors.some(e =>
+        e.code === 'INVALID_VALUE' && e.field === 'adapter'
+      ));
+    });
+
+    it('should accept valid vla adapter', () => {
+      const parser = new AIXParser();
+      const requirements = { vla: { adapter: 'openpi' } };
+      parser.validateRequirements(requirements);
+      assert(!parser.errors.some(e => e.section === 'requirements.vla'));
+    });
+  });
+
   describe('Checksum Calculation', () => {
     it('should calculate consistent checksums', () => {
       const parser = new AIXParser();

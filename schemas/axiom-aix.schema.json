@@ -4,18 +4,33 @@
   "title": "Axiom AIX Standard Schema",
   "description": "Official JSON Schema for Axiom AIX (Artificial Intelligence eXchange) file format with identity and economics layers. The Digital DNA of autonomous AI agents.",
   "type": "object",
-  "required": ["version", "metadata", "persona", "identity_layer", "economics", "superpowers"],
+  "required": [
+    "version",
+    "metadata",
+    "persona",
+    "identity_layer",
+    "economics",
+    "superpowers"
+  ],
   "properties": {
     "version": {
       "type": "string",
       "description": "AIX format version (semantic versioning)",
       "pattern": "^\\d+\\.\\d+(\\.\\d+)?(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$",
-      "examples": ["1.0.0", "1.0.0-beta.1"]
+      "examples": [
+        "1.0.0",
+        "1.0.0-beta.1"
+      ]
     },
     "metadata": {
       "type": "object",
       "description": "Agent metadata and identification",
-      "required": ["name", "id", "created_at", "author"],
+      "required": [
+        "name",
+        "id",
+        "created_at",
+        "author"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -27,13 +42,17 @@
           "type": "string",
           "description": "Unique identifier (UUID v4)",
           "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-          "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+          "examples": [
+            "550e8400-e29b-41d4-a716-446655440000"
+          ]
         },
         "created_at": {
           "type": "string",
           "description": "Creation timestamp (ISO 8601)",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$",
-          "examples": ["2026-04-24T10:30:00Z"]
+          "examples": [
+            "2026-04-24T10:30:00Z"
+          ]
         },
         "author": {
           "type": "string",
@@ -63,7 +82,11 @@
         "license": {
           "type": "string",
           "description": "License identifier (SPDX format)",
-          "examples": ["MIT", "Apache-2.0", "GPL-3.0"]
+          "examples": [
+            "MIT",
+            "Apache-2.0",
+            "GPL-3.0"
+          ]
         },
         "homepage": {
           "type": "string",
@@ -89,7 +112,11 @@
           "type": "string",
           "description": "Primary language (ISO 639-1)",
           "pattern": "^[a-z]{2}$",
-          "examples": ["en", "es", "fr"]
+          "examples": [
+            "en",
+            "es",
+            "fr"
+          ]
         }
       },
       "additionalProperties": true
@@ -97,7 +124,11 @@
     "persona": {
       "type": "object",
       "description": "Agent personality and behavior",
-      "required": ["role", "description", "tone"],
+      "required": [
+        "role",
+        "description",
+        "tone"
+      ],
       "properties": {
         "role": {
           "type": "string",
@@ -114,12 +145,21 @@
         "tone": {
           "type": "string",
           "description": "Communication style",
-          "examples": ["friendly", "professional", "casual", "technical"]
+          "examples": [
+            "friendly",
+            "professional",
+            "casual",
+            "technical"
+          ]
         },
         "style": {
           "type": "string",
           "description": "Response style",
-          "examples": ["concise", "detailed", "technical"]
+          "examples": [
+            "concise",
+            "detailed",
+            "technical"
+          ]
         },
         "constraints": {
           "type": "array",
@@ -175,64 +215,114 @@
     },
     "identity_layer": {
       "type": "object",
-      "description": "Agent identity and wallet information",
-      "required": ["network", "wallet_pubkey"],
+      "description": "AxiomID Identity block. axiomid.app is the Root Authority for all issued identities.",
+      "required": [
+        "id",
+        "authority",
+        "issuedAt"
+      ],
       "properties": {
-        "network": {
+        "id": {
           "type": "string",
-          "description": "Blockchain network",
-          "enum": ["solana", "ethereum", "polygon", "bsc", "avalanche", "arbitrum", "optimism", "base"],
-          "default": "solana"
+          "description": "Unique Axiom identifier (UUID v4 or DID format).",
+          "pattern": "^(did:axiom:(axiomid\\.app:)?[a-zA-Z0-9._\\\\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$"
         },
-        "wallet_pubkey": {
+        "authority": {
           "type": "string",
-          "description": "Public key of the agent's wallet",
-          "minLength": 32,
-          "maxLength": 100
+          "description": "Root authority domain. Must resolve to axiomid.app.",
+          "const": "axiomid.app"
         },
-        "did_document": {
+        "issuedAt": {
           "type": "string",
-          "description": "Decentralized Identifier (DID) document",
-          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9]+$"
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of identity issuance."
         },
-        "verifiable_credentials": {
-          "type": "array",
-          "description": "Verifiable credentials associated with the agent",
-          "items": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string"
-              },
-              "issuer": {
-                "type": "string"
-              },
-              "issuance_date": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "expiration_date": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "credential_subject": {
-                "type": "object"
-              }
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional expiry timestamp for ephemeral identities."
+        },
+        "publicKey": {
+          "type": "object",
+          "description": "Public key material for cryptographic verification.",
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "Ed25519",
+                "secp256k1"
+              ],
+              "description": "Cryptographic algorithm used to generate the key pair."
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64url-encoded public key bytes."
+            },
+            "encoding": {
+              "type": "string",
+              "enum": [
+                "base64url",
+                "hex"
+              ],
+              "default": "base64url"
+            }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "description": "Cryptographic signature over the canonical payload hash.",
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "Ed25519",
+                "secp256k1"
+              ],
+              "description": "Algorithm used to produce the signature."
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64url-encoded signature bytes."
+            },
+            "canonicalization": {
+              "type": "string",
+              "enum": [
+                "JCS",
+                "RFC8785"
+              ],
+              "default": "JCS",
+              "description": "JSON canonicalization scheme used before signing."
             }
           }
         }
-      },
-      "additionalProperties": true
+      }
     },
     "economics": {
       "type": "object",
       "description": "Agent economic model and pricing",
-      "required": ["token", "cost_per_task"],
+      "required": [
+        "token",
+        "cost_per_task"
+      ],
       "properties": {
         "token": {
           "type": "string",
           "description": "Token used for transactions",
-          "enum": ["AXIOM", "SOL", "ETH", "USDC", "USDT"],
+          "enum": [
+            "AXIOM",
+            "SOL",
+            "ETH",
+            "USDC",
+            "USDT"
+          ],
           "default": "AXIOM"
         },
         "cost_per_task": {
@@ -308,7 +398,11 @@
       "description": "Agent capabilities and skills",
       "items": {
         "type": "object",
-        "required": ["name", "version", "type"],
+        "required": [
+          "name",
+          "version",
+          "type"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -323,7 +417,13 @@
           "type": {
             "type": "string",
             "description": "Superpower type",
-            "enum": ["python_module", "llm_chain", "api_integration", "mcp_server", "custom"]
+            "enum": [
+              "python_module",
+              "llm_chain",
+              "api_integration",
+              "mcp_server",
+              "custom"
+            ]
           },
           "description": {
             "type": "string",
@@ -343,7 +443,13 @@
             "description": "Required permissions",
             "items": {
               "type": "string",
-              "enum": ["internet_access", "file_system", "camera", "microphone", "location"]
+              "enum": [
+                "internet_access",
+                "file_system",
+                "camera",
+                "microphone",
+                "location"
+              ]
             }
           },
           "parameters": {
@@ -382,6 +488,39 @@
       "type": "object",
       "description": "Agent resource requirements for deployment and execution",
       "properties": {
+        "vla": {
+          "type": "object",
+          "description": "Vision-Language-Action payload requirements",
+          "required": [
+            "adapter"
+          ],
+          "properties": {
+            "adapter": {
+              "type": "string",
+              "enum": [
+                "openpi",
+                "pi0.7",
+                "generic"
+              ],
+              "description": "Identifies which VLA runtime adapter should process this payload."
+            },
+            "vision": {
+              "type": "object",
+              "description": "Visual perception inputs.",
+              "additionalProperties": true
+            },
+            "language": {
+              "type": "object",
+              "description": "Natural language instruction or context.",
+              "additionalProperties": true
+            },
+            "action": {
+              "type": "object",
+              "description": "Motor or decision action outputs.",
+              "additionalProperties": true
+            }
+          }
+        },
         "hardware": {
           "type": "object",
           "description": "Hardware requirements",
@@ -466,15 +605,24 @@
     "security": {
       "type": "object",
       "description": "Security and integrity data",
-      "required": ["checksum"],
+      "required": [
+        "checksum"
+      ],
       "properties": {
         "checksum": {
           "type": "object",
-          "required": ["algorithm", "value"],
+          "required": [
+            "algorithm",
+            "value"
+          ],
           "properties": {
             "algorithm": {
               "type": "string",
-              "enum": ["sha256", "sha512", "blake3"]
+              "enum": [
+                "sha256",
+                "sha512",
+                "blake3"
+              ]
             },
             "value": {
               "type": "string",
@@ -494,7 +642,11 @@
           "properties": {
             "algorithm": {
               "type": "string",
-              "enum": ["RSA-SHA256", "Ed25519", "ECDSA-SHA256"]
+              "enum": [
+                "RSA-SHA256",
+                "Ed25519",
+                "ECDSA-SHA256"
+              ]
             },
             "value": {
               "type": "string",
@@ -525,7 +677,11 @@
             },
             "algorithm": {
               "type": "string",
-              "enum": ["AES-256-GCM", "ChaCha20-Poly1305", "none"]
+              "enum": [
+                "AES-256-GCM",
+                "ChaCha20-Poly1305",
+                "none"
+              ]
             },
             "key_fingerprint": {
               "type": "string"

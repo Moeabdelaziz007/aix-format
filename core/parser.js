@@ -168,26 +168,26 @@ export class AIXParser {
       if (trimmed.startsWith('- ')) {
         const value = trimmed.substring(2).trim();
         
-        // Find parent array
         while (currentPath.length > 0 && currentPath[currentPath.length - 1].indent >= indent) {
           currentPath.pop();
         }
         
-        const parent = currentPath.length > 0 ? currentPath[currentPath.length - 1].obj : result;
-        const lastKey = currentPath.length > 0 ? currentPath[currentPath.length - 1].key : null;
-        
-        if (lastKey && !Array.isArray(parent[lastKey])) {
-          parent[lastKey] = [];
-        }
-        
-        if (lastKey) {
-          if (value.includes(':')) {
-            // Object in array
-            const obj = this.parseYAMLObject(value);
-            parent[lastKey].push(obj);
-          } else {
-            parent[lastKey].push(this.parseYAMLValue(value));
-          }
+        if (currentPath.length > 0) {
+           const currentItem = currentPath[currentPath.length - 1];
+           const parentOfCurrentItem = currentPath.length > 1 ? currentPath[currentPath.length - 2].obj : result;
+           const lastKey = currentItem.key;
+
+           if (!Array.isArray(parentOfCurrentItem[lastKey])) {
+             parentOfCurrentItem[lastKey] = [];
+             // Update the reference in currentPath so it points to the array
+             currentItem.obj = parentOfCurrentItem[lastKey];
+           }
+
+           if (value.includes(':')) {
+             parentOfCurrentItem[lastKey].push(this.parseYAMLObject(value));
+           } else {
+             parentOfCurrentItem[lastKey].push(this.parseYAMLValue(value));
+           }
         }
         continue;
       }
@@ -213,6 +213,8 @@ export class AIXParser {
             inMultiline = true;
             currentObj[key] = '';
           } else {
+            // It could be an object or an array, so we init with an empty object.
+            // If it's an array, it will be replaced by [] in the array logic.
             const newObj = {};
             currentObj[key] = newObj;
             currentPath.push({ indent, obj: newObj, key });
@@ -358,6 +360,7 @@ export class AIXParser {
     if (data.memory) this.validateMemory(data.memory);
     if (data.requirements) this.validateRequirements(data.requirements);
     if (data.pricing) this.validatePricing(data.pricing);
+    if (data.identity_layer) this.validateIdentityLayer(data.identity_layer);
   }
 
   /**
@@ -687,6 +690,28 @@ export class AIXParser {
         });
       }
     }
+
+    if (requirements.vla) {
+      const vla = requirements.vla;
+      if (!vla.adapter) {
+        this.errors.push({
+          code: 'MISSING_FIELD',
+          section: 'requirements.vla',
+          field: 'adapter',
+          message: `Required field 'requirements.vla.adapter' is missing`
+        });
+      } else {
+        const validAdapters = ['openpi', 'pi0.7', 'generic'];
+        if (!validAdapters.includes(vla.adapter)) {
+          this.errors.push({
+            code: 'INVALID_VALUE',
+            section: 'requirements.vla',
+            field: 'adapter',
+            message: `Adapter must be one of: ${validAdapters.join(', ')}`
+          });
+        }
+      }
+    }
   }
 
   /**
@@ -735,6 +760,41 @@ export class AIXParser {
           message: 'Included calls must be a non-negative integer'
         });
       }
+    }
+  }
+
+  /**
+   * Validate identity_layer section
+   */
+  validateIdentityLayer(identity_layer) {
+    const required = ['id', 'authority', 'issuedAt'];
+    for (const field of required) {
+      if (!identity_layer[field]) {
+        this.errors.push({
+          code: 'MISSING_FIELD',
+          section: 'identity_layer',
+          field,
+          message: `Required field 'identity_layer.${field}' is missing`
+        });
+      }
+    }
+
+    if (identity_layer.authority && identity_layer.authority !== 'axiomid.app') {
+      this.errors.push({
+        code: 'INVALID_AUTHORITY',
+        section: 'identity_layer',
+        field: 'authority',
+        message: `Authority must be 'axiomid.app'`
+      });
+    }
+
+    if (identity_layer.issuedAt && !this.isValidISO8601(identity_layer.issuedAt)) {
+      this.errors.push({
+        code: 'INVALID_TIMESTAMP',
+        section: 'identity_layer',
+        field: 'issuedAt',
+        message: 'Invalid ISO 8601 timestamp'
+      });
     }
   }
 
@@ -856,6 +916,7 @@ export class AIXAgent {
   get requirements() { return this.data.requirements; }
   get pricing() { return this.data.pricing; }
   get security() { return this.data.security; }
+  get identity_layer() { return this.data.identity_layer; }
 
   /**
    * Get agent capabilities
@@ -873,6 +934,10 @@ export class AIXAgent {
 
     if (this.mcp) {
       capabilities.push('mcp_servers');
+    }
+
+    if (this.requirements && this.requirements.vla) {
+      capabilities.push('vla');
     }
 
     if (this.memory) {
