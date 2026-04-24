@@ -3,12 +3,12 @@
 **Version:** 0.2.0 (Pre-release)  
 **Author:** Mohamed H Abdelaziz  
 **Organization:** AMRIKYY AI Solutions  
-**Date:** October 2025  
+**Date:** April 2026
 **Contact:** amrikyy@gmail.com
 
 ---
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**  
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 Licensed under MIT with Attribution Requirements.
 
 ---
@@ -51,7 +51,7 @@ This document specifies **recommended** API integration patterns for AIX agents.
     "instance": "/api/v1/search?q=quantum",
     "retry_after": 60,
     "request_id": "req_abc123",
-    "timestamp": "2025-01-15T10:30:00Z"
+    "timestamp": "2026-04-24T10:30:00Z"
   }
 }
 ```
@@ -174,7 +174,7 @@ retry:
 ```javascript
 /**
  * AIX Error Handler - Production-Grade Retry & Circuit Breaker
- * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
  * 
  * Research backing:
  * - Netflix Hystrix (2012): Circuit breaker pattern
@@ -648,7 +648,7 @@ GET /feed?per_page=50&cursor=eyJpZCI6MTIzfQ==  # Next page
 // Decoded cursor
 {
   "id": 123,
-  "created_at": "2025-01-15T10:30:00Z",
+  "created_at": "2026-04-24T10:30:00Z",
   "sort_key": "popularity"
 }
 ```
@@ -844,7 +844,7 @@ apis:
       deprecation:
         v1:
           deprecated_date: "2024-12-01"
-          sunset_date: "2025-06-01"
+          sunset_date: "2026-06-01"
           migration_guide: "https://docs.example.com/migrate-v1-to-v2"
 ```
 
@@ -1087,5 +1087,5 @@ circuit_breaker:
 
 For questions: amrikyy@gmail.com
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 

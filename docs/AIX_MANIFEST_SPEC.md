@@ -3,14 +3,14 @@
 **Title:** AIX Manifest File Format - Detached Signature Architecture  
 **Version:** 1.1  
 **Status:** Stable  
-**Date:** January 2025  
+**Date:** April 2026
 **Author:** Mohamed H Abdelaziz  
 **Organization:** AMRIKYY AI Solutions  
 **Contact:** amrikyy@gmail.com
 
 ---
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**  
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 Licensed under MIT with Attribution Requirements. See [LICENSE.md](../LICENSE.md)
 
 ---
@@ -50,7 +50,7 @@ meta:
   id: "550e8400-e29b-41d4-a716-446655440001"
   name: "ResearchBot"
   version: "1.0.0"
-  created: "2025-01-15T10:30:00Z"
+  created: "2026-04-24T10:30:00Z"
   author: "Mohamed H Abdelaziz"
 
 persona:
@@ -75,14 +75,14 @@ content_file: "agent.aix"
 content_hash:
   algorithm: "SHA-256"
   value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-  timestamp: "2025-01-15T10:30:00Z"
+  timestamp: "2026-04-24T10:30:00Z"
 
 signatures:
   - signer: "Mohamed H Abdelaziz <amrikyy@gmail.com>"
     algorithm: "RSA-SHA256"
     public_key_fingerprint: "SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
     signature_value: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA..."
-    timestamp: "2025-01-15T10:30:00Z"
+    timestamp: "2026-04-24T10:30:00Z"
 
 integrity:
   previous_version_hash: null
@@ -241,21 +241,21 @@ signatures:
     algorithm: "Ed25519"
     public_key_fingerprint: "SHA256:abc123..."
     signature_value: "..."
-    timestamp: "2025-01-15T10:30:00Z"
+    timestamp: "2026-04-24T10:30:00Z"
   
   # Organization attestation
   - signer: "AMRIKYY AI Solutions <amrikyy@gmail.com>"
     algorithm: "RSA-SHA256"
     public_key_fingerprint: "SHA256:def456..."
     signature_value: "..."
-    timestamp: "2025-01-15T10:35:00Z"
+    timestamp: "2026-04-24T10:35:00Z"
   
   # Third-party auditor
   - signer: "Security Audit Co <audit@example.com>"
     algorithm: "ECDSA-SHA256"
     public_key_fingerprint: "SHA256:ghi789..."
     signature_value: "..."
-    timestamp: "2025-01-15T11:00:00Z"
+    timestamp: "2026-04-24T11:00:00Z"
 ```
 
 **Use Cases:**
@@ -281,7 +281,7 @@ integrity:
     os_version: "Ubuntu 22.04"
     arch: "x86_64"
     aix_tools_version: "1.1.0"
-    build_date: "2025-01-15T10:30:00Z"
+    build_date: "2026-04-24T10:30:00Z"
     builder: "GitHub Actions"
     commit_sha: "abc123def456..."
   
@@ -301,11 +301,11 @@ integrity:
   version_chain:
     - version: "0.9.0"
       content_hash: "def456..."
-      released: "2025-01-10T10:00:00Z"
+      released: "2026-04-20T10:00:00Z"
     
     - version: "1.0.0"
       content_hash: "e3b0c4..."
-      released: "2025-01-15T10:30:00Z"
+      released: "2026-04-24T10:30:00Z"
   
   previous_version_hash: "def456..."
 ```
@@ -461,7 +461,7 @@ content_file: "simple-agent.aix"
 content_hash:
   algorithm: "SHA-256"
   value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-  timestamp: "2025-01-15T10:30:00Z"
+  timestamp: "2026-04-24T10:30:00Z"
 ```
 
 ### 11.2 Signed Manifest
@@ -473,14 +473,14 @@ content_file: "signed-agent.aix"
 content_hash:
   algorithm: "SHA-256"
   value: "a1b2c3d4e5f6..."
-  timestamp: "2025-01-15T10:30:00Z"
+  timestamp: "2026-04-24T10:30:00Z"
 
 signatures:
   - signer: "Mohamed H Abdelaziz <amrikyy@gmail.com>"
     algorithm: "Ed25519"
     public_key_fingerprint: "SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
     signature_value: "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHNpZ25hdHVyZQ=="
-    timestamp: "2025-01-15T10:30:00Z"
+    timestamp: "2026-04-24T10:30:00Z"
 ```
 
 ### 11.3 Enterprise Manifest
@@ -492,20 +492,20 @@ content_file: "enterprise-agent.aix"
 content_hash:
   algorithm: "SHA-512"
   value: "abc123def456..."
-  timestamp: "2025-01-15T10:30:00Z"
+  timestamp: "2026-04-24T10:30:00Z"
 
 signatures:
   - signer: "Mohamed H Abdelaziz <amrikyy@gmail.com>"
     algorithm: "Ed25519"
     public_key_fingerprint: "SHA256:author_key_fp"
     signature_value: "..."
-    timestamp: "2025-01-15T10:30:00Z"
+    timestamp: "2026-04-24T10:30:00Z"
   
   - signer: "AMRIKYY AI Solutions <amrikyy@gmail.com>"
     algorithm: "RSA-SHA256"
     public_key_fingerprint: "SHA256:org_key_fp"
     signature_value: "..."
-    timestamp: "2025-01-15T10:35:00Z"
+    timestamp: "2026-04-24T10:35:00Z"
     certificate_chain:
       - "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
 
@@ -519,7 +519,7 @@ integrity:
   version_chain:
     - version: "1.0.0"
       content_hash: "abc123..."
-      released: "2025-01-15T10:30:00Z"
+      released: "2026-04-24T10:30:00Z"
 
 metadata:
   generator: "aix-cli/1.1.0"
@@ -593,5 +593,5 @@ This specification aligns with:
 
 For questions: amrikyy@gmail.com
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 

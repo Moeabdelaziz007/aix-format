@@ -18,21 +18,23 @@
 
 ## 🌟 Overview
 
-**AIX (Artificial Intelligence eXchange)** is a robust, structured, and cryptographically-verifiable file format for defining, packaging, and distributing AI Agents. Developed by **Mohamed H Abdelaziz / AMRIKYY AI Solutions** and upgraded for the **Sovereign Protocol**, AIX ensures your agents are secure, autonomous, and portable across platforms.
+**AIX (Artificial Intelligence eXchange)** is a robust, structured, and cryptographically-verifiable file format for defining, packaging, and distributing AI Agents. Originally developed by **Mohamed H Abdelaziz / AMRIKYY AI Solutions** and now vastly upgraded for the **Sovereign Protocol**, AIX ensures your agents are secure, autonomous, and portable across platforms.
 
-Whether you're building a conversational assistant, a Web3 autonomous entity, or a Vision-Language-Action (VLA) robotics model, AIX provides the DNA structure for your agent.
+Whether you're building a conversational assistant, a Web3 autonomous entity, or a Vision-Language-Action (VLA) robotics model, AIX provides the essential DNA structure for your agent.
+
+This repository is **actively maintained** and serves as the living standard for Sovereign Agent architectures.
 
 ---
 
 ## ✨ Key Features
 
 ### 🛡️ **Sovereign Identity Layer (AxiomID)**
-Every AIX Enhanced message is governed by **axiomid.app** as the sole Root Authority for Agent DIDs (`did:axiom:axiomid.app:<id>`). Includes an `identity_layer` block with support for **Ed25519** and **secp256k1** cryptographic signatures.
+Every AIX Enhanced message is governed by **axiomid.app** as the sole Root Authority for Agent DIDs (`did:axiom:axiomid.app:<id>`). Includes an `identity_layer` block with support for **Ed25519** and **secp256k1** cryptographic signatures, guaranteeing mathematical ownership of the agent identity.
 
 ### 🦾 **Vision-Language-Action (VLA) Alignment**
-Built-in requirements for Cyber-Physical operations. Supports robotic and VLA runtimes seamlessly with dedicated generic configurations, including adapters for **openpi** and **π0.7**.
+Built-in requirements for Cyber-Physical operations. Supports robotic and VLA runtimes seamlessly with dedicated generic configurations, including adapters for **openpi** and **π0.7**. The format is ready to bridge the gap between digital reasoning and physical action.
 
-### 🔒 **Security First**
+### 🔒 **Security & Sovereignty First**
 - **SHA-256 Checksums**: Verify agent file integrity and manifestations.
 - **Capability Restrictions**: Explicitly define what the agent is allowed to execute (sandboxing).
 - **Manifest Integrity**: Validated digital signatures to trace origin authenticity.
@@ -80,7 +82,7 @@ node bin/aix-convert.js my-agent.yaml my-agent.json --format json
 
 ## 🏗️ Structure of an AIX Agent
 
-An `aix` file defines everything an agent needs to exist and operate:
+An `aix` file defines everything an agent needs to exist and operate autonomously:
 
 ```yaml
 # 1. Metadata
@@ -131,7 +133,7 @@ aix-format/
 │   ├── AIX_SPEC.md                # Complete technical specification
 │   ├── AIX_PARSER_DOC.md          # Guide for building custom parsers
 │   ├── STATUS.md                  # Implementation health status
-│   └── ROADMAP.md                 # Future milestones
+│   └── ROADMAP.md                 # Future milestones (Updated for 2026+)
 ├── core/
 │   └── parser.js                  # Reference JS implementation
 ├── bin/
@@ -140,6 +142,17 @@ aix-format/
 ├── tests/                         # Full test suite
 └── examples/                      # Agent templates
 ```
+
+---
+
+## 🗺️ The Sovereign Roadmap
+
+Our vision expands rapidly through 2026 and beyond. For a detailed breakdown, see [ROADMAP.md](docs/ROADMAP.md).
+
+- **Q2 2026**: AxiomID Integration, VLA payloads, automated weekly audits (Current).
+- **Q3 2026**: Multi-language SDKs (TypeScript, Python), decentralized storage plugins.
+- **Q4 2026**: Streaming binary AIX encoding, Edge Wasm executors.
+- **2027**: M-of-N Multi-sig Agents, fully autonomous DeFi logic, AIX Swarm schemas.
 
 ---
 
@@ -167,7 +180,7 @@ We welcome early adopters to shape the future of Sovereign Agent formats!
 
 This project is licensed under the **MIT License with Attribution Requirements**.
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 
 When using this specification, please include:
 > *Based on the AIX Format Specification by Mohamed H Abdelaziz / AMRIKYY AI Solutions*

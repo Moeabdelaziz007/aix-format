@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://amrikyy.ai/schemas/aix-enhanced.schema.json",
   "title": "Enhanced AIX Format Schema",
-  "description": "Enhanced JSON Schema for AIX (Artificial Intelligence eXchange) file format with requirements and pricing fields. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2025",
+  "description": "Enhanced JSON Schema for AIX (Artificial Intelligence eXchange) file format with requirements and pricing fields. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026",
   "type": "object",
   "required": [
     "meta",
@@ -55,7 +55,7 @@
           "description": "Creation timestamp (ISO 8601)",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$",
           "examples": [
-            "2025-01-12T10:30:00Z"
+            "2026-04-24T10:30:00Z"
           ]
         },
         "updated": {

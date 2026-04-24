@@ -8,7 +8,7 @@
 
 ---
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**  
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 Licensed under MIT with Attribution Requirements. See [LICENSE.md](../LICENSE.md)
 
 ---
@@ -104,7 +104,7 @@ npm init -y
 ```javascript
 /**
  * AIX Parser - Reference Implementation
- * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
  * 
  * Zero-dependency parser for AIX (Artificial Intelligence eXchange) files.
  * Supports YAML, JSON, and TOML formats with built-in validation.
@@ -859,7 +859,7 @@ aix_format/
 ```python
 """
 AIX Parser - Python Reference Implementation
-Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
 
 Zero-dependency parser for AIX files.
 """
@@ -1502,7 +1502,7 @@ Aim for:
 #!/usr/bin/env node
 /**
  * AIX Validation Tool
- * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
  */
 
 import { AIXParser } from '../core/parser.js';
@@ -1566,7 +1566,7 @@ try {
 #!/usr/bin/env node
 /**
  * AIX Format Conversion Tool
- * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2025
+ * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026
  */
 
 import { AIXParser } from '../core/parser.js';
@@ -1721,5 +1721,5 @@ See [Section 5.2](#52-validation-error-codes) for complete error code listing.
 
 For technical support: amrikyy@gmail.com
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 

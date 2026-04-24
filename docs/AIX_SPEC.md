@@ -3,7 +3,7 @@
 **Title:** AIX (Artificial Intelligence e**X**change) File Format Specification  
 **Version:** 1.0  
 **Status:** Stable  
-**Date:** January 2025  
+**Date:** April 2026
 **Author:** Mohamed H Abdelaziz  
 **Organization:** AMRIKYY AI Solutions  
 **Contact:** amrikyy@gmail.com  
@@ -11,7 +11,7 @@
 
 ---
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**  
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 Licensed under MIT with Attribution Requirements. See [LICENSE.md](../LICENSE.md)
 
 ---
@@ -226,8 +226,8 @@ meta:
   id: "550e8400-e29b-41d4-a716-446655440000"
   name: "Customer Service Bot"
   description: "AI agent for handling customer inquiries"
-  created: "2025-01-12T10:30:00Z"
-  updated: "2025-01-12T15:45:00Z"
+  created: "2026-04-24T10:30:00Z"
+  updated: "2026-04-24T15:45:00Z"
   author: "Mohamed H Abdelaziz"
   tags: ["customer-service", "support", "chatbot"]
   license: "MIT"
@@ -706,7 +706,7 @@ pricing:
     {
       "type": "DataAnalysisCertification",
       "issuer": "Axiom Academy",
-      "issuance_date": "2025-01-15T10:00:00Z",
+      "issuance_date": "2026-04-24T10:00:00Z",
       "expiration_date": "2026-01-15T10:00:00Z",
       "credential_subject": {
         "id": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
@@ -829,7 +829,7 @@ security:
       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
       -----END PUBLIC KEY-----
     signer: "mohamed@amrikyy.ai"
-    timestamp: "2025-01-12T10:30:00Z"
+    timestamp: "2026-04-24T10:30:00Z"
     
   capabilities:
     allowed_operations:
@@ -1074,15 +1074,15 @@ persona:
 
 ```yaml
 # Complete AIX Agent Example
-# Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2025
+# Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
 
 meta:
   version: "1.0"
   id: "550e8400-e29b-41d4-a716-446655440000"
   name: "Complete Example Agent"
   description: "Demonstrates all AIX features"
-  created: "2025-01-12T10:30:00Z"
-  updated: "2025-01-12T15:45:00Z"
+  created: "2026-04-24T10:30:00Z"
+  updated: "2026-04-24T15:45:00Z"
   author: "Mohamed H Abdelaziz"
   tags: ["example", "full-featured"]
   license: "MIT"
@@ -1173,7 +1173,7 @@ See [schemas/axiom-aix.schema.json](../schemas/axiom-aix.schema.json) for the Ax
 
 ## Appendix C: Change Log
 
-### Version 1.0 (January 2025)
+### Version 1.0 (April 2026)
 
 - Initial specification release
 - Defined seven core sections
@@ -1181,14 +1181,14 @@ See [schemas/axiom-aix.schema.json](../schemas/axiom-aix.schema.json) for the Ax
 - Defined security model
 - Established conformance levels
 
-### Version 1.1 (November 2025)
+### Version 1.1 (May 2026)
 
 - Added requirements section for deployment specifications
 - Added pricing section for usage-based models
 - Updated conformance levels to include new sections
 - Enhanced examples to demonstrate new features
 
-### Version 1.2 (November 2025)
+### Version 1.2 (May 2026)
 
 - Added identity_layer section for decentralized identity
 - Added economics section for token-based economic models
@@ -1202,4 +1202,4 @@ See [schemas/axiom-aix.schema.json](../schemas/axiom-aix.schema.json) for the Ax
 
 For questions or clarifications, contact: amrikyy@gmail.com
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
