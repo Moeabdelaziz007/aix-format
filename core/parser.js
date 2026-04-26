@@ -172,7 +172,6 @@ export class AIXParser {
           currentPath.pop();
         }
         
- update/architecture-audit-identity-vla-12899353967995595920
         if (currentPath.length > 0) {
            const currentItem = currentPath[currentPath.length - 1];
            const parentOfCurrentItem = currentPath.length > 1 ? currentPath[currentPath.length - 2].obj : result;
@@ -189,41 +188,6 @@ export class AIXParser {
            } else {
              parentOfCurrentItem[lastKey].push(this.parseYAMLValue(value));
            }
-=======
-        const parent = currentPath.length > 0 ? currentPath[currentPath.length - 1].obj : result;
-        const lastKey = currentPath.length > 0 ? currentPath[currentPath.length - 1].key : null;
-        
-        if (lastKey && !Array.isArray(parent[lastKey])) {
-          if (parent[lastKey] === '' || parent[lastKey] === null || parent[lastKey] === undefined || Object.keys(parent[lastKey]).length === 0) {
-            parent[lastKey] = [];
-          } else {
-            parent[lastKey] = [parent[lastKey]];
-          }
-        }
-        
-        if (lastKey) {
-          let parsedValue;
-          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
-            // Object in array
-            parsedValue = this.parseYAMLObject(value);
-          } else {
-            parsedValue = this.parseYAMLValue(value);
-          }
-
-          if (Array.isArray(parent)) {
-            parent.push(parsedValue);
-          } else {
-            parent[lastKey].push(parsedValue);
-          }
-        } else if (Array.isArray(parent)) {
-          let parsedValue;
-          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
-            parsedValue = this.parseYAMLObject(value);
-          } else {
-            parsedValue = this.parseYAMLValue(value);
-          }
-          parent.push(parsedValue);
- main
         }
         continue;
       }
@@ -249,13 +213,9 @@ export class AIXParser {
             inMultiline = true;
             currentObj[key] = '';
           } else {
- update/architecture-audit-identity-vla-12899353967995595920
             // It could be an object or an array, so we init with an empty object.
             // If it's an array, it will be replaced by [] in the array logic.
             const newObj = {};
-
-            let newObj = {};
- main
             currentObj[key] = newObj;
             currentPath.push({ indent, obj: currentObj, key, newObj });
           }
