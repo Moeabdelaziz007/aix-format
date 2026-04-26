@@ -42,16 +42,16 @@
       "email": "abdela1@students.kennesaw.edu"
     }
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/amrikyy/aix-format.git"
+    "url": "https://github.com/Moeabdelaziz007/aix-format.git"
   },
   "bugs": {
-    "url": "https://github.com/amrikyy/aix-format/issues",
+    "url": "https://github.com/Moeabdelaziz007/aix-format/issues",
     "email": "amrikyy@gmail.com"
   },
-  "homepage": "https://github.com/amrikyy/aix-format#readme",
+  "homepage": "https://github.com/Moeabdelaziz007/aix-format#readme",
   "engines": {
     "node": ">=18.0.0"
   },

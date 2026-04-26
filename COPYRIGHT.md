@@ -3,7 +3,7 @@
 ## AIX (Artificial Intelligence eXchange) Format Specification
 
 **Version:** 1.0  
-**Copyright © 2025 Mohamed H Abdelaziz**  
+**Copyright © 2026 Mohamed H Abdelaziz**
 **Organization:** AMRIKYY AI Solutions  
 **All Rights Reserved.**
 
@@ -16,7 +16,7 @@
 **Organization:** AMRIKYY AI Solutions  
 **Contact:** amrikyy@gmail.com  
 **Academic Contact:** abdela1@students.kennesaw.edu  
-**Year:** 2025
+**Year:** 2026
 
 ---
 
@@ -58,7 +58,7 @@ Derivative works based on this specification must:
 
 ## Commercial Use
 
-This work is licensed under the MIT License (see LICENSE.md), which permits commercial use with proper attribution. However, trademark usage in commercial contexts requires explicit permission.
+This work is licensed under the Apache License 2.0 (see LICENSE), which permits commercial use with proper attribution. However, trademark usage in commercial contexts requires explicit permission.
 
 ---
 
@@ -74,7 +74,7 @@ For technical questions or contributions:
 
 **Email:** amrikyy@gmail.com  
 **Academic Email:** abdela1@students.kennesaw.edu  
-**Repository:** https://github.com/amrikyy/aix-format
+**Repository:** https://github.com/Moeabdelaziz007/aix-format
 
 ---
 
@@ -84,6 +84,6 @@ This specification is provided "as is" without warranty of any kind, express or 
 
 ---
 
-**Last Updated:** January 2025  
+**Last Updated:** January 2026
 **Document Version:** 1.0
 
