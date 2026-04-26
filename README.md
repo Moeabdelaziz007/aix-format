@@ -93,3 +93,6 @@ To verify your domain with Pi Network (`axiomid.app` or your custom domain), fol
 - **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
 
 *We are building the trust layer for the Machine Economy.*
+
+## 📄 Current Status
+✅ **RFC v0.1 published**: [#9](https://github.com/Moeabdelaziz007/aix-format/issues/9)
