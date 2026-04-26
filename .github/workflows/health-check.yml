@@ -20,11 +20,18 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Validate Schema and Integrity
+        run: |
+          echo "Validating Schemas..."
+          npm install -g ajv-cli
+          ajv compile -s schemas/aix-enhanced.schema.json
+          ajv compile -s schemas/manifest.schema.json
+
       - name: Run Health Check
         run: |
           echo "Running Deep Architecture Audit..."
-          # Update STATUS.md and ROADMAP.md logic here
-          echo "Last Audit: $(date)" > STATUS.md
+          # Log audit date
+          echo "Last Audit: $(date)" >> STATUS.md
           echo "Audited by Sovereign Protocol Maintainer GitHub Action." >> STATUS.md
 
           git config user.name "github-actions[bot]"

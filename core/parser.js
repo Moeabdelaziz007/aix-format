@@ -172,6 +172,7 @@ export class AIXParser {
           currentPath.pop();
         }
         
+ update/architecture-audit-identity-vla-12899353967995595920
         if (currentPath.length > 0) {
            const currentItem = currentPath[currentPath.length - 1];
            const parentOfCurrentItem = currentPath.length > 1 ? currentPath[currentPath.length - 2].obj : result;
@@ -188,12 +189,47 @@ export class AIXParser {
            } else {
              parentOfCurrentItem[lastKey].push(this.parseYAMLValue(value));
            }
+=======
+        const parent = currentPath.length > 0 ? currentPath[currentPath.length - 1].obj : result;
+        const lastKey = currentPath.length > 0 ? currentPath[currentPath.length - 1].key : null;
+        
+        if (lastKey && !Array.isArray(parent[lastKey])) {
+          if (parent[lastKey] === '' || parent[lastKey] === null || parent[lastKey] === undefined || Object.keys(parent[lastKey]).length === 0) {
+            parent[lastKey] = [];
+          } else {
+            parent[lastKey] = [parent[lastKey]];
+          }
+        }
+        
+        if (lastKey) {
+          let parsedValue;
+          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
+            // Object in array
+            parsedValue = this.parseYAMLObject(value);
+          } else {
+            parsedValue = this.parseYAMLValue(value);
+          }
+
+          if (Array.isArray(parent)) {
+            parent.push(parsedValue);
+          } else {
+            parent[lastKey].push(parsedValue);
+          }
+        } else if (Array.isArray(parent)) {
+          let parsedValue;
+          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
+            parsedValue = this.parseYAMLObject(value);
+          } else {
+            parsedValue = this.parseYAMLValue(value);
+          }
+          parent.push(parsedValue);
+ main
         }
         continue;
       }
 
       // Key-value pair
-      if (trimmed.includes(':')) {
+      if (trimmed.includes(':') && !trimmed.match(/^[a-zA-Z0-9_]+:\/\//)) {
         const colonIndex = trimmed.indexOf(':');
         const key = trimmed.substring(0, colonIndex).trim();
         let value = trimmed.substring(colonIndex + 1).trim();
@@ -203,7 +239,7 @@ export class AIXParser {
           currentPath.pop();
         }
         
-        currentObj = currentPath.length > 0 ? currentPath[currentPath.length - 1].obj : result;
+        currentObj = currentPath.length > 0 ? currentPath[currentPath.length - 1].newObj : result;
 
         if (value === '' || value === '|' || value === '>') {
           // New object or multi-line string
@@ -213,13 +249,18 @@ export class AIXParser {
             inMultiline = true;
             currentObj[key] = '';
           } else {
+ update/architecture-audit-identity-vla-12899353967995595920
             // It could be an object or an array, so we init with an empty object.
             // If it's an array, it will be replaced by [] in the array logic.
             const newObj = {};
+
+            let newObj = {};
+ main
             currentObj[key] = newObj;
-            currentPath.push({ indent, obj: newObj, key });
+            currentPath.push({ indent, obj: currentObj, key, newObj });
           }
         } else {
+          // It's a property on the last key if we are properly indented
           currentObj[key] = this.parseYAMLValue(value);
         }
       }
@@ -339,7 +380,7 @@ export class AIXParser {
    */
   validateStructure(data) {
     // Required sections
-    const requiredSections = ['meta', 'persona', 'security'];
+    const requiredSections = ['meta', 'persona', 'security', 'identity_layer'];
     for (const section of requiredSections) {
       if (!data[section]) {
         this.errors.push({
@@ -379,13 +420,13 @@ export class AIXParser {
       }
     }
 
-    // Validate UUID format
-    if (meta.id && !this.isValidUUID(meta.id)) {
+    // Validate ID format
+    if (meta.id && !this.isValidID(meta.id)) {
       this.errors.push({
-        code: 'INVALID_UUID',
+        code: 'INVALID_ID',
         section: 'meta',
         field: 'id',
-        message: 'Invalid UUID format'
+        message: 'Invalid ID format'
       });
     }
 
@@ -406,6 +447,50 @@ export class AIXParser {
         section: 'meta',
         field: 'version',
         message: 'Invalid semantic version format'
+      });
+    }
+  }
+
+  /**
+   * Validate identity layer section
+   */
+  validateIdentityLayer(identity_layer) {
+    const required = ['id', 'authority', 'issuedAt'];
+    for (const field of required) {
+      if (!identity_layer[field]) {
+        this.errors.push({
+          code: 'MISSING_FIELD',
+          section: 'identity_layer',
+          field,
+          message: `Required field 'identity_layer.${field}' is missing`
+        });
+      }
+    }
+
+    if (identity_layer.authority && identity_layer.authority !== 'axiomid.app') {
+      this.errors.push({
+        code: 'INVALID_AUTHORITY',
+        section: 'identity_layer',
+        field: 'authority',
+        message: 'Authority must be axiomid.app'
+      });
+    }
+
+    if (identity_layer.id && !this.isValidID(identity_layer.id)) {
+      this.errors.push({
+        code: 'INVALID_ID',
+        section: 'identity_layer',
+        field: 'id',
+        message: 'Invalid ID format'
+      });
+    }
+
+    if (identity_layer.issuedAt && !this.isValidISO8601(identity_layer.issuedAt)) {
+      this.errors.push({
+        code: 'INVALID_TIMESTAMP',
+        section: 'identity_layer',
+        field: 'issuedAt',
+        message: 'Invalid ISO 8601 timestamp'
       });
     }
   }
@@ -533,6 +618,7 @@ export class AIXParser {
         });
       }
     }
+
   }
 
   /**
@@ -623,6 +709,18 @@ export class AIXParser {
    * Validate memory section
    */
   validateMemory(memory) {
+    const validMemoryTypes = ['episodic', 'semantic', 'procedural'];
+    for (const key of Object.keys(memory)) {
+      if (!validMemoryTypes.includes(key)) {
+        this.errors.push({
+          code: 'INVALID_MEMORY_TYPE',
+          section: 'memory',
+          field: key,
+          message: `Memory type must be one of: ${validMemoryTypes.join(', ')}`
+        });
+      }
+    }
+
     if (memory.semantic && memory.semantic.similarity_threshold !== undefined) {
       const threshold = memory.semantic.similarity_threshold;
       if (threshold < 0 || threshold > 1) {
@@ -865,9 +963,9 @@ export class AIXParser {
   /**
    * Validation helpers
    */
-  isValidUUID(uuid) {
-    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return regex.test(uuid);
+  isValidID(id) {
+    const regex = /^(did:axiom:(axiomid\.app:)?[a-zA-Z0-9._\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
+    return regex.test(id);
   }
 
   isValidISO8601(timestamp) {
