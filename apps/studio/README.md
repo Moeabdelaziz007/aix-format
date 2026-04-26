@@ -1,7 +1,7 @@
-# 🌐 Sovereign Pi Agents Studio & AIX Format
+# 🌐 Sovereign Pi Agents Studio
 
 <div align="center">
-  <img src="./apps/studio/public/globe.svg" width="120" alt="Logo"/>
+  <img src="./public/globe.svg" width="120" alt="Logo"/>
   <h3>The Global Marketplace for Autonomous AI Agents</h3>
   <p>Powered by <b>AIX (Artificial Intelligence eXchange)</b> format and secured by <b>Pi Network KYC</b>.</p>
 </div>
@@ -55,12 +55,8 @@ This repository uses npm workspaces (`apps/studio` and `core/`).
 - Node.js >= 18.0.0
 - Pi Browser (for full authentication testing)
 
-### Installation
+### Run Studio Development Server
 ```bash
-# Install dependencies for both core and studio
-npm install
-
-# Run the Studio development server
 npm run dev --prefix apps/studio
 ```
 
