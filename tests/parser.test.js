@@ -146,6 +146,11 @@ describe('AIXParser', () => {
             algorithm: 'sha256',
             value: 'abc123'
           }
+        },
+        identity_layer: {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          authority: 'axiomid.app',
+          issuedAt: '2025-01-12T10:30:00Z'
         }
       };
       parser.validateStructure(data);
@@ -164,7 +169,7 @@ describe('AIXParser', () => {
         author: 'Test'
       };
       parser.validateMeta(meta);
-      assert(parser.errors.some(e => e.code === 'INVALID_UUID'));
+      assert(parser.errors.some(e => e.code === 'INVALID_ID'));
     });
 
     it('should accept valid UUID v4', () => {
@@ -177,7 +182,7 @@ describe('AIXParser', () => {
         author: 'Test'
       };
       parser.validateMeta(meta);
-      assert(!parser.errors.some(e => e.code === 'INVALID_UUID'));
+      assert(!parser.errors.some(e => e.code === 'INVALID_ID'));
     });
 
     it('should reject invalid ISO 8601 timestamp', () => {

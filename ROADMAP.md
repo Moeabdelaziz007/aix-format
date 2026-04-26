@@ -29,6 +29,11 @@
 
 **The roadmap is driven by USERS, not hype.**
 
+## Weekly Health Check Updates
+- ✅ **AxiomID Integration**: Enforced `axiomid.app` as the root authority for Agent DIDs.
+- ✅ **Deep Architecture Audit**: Enforced `episodic`, `semantic`, and `procedural` classification.
+- ✅ **Cyber-Physical Alignment**: Integrated VLA payload requirements supporting `openpi`, `pi0.7`, and generic models.
+
 ---
 
 ## Current State: v0.2.0 (Day 2)
