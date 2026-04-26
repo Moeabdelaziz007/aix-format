@@ -172,24 +172,6 @@ export class AIXParser {
           currentPath.pop();
         }
         
- update/architecture-audit-identity-vla-12899353967995595920
-        if (currentPath.length > 0) {
-           const currentItem = currentPath[currentPath.length - 1];
-           const parentOfCurrentItem = currentPath.length > 1 ? currentPath[currentPath.length - 2].obj : result;
-           const lastKey = currentItem.key;
-
-           if (!Array.isArray(parentOfCurrentItem[lastKey])) {
-             parentOfCurrentItem[lastKey] = [];
-             // Update the reference in currentPath so it points to the array
-             currentItem.obj = parentOfCurrentItem[lastKey];
-           }
-
-           if (value.includes(':')) {
-             parentOfCurrentItem[lastKey].push(this.parseYAMLObject(value));
-           } else {
-             parentOfCurrentItem[lastKey].push(this.parseYAMLValue(value));
-           }
-=======
         const parent = currentPath.length > 0 ? currentPath[currentPath.length - 1].obj : result;
         const lastKey = currentPath.length > 0 ? currentPath[currentPath.length - 1].key : null;
         
@@ -249,13 +231,9 @@ export class AIXParser {
             inMultiline = true;
             currentObj[key] = '';
           } else {
- update/architecture-audit-identity-vla-12899353967995595920
             // It could be an object or an array, so we init with an empty object.
             // If it's an array, it will be replaced by [] in the array logic.
             const newObj = {};
-
-            let newObj = {};
- main
             currentObj[key] = newObj;
             currentPath.push({ indent, obj: currentObj, key, newObj });
           }
@@ -1015,6 +993,7 @@ export class AIXAgent {
   get pricing() { return this.data.pricing; }
   get security() { return this.data.security; }
   get identity_layer() { return this.data.identity_layer; }
+  get kyc_proof() { return this.data.kyc_proof; }
 
   /**
    * Get agent capabilities

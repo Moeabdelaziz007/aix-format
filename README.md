@@ -68,22 +68,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ---
 
-## 🌍 Vercel Deployment & Domain Claiming (Pi Network)
-
-To verify your domain with Pi Network (`axiomid.app` or your custom domain), follow these steps:
-
-1. **Push your code to GitHub.**
-2. Go to **Vercel** and click **"Add New Project"**.
-3. Import this repository.
-4. In the Vercel project configuration:
-   - **Framework Preset:** Next.js
-   - **Root Directory:** `apps/studio` ⚠️ *(Crucial Step)*
-5. Click **Deploy**.
-6. Once deployed, Vercel will give you a domain (e.g., `your-app.vercel.app`) or you can link your custom domain (`axiomid.app`).
-7. The required Pi Network Validation Key is already included in `apps/studio/public/validation-key.txt`.
-8. Go to the **Pi Developer Portal** in the Pi Browser.
-9. Enter your Vercel URL in the "App Domain" field.
-10. Click **Verify Domain**. It will successfully find the `validation-key.txt` file and verify your ownership!
 
 ---
 
@@ -94,5 +78,27 @@ To verify your domain with Pi Network (`axiomid.app` or your custom domain), fol
 
 *We are building the trust layer for the Machine Economy.*
 
+ jules-2333444999271751051-9f9ef3e9
+## 🔒 AIX Agent Runtime Validator (CLI)
+
+The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints.
+
+### Usage
+
+```bash
+node bin/aix-validate.js path/to/your-agent.aix [options]
+```
+
+### Flags
+
+- `--strict-kyc`: **(Important)** Enforces that the agent is KYC-verified. Fails the validation if a valid `kyc_proof` is missing, or if the `identity_layer` DID is invalid. Also requires `meta.version` to be a `2.x.x` version.
+- `--security`: Verifies the SHA-256 checksum embedded in the `.aix` payload matches the actual file hash.
+- `--verbose`: Outputs deep inspection data (capabilities, APIs, MCP servers, warnings).
+
+### GitHub Actions
+
+A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
+=======
 ## 📄 Current Status
 ✅ **RFC v0.1 published**: [#9](https://github.com/Moeabdelaziz007/aix-format/issues/9)
+ main

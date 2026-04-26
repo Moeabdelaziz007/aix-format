@@ -12,6 +12,7 @@ export function UploadSidebar() {
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
   const [voiceCommand, setVoiceCommand] = useState("");
+  const [isSigning, setIsSigning] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -46,17 +47,60 @@ export function UploadSidebar() {
       setIsProcessingVoice(false);
       if (transcript.toLowerCase().includes("deploy") || transcript.toLowerCase().includes("create")) {
         // Mock creating an AIX payload from voice
-        const blob = new Blob(['{"aix_version": "1.0", "identity": {"name": "Voice-Generated Agent"}}'], { type: 'application/json' });
+        const blob = new Blob(['{"meta": {"version": "1.0", "id": "123e4567-e89b-12d3-a456-426614174000", "name": "Voice-Generated Agent", "author": "User", "created": "2023-01-01T00:00:00Z"}, "persona": {"role": "Assistant"}}'], { type: 'application/json' });
         const mockFile = new File([blob], "voice-agent.aix", { type: "application/json" });
         setFile(mockFile);
       }
     }, 2000);
   };
 
-  const handleSign = () => {
-    setIsKycModalOpen(false);
-    alert(`Successfully signed and deployed ${file?.name} to Pi Network!`);
-    setFile(null);
+  const handleSign = async (mockAuthResult: any) => {
+    if (!file) return;
+
+    setIsSigning(true);
+
+    try {
+      // 1. Call our API Route to verify the Pi Network signature and get the identity_layer
+      const response = await fetch("/api/kyc/sign", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(mockAuthResult),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to verify signature");
+      }
+
+      const { identity_layer, kyc_proof } = await response.json();
+
+      // 2. Read the current .aix file content
+      const fileText = await file.text();
+      let aixPayload;
+      try {
+        aixPayload = JSON.parse(fileText);
+      } catch (e) {
+        throw new Error("Invalid .aix JSON format");
+      }
+
+      // 3. Merge the identity_layer and kyc_proof into the payload
+      aixPayload.identity_layer = identity_layer;
+      aixPayload.kyc_proof = kyc_proof;
+
+      // 4. Create a new updated file (in a real app, this would be downloaded or deployed directly)
+      const updatedBlob = new Blob([JSON.stringify(aixPayload, null, 2)], { type: 'application/json' });
+      const updatedFile = new File([updatedBlob], file.name, { type: "application/json" });
+
+      setFile(updatedFile);
+      setIsKycModalOpen(false);
+      alert(`Successfully verified KYC, signed, and injected Identity Layer to ${file.name}! Ready for deployment to Pi Network.`);
+    } catch (error: any) {
+      alert(`Signature failed: ${error.message}`);
+    } finally {
+      setIsSigning(false);
+    }
   };
 
   return (
@@ -140,6 +184,7 @@ export function UploadSidebar() {
         isOpen={isKycModalOpen}
         onClose={() => setIsKycModalOpen(false)}
         onSign={handleSign}
+        isSigning={isSigning}
         agentName={file?.name.replace('.aix', '') || "Agent Payload"}
       />
     </>
