@@ -6,6 +6,30 @@ import nacl from 'tweetnacl';
 import naclUtil from 'tweetnacl-util';
 
 describe('PiKycAdapter Unit Tests', () => {
+  it('generates VLA device registry if provided in Pi auth result', () => {
+    const keypair = nacl.sign.keyPair();
+    const mockUid = 'vla_user';
+    const mockAccessToken = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.vlatoken';
+    const messageUint8 = naclUtil.decodeUTF8(mockAccessToken);
+    const signatureUint8 = nacl.sign.detached(messageUint8, keypair.secretKey);
+
+    const authResult = {
+      user: { uid: mockUid },
+      accessToken: mockAccessToken,
+      signature: naclUtil.encodeBase64(signatureUint8),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey),
+      vlaDevice: {
+        adapter: 'openpi',
+        id: 'hw_998877'
+      }
+    };
+
+    const result = PiKycAdapter.generateIdentity(authResult);
+    assert.ok(result.kyc_proof.vla_device_registry);
+    assert.strictEqual(result.kyc_proof.vla_device_registry.adapter, 'openpi');
+    assert.strictEqual(result.kyc_proof.vla_device_registry.hardware_id, 'hw_998877');
+  });
+
   it('generates valid DID and identity layer from valid Pi auth result', () => {
     // 1. Generate a mock keypair
     const keypair = nacl.sign.keyPair();

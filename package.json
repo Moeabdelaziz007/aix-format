@@ -74,6 +74,7 @@
     "apps/*"
   ],
   "dependencies": {
+    "js-yaml": "^4.1.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   }
