@@ -203,8 +203,8 @@
         "temperature": {
           "type": "number",
           "description": "Sampling temperature",
-          "minimum": 0,
-          "maximum": 2
+          "minimum": 0.0,
+          "maximum": 2.0
         },
         "context_window": {
           "type": "integer",
@@ -497,8 +497,8 @@
             },
             "similarity_threshold": {
               "type": "number",
-              "minimum": 0,
-              "maximum": 1
+              "minimum": 0.0,
+              "maximum": 1.0
             },
             "max_results": {
               "type": "integer",
@@ -928,8 +928,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique Axiom identifier enforcing did:axiom:axiomid.app:<id> format.",
-          "pattern": "^did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+$"
+          "description": "Unique Axiom identifier (UUID v4 or DID format).",
+          "pattern": "^(did:axiom:(axiomid\\.app:)?[a-zA-Z0-9._\\\\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$"
         },
         "authority": {
           "type": "string",
@@ -1006,43 +1006,6 @@
               "description": "JSON canonicalization scheme used before signing."
             }
           }
-        }
-      }
-    },
-    "live_voice": {
-      "type": "object",
-      "description": "Live Voice Models integration for human-like conversational experiences.",
-      "required": [
-        "enabled",
-        "provider"
-      ],
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": false
-        },
-        "provider": {
-          "type": "string",
-          "enum": [
-            "openai-realtime",
-            "hume",
-            "elevenlabs",
-            "generic"
-          ],
-          "description": "The live voice model provider."
-        },
-        "voice_id": {
-          "type": "string",
-          "description": "The specific voice profile or identifier to use."
-        },
-        "latency_mode": {
-          "type": "string",
-          "enum": [
-            "ultra_low",
-            "standard",
-            "high_quality"
-          ],
-          "default": "standard"
         }
       }
     }

@@ -53,20 +53,13 @@ export class PiKycAdapter {
       }
     };
 
-        const kyc_proof = {
+    const kyc_proof = {
       provider: "pi_network",
       uid_hash: uidHash,
       verified_at: timestamp,
       access_token_hash: accessTokenHash
     };
 
-    if (piAuthResult.vlaDevice) {
-      kyc_proof.vla_device_registry = {
-        adapter: piAuthResult.vlaDevice.adapter || 'generic',
-        hardware_id: piAuthResult.vlaDevice.id || 'unknown'
-      };
-    }
-
-return { identity_layer, kyc_proof };
+    return { identity_layer, kyc_proof };
   }
 }
