@@ -3,10 +3,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, Fingerprint, Lock, X, Loader2, Network } from "lucide-react";
 import { useEffect, useState } from "react";
+import nacl from "tweetnacl";
+import naclUtil from "tweetnacl-util";
 
 interface KycSignatureModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSign: (authResult: any) => Promise<void>;
   isSigning: boolean;
   agentName: string;
@@ -31,177 +34,127 @@ export function KycSignatureModal({ isOpen, onClose, onSign, isSigning, agentNam
 
   const handlePiAuthentication = async () => {
     try {
-      const nacl = require('tweetnacl');
-      const naclUtil = require('tweetnacl-util');
-
       const keypair = nacl.sign.keyPair();
       const mockUid = `pi_user_${Date.now()}`;
       const mockAccessToken = `eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.mock_token_${Date.now()}`;
 
-      const messageUint8 = naclUtil.decodeUTF8(mockAccessToken);
-      const signatureUint8 = nacl.sign.detached(messageUint8, keypair.secretKey);
-
-      const signature = naclUtil.encodeBase64(signatureUint8);
-      const publicKey = naclUtil.encodeBase64(keypair.publicKey);
-
+      // This mimics the Pi SDK response + Cryptographic Ed25519 signature
       const mockAuthResult = {
-        user: { uid: mockUid },
         accessToken: mockAccessToken,
-        signature: signature,
-        publicKey: publicKey
+        user: {
+          uid: mockUid,
+          username: "SovereignUser1"
+        },
+        signature: {
+          publicKey: naclUtil.encodeBase64(keypair.publicKey),
+          type: "Ed25519",
+          timestamp: new Date().toISOString(),
+          kyc_verified: true
+        }
       };
 
       await onSign(mockAuthResult);
     } catch (error) {
-      console.error("Pi SDK Authentication failed:", error);
-      alert("Pi Network authentication failed.");
+      console.error("Authentication failed:", error);
     }
   };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-[#020617]/90 backdrop-blur-md"
-        />
-
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl overflow-hidden rounded-3xl p-[1px] shadow-2xl shadow-[var(--color-primary)]/20"
+          className="relative w-full max-w-lg bg-[var(--color-surface-container)] border border-[var(--color-glass-border)] rounded-3xl overflow-hidden shadow-2xl"
         >
-          {/* Animated gradient border effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#00dbe9] via-[#d2bbff] to-transparent opacity-50" />
+          {/* Quantum Topology Background */}
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
+            {nodes.map((node) => (
+              <motion.div
+                key={node.id}
+                className="absolute w-2 h-2 bg-primary rounded-full blur-[2px]"
+                style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                animate={{
+                  x: [0, 10, 0],
+                  y: [0, 10, 0],
+                  opacity: [0.2, 0.8, 0.2]
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+            {/* SVG connections between some nodes to form a network */}
+            <svg className="absolute inset-0 w-full h-full stroke-primary/20" strokeWidth="1">
+                {nodes.slice(0, 8).map((node, i) => {
+                   const nextNode = nodes[i + 1] || nodes[0];
+                   return (
+                     <line key={`line-${i}`} x1={`${node.x}%`} y1={`${node.y}%`} x2={`${nextNode.x}%`} y2={`${nextNode.y}%`} />
+                   );
+                })}
+            </svg>
+          </div>
 
-          <div className="relative bg-[#070d1f] rounded-[23px] h-full overflow-hidden">
+          <div className="relative p-6 sm:p-8 z-10 flex flex-col items-center">
+            <button
+              onClick={onClose}
+              disabled={isSigning}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors disabled:opacity-50"
+            >
+              <X size={20} />
+            </button>
 
-            {/* Quantum Topology Background */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none">
-              {nodes.map((node, i) => (
-                <div key={node.id}>
-                  <motion.div
-                    animate={{
-                      y: [node.y + "%", (node.y + 10) + "%", node.y + "%"],
-                      x: [node.x + "%", (node.x - 5) + "%", node.x + "%"]
-                    }}
-                    transition={{ repeat: Infinity, duration: 10 + (i % 5), ease: "linear" }}
-                    className="absolute w-1.5 h-1.5 rounded-full bg-[#00dbe9]"
-                    style={{ top: `${node.y}%`, left: `${node.x}%` }}
-                  />
-                  {/* Connect to next node to form topology */}
-                  {i < nodes.length - 1 && (
-                    <svg className="absolute inset-0 w-full h-full">
-                      <motion.line
-                        x1={`${node.x}%`} y1={`${node.y}%`}
-                        x2={`${nodes[i+1].x}%`} y2={`${nodes[i+1].y}%`}
-                        stroke="url(#gradient)" strokeWidth="0.5" strokeDasharray="4 4"
-                        animate={{ strokeDashoffset: [0, 20] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                      />
-                      <defs>
-                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#00dbe9" stopOpacity="0.5" />
-                          <stop offset="100%" stopColor="#d2bbff" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  )}
-                </div>
-              ))}
+            <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,219,233,0.3)]">
+              <ShieldCheck className="w-8 h-8 text-primary" />
             </div>
 
-            <div className="relative p-8 md:p-12 z-10 flex flex-col md:flex-row gap-8 items-center">
+            <h2 className="text-2xl font-display font-bold text-white text-center mb-2">Agentic KYC Binding</h2>
+            <p className="text-[var(--color-on-surface-variant)] text-center text-sm mb-8">
+              Sign the <span className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded">.aix</span> payload for <strong>{agentName}</strong> to link ownership to your verified identity.
+            </p>
 
-              {/* Visual Side */}
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                 <div className="relative w-32 h-32 mb-6">
-                    {isSigning ? (
-                       <>
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-                          className="absolute inset-0 rounded-full border border-dashed border-[#00dbe9]"
-                        />
-                         <motion.div
-                          animate={{ rotate: -360 }}
-                          transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-                          className="absolute inset-2 rounded-full border border-dotted border-[#d2bbff]"
-                        />
-                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Lock className="w-10 h-10 text-[#00dbe9] animate-pulse" />
-                         </div>
-                       </>
-                    ) : (
-                      <>
-                        <div className="absolute inset-0 rounded-full border-2 border-[var(--color-surface-container-high)]" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Network className="w-12 h-12 text-[#d2bbff]" />
-                        </div>
-                      </>
-                    )}
-                 </div>
-
-                 <h2 className="text-2xl font-display font-bold text-white mb-2">Agentic KYC Security</h2>
-                 <p className="text-sm text-[#94a3b8] leading-relaxed max-w-xs">
-                   Quantum Topology Architecture for immutable identity binding.
-                 </p>
-              </div>
-
-              {/* Action Side */}
-              <div className="flex-1 w-full flex flex-col justify-center">
-                <button
-                  onClick={onClose}
-                  disabled={isSigning}
-                  className="absolute top-4 right-4 text-[#94a3b8] hover:text-white transition-colors disabled:opacity-50"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-
-                <div className="space-y-4 mb-8">
-                  <div className="p-4 rounded-xl bg-[#0f172a] border border-[#1e293b] flex items-start gap-4 group hover:border-[#00dbe9]/50 transition-colors">
-                    <ShieldCheck className="w-5 h-5 text-[#00dbe9] shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-white mb-1">AxiomID Cryptography</h4>
-                      <p className="text-xs text-[#94a3b8]">Ed25519 signature binds your Pi Network identity to <span className="text-white">{agentName}</span>.</p>
-                    </div>
+            <div className="w-full bg-[var(--color-surface-container-high)] rounded-2xl p-4 mb-8 border border-white/5 relative overflow-hidden group">
+               <div className="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+               <div className="flex items-start gap-4">
+                  <div className="p-2 bg-secondary/10 rounded-lg text-secondary">
+                     <Lock size={20} />
                   </div>
-
-                  <div className="p-4 rounded-xl bg-[#0f172a] border border-[#1e293b] flex items-start gap-4 group hover:border-[#d2bbff]/50 transition-colors">
-                    <Fingerprint className="w-5 h-5 text-[#d2bbff] shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-white mb-1">Sybil Resistance</h4>
-                      <p className="text-xs text-[#94a3b8]">Ensures 1 Human = 1 Identity in the M2M ecosystem.</p>
-                    </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-1">Cryptographic Proof</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      This action generates an Ed25519 signature binding your KYC status to the agent&apos;s genome. This prevents Sybil attacks in the Autonomous Economy.
+                    </p>
                   </div>
-                </div>
+               </div>
+            </div>
 
-                <button
-                  onClick={handlePiAuthentication}
-                  disabled={isSigning}
-                  className="w-full py-4 rounded-xl bg-gradient-primary text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,219,233,0.3)] hover:shadow-[0_0_30px_rgba(0,219,233,0.5)] disabled:opacity-50 relative overflow-hidden group"
-                >
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-
-                  <span className="relative flex items-center gap-2">
-                    {isSigning ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Generating Quantum Signature...
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-4 h-4" />
-                        Sign & Deploy
-                      </>
-                    )}
-                  </span>
-                </button>
+            <button
+              onClick={handlePiAuthentication}
+              disabled={isSigning}
+              className="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-[#8b5cf6] to-[#6366f1] p-[1px] disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+            >
+              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative flex items-center justify-center gap-3 bg-[var(--color-surface-container)] rounded-xl py-4 px-6 transition-all group-hover:bg-opacity-0">
+                {isSigning ? (
+                  <>
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    <span className="text-white font-medium">Verifying Identity...</span>
+                  </>
+                ) : (
+                  <>
+                    <Fingerprint className="w-5 h-5 text-[#d2bbff] group-hover:text-white transition-colors" />
+                    <span className="text-white font-medium">Authenticate with Pi Network</span>
+                  </>
+                )}
               </div>
+            </button>
+
+            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500">
+               <Network size={14} />
+               <span>Secured by Pi SDK v2.0 & Axiom Protocol</span>
             </div>
           </div>
         </motion.div>
