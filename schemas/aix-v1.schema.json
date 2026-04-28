@@ -474,7 +474,7 @@
           "properties": {
             "adapter": {
               "type": "string",
-              "enum": ["openpi", "pi0.7", "generic"],
+              "enum": ["openpi", "π0.7", "generic"],
               "description": "Identifies which VLA runtime adapter should process this payload."
             },
             "vision": {
@@ -632,8 +632,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique Axiom identifier (UUID v4 or DID format).",
-          "pattern": "^(did:axiom:(axiomid\\.app:)?[a-zA-Z0-9._\\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$"
+          "description": "Unique Axiom identifier enforcing did:axiom:axiomid.app:<id> format.",
+          "pattern": "^did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+$"
         },
         "authority": {
           "type": "string",

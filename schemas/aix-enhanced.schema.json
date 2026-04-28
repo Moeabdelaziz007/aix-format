@@ -677,7 +677,7 @@
               "type": "string",
               "enum": [
                 "openpi",
-                "pi0.7",
+                "π0.7",
                 "generic"
               ],
               "description": "Identifies which VLA runtime adapter should process this payload."

@@ -132,7 +132,7 @@ describe('AIXParser', () => {
       const data = {
         meta: {
           version: '1.0',
-          id: '550e8400-e29b-41d4-a716-446655440000',
+          id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           name: 'Test',
           created: '2025-01-12T10:30:00Z',
           author: 'Test Author'
@@ -148,7 +148,7 @@ describe('AIXParser', () => {
           }
         },
         identity_layer: {
-          id: '550e8400-e29b-41d4-a716-446655440000',
+          id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           authority: 'axiomid.app',
           issuedAt: '2025-01-12T10:30:00Z'
         }
@@ -172,11 +172,11 @@ describe('AIXParser', () => {
       assert(parser.errors.some(e => e.code === 'INVALID_ID'));
     });
 
-    it('should accept valid UUID v4', () => {
+    it('should accept valid did:axiom format', () => {
       const parser = new AIXParser();
       const meta = {
         version: '1.0',
-        id: '550e8400-e29b-41d4-a716-446655440000',
+        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
         created: '2025-01-12T10:30:00Z',
         author: 'Test'
@@ -189,7 +189,7 @@ describe('AIXParser', () => {
       const parser = new AIXParser();
       const meta = {
         version: '1.0',
-        id: '550e8400-e29b-41d4-a716-446655440000',
+        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
         created: 'invalid-date',
         author: 'Test'
@@ -202,7 +202,7 @@ describe('AIXParser', () => {
       const parser = new AIXParser();
       const meta = {
         version: '1.0',
-        id: '550e8400-e29b-41d4-a716-446655440000',
+        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
         created: '2025-01-12T10:30:00Z',
         author: 'Test'
@@ -215,7 +215,7 @@ describe('AIXParser', () => {
       const parser = new AIXParser();
       const meta = {
         version: 'invalid',
-        id: '550e8400-e29b-41d4-a716-446655440000',
+        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
         name: 'Test',
         created: '2025-01-12T10:30:00Z',
         author: 'Test'
@@ -231,7 +231,7 @@ describe('AIXParser', () => {
       for (const version of validVersions) {
         const meta = {
           version,
-          id: '550e8400-e29b-41d4-a716-446655440000',
+          id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           name: 'Test',
           created: '2025-01-12T10:30:00Z',
           author: 'Test'
@@ -334,7 +334,7 @@ describe('AIXParser', () => {
   describe('Validation - Identity Layer', () => {
     it('should reject missing required fields in identity_layer', () => {
       const parser = new AIXParser();
-      const identity_layer = { id: 'did:axiom:test' }; // Missing authority and issuedAt
+      const identity_layer = { id: 'did:axiom:axiomid.app:test' }; // Missing authority and issuedAt
       parser.validateIdentityLayer(identity_layer);
       assert(parser.errors.some(e =>
         e.code === 'MISSING_FIELD' && e.field === 'authority'
@@ -347,7 +347,7 @@ describe('AIXParser', () => {
     it('should reject invalid authority in identity_layer', () => {
       const parser = new AIXParser();
       const identity_layer = {
-        id: 'did:axiom:test',
+        id: 'did:axiom:axiomid.app:test',
         authority: 'invalid.app',
         issuedAt: '2026-04-24T10:30:00Z'
       };
@@ -420,7 +420,7 @@ describe('AIXParser', () => {
       const data = {
         meta: {
           version: '1.0',
-          id: '550e8400-e29b-41d4-a716-446655440000',
+          id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
           name: 'Test Agent',
           created: '2025-01-12T10:30:00Z',
           author: 'Test'
@@ -448,7 +448,7 @@ describe('AIXParser', () => {
 
     it('should get agent capabilities', () => {
       const data = {
-        meta: { version: '1.0', id: '550e8400-e29b-41d4-a716-446655440000', 
+        meta: { version: '1.0', id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
                 name: 'Test', created: '2025-01-12T10:30:00Z', author: 'Test' },
         persona: { role: 'test', instructions: 'test' },
         skills: [
@@ -471,7 +471,7 @@ describe('AIXParser', () => {
 
     it('should check authorization', () => {
       const data = {
-        meta: { version: '1.0', id: '550e8400-e29b-41d4-a716-446655440000',
+        meta: { version: '1.0', id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
                 name: 'Test', created: '2025-01-12T10:30:00Z', author: 'Test' },
         persona: { role: 'test', instructions: 'test' },
         security: {
@@ -489,7 +489,7 @@ describe('AIXParser', () => {
 
     it('should return formatted string', () => {
       const data = {
-        meta: { version: '1.0', id: '550e8400-e29b-41d4-a716-446655440000',
+        meta: { version: '1.0', id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
                 name: 'Test Agent', created: '2025-01-12T10:30:00Z', author: 'Test' },
         persona: { role: 'test', instructions: 'test' },
         security: { checksum: { algorithm: 'sha256', value: 'abc123' } }

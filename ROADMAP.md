@@ -39,7 +39,7 @@
 ## Current State: v0.2.0 (Day 2)
 
 ### 🌟 Weekly Deep Architecture Audit
-* **Agentic Vision & Steerability**: Integrated Vision-Language-Action (VLA) pipelines preparing for `openpi` and `π0.7` robotics runtimes.
+* **Agentic Vision & Steerability**: Integrated Vision-Language-Action (VLA) pipelines preparing for `openpi` and `π0.7` robotics runtimes. Adapted architecture based on the latest industry patterns and breakthroughs in steerability.
 * **AxiomID Integration**: Transitioning to `did:axiom:axiomid.app:<id>` as the Root Authority for Agent DIDs for secure, cryptographic verification.
 
 

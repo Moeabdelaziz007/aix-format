@@ -747,7 +747,7 @@ export class AIXParser {
           message: "Cyber-physical agent requires a VLA adapter in requirements.vla"
         });
       } else {
-        const allowedAdapters = ['openpi', 'pi0.7', 'generic'];
+        const allowedAdapters = ['openpi', 'π0.7', 'generic'];
         if (!allowedAdapters.includes(requirements.vla.adapter)) {
           this.errors.push({
             code: 'INVALID_VALUE',
@@ -960,7 +960,7 @@ export class AIXParser {
    * Validation helpers
    */
   isValidID(id) {
-    const regex = /^(did:axiom:(axiomid\.app:)?[a-zA-Z0-9._\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
+    const regex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
     return regex.test(id);
   }
 

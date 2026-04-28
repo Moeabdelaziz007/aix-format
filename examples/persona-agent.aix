@@ -1,6 +1,6 @@
 meta:
   version: '1.0'
-  id: 550e8400-e29b-41d4-a716-446655440001
+  id: did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440001
   name: Customer Service Bot
   description: Empathetic AI agent for handling customer inquiries and support
   created: '2025-01-12T10:30:00Z'
