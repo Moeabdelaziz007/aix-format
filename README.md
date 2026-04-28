@@ -146,5 +146,6 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 
 - **Moe Abdelaziz** (@Moeabdelaziz007) - Visionary, Protocol Architect & Pi Integration Lead.
 - **Jules (AI Engineer)** - Engineering Partner & UI/UX Architect.
+- **Antigravity IDE Agent** - Core Engineering Partner & Collaborator.
 
 *We are building the trust layer for the Machine Economy. (نحن نبني طبقة الثقة لاقتصاد الآلات.)*
