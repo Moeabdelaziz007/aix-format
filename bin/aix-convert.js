@@ -343,7 +343,8 @@ function removeSecuritySection(content) {
   let securityIndent = 0;
   
   for (const line of lines) {
-    if (line.trim().startsWith('security:') || line.trim().startsWith('"security"') || line.trim().startsWith('[security]')) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('security:') || trimmed.startsWith('"security"') || trimmed.startsWith('[security]')) {
       inSecurity = true;
       securityIndent = line.search(/\S/);
       continue;
@@ -352,7 +353,7 @@ function removeSecuritySection(content) {
     if (inSecurity) {
       const currentIndent = line.search(/\S/);
       // Check if we're back to top-level
-      if (currentIndent !== -1 && currentIndent <= securityIndent && line.trim() !== '') {
+      if (currentIndent !== -1 && currentIndent <= securityIndent && trimmed !== '') {
         inSecurity = false;
       }
     }

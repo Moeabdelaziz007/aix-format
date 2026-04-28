@@ -771,8 +771,9 @@ export class AIXParser {
     let securityIndent = 0;
 
     for (const line of lines) {
+      const trimmed = line.trim();
       // Detect security section start
-      if (line.trim().startsWith('security:')) {
+      if (trimmed.startsWith('security:')) {
         inSecurity = true;
         securityIndent = line.search(/\S/);
         continue;
@@ -781,7 +782,7 @@ export class AIXParser {
       // Check if we've reached another top-level section
       if (inSecurity) {
         const currentIndent = line.search(/\S/);
-        if (currentIndent !== -1 && currentIndent <= securityIndent && line.trim() !== '') {
+        if (currentIndent !== -1 && currentIndent <= securityIndent && trimmed !== '') {
           inSecurity = false;
         }
       }
