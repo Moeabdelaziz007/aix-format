@@ -6,6 +6,8 @@ import { X, ShieldCheck, Fingerprint, KeyRound, Check, Loader2, Network, Lock } 
 import { useIdentityStore } from "@/store/identity";
 import { useSignalStore } from "@/store/signals";
 import { cn } from "@/lib/utils";
+import nacl from "tweetnacl";
+import naclUtil from "tweetnacl-util";
 
 interface KycSignatureModalProps {
   open: boolean;
@@ -48,14 +50,32 @@ export function KycSignatureModal({ open, onClose }: KycSignatureModalProps) {
 
     // Step 1: Generate DID
     setCurrentStep(1);
-    const mockDid = "did:axiom:axiomid.app:1234567890abcdef";
+    const keypair = nacl.sign.keyPair();
+    const mockDid = `did:axiom:axiomid.app:${naclUtil.encodeBase64(keypair.publicKey).slice(0, 16)}`;
     setDid(mockDid);
 
     // Step 2: Sign
     setCurrentStep(2);
     await new Promise((r) => setTimeout(r, 1000));
+    
+    const mockUid = `pi_user_${Date.now()}`;
+    const mockAccessToken = `eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.mock_token_${Date.now()}`;
 
-    setKyc("verified", "mock-signature-jws");
+    const mockAuthResult = {
+      accessToken: mockAccessToken,
+      user: {
+        uid: mockUid,
+        username: "SovereignUser1"
+      },
+      signature: {
+        publicKey: naclUtil.encodeBase64(keypair.publicKey),
+        type: "Ed25519",
+        timestamp: new Date().toISOString(),
+        kyc_verified: true
+      }
+    };
+
+    setKyc("verified", JSON.stringify(mockAuthResult.signature));
 
     addSignal({
       kind: "success",
