@@ -13,6 +13,8 @@ The current phase establishes the **Sovereign AIX Format** as the canonical stan
 - [x] **Cryptographic Signatures**: Integrated `Ed25519` and `secp256k1` support within the Identity Layer.
 - [x] **Vision-Language-Action (VLA)**: Embedded generic `vla` capabilities to prepare the agent standard for robotics and physical runtimes (e.g., `openpi`, `π0.7`).
 - [x] **Automated Weekly Health Checks**: Ensuring protocol validity and structural integrity via GitHub Actions.
+- [x] **Sovereign Glassmorphism Studio**: A highly polished, Next.js-based web interface for managing, configuring, and signing agents via Pi Network KYC.
+- [x] **Advanced Cognitive Memory**: Implementation of Temporal Memory and Early Fusion within the schema.
 
 ---
 

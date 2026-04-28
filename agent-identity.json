@@ -1,0 +1,7 @@
+{
+  "did": "did:axiom:axiomid.app:jules",
+  "name": "Jules Sovereign Agent",
+  "version": "1.0.0",
+  "capabilities": ["code-generation", "self-healing", "aix-parsing"],
+  "signature_type": "ed25519"
+}

@@ -22,22 +22,32 @@
 export class AIXErrorHandler {
   constructor(config = {}) {
     this.circuitBreakers = new Map();  // Per-API circuit breakers
+    this.rateLimiters = new Map();     // Token bucket rate limiters
     this.config = {
       circuitBreaker: {
-        failureThreshold: 5,
-        successThreshold: 2,
-        timeoutSeconds: 60,
-        ...config.circuitBreaker
+        failureThreshold: config.circuitBreaker?.failureThreshold || 5,
+        successThreshold: config.circuitBreaker?.successThreshold || 2,
+        timeoutSeconds: config.circuitBreaker?.timeoutSeconds || 60,
       },
       defaultRetry: {
-        maxAttempts: 3,
-        strategy: 'exponential_backoff',
-        initialDelay: 1000,
-        maxDelay: 32000,
-        jitter: true,
-        ...config.defaultRetry
+        maxAttempts: config.defaultRetry?.maxAttempts || 3,
+        strategy: config.defaultRetry?.strategy || 'exponential_backoff',
+        initialDelay: config.defaultRetry?.initialDelay || 1000,
+        maxDelay: config.defaultRetry?.maxDelay || 32000,
+        jitter: config.defaultRetry?.jitter !== false
       }
     };
+  }
+
+  /**
+   * Get or create a rate limiter for a context
+   */
+  getRateLimiter(context) {
+    if (!this.rateLimiters.has(context)) {
+      // Default rate: 10 requests per second with capacity of 20
+      this.rateLimiters.set(context, new TokenBucket(20, 10));
+    }
+    return this.rateLimiters.get(context);
   }
   
   /**
@@ -494,6 +504,86 @@ export class TimeoutError extends Error {
     super(message);
     this.name = 'TimeoutError';
     this.timestamp = new Date().toISOString();
+  }
+}
+
+export class RateLimitError extends Error {
+  constructor(message, retryAfter) {
+    super(message);
+    this.name = 'RateLimitError';
+    this.retryAfter = retryAfter;
+    this.timestamp = new Date().toISOString();
+  }
+}
+
+/**
+ * Token Bucket Rate Limiter
+ * 
+ * Implements token bucket algorithm for rate limiting.
+ */
+export class TokenBucket {
+  constructor(capacity, refillRate) {
+    this.capacity = capacity;          // Maximum tokens
+    this.tokens = capacity;            // Current tokens
+    this.refillRate = refillRate;      // Tokens per second
+    this.lastRefill = Date.now();
+  }
+  
+  /**
+   * Try to consume tokens
+   * 
+   * @param {number} tokens - Number of tokens to consume
+   * @returns {boolean} True if tokens were consumed
+   */
+  tryConsume(tokens = 1) {
+    this.refill();
+    
+    if (this.tokens >= tokens) {
+      this.tokens -= tokens;
+      return true;
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Refill tokens based on elapsed time
+   */
+  refill() {
+    const now = Date.now();
+    const elapsed = (now - this.lastRefill) / 1000;  // Convert to seconds
+    const tokensToAdd = elapsed * this.refillRate;
+    
+    this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);
+    this.lastRefill = now;
+  }
+  
+  /**
+   * Get wait time until token available
+   * 
+   * @returns {number} Wait time in milliseconds
+   */
+  getWaitTime() {
+    if (this.tokens >= 1) return 0;
+    
+    const tokensNeeded = 1 - this.tokens;
+    return (tokensNeeded / this.refillRate) * 1000;
+  }
+  
+  /**
+   * Get current state
+   * 
+   * @returns {Object} State information
+   */
+  getState() {
+    this.refill();  // Ensure tokens are up to date
+    
+    return {
+      tokens: this.tokens,
+      capacity: this.capacity,
+      refillRate: this.refillRate,
+      utilization: (1 - this.tokens / this.capacity) * 100
+    };
   }
 }
 
