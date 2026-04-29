@@ -19,7 +19,8 @@ import {
   AlertCircle,
   FileJson,
   FileCode,
-  Database
+  Database,
+  Activity
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
@@ -168,37 +169,54 @@ export default function AgentBuilderPage() {
     });
   };
 
-  const handleDeploy = async () => {
+  const handleExportAndSave = async () => {
     setIsDeploying(true);
     
-    // Simulate some "blockchain deployment" lag
-    await new Promise(r => setTimeout(r, 1500));
+    // Simulate some processing lag for effect
+    await new Promise(r => setTimeout(r, 1000));
     
     try {
-      const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      const agentId = `agent-${slug}-${Date.now().toString().slice(-4)}`;
+      const id = crypto.randomUUID();
+      const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unnamed-agent';
+      const agentId = `${slug}-${id.slice(0, 4)}`;
       
-      const agentRecord = {
+      // Calculate integrity hash of the final manifest
+      const integrityHash = await sha256Hex(manifestContent);
+      
+      // Build agent record
+      const record: AgentRecord = {
         id: agentId,
-        name: formData.meta.name,
-        role: formData.persona.role,
+        name: formData.meta.name || "Unnamed Agent",
+        role: formData.persona.role || "AI Assistant",
         createdAt: new Date().toISOString(),
         yaml: manifestContent,
-        did: formData.identity_layer.id,
-        kyc_tier: 'unverified' as const,
-        abom: formData.abom,
-        manifest: JSON.parse(JSON.stringify(formData)),
-        color: "#00dbe9",
-        status: 'online' as const,
-        successRate: 100,
-        tasksCompleted: 0
+        did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
+        kyc_tier: 'unverified',
+        abom: {
+          capabilities: formData.skills.map(s => s.name || "unnamed_skill"),
+          integrity_hash: integrityHash,
+          generated_by: "AIX Studio Builder",
+          timestamp: new Date().toISOString(),
+          model: {
+            provider: "axiom",
+            name: "sovereign-1"
+          },
+          governance: {
+            license: "MIT"
+          }
+        }
       };
 
-      saveAgent(agentRecord);
-      router.push(`/agents/${agentRecord.id}`);
+      saveAgent(record);
+      handleDownload(); // Trigger file download
+      
+      // Short delay to ensure download starts before navigation
+      setTimeout(() => {
+        router.push(`/agents/${record.id}`);
+      }, 500);
     } catch (e) {
-      console.error("Deployment failed", e);
-      alert("Failed to deploy agent locally.");
+      console.error("Export and Save failed", e);
+      alert("Failed to save agent locally.");
     } finally {
       setIsDeploying(false);
     }
@@ -386,7 +404,7 @@ export default function AgentBuilderPage() {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {formData.skills.map((skill, index) => (
+                          {formData.skills.map((skill: any, index: number) => (
                             <div key={index} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-3 relative group">
                               <button 
                                 onClick={() => removeSkill(index)}
@@ -562,16 +580,16 @@ export default function AgentBuilderPage() {
             <div className="mt-8 pt-6 border-t border-white/[0.05]">
               <button
                 className={`btn btn-primary-green-glow w-full ${isDeploying ? 'opacity-50 cursor-wait' : ''}`}
-                onClick={handleDeploy}
+                onClick={handleExportAndSave}
                 disabled={isDeploying}
               >
                 {isDeploying ? (
                   <span className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 animate-spin" /> Deploying...
+                    <Activity className="w-4 h-4 animate-spin" /> Processing...
                   </span>
                 ) : (
                   <>
-                    <Rocket className="w-4 h-4 mr-2" /> Validate & Deploy
+                    <Rocket className="w-4 h-4 mr-2" /> Export & Save Agent
                   </>
                 )}
               </button>

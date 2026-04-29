@@ -7,7 +7,8 @@ export interface AgentRecord {
   did?: string;
   kyc_tier?: 'unverified' | 'basic' | 'verified' | 'institutional';
   abom?: AbomRecord;
-  manifest: any; // The full parsed manifest object
+  // Extended fields for UI state (kept as optional to maintain compatibility with MISSION 9)
+  manifest?: any;
   color?: string;
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
