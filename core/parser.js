@@ -12,6 +12,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import yaml from 'js-yaml';
+import { AIXErrorHandler } from './error_handler.js';
 
 /**
  * AIXParser - Main parser class for AIX files
@@ -20,6 +21,7 @@ export class AIXParser {
   constructor() {
     this.errors = [];
     this.warnings = [];
+    this.errorHandler = new AIXErrorHandler();
   }
 
   /**
@@ -67,7 +69,7 @@ export class AIXParser {
         message: `Failed to parse ${format.toUpperCase()}: ${error.message}`,
         file: filePath
       });
-      throw new Error(`Parse failed: ${error.message}`);
+      throw this.createParseError('PARSE_ERROR', `Failed to parse ${format.toUpperCase()}: ${error.message}`, filePath, error);
     }
 
     // Validate structure
@@ -128,59 +130,41 @@ export class AIXParser {
    * Parse YAML content using js-yaml
    */
   parseYAML(content) {
-    return yaml.load(content);
+    return yaml.load(content, { schema: yaml.JSON_SCHEMA });
   }
 
   /**
    * Parse TOML content (simplified implementation)
    */
   parseTOML(content) {
-    const result = {};
-    const lines = content.split('\n');
-    let currentSection = result;
-    let currentSectionName = null;
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      
-      // Skip comments and empty lines
-      if (trimmed.startsWith('#') || trimmed === '') continue;
-
-      // Section header [section]
-      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-        currentSectionName = trimmed.slice(1, -1);
-        currentSection = result[currentSectionName] = {};
-        continue;
-      }
-
-      // Key-value pair
-      if (trimmed.includes('=')) {
-        const equalIndex = trimmed.indexOf('=');
-        const key = trimmed.substring(0, equalIndex).trim();
-        let value = trimmed.substring(equalIndex + 1).trim();
-
-        // Parse value
-        if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.slice(1, -1);
-        } else if (value.startsWith("'") && value.endsWith("'")) {
-          value = value.slice(1, -1);
-        } else if (value === 'true' || value === 'false') {
-          value = value === 'true';
-        } else if (!isNaN(value) && value !== '') {
-          value = Number(value);
-        } else if (value.startsWith('[') && value.endsWith(']')) {
-          try {
-            value = JSON.parse(value);
-          } catch {
-            // Keep as string
-          }
+    const yamlCompatible = content
+      .split('\n')
+      .map((line) => {
+        const trimmed = line.trim();
+        if (trimmed === '' || trimmed.startsWith('#')) return line;
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          return `${trimmed.slice(1, -1)}:`;
         }
+        const eq = line.indexOf('=');
+        if (eq === -1) return line;
+        return `${line.slice(0, eq)}:${line.slice(eq + 1)}`;
+      })
+      .join('\n');
 
-        currentSection[key] = value;
-      }
-    }
+    return yaml.load(yamlCompatible, { schema: yaml.JSON_SCHEMA });
+  }
 
-    return result;
+
+  createParseError(code, message, filePath, originalError) {
+    const formatted = this.errorHandler.formatError(
+      { status: 400, message, details: { filePath } },
+      'aix_parser'
+    );
+    const error = new Error(formatted.error.detail || message);
+    error.code = code;
+    error.file = filePath;
+    error.cause = originalError;
+    return error;
   }
 
   /**
