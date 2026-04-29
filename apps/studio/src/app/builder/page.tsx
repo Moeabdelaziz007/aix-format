@@ -20,7 +20,8 @@ import {
   FileJson,
   FileCode,
   Database,
-  Activity
+  Activity,
+  UserCheck
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
@@ -41,7 +42,8 @@ const STEPS = [
   { id: 2, name: "Persona", icon: <Cpu className="w-4 h-4" /> },
   { id: 3, name: "Skills", icon: <Zap className="w-4 h-4" /> },
   { id: 4, name: "Economics", icon: <Wallet className="w-4 h-4" /> },
-  { id: 5, name: "SBOM", icon: <Shield className="w-4 h-4" /> }
+  { id: 5, name: "SBOM", icon: <Shield className="w-4 h-4" /> },
+  { id: 6, name: "Identity", icon: <UserCheck className="w-4 h-4" /> }
 ];
 
 export default function AgentBuilderPage() {
@@ -77,7 +79,8 @@ export default function AgentBuilderPage() {
     identity_layer: {
       id: `did:axiom:axiomid.app:agent-temp`,
       authority: "axiomid.app",
-      issuedAt: new Date().toISOString()
+      issuedAt: new Date().toISOString(),
+      kyc_tier: "unverified" as const
     },
     economics: {
       pricing_model: "pay_per_call",
@@ -190,8 +193,9 @@ export default function AgentBuilderPage() {
         role: formData.persona.role || "AI Assistant",
         createdAt: new Date().toISOString(),
         yaml: manifestContent,
+        manifest: JSON.parse(JSON.stringify(formData)), // Save structured manifest
         did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
-        kyc_tier: 'unverified',
+        kyc_tier: formData.identity_layer.kyc_tier as any,
         abom: {
           capabilities: formData.skills.map(s => s.name || "unnamed_skill"),
           integrity_hash: integrityHash,
@@ -237,6 +241,16 @@ export default function AgentBuilderPage() {
       ...prev,
       abom: {
         ...prev.abom,
+        [field]: value
+      }
+    }));
+  };
+
+  const updateIdentity = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      identity_layer: {
+        ...prev.identity_layer,
         [field]: value
       }
     }));
@@ -568,6 +582,46 @@ export default function AgentBuilderPage() {
                           placeholder="e.g. langchain, openai, pinecone"
                           className="input"
                           onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
+                        />
+                      </div>
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-6">
+                        <div className="flex gap-3">
+                          <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                          <p className="text-xs text-emerald-300/80 leading-relaxed">
+                            Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {['unverified', 'basic', 'verified', 'institutional'].map((tier) => (
+                            <button
+                              key={tier}
+                              onClick={() => updateIdentity('kyc_tier', tier)}
+                              className={cn(
+                                "p-3 rounded-xl border text-left transition-all",
+                                formData.identity_layer.kyc_tier === tier
+                                  ? "bg-emerald-500/10 border-emerald-500/50 text-white"
+                                  : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
+                              )}
+                            >
+                              <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 pt-4">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">DID Authority</label>
+                        <input
+                          type="text"
+                          value={formData.identity_layer.authority}
+                          onChange={(e) => updateIdentity("authority", e.target.value)}
+                          className="input"
+                          placeholder="e.g. axiomid.app"
                         />
                       </div>
                     </div>

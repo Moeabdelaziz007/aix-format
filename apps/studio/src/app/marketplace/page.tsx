@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
@@ -8,6 +8,7 @@ import { ShoppingCart, Star, Shield, Zap, Search, Filter } from "lucide-react";
 import { AgentCard } from "@/components/studio/AgentCard";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
 import { mockAgents } from "@/lib/mock-agents";
+import { AgentRecord } from "@/lib/types";
 
 const tags = ["All", "research", "support", "coding", "robotics", "finance", "content"];
 
@@ -17,34 +18,21 @@ export default function MarketplacePage() {
   const [activeTag, setActiveTag] = useState("All");
   const [kycFilter, setKycFilter] = useState("All");
 
-  const allAgents = [
-    ...mockAgents.map(a => ({
-      ...a,
-      isMock: true,
-      id: a.id.toString(),
-      successRate: a.rating * 20,
-      tasksCompleted: a.reviews * 10
-    })),
-    ...localAgents.map(a => ({
-      id: a.id,
-      name: a.manifest.meta.name,
-      role: a.manifest.meta.role,
-      price: a.manifest.economics.pricing_model === 'free' ? '0' : '0.5',
-      status: a.status,
-      kyc: true,
-      color: a.color,
-      tags: a.manifest.skills.map(s => s.name.toLowerCase()),
-      description: a.manifest.meta.description,
-      successRate: a.successRate,
-      tasksCompleted: a.tasksCompleted,
-      isMock: false
-    }))
-  ];
+  const allAgents: AgentRecord[] = useMemo(() => [
+    ...mockAgents,
+    ...localAgents
+  ], [localAgents]);
 
   const filtered = allAgents.filter(a => {
-    const matchSearch = a.name.toLowerCase().includes(search.toLowerCase()) || a.description.toLowerCase().includes(search.toLowerCase());
-    const matchTag = activeTag === "All" || a.tags.includes(activeTag);
-    const matchKyc = kycFilter === "All" ? true : kycFilter === "Verified" ? a.kyc : !a.kyc;
+    const matchSearch = a.name.toLowerCase().includes(search.toLowerCase()) || 
+                       a.role.toLowerCase().includes(search.toLowerCase());
+    
+    const agentTags = a.abom?.capabilities || [];
+    const matchTag = activeTag === "All" || agentTags.some(t => t.toLowerCase() === activeTag.toLowerCase());
+    
+    const isVerified = a.kyc_tier && a.kyc_tier !== 'unverified';
+    const matchKyc = kycFilter === "All" ? true : kycFilter === "Verified" ? isVerified : !isVerified;
+    
     return matchSearch && matchTag && matchKyc;
   });
 
@@ -106,16 +94,7 @@ export default function MarketplacePage() {
         >
           {filtered.map(agent => (
             <motion.div key={agent.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-               <AgentCard
-                 id={agent.id}
-                 name={agent.name}
-                 role={agent.role}
-                 price={agent.price}
-                 status={agent.status as "online" | "offline" | "busy"}
-                 color={agent.color}
-                 successRate={agent.successRate}
-                 tasksCompleted={agent.tasksCompleted}
-               />
+               <AgentCard agent={agent} showDeploy />
             </motion.div>
           ))}
         </motion.div>

@@ -1,8 +1,112 @@
-export const mockAgents = [
-  { id: 1, name: "Research Analyst Pro", role: "Data Scientist", price: "0.5", rating: 4.9, reviews: 128, status: "online", kyc: true, color: "#6366f1", tags: ["research", "summarization"], description: "Advanced research agent with multi-source data aggregation and Pi KYC-verified identity." },
-  { id: 2, name: "Customer Support Bot", role: "Support Specialist", price: "0.1", rating: 4.7, reviews: 342, status: "online", kyc: true, color: "#8b5cf6", tags: ["support", "nlp"], description: "24/7 sovereign support agent with verified human oversight and Ed25519 signed payloads." },
-  { id: 3, name: "Code Review Agent", role: "Senior Engineer", price: "1.0", rating: 4.8, reviews: 89, status: "online", kyc: true, color: "#06b6d4", tags: ["coding", "security"], description: "Autonomous code review and security audit agent anchored to Pi Network identity." },
-  { id: 4, name: "Robotics Controller", role: "VLA Agent", price: "2.5", rating: 4.6, reviews: 41, status: "offline", kyc: true, color: "#f59e0b", tags: ["robotics", "openpi"], description: "Vision-Language-Action agent compatible with openpi and π0.7 — the only AIX VLA agent." },
-  { id: 5, name: "Finance Forecaster", role: "Quant Analyst", price: "0.8", rating: 4.5, reviews: 212, status: "online", kyc: true, color: "#10b981", tags: ["finance", "ml"], description: "Time-series forecasting agent with M2M micropayment settlement via Pi Protocol v23." },
-  { id: 6, name: "Content Generator", role: "Creative Writer", price: "0.3", rating: 4.4, reviews: 567, status: "online", kyc: false, color: "#ec4899", tags: ["content", "creative"], description: "Multi-lingual content agent — KYC verification pending. Use in sandbox mode only." },
+import { AgentRecord } from './types';
+
+export const mockAgents: AgentRecord[] = [
+  { 
+    id: "featured-001", 
+    name: "Research Analyst Pro", 
+    role: "Data Scientist", 
+    createdAt: new Date().toISOString(),
+    yaml: "",
+    status: "online", 
+    kyc_tier: "verified", 
+    color: "#6366f1", 
+    successRate: 98,
+    tasksCompleted: 1247,
+    abom: {
+      capabilities: ["research", "summarization"],
+      integrity_hash: "sha256:mock1",
+      generated_by: "AIX Studio",
+      timestamp: new Date().toISOString()
+    }
+  },
+  { 
+    id: "featured-002", 
+    name: "Customer Support Bot", 
+    role: "Support Specialist", 
+    createdAt: new Date().toISOString(),
+    yaml: "",
+    status: "online", 
+    kyc_tier: "verified", 
+    color: "#8b5cf6", 
+    successRate: 94,
+    tasksCompleted: 3420,
+    abom: {
+      capabilities: ["support", "nlp"],
+      integrity_hash: "sha256:mock2",
+      generated_by: "AIX Studio",
+      timestamp: new Date().toISOString()
+    }
+  },
+  { 
+    id: "featured-003", 
+    name: "Code Review Agent", 
+    role: "Senior Engineer", 
+    createdAt: new Date().toISOString(),
+    yaml: "",
+    status: "online", 
+    kyc_tier: "verified", 
+    color: "#06b6d4", 
+    successRate: 96,
+    tasksCompleted: 890,
+    abom: {
+      capabilities: ["coding", "security"],
+      integrity_hash: "sha256:mock3",
+      generated_by: "AIX Studio",
+      timestamp: new Date().toISOString()
+    }
+  },
+  { 
+    id: "featured-004", 
+    name: "Robotics Controller", 
+    role: "VLA Agent", 
+    createdAt: new Date().toISOString(),
+    yaml: "",
+    status: "offline", 
+    kyc_tier: "verified", 
+    color: "#f59e0b", 
+    successRate: 92,
+    tasksCompleted: 410,
+    abom: {
+      capabilities: ["robotics", "openpi"],
+      integrity_hash: "sha256:mock4",
+      generated_by: "AIX Studio",
+      timestamp: new Date().toISOString()
+    }
+  },
+  { 
+    id: "featured-005", 
+    name: "Finance Forecaster", 
+    role: "Quant Analyst", 
+    createdAt: new Date().toISOString(),
+    yaml: "",
+    status: "online", 
+    kyc_tier: "verified", 
+    color: "#10b981", 
+    successRate: 90,
+    tasksCompleted: 2120,
+    abom: {
+      capabilities: ["finance", "ml"],
+      integrity_hash: "sha256:mock5",
+      generated_by: "AIX Studio",
+      timestamp: new Date().toISOString()
+    }
+  },
+  { 
+    id: "featured-006", 
+    name: "Content Generator", 
+    role: "Creative Writer", 
+    createdAt: new Date().toISOString(),
+    yaml: "",
+    status: "online", 
+    kyc_tier: "unverified", 
+    color: "#ec4899", 
+    successRate: 88,
+    tasksCompleted: 5670,
+    abom: {
+      capabilities: ["content", "creative"],
+      integrity_hash: "sha256:mock6",
+      generated_by: "AIX Studio",
+      timestamp: new Date().toISOString()
+    }
+  },
 ];

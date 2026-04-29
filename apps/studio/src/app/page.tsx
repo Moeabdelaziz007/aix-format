@@ -55,18 +55,29 @@ export default function Home() {
                   agents.slice(0, 2).map(agent => (
                     <AgentCard 
                       key={agent.id}
-                      id={agent.id}
-                      name={agent.manifest.meta.name} 
-                      role={agent.manifest.meta.role} 
-                      price="0.5" 
-                      status={agent.status} 
-                      color={agent.color} 
+                      agent={agent}
                     />
                   ))
                 ) : (
                   <>
-                    <AgentCard id="1" name="Research Analyst Pro" role="Data Scientist" price="0.5" status="online" color="#6366f1" />
-                    <AgentCard id="2" name="Customer Support Bot" role="Support Specialist" price="0.1" status="offline" color="#8b5cf6" />
+                    <AgentCard agent={{ 
+                      id: "1", 
+                      name: "Research Analyst Pro", 
+                      role: "Data Scientist", 
+                      status: "online", 
+                      color: "#6366f1",
+                      createdAt: new Date().toISOString(),
+                      yaml: ""
+                    }} />
+                    <AgentCard agent={{ 
+                      id: "2", 
+                      name: "Customer Support Bot", 
+                      role: "Support Specialist", 
+                      status: "offline", 
+                      color: "#8b5cf6",
+                      createdAt: new Date().toISOString(),
+                      yaml: ""
+                    }} />
                   </>
                 )}
               </div>
