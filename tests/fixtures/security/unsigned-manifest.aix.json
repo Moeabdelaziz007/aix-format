@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+    "name": "Fixture Agent",
+    "created": "2026-01-12T10:30:00Z",
+    "author": "AIX QA"
+  },
+  "persona": {
+    "role": "assistant",
+    "instructions": "help"
+  },
+  "identity_layer": {
+    "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+    "authority": "axiomid.app",
+    "issuedAt": "2026-01-12T10:30:00Z"
+  },
+  "security": {}
+}

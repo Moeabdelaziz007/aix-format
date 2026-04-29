@@ -1,0 +1,31 @@
+name: 🔐 Security Signature Gate
+
+on:
+  pull_request:
+    paths:
+      - 'core/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/security-signature-gate.yml'
+  push:
+    branches: [ main, master ]
+
+jobs:
+  sign-verify-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Parser + Security tests
+        run: |
+          node --test tests/parser.test.js tests/canonicalize.test.js tests/e2e/sign-verify.test.js tests/e2e/security-gate.test.js
