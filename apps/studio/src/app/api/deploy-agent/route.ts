@@ -1,60 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AgentRecord, DeploymentRecord } from '@/lib/types';
-import { verifyMessage } from 'viem';
+import { DeployRequest, DeployResponse } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { signature, signer, signedMessage, ...agent } = body;
-    
-    if (!agent.id || !agent.did) {
+    const body: DeployRequest = await req.json();
+
+    // Validation
+    if (!body.agentId || !body.target || !body.yaml) {
       return NextResponse.json(
-        { error: 'Missing agent.id or agent.did' }, 
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Security: Verify the cryptographic signature if provided
-    if (signature && signer && signedMessage) {
-      try {
-        const isValid = await verifyMessage({
-          address: signer as `0x${string}`,
-          message: signedMessage,
-          signature: signature as `0x${string}`,
-        });
-
-        if (!isValid) {
-          return NextResponse.json({ error: 'Invalid cryptographic signature' }, { status: 401 });
-        }
-
-        // Security: Ensure the signed message actually matches the agent being deployed
-        if (!signedMessage.includes(agent.did)) {
-          return NextResponse.json({ error: 'Signature DID mismatch' }, { status: 401 });
-        }
-      } catch (verifyErr) {
-        return NextResponse.json({ error: 'Signature verification failed', details: String(verifyErr) }, { status: 401 });
+    if (body.target === 'vercel') {
+      if (!body.config.token || !body.config.projectName) {
+        return NextResponse.json(
+          { error: 'Vercel deployment requires token and project name' },
+          { status: 400 }
+        );
+      }
+    } else if (body.target === 'custom') {
+      if (!body.config.endpointUrl) {
+        return NextResponse.json(
+          { error: 'Custom deployment requires an endpoint URL' },
+          { status: 400 }
+        );
       }
     }
 
-    // Creative Engineering: Simulate a sophisticated sovereign deployment process
-    const deployment: DeploymentRecord = {
-      agentId: agent.id,
-      deployedAt: new Date().toISOString(),
-      endpointUrl: `https://axiomid.app/agents/${agent.id}`,
-      mcpUrl: `https://axiomid.app/api/mcp-discovery`,
-      status: 'deployed',
-      signature,
-      signer,
+    // TODO: Implement real Vercel API integration here
+    // 1. Create a new deployment using Vercel API
+    // 2. Set environment variables (AIX_YAML, etc.)
+    // 3. Trigger build and wait for completion (or return pending)
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const projectName = body.config.projectName || `agent-${body.agentId.slice(0, 8)}`;
+    const deployUrl = body.target === 'vercel' 
+      ? `https://${projectName}.vercel.app`
+      : body.config.endpointUrl!;
+
+    const response: DeployResponse = {
+      deployUrl,
+      status: 'deployed'
     };
 
-    return NextResponse.json({ 
-      success: true, 
-      deployment,
-      message: `Agent "${agent.name}" cryptographically verified and deployed.`
-    });
-  } catch (err) {
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('Deployment error:', error);
     return NextResponse.json(
-      { error: 'Deploy failed', details: String(err) }, 
+      { error: 'Internal server error during deployment' },
       { status: 500 }
     );
   }

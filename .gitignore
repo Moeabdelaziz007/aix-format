@@ -64,3 +64,6 @@ temp/
 playwright-report/
 test-results/
 .playwright/
+
+# AIX Studio Data
+apps/studio/data/registry.json

@@ -4,6 +4,7 @@ import "./globals.css";
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next';
 import { WalletProvider } from '@/components/providers/WalletProvider';
+import { SovereignAether } from '@/components/studio/SovereignAether';
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -32,12 +33,7 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${inter.variable} min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] font-sans antialiased overflow-x-hidden`}
       >
-        {/* Ambient background glow */}
-        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[var(--color-primary-dim)] opacity-20 blur-[120px]" />
-          <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[var(--color-secondary)] opacity-10 blur-[150px]" />
-        </div>
-
+        <SovereignAether />
         <div className="relative z-10 flex flex-col min-h-screen">
           <WalletProvider>
             {children}

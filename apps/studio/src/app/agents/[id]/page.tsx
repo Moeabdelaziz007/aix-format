@@ -124,28 +124,45 @@ export default function AgentDetailPage() {
                 <span className="px-4 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black rounded-full uppercase tracking-[0.2em]">
                   {agent.kyc_tier || 'unverified'}
                 </span>
+                {agent.status === 'online' && (
+                  <span className="px-4 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black rounded-full uppercase tracking-[0.2em] flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    LIVE
+                  </span>
+                )}
               </div>
               <p className="text-xl text-zinc-400 font-medium">{agent.role}</p>
             </div>
           </div>
           
-          <div className="flex gap-4 w-full lg:w-auto">
-            {!agent.deployment && (
-              <button 
-                onClick={() => setShowDeploy(true)}
-                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(99,102,241,0.2)] hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Rocket className="w-5 h-5" />
-                Deploy Agent
-              </button>
-            )}
+          <div className="flex flex-wrap gap-4 w-full lg:w-auto">
             <button 
               onClick={handleDownload}
               className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-black rounded-2xl transition-all border border-white/5 hover:text-white"
             >
-              <Download className="w-5 h-5" />
+              <Download className="w-4 h-4" />
               Download .aix
             </button>
+            
+            {agent.status === 'online' ? (
+              <a 
+                href={agent.deployment?.endpointUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(16,185,129,0.2)] hover:scale-[1.02]"
+              >
+                <Activity className="w-4 h-4" />
+                View Live Agent
+              </a>
+            ) : (
+              <button 
+                onClick={() => setShowDeploy(true)}
+                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(99,102,241,0.2)] hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Rocket className="w-4 h-4" />
+                Deploy Agent
+              </button>
+            )}
           </div>
         </div>
 

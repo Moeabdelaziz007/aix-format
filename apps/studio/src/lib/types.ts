@@ -13,6 +13,11 @@ export interface DeploymentRecord {
   signer?: string;          // Address of the signer
 }
 
+export interface RegistryEntry extends McpAgent {
+  publishedAt: string;
+  yaml: string;
+}
+
 export interface AgentRecord {
   id: string;
   name: string;
@@ -29,6 +34,7 @@ export interface AgentRecord {
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
+  published?: boolean;
 }
 
 export interface AbomRecord {
