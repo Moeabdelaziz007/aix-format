@@ -188,7 +188,7 @@ name = "Example Agent"
 ```yaml
 meta:
   version: string          # AIX format version (semver), REQUIRED
-  id: string              # did:axiom:axiomid.app:<id> format, REQUIRED
+  id: string              # did:web:<id> format, REQUIRED
   name: string            # Agent name, REQUIRED
   created: string         # ISO 8601 timestamp, REQUIRED
   author: string          # Author name or identifier, REQUIRED
@@ -213,7 +213,7 @@ meta:
 **Validation Rules:**
 
 - `version` **MUST** follow Semantic Versioning (semver) format
-- `id` **MUST** be a valid `did:axiom` identifier (`did:axiom:axiomid.app:<id>`)
+- `id` **MUST** be a valid `did:web` identifier (`did:web:<id>`)
 - `created` and `updated` **MUST** be valid ISO 8601 timestamps
 - `name` **MUST** be 1-100 characters
 - `tags` **SHOULD** contain 1-10 tags, each 1-50 characters
@@ -223,7 +223,7 @@ meta:
 ```yaml
 meta:
   version: "1.0"
-  id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
+  id: "did:web:550e8400-e29b-41d4-a716-446655440000"
   name: "Customer Service Bot"
   description: "AI agent for handling customer inquiries"
   created: "2026-04-24T10:30:00Z"
@@ -688,7 +688,7 @@ pricing:
 
 ```json
 "identity_layer": {
-  "id": string,               // Unique Axiom identifier (did:axiom:axiomid.app:<id> format), REQUIRED
+  "id": string,               // Unique Axiom identifier (did:web:<id> format), REQUIRED
   "authority": string,        // Root authority domain, must be "axiomid.app", REQUIRED
   "issuedAt": string,         // ISO 8601 timestamp of issuance, REQUIRED
   "expiresAt": string,        // ISO 8601 timestamp of expiration, OPTIONAL
@@ -699,7 +699,7 @@ pricing:
 
 **Validation Rules:**
 
-- `id` **MUST** be a valid `did:axiom` identifier (`did:axiom:axiomid.app:<id>`).
+- `id` **MUST** be a valid `did:web` identifier (`did:web:<id>`).
 - `authority` **MUST** resolve to `axiomid.app`.
 - `issuedAt` **MUST** be a valid ISO 8601 date-time string.
 - `publicKey.algorithm` **MUST** be one of: `Ed25519`, `secp256k1`.
@@ -710,7 +710,7 @@ pricing:
 
 ```json
 "identity_layer": {
-  "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+  "id": "did:web:550e8400-e29b-41d4-a716-446655440000",
   "authority": "axiomid.app",
   "issuedAt": "2026-04-24T10:30:00Z",
   "publicKey": {
@@ -1087,7 +1087,7 @@ persona:
 
 meta:
   version: "1.0"
-  id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
+  id: "did:web:550e8400-e29b-41d4-a716-446655440000"
   name: "Complete Example Agent"
   description: "Demonstrates all AIX features"
   created: "2026-04-24T10:30:00Z"
@@ -1154,7 +1154,7 @@ pricing:
 identity_layer:
   network: "solana"
   wallet_pubkey: "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g"
-  did_document: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
+  did_document: "did:web:550e8400-e29b-41d4-a716-446655440000"
 
 economics:
   token: "AXIOM"

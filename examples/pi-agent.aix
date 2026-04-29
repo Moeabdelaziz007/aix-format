@@ -4,7 +4,7 @@
 
 meta:
   version: "0.2.0"
-  id: "did:axiom:axiomid.app:pi-assistant-777"
+  id: "did:web:pi-assistant-777"
   name: "Pi Eco Assistant"
   description: "Autonomous assistant optimized for the Pi Network ecosystem and Dev Studio."
   created: "2026-04-26T13:30:00Z"
@@ -12,7 +12,7 @@ meta:
   tags: ["pi-network", "ecosystem", "assistant"]
 
 identity_layer:
-  id: "did:axiom:axiomid.app:pi-assistant-777"
+  id: "did:web:pi-assistant-777"
   authority: "axiomid.app"
   issuedAt: "2026-04-26T13:30:00Z"
   signature:

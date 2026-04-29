@@ -9,7 +9,7 @@
 
 The current phase establishes the **Sovereign AIX Format** as the canonical standard for decentralized agent identities and cyber-physical alignments.
 
-- [x] **AxiomID Integration**: Full support for `did:axiom` DIDs governed by `axiomid.app` (Root Authority verified).
+- [x] **AxiomID Integration**: Full support for `did:web` DIDs governed by `axiomid.app` (Root Authority verified).
 - [x] **Cryptographic Signatures**: Integrated `Ed25519` and `secp256k1` support within the Identity Layer.
 - [x] **Vision-Language-Action (VLA)**: Embedded generic `vla` capabilities to prepare the agent standard for robotics and physical runtimes (e.g., `openpi`, `π0.7`).
 - [x] **Automated Weekly Health Checks**: Ensuring protocol validity and structural integrity via GitHub Actions.

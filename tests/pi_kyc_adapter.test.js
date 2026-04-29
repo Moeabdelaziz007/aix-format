@@ -55,7 +55,7 @@ describe('PiKycAdapter Unit Tests', () => {
     assert.ok(result.kyc_proof, 'Should generate kyc_proof');
 
     assert.strictEqual(result.identity_layer.authority, 'axiomid.app');
-    assert.ok(result.identity_layer.id.startsWith('did:axiom:axiomid.app:'));
+    assert.ok(result.identity_layer.id.startsWith('did:web:'));
     assert.strictEqual(result.identity_layer.publicKey.algorithm, 'Ed25519');
     assert.strictEqual(result.identity_layer.publicKey.value, authResult.publicKey);
 
@@ -108,7 +108,7 @@ describe('PiKycAdapter Integration', () => {
     const aixData = {
       meta: {
         version: "1.0",
-        id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+        id: "did:web:550e8400-e29b-41d4-a716-446655440000",
         name: "Test Agent",
         created: "2024-04-26T10:30:00Z",
         author: "Tester"

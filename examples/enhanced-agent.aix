@@ -4,7 +4,7 @@
 
 meta:
   version: "1.0"
-  id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440002"
+  id: "did:web:550e8400-e29b-41d4-a716-446655440002"
   name: "Web Scraper Pro"
   description: "Advanced web scraping agent with content analysis capabilities"
   created: "2025-01-12T10:30:00Z"

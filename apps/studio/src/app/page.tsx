@@ -1,9 +1,6 @@
- feat/kyc-wizard-tts-12299921071301084280
 import { Navbar } from "@/components/layout/Navbar";
 import { SetupWizard } from "@/components/studio/SetupWizard";
-=======
 import Image from "next/image";
- main
 import { AgentCard } from "@/components/studio/AgentCard";
 import { VoiceOrb } from "@/components/studio/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
@@ -64,16 +61,13 @@ export default function Home() {
             </div>
           </div>
 
- feat/kyc-wizard-tts-12299921071301084280
           {/* Right Sidebar - Setup Wizard */}
           <SetupWizard />
 
-=======
           <div className="flex flex-col gap-6">
             <h2 className="text-2xl font-bold text-white mb-2">Security & Identity</h2>
             <AgenticKycSetup />
           </div>
- main
         </div>
 
       </main>

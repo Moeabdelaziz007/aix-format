@@ -224,8 +224,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique Axiom identifier enforcing did:axiom:axiomid.app:<id> format.",
-          "pattern": "^did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+$"
+          "description": "Unique Axiom identifier enforcing did:web:<id> format.",
+          "pattern": "^did:web:axiomid\\.app:[a-zA-Z0-9._\\-]+$"
         },
         "authority": {
           "type": "string",

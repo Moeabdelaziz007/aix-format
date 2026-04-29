@@ -1,6 +1,6 @@
 meta:
   version: '1.0'
-  id: did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440001
+  id: did:web:550e8400-e29b-41d4-a716-446655440001
   name: Customer Service Bot
   description: Empathetic AI agent for handling customer inquiries and support
   created: '2025-01-12T10:30:00Z'
@@ -152,7 +152,7 @@ security:
     audit_log: true
     data_retention_days: 90
 identity_layer:
-  id: did:axiom:axiomid.app:12345678-1234-4234-8234-1234567890ab
+  id: did:web:12345678-1234-4234-8234-1234567890ab
   authority: axiomid.app
   issuedAt: '2026-04-27T01:41:47.174Z'
   publicKey:

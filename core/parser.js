@@ -961,7 +961,7 @@ export class AIXParser {
    * Validation helpers
    */
   isValidID(id) {
-    const regex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
+    const regex = /^did:web:[a-zA-Z0-9._\-]+$/i;
     return regex.test(id);
   }
 
