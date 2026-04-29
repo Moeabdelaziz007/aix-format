@@ -8,16 +8,15 @@ import { Plus, Shield, Activity, FileCode } from "lucide-react";
 import { AgentCard } from "@/components/studio/AgentCard";
 import Link from "next/link";
 
-const initialAgents = [
-  { id: 1, name: "Data Analyzer Pro", role: "Data Scientist", price: "0.5", status: "online", kyc: true, color: "#6366f1", calls: 1420, earnings: "710", did: "did:axiom:axiomid.app:agent_001", successRate: 99.2 },
-  { id: 2, name: "Customer Support Bot", role: "Support Specialist", price: "0.1", status: "offline", kyc: true, color: "#8b5cf6", calls: 380, earnings: "38", did: "did:axiom:axiomid.app:agent_002", successRate: 96.5 },
-];
+import { useLocalAgents } from "@/hooks/useLocalAgents";
 
 export default function MyAgentsPage() {
-  const [agents] = useState(initialAgents);
+  const { agents, isLoading } = useLocalAgents();
 
-  const totalEarnings = agents.reduce((sum, a) => sum + parseFloat(a.earnings), 0).toFixed(1);
+  const totalEarnings = agents.reduce((sum, a) => sum + (parseFloat(a.manifest.economics.token === 'PI' ? '0.5' : '0')), 0).toFixed(1);
   const onlineCount = agents.filter(a => a.status === 'online').length;
+
+  if (isLoading) return <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center"><Activity className="animate-spin text-[var(--color-primary)]" /></div>;
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
@@ -57,13 +56,14 @@ export default function MyAgentsPage() {
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               >
                 <AgentCard
-                  name={agent.name}
-                  role={agent.role}
-                  price={agent.price}
+                  id={agent.id}
+                  name={agent.manifest.meta.name}
+                  role={agent.manifest.meta.role}
+                  price={agent.manifest.economics.pricing_model === 'free' ? '0' : '0.5'}
                   status={agent.status as "online" | "offline" | "busy"}
                   color={agent.color}
                   successRate={agent.successRate}
-                  tasksCompleted={agent.calls}
+                  tasksCompleted={agent.tasksCompleted}
                 />
               </motion.div>
             ))}

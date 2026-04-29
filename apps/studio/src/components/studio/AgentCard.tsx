@@ -2,9 +2,10 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Shield, BrainCircuit, Zap, MoreHorizontal, TrendingUp } from "lucide-react";
+import Link from "next/link";
 
 interface AgentCardProps {
+  id: string;
   name: string;
   role: string;
   price: string;
@@ -22,6 +23,7 @@ const STATUS_CONFIG = {
 } as const;
 
 export const AgentCard = memo(function AgentCard({
+  id,
   name,
   role,
   price,
@@ -82,10 +84,10 @@ export const AgentCard = memo(function AgentCard({
         </div>
 
         {/* ── Info ── */}
-        <div>
-          <h3 className="text-base font-display font-bold text-white tracking-tight leading-tight">{name}</h3>
+        <Link href={`/agents/${id}`} className="block group/link">
+          <h3 className="text-base font-display font-bold text-white tracking-tight leading-tight group-hover/link:text-[var(--agent-color)] transition-colors">{name}</h3>
           <p className="text-[13px] text-[var(--color-on-surface-variant)] mt-0.5">{role}</p>
-        </div>
+        </Link>
 
         {/* ── Metrics ── */}
         <div className="grid grid-cols-2 gap-3">

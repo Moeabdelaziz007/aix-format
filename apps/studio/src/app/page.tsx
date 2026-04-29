@@ -9,8 +9,10 @@ import { VoiceOrb } from "@/components/studio/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
+import { useLocalAgents } from "@/hooks/useLocalAgents";
 
 export default function Home() {
+  const { agents } = useLocalAgents();
   return (
     <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-manrope)]">
       <Navbar />
@@ -49,8 +51,24 @@ export default function Home() {
             <div className="flex flex-col gap-6">
               <h2 className="text-2xl font-bold text-white mb-2">My Agents</h2>
               <div className="grid grid-cols-1 gap-6 w-full max-w-lg">
-                <AgentCard name="Data Analyzer Pro" role="Data Scientist" price="0.5" status="online" color="#6366f1" />
-                <AgentCard name="Customer Support Bot" role="Support Specialist" price="0.1" status="offline" color="#8b5cf6" />
+                {agents.length > 0 ? (
+                  agents.slice(0, 2).map(agent => (
+                    <AgentCard 
+                      key={agent.id}
+                      id={agent.id}
+                      name={agent.manifest.meta.name} 
+                      role={agent.manifest.meta.role} 
+                      price="0.5" 
+                      status={agent.status} 
+                      color={agent.color} 
+                    />
+                  ))
+                ) : (
+                  <>
+                    <AgentCard id="1" name="Research Analyst Pro" role="Data Scientist" price="0.5" status="online" color="#6366f1" />
+                    <AgentCard id="2" name="Customer Support Bot" role="Support Specialist" price="0.1" status="offline" color="#8b5cf6" />
+                  </>
+                )}
               </div>
             </div>
 

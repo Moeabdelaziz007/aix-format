@@ -21,8 +21,11 @@ import {
   FileCode,
   Database
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
+import { useLocalAgents } from "@/hooks/useLocalAgents";
+import { AgentManifest } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { clsx, type ClassValue } from "clsx";
@@ -41,10 +44,13 @@ const STEPS = [
 ];
 
 export default function AgentBuilderPage() {
+  const router = useRouter();
+  const { addAgent } = useLocalAgents();
   const [currentStep, setCurrentStep] = useState(1);
-  const [previewFormat, setPreviewFormat] = useState<"yaml" | "json">("yaml");
+  const [previewFormat, setPreviewFormat] = useState<"yaml" | "json" | "discovery">("yaml");
   const [copied, setCopied] = useState(false);
   const [manifestContent, setManifestContent] = useState("");
+  const [isDeploying, setIsDeploying] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -82,6 +88,9 @@ export default function AgentBuilderPage() {
       risk_level: "low",
       integrity_hash: "pending",
       dependencies: [] as string[]
+    },
+    mcp: {
+      prompts: [] as any[]
     }
   });
 
@@ -107,6 +116,11 @@ export default function AgentBuilderPage() {
 
       if (previewFormat === "json") {
         setManifestContent(JSON.stringify(manifest, null, 2));
+      } else if (previewFormat === "discovery") {
+        // Dynamic import to avoid SSR issues if any, or just use the local generator
+        const { generateAIXDiscovery } = await import("@/lib/mcp-generator");
+        const disc = generateAIXDiscovery(manifest, "https://agent.example.com");
+        setManifestContent(JSON.stringify(disc, null, 2));
       } else {
         const yml = await stringifyYamlSafe(manifest);
         setManifestContent(yml);
@@ -154,7 +168,24 @@ export default function AgentBuilderPage() {
     });
   };
 
-  const updateEconomics = (field: string, value: any) => {
+  const handleDeploy = async () => {
+    setIsDeploying(true);
+    
+    // Simulate some "blockchain deployment" lag
+    await new Promise(r => setTimeout(r, 1500));
+    
+    try {
+      const agent = addAgent(formData as unknown as AgentManifest, "#00dbe9");
+      router.push(`/agents/${agent.id}`);
+    } catch (e) {
+      console.error("Deployment failed", e);
+      alert("Failed to deploy agent locally.");
+    } finally {
+      setIsDeploying(false);
+    }
+  };
+
+  const updateEconomics = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       economics: {
@@ -362,6 +393,54 @@ export default function AgentBuilderPage() {
                           ))}
                         </div>
                       )}
+
+                      {/* MCP Prompts Section */}
+                      <div className="pt-6 border-t border-white/[0.05] mt-6">
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">MCP Prompts (v1.3)</label>
+                          <button 
+                            onClick={() => setFormData(prev => ({ 
+                              ...prev, 
+                              mcp: { prompts: [...prev.mcp.prompts, { name: "", description: "" }] } 
+                            }))}
+                            className="btn btn-sm btn-ghost hover:border-[#00dbe9]/50 text-[#00dbe9]"
+                          >
+                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Prompt
+                          </button>
+                        </div>
+                        
+                        {formData.mcp.prompts.length === 0 ? (
+                          <div className="p-4 border border-dashed border-white/[0.05] rounded-xl text-center">
+                            <p className="text-[10px] text-[#404050]">No discovery prompts defined.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {formData.mcp.prompts.map((p: any, i: number) => (
+                              <div key={i} className="flex gap-2 group">
+                                <input 
+                                  placeholder="Prompt Name" 
+                                  value={p.name}
+                                  onChange={(e) => {
+                                    const next = [...formData.mcp.prompts];
+                                    next[i].name = e.target.value;
+                                    setFormData(prev => ({ ...prev, mcp: { prompts: next } }));
+                                  }}
+                                  className="input py-2 text-[10px] flex-1"
+                                />
+                                <button 
+                                  onClick={() => {
+                                    const next = formData.mcp.prompts.filter((_: any, idx: number) => idx !== i);
+                                    setFormData(prev => ({ ...prev, mcp: { prompts: next } }));
+                                  }}
+                                  className="p-2 text-[#404050] hover:text-red-400 transition-colors"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -465,10 +544,19 @@ export default function AgentBuilderPage() {
             {/* Footer Actions */}
             <div className="mt-8 pt-6 border-t border-white/[0.05]">
               <button
-                className="btn btn-primary-green-glow w-full"
-                onClick={() => alert("Manifest published to registry!")}
+                className={`btn btn-primary-green-glow w-full ${isDeploying ? 'opacity-50 cursor-wait' : ''}`}
+                onClick={handleDeploy}
+                disabled={isDeploying}
               >
-                <Rocket className="w-4 h-4 mr-2" /> Validate & Deploy
+                {isDeploying ? (
+                  <span className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 animate-spin" /> Deploying...
+                  </span>
+                ) : (
+                  <>
+                    <Rocket className="w-4 h-4 mr-2" /> Validate & Deploy
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -504,6 +592,15 @@ export default function AgentBuilderPage() {
                   )}
                 >
                   <FileJson className="w-3 h-3" /> JSON
+                </button>
+                <button 
+                  onClick={() => setPreviewFormat("discovery")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
+                    previewFormat === "discovery" ? "bg-[var(--color-accent-primary)] text-black" : "text-[#404050] hover:text-[#8888a0]"
+                  )}
+                >
+                  <Zap className="w-3 h-3" /> Discovery
                 </button>
               </div>
             </div>
