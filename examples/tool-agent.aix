@@ -1,6 +1,6 @@
 meta:
   version: '1.0'
-  id: did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440002
+  id: did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440002
   name: Data Fetcher Bot
   description: AI agent specialized in fetching and integrating data from multiple APIs
   created: '2026-01-12T11:00:00Z'
@@ -304,7 +304,7 @@ security:
     log_api_calls: true
     log_retention_days: 30
 identity_layer:
-  id: did:axiom:axiomid.app:12345678-1234-4234-8234-1234567890ab
+  id: did:web:axiomid.app:12345678-1234-4234-8234-1234567890ab
   authority: axiomid.app
   issuedAt: '2026-04-27T01:41:47.184Z'
   publicKey:

@@ -314,13 +314,13 @@ export class AIXParser {
 
       // Cross-validate authority
       if (identity_layer.authority) {
-        if (identity_layer.id.startsWith('did:axiom:')) {
+        if (identity_layer.id.startsWith('did:web:axiomid.app')) {
           if (identity_layer.authority !== 'axiomid.app') {
             this.errors.push({
               code: 'INVALID_AUTHORITY',
               section: 'identity_layer',
               field: 'authority',
-              message: "Authority must be 'axiomid.app' for did:axiom"
+              message: "Authority must be 'axiomid.app' for did:web"
             });
           }
         } else if (identity_layer.id.startsWith('did:web:')) {
@@ -856,7 +856,7 @@ export class AIXParser {
    * Validation helpers
    */
   isValidID(id) {
-    const axiomRegex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
+    const axiomRegex = /^did:web:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
     const webRegex = /^did:web:[a-zA-Z0-9.\-]+(:[a-zA-Z0-9.\-]+)*$/i;
     return axiomRegex.test(id) || webRegex.test(id);
   }

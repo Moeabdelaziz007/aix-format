@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "metadata": {
     "name": "DataHunter-v1",
-    "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+    "id": "did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
     "created_at": "2026-11-18T12:00:00Z",
     "author": "MoeAbdelaziz",
     "description": "AI agent specialized in extracting and analyzing complex web data",
@@ -24,7 +24,7 @@
   "identity_layer": {
     "network": "solana",
     "wallet_pubkey": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g",
-    "did_document": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+    "did_document": "did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
     "verifiable_credentials": [
       {
         "type": "DataAnalysisCertification",
@@ -32,7 +32,7 @@
         "issuance_date": "2026-01-15T10:00:00Z",
         "expiration_date": "2026-01-15T10:00:00Z",
         "credential_subject": {
-          "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
+          "id": "did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
           "skills": ["web_scraping", "data_analysis", "pattern_recognition"]
         }
       }

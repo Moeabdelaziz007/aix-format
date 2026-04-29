@@ -39,7 +39,7 @@ export class PiKycAdapter {
     // Generate SHA-256 hash of the accessToken
     const accessTokenHash = crypto.createHash('sha256').update(accessToken).digest('hex');
 
-    const did = `did:axiom:axiomid.app:${uidHash}`;
+    const did = `did:web:axiomid.app:${uidHash}`;
     const timestamp = new Date().toISOString();
 
     const identity_layer = {

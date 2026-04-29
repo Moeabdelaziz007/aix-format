@@ -64,7 +64,7 @@ test('aix-validate CLI', async (t) => {
   const minimalValidAix = {
     meta: {
       version: '2.0.0',
-      id: 'did:axiom:axiomid.app:12345678',
+      id: 'did:web:axiomid.app:12345678',
       name: 'Test Agent',
       created: '2026-01-01T00:00:00Z',
       author: 'Tester'
@@ -74,7 +74,7 @@ test('aix-validate CLI', async (t) => {
       instructions: 'Do test things'
     },
     identity_layer: {
-      id: 'did:axiom:axiomid.app:12345678',
+      id: 'did:web:axiomid.app:12345678',
       authority: 'axiomid.app',
       issuedAt: '2026-01-01T00:00:00Z'
     },
@@ -119,7 +119,7 @@ test('aix-validate CLI', async (t) => {
     const invalidKycAix = {
       meta: {
         version: '1.0.0', // Fails strict KYC version check
-        id: 'did:axiom:axiomid.app:12345678',
+        id: 'did:web:axiomid.app:12345678',
         name: 'Test Agent',
         created: '2026-01-01T00:00:00Z',
         author: 'Tester'
@@ -129,7 +129,7 @@ test('aix-validate CLI', async (t) => {
         instructions: 'Do test things'
       },
       identity_layer: {
-        id: 'did:axiom:axiomid.app:12345678',
+        id: 'did:web:axiomid.app:12345678',
         authority: 'axiomid.app',
         issuedAt: '2026-01-01T00:00:00Z'
       },

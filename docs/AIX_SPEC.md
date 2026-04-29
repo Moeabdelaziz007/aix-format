@@ -188,7 +188,7 @@ name = "Example Agent"
 ```yaml
 meta:
   version: string          # AIX format version (semver), REQUIRED
-  id: string              # did:axiom or did:web format, REQUIRED
+  id: string              # did:web or did:web format, REQUIRED
   abom: object            # Agent Bill of Materials, REQUIRED
   name: string            # Agent name, REQUIRED
   created: string         # ISO 8601 timestamp, REQUIRED
@@ -214,7 +214,7 @@ meta:
 **Validation Rules:**
 
 - `version` **MUST** follow Semantic Versioning (semver) format
-- `id` **MUST** be a valid `did:axiom` or `did:web` identifier
+- `id` **MUST** be a valid `did:web` or `did:web` identifier
 - `created` and `updated` **MUST** be valid ISO 8601 timestamps
 - `name` **MUST** be 1-100 characters
 - `tags` **SHOULD** contain 1-10 tags, each 1-50 characters
@@ -224,7 +224,7 @@ meta:
 ```yaml
 meta:
   version: "1.1"
-  id: "did:axiom:550e8400-e29b-41d4-a716-446655440000"
+  id: "did:web:550e8400-e29b-41d4-a716-446655440000"
   abom:
     framework: "langchain"
     dependencies: ["torch", "transformers"]
@@ -692,7 +692,7 @@ pricing:
 
 ```json
 "identity_layer": {
-  "id": string,               // Unique identifier (did:axiom or did:web format), REQUIRED
+  "id": string,               // Unique identifier (did:web or did:web format), REQUIRED
   "authority": string,        // Root authority domain, must be "axiomid.app", REQUIRED
   "issuedAt": string,         // ISO 8601 timestamp of issuance, REQUIRED
   "expiresAt": string,        // ISO 8601 timestamp of expiration, OPTIONAL
@@ -703,7 +703,7 @@ pricing:
 
 **Validation Rules:**
 
-- `id` **MUST** be a valid `did:axiom` or `did:web` identifier.
+- `id` **MUST** be a valid `did:web` or `did:web` identifier.
 - `authority` **MUST** resolve to `axiomid.app`.
 - `issuedAt` **MUST** be a valid ISO 8601 date-time string.
 - `publicKey.algorithm` **MUST** be one of: `Ed25519`, `secp256k1`.
@@ -714,7 +714,7 @@ pricing:
 
 ```json
 "identity_layer": {
-  "id": "did:axiom:550e8400-e29b-41d4-a716-446655440000",
+  "id": "did:web:550e8400-e29b-41d4-a716-446655440000",
   "authority": "axiomid.app",
   "issuedAt": "2026-04-24T10:30:00Z",
   "publicKey": {

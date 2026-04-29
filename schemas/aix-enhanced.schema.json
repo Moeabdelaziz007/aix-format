@@ -1083,8 +1083,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique Axiom identifier enforcing did:axiom or did:web format.",
-          "pattern": "^(did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+|did:web:[a-zA-Z0-9.\\-]+(:[a-zA-Z0-9.\\-]+)*)$"
+          "description": "Unique Axiom identifier enforcing did:web or did:web format.",
+          "pattern": "^(did:web:axiomid\\.app:[a-zA-Z0-9._\\-]+|did:web:[a-zA-Z0-9.\\-]+(:[a-zA-Z0-9.\\-]+)*)$"
         },
         "authority": {
           "type": "string",

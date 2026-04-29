@@ -114,10 +114,10 @@ try {
         section: 'identity_layer'
       });
     } else {
-      if (!agent.identity_layer.id || !agent.identity_layer.id.startsWith('did:axiom:axiomid.app:')) {
+      if (!agent.identity_layer.id || !agent.identity_layer.id.startsWith('did:web:axiomid.app:')) {
         additionalErrors.push({
           code: 'INVALID_DID',
-          message: 'identity_layer ID must be a valid AxiomID DID (did:axiom:axiomid.app:<id>).',
+          message: 'identity_layer ID must be a valid AxiomID DID (did:web:axiomid.app:<id>).',
           section: 'identity_layer.id'
         });
       }
