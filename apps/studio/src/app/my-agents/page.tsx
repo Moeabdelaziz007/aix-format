@@ -1,89 +1,93 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Navbar } from "@/components/layout/Navbar";
-import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
-import { Plus, Shield, Activity, FileCode } from "lucide-react";
-import { AgentCard } from "@/components/studio/AgentCard";
-import Link from "next/link";
-
-import { useLocalAgents } from "@/hooks/useLocalAgents";
+import { useLocalAgents } from '@/hooks/useLocalAgents';
+import { useRouter } from 'next/navigation';
 
 export default function MyAgentsPage() {
-  const { agents, loaded } = useLocalAgents();
+  const { agents, deleteAgent, loaded } = useLocalAgents();
+  const router = useRouter();
 
-  const totalEarnings = agents.reduce((sum, a) => sum + (parseFloat(a.manifest?.economics?.currency === 'PI' ? '0.5' : '0') || 0), 0).toFixed(1);
-  const onlineCount = agents.filter(a => a.status === 'online').length;
+  if (!loaded) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-8 h-8 border-4 border-indigo-500 
+                      border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
-  if (!loaded) return <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center"><Activity className="animate-spin text-[var(--color-primary)]" /></div>;
+  if (agents.length === 0) return (
+    <div className="flex flex-col items-center justify-center 
+                    min-h-screen gap-6 text-center px-4">
+      <div className="text-6xl">🤖</div>
+      <h1 className="text-2xl font-bold text-white">No agents yet</h1>
+      <p className="text-zinc-400 max-w-sm">
+        Build your first AIX agent and it will appear here.
+      </p>
+      <button onClick={() => router.push('/builder')}
+        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 
+                   rounded-xl text-white font-medium transition">
+        + Build Agent
+      </button>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
-      <Navbar />
-      <div className="pt-28 pb-20 px-6 md:px-12 max-w-5xl mx-auto">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between mb-10 flex-wrap gap-4">
-          <div>
-            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text text-gradient tracking-tight mb-2">My Agents</h1>
-            <p className="text-gray-400">Manage your sovereign AI agents — KYC-anchored & Pi-signed.</p>
-          </div>
-          <Link href="/builder"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--color-primary)] text-black text-sm font-bold hover:brightness-110 transition shadow-[0_0_22px_rgba(57,255,20,0.3)]">
-            <Plus className="w-4 h-4" /> Create New Agent
-          </Link>
-        </motion.div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-10">
-          {[
-            { label: "Total Agents", value: agents.length, icon: <FileCode className="w-4 h-4" />, color: "text-indigo-400" },
-            { label: "Online Now", value: onlineCount, icon: <Activity className="w-4 h-4" />, color: "text-green-400" },
-            { label: "Total Earnings", value: `${totalEarnings} π`, icon: <Shield className="w-4 h-4" />, color: "text-yellow-400" },
-          ].map(s => (
-            <div key={s.label} className="glass-panel rounded-xl p-4 border border-white/5">
-              <div className={`flex items-center gap-2 mb-1 ${s.color}`}>{s.icon}<span className="text-xs">{s.label}</span></div>
-              <p className="text-2xl font-bold text-white">{s.value}</p>
-            </div>
-          ))}
+    <main className="max-w-5xl mx-auto px-6 py-10">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-white">My Agents</h1>
+          <p className="text-zinc-400 mt-1">{agents.length} agent
+            {agents.length !== 1 ? 's' : ''} saved locally</p>
         </div>
-
-        {/* Agents List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AnimatePresence>
-            {agents.map(agent => (
-              <motion.div key={agent.id}
-                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              >
-                <AgentCard
-                  id={agent.id}
-                  name={agent.manifest.meta.name}
-                  role={agent.manifest.meta.role}
-                  price={agent.manifest.economics.pricing_model === 'free' ? '0' : '0.5'}
-                  status={agent.status as "online" | "offline" | "busy"}
-                  color={agent.color}
-                  successRate={agent.successRate}
-                  tasksCompleted={agent.tasksCompleted}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {agents.length === 0 && (
-          <div className="text-center py-24 text-gray-500">
-            <FileCode className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p className="text-lg">No agents deployed yet.</p>
-            <p className="text-sm mt-1">Deploy your first sovereign agent to get started.</p>
-            <Link href="/builder"
-              className="inline-flex mt-6 px-6 py-2.5 rounded-full bg-[var(--color-primary)] text-black text-sm font-bold hover:brightness-110 transition">
-              Create your first agent
-            </Link>
-          </div>
-        )}
-
+        <button onClick={() => router.push('/builder')}
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 
+                     rounded-lg text-white text-sm font-medium transition">
+          + New Agent
+        </button>
       </div>
-      <SovereignStatusBar />
-    </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {agents.map(agent => (
+          <div key={agent.id}
+            onClick={() => router.push(`/agents/${agent.id}`)}
+            className="bg-zinc-900 rounded-xl p-5 border border-zinc-800 
+                       hover:border-indigo-600 transition cursor-pointer group">
+            <div className="flex justify-between items-start mb-3">
+              <div className="w-10 h-10 bg-indigo-900/50 rounded-lg 
+                              flex items-center justify-center text-xl">
+                🤖
+              </div>
+              <span className={`text-xs px-2 py-1 rounded-full font-medium
+                ${agent.kyc_tier === 'verified' 
+                  ? 'bg-green-900/50 text-green-400' 
+                  : 'bg-zinc-800 text-zinc-400'}`}>
+                {agent.kyc_tier ?? 'unverified'}
+              </span>
+            </div>
+            <h3 className="font-semibold text-white group-hover:text-indigo-300 
+                           transition">{agent.name}</h3>
+            <p className="text-zinc-400 text-sm mt-1">{agent.role}</p>
+            {agent.did && (
+              <p className="text-xs text-indigo-400 font-mono mt-2 truncate">
+                {agent.did}
+              </p>
+            )}
+            <div className="flex justify-between items-center mt-4 pt-4 
+                            border-t border-zinc-800">
+              <span className="text-xs text-zinc-500">
+                {new Date(agent.createdAt).toLocaleDateString()}
+              </span>
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  if (confirm(`Delete "${agent.name}"?`)) deleteAgent(agent.id);
+                }}
+                className="text-xs text-red-400 hover:text-red-300 transition">
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
   );
 }
