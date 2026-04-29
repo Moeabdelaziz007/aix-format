@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { SetupWizard } from "@/components/studio/SetupWizard";
 import { AgentCard } from "@/components/studio/AgentCard";
@@ -12,7 +11,7 @@ import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-manrope)]">
+    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
       <Navbar />
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20">
         <main className="flex flex-col gap-12 row-start-2 items-center sm:items-start w-full max-w-6xl">
@@ -31,12 +30,12 @@ export default function Home() {
                 >
                   Deploy New Agent
                 </a>
-                <Link
-                  href="/spec"
+                <a
                   className="rounded-full border border-solid border-[var(--color-glass-border)] transition-colors flex items-center justify-center bg-[rgba(20,20,20,0.5)] hover:bg-[rgba(35,35,35,0.82)] text-white text-sm sm:text-base h-12 px-8 sm:px-6 backdrop-blur-xl"
+                  href="https://axiomid.app"
                 >
                   Read AIX Spec
-                </Link>
+                </a>
               </div>
             </div>
 
@@ -44,6 +43,32 @@ export default function Home() {
               <VoiceOrb />
             </div>
           </div>
+
+          <section className="w-full mt-2">
+            <h2 className="text-2xl font-bold text-white mb-4">AI Partners</h2>
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.25 }}
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.18 } } }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            >
+              {[
+                { name: "Jules", role: "UI/UX Agent" },
+                { name: "Antigravity", role: "Systems & Security AI" },
+                { name: "Codex Agent", role: "Ed25519 Encryption & DNA Protocol" },
+              ].map((agent) => (
+                <motion.div
+                  key={agent.name}
+                  variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }}
+                  className="glass-panel rounded-2xl p-5 border border-white/5"
+                >
+                  <h3 className="text-lg text-white font-semibold">{agent.name}</h3>
+                  <p className="text-sm text-[var(--color-on-surface-variant)] mt-1">{agent.role}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </section>
 
           <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
             <div className="flex flex-col gap-6">
@@ -56,7 +81,7 @@ export default function Home() {
 
             <div className="flex flex-col gap-8">
               <div className="flex flex-col gap-6">
-                <h2 className="text-2xl font-bold text-white mb-2">Security &amp; Identity</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">Security & Identity</h2>
                 <AgenticKycSetup />
               </div>
               <div className="flex flex-col gap-6">
@@ -69,9 +94,9 @@ export default function Home() {
         </main>
 
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-500 text-sm">
-          <Link href="/spec" className="flex items-center gap-2 hover:text-white transition-colors">
+          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
             AIX Format Spec
-          </Link>
+          </a>
           <a className="flex items-center gap-2 hover:text-white transition-colors" href="https://axiomid.app">
             Pi Network Integration
           </a>

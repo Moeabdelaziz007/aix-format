@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://github.com/Moeabdelaziz007/aix-format">
-  <img src="./docs/aix-logo.svg" width="720" alt="AIX FORMAT — Sovereign Agent Standard Logo" />
+  <img src="/Users/cryptojoker710/.gemini/antigravity/brain/c2b988cf-b1a7-48f7-898c-ed8bd76dddde/aix_format_logo_1777443313294.png" width="300" alt="AIX-Format Sovereign Logo" />
 </a>
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=18&pause=1000&color=8B5CF6&center=true&vCenter=true&width=700&lines=Identity+%2B+Economics+%2B+Security+%E2%80%94+In+One+File;Pi+Network+KYC+%2B+Ed25519+Cryptography;The+Only+Standard+With+Human-Verified+Agents;%D8%A7%D9%84%D9%85%D8%B9%D9%8A%D8%A7%D8%B1+%D8%A7%D9%84%D9%88%D8%AD%D9%8A%D8%AF+%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9+%D9%84%D9%84%D9%87%D9%88%D9%8A%D8%A9+%D9%88%D8%A7%D9%84%D8%A7%D9%82%D8%AA%D8%B5%D8%A7%D8%AF+%D9%88%D8%A7%D9%84%D8%A3%D9%85%D8%B7" alt="Typing SVG" />
@@ -62,6 +62,9 @@
 - **Live Voice Futures:** Natively stream high-fidelity voice output for human-like conversational experiences.
 
 **[AR]** نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، وليس للمهندسين فقط. في التحديثات القادمة، سيدعم بروتوكول AIX تقنية **Agentic KYC**—حيث سيقوم وكلاء الذكاء الاصطناعي بإرشادك خلال عملية التحقق (KYC) والإعداد بشكل تلقائي باستخدام واجهة بصرية جذابة وبدون الحاجة لأي كود (zero-code).
+- **إعداد بدون كود:** لن تحتاج إلى كتابة سطر كود واحد أو معرفة بتفاصيل تشفير Ed25519.
+- **Agentic KYC:** سيقوم الوكلاء بإجراء التحقق من الهوية من خلال المحادثة الطبيعية.
+- **المستقبل الصوتي المباشر (Live Voice):** بث مباشر لصوت عالي الجودة لتقديم تجارب محادثة شبيهة بالبشر.
 
 ---
 
@@ -136,9 +139,28 @@ The root cause: there is no open standard requiring human-verified identity for 
 | **A2A Compatible** | ⚠️ converter exists | ✅ native | ⚠️ | ❌ |
 | **Focus Layer** | Identity + Distribution | Runtime Comm. | Contract | Enterprise Meta |
 
+> 💡 **[EN]** A2A is not a competitor — it handles *runtime agent communication*. AIX handles *agent definition and distribution*. They are complementary.
+>
+> 💡 **[AR]** A2A ليس منافساً — بل يتعامل مع *التواصل وقت التشغيل*، بينما AIX يتعامل مع *تعريف الوكيل وتوزيعه*. هما متكاملان.
+
 ---
 
 ## 🧬 Core Architecture | الهندسة الجوهرية
+
+<table width="100%">
+<tr>
+<td width="50%" valign="top">
+
+**[EN]** A high-performance Monorepo integrating the **AIX validation engine** with a **Next.js 15** sovereign studio. The trust chain flows from human KYC identity down to every machine action — from agent publishing to M2M micropayments.
+
+</td>
+<td width="50%" valign="top" dir="rtl">
+
+**[AR]** مستودع Monorepo متكامل يجمع بين **محرك التحقق AIX** و**استوديو Next.js 15** السيادي. تنساب سلسلة الثقة من هوية KYC البشرية وصولاً إلى كل إجراء آلي — من نشر الوكلاء إلى المدفوعات الدقيقة بين الآلات.
+
+</td>
+</tr>
+</table>
 
 ```mermaid
 graph TD
@@ -162,16 +184,31 @@ aix-format/
 │   └── src/converters/      # A2A AgentCard ↔ AIX converters
 ├── apps/studio/             # Sovereign Studio UI | واجهة الاستوديو
 │   └── src/app/             # Next.js 15 App Router
-│       ├── marketplace/     # Agent marketplace page
-│       ├── my-agents/       # User agent management
-│       └── network-status/  # Real-time network health
-├── docs/
-│   └── aix-logo.svg         # Official SVG logo
 ├── bin/
 │   └── aix-validate.js      # CLI Validator | مدقق سطر الأوامر
 └── .github/workflows/
     └── aix-validation.yml   # Automated security CI | الأمن الآلي
 ```
+
+### 🌟 Key Features (أبرز الميزات)
+
+1. **Step-by-Step Setup Wizard:** A guided, beginner-friendly process to configure and deploy agents without coding knowledge.
+2. **Interactive Voice Orb with TTS:** Speak to configure agents, and the AIX engine will provide audible feedback confirmation.
+3. **Quantum Topology KYC Security:** High-end visual architecture for Agentic KYC bindings, ensuring a Sovereign Proof of Ownership through Ed25519 signatures and the `@pinetwork-js/sdk`.
+4. **Glassmorphism UI ("Sovereign Aether"):** Ethereal design system relying on deep indigos, charcoals, and translucent layers.
+5. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM.
+
+**[EN]**
+1. **Voice-First Orchestration:** Replaced traditional chatboxes with an interactive Voice Orb. Speak to configure and deploy your agents on the fly.
+2. **KYC-First Deployment:** Every `.aix` payload uploaded to the Studio requires a Cryptographic KYC Signature via Pi Network. This ensures a Sovereign Proof of Ownership.
+3. **Glassmorphism UI ("Sovereign Aether"):** A high-end, ethereal design system relying on deep indigos, charcoals, and translucent layers instead of cyberpunk tropes.
+4. **Polyglot & Model Agnostic:** The Studio acts as the Gateway. The execution layer (AIX core) is designed to run seamlessly on Go/Rust backend execution engines in the future, supporting any LLM (Open Source or Closed).
+
+**[AR]**
+1. **التوجيه الصوتي أولاً:** تم استبدال صناديق الدردشة التقليدية بكرة صوتية تفاعلية (Voice Orb). تحدث فقط لإعداد ونشر وكلائك فوراً.
+2. **النشر المعتمد على KYC:** كل ملف `.aix` يتم رفعه إلى الاستوديو يتطلب توقيعاً مشفراً للتحقق من الهوية (KYC) عبر شبكة Pi، مما يضمن إثباتاً سيادياً للملكية.
+3. **واجهة Glassmorphism:** نظام تصميم راقٍ يعتمد على الألوان الداكنة والطبقات الشفافة، بعيداً عن الكليشيهات التقليدية.
+4. **متعدد اللغات ومستقل عن النماذج:** يعمل الاستوديو كبوابة، بينما تم تصميم طبقة التنفيذ الأساسية (AIX core) لتعمل مستقبلاً على محركات تنفيذ مبنية بـ Go/Rust تدعم أي نموذج ذكاء اصطناعي (مفتوح أو مغلق المصدر).
 
 ---
 
@@ -292,6 +329,8 @@ security:
 | 🟣 **السلامة** | توقيعات Ed25519 | *هل تم التلاعب بالملف؟* |
 | 🟢 **التفويض** | شهادات قابلة للتحقق | *ما المسموح له بفعله؟* |
 
+**لماذا يهم هذا؟** في فبراير 2026، اخترقت حملة ClawHavoc أكثر من 1,184 مهارة في سوق وكلاء بارز. بنية AIX تجعل هذا النوع من الهجمات مستحيلاً هيكلياً — لأن كل وكيل مُرتبط بإنسان حقيقي مُحقق.
+
 </td>
 </tr>
 </table>
@@ -320,8 +359,85 @@ node bin/aix-validate.js my-agent.aix --strict-kyc --security
 npm test
 ```
 
+**Anatomy of a `.aix` file | تشريح ملف `.aix`:**
+
+```yaml
+# my-agent.aix
+meta:
+  name: "research-assistant"
+  version: "1.2.0"
+  aix_version: "1.2.0"
+  lineage: ["did:axiom:parent_agent_hash"] # Agent Genealogy (v1.2)
+
+identity_layer:
+  id: "did:axiom:axiomid.app:agent_uuid"
+  kyc_provider: "pi_network"
+  kyc_proof: "verified_pi_token"
+
+economics:
+  token: "PI"
+  cost_per_task: 0.5
+  pi_smart_contract: # Protocol v23 M2M Settlement
+    address: "GDX...PI"
+    type: "pay_per_call"
+    network: "mainnet"
+
+abom: # Agent Bill of Materials (v1.2)
+  base_model: "claude-3.5-sonnet"
+  mcp_servers: ["brave-search", "filesystem"]
+  checksum: "sha256:7b5..."
+
+security:
+  checksum:
+    algorithm: "sha256"
+    value: "sha256_of_all_fields"
+  signature:
+    algorithm: "Ed25519"
+    signer: "did:axiom:axiomid.app:publisher"
+
+capabilities:
+  - "research"
+  - "summarization"
+```
+
 **[EN]** Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 **[AR]** افتح [http://localhost:3000](http://localhost:3000) في متصفحك لترى النتيجة.
+
+---
+
+## 🔒 AIX Agent Runtime Validator (CLI) (مدقق وقت تشغيل وكيل AIX)
+
+**[EN]** The repository includes a strict validation tool designed for CI/CD pipelines and deployment gateways. This ensures no agent enters the network without meeting structural, cryptographic, and security constraints. See [AXIOM_AGENTS.md](./AXIOM_AGENTS.md) for full technical specifications.
+
+**[AR]** يتضمن المستودع أداة تحقق صارمة مصممة لمسارات CI/CD وبوابات النشر. يضمن هذا عدم دخول أي وكيل إلى الشبكة دون تلبية القيود الهيكلية، التشفيرية، والأمنية. راجع [AXIOM_AGENTS.md](./AXIOM_AGENTS.md) للمواصفات التقنية الكاملة.
+
+### Usage (طريقة الاستخدام)
+
+```bash
+node bin/aix-validate.js path/to/your-agent.aix [options]
+```
+
+### Flags (الخيارات المدعومة)
+
+**[EN]**
+- `--strict-kyc`: **(Important)** Enforces that the agent is KYC-verified. Fails the validation if a valid `kyc_proof` is missing, or if the `identity_layer` DID is invalid.
+- `--security`: Verifies the SHA-256 checksum embedded in the `.aix` payload matches the actual file hash.
+- `--verbose`: Outputs deep inspection data (capabilities, APIs, MCP servers, warnings).
+
+**[AR]**
+- `--strict-kyc`: **(مهم جداً)** يفرض أن يكون الوكيل موثقاً عبر KYC. ستفشل عملية التحقق إذا كان حقل `kyc_proof` غير صالح، أو إذا كان الـ DID في `identity_layer` غير صالح.
+- `--security`: يتحقق من أن بصمة التشفير (SHA-256) المدمجة في ملف الـ `.aix` تتطابق مع التشفير الفعلي للملف.
+- `--verbose`: يعرض بيانات الفحص العميق (مثل الإمكانيات، واجهات برمجة التطبيقات APIs، وخوادم MCP، والتحذيرات).
+
+### GitHub Actions (إجراءات GitHub)
+
+**[EN]** A GitHub action is included (`.github/workflows/aix-validation.yml`) which automatically validates all modified `.aix` payloads in Pull Requests, running with the `--strict-kyc` and `--security` flags enabled. If an agent fails KYC checks, the PR is blocked.
+**[AR]** تم إدراج إجراء لـ GitHub Action (`.github/workflows/aix-validation.yml`) يقوم تلقائياً بالتحقق من جميع ملفات الـ `.aix` المعدلة في طلبات السحب (Pull Requests)، ويعمل مع تفعيل خيارات `--strict-kyc` و `--security`. إذا فشل أي وكيل في تجاوز فحص KYC، يتم حظر طلب السحب.
+
+---
+
+## 📄 Current Status (الحالة الحالية)
+✅ **RFC v0.1 published**: [#9](https://github.com/Moeabdelaziz007/aix-format/issues/9)
 
 ---
 
@@ -369,9 +485,13 @@ npm test
 
 ## 🤝 How to Contribute | كيف تساهم
 
-🇬🇧 **[EN]** We welcome contributions! Please read our [CONTRIBUTING.md] and check the open issues.
+🇬🇧 **[EN]** We welcome contributions! Please read our [CONTRIBUTING.md] and check the open issues. Join our community to discuss the future of Sovereign Agents.
+- **Rules:** Follow the [AXIOM_AGENTS.md](./AXIOM_AGENTS.md) standards.
+- **Security:** Submit security vulnerabilities via private disclosure.
 
-🇦🇪 **[AR]** نرحب بمساهماتكم! يُرجى قراءة ملف المساهمة والاطلاع على المهام المفتوحة.
+🇦🇪 **[AR]** نرحب بمساهماتكم! يُرجى قراءة ملف المساهمة والاطلاع على المهام المفتوحة. انضم إلى مجتمعنا لمناقشة مستقبل الوكلاء السياديين.
+- **القواعد:** اتبع معايير [AXIOM_AGENTS.md](./AXIOM_AGENTS.md).
+- **الأمن:** قم بالإبلاغ عن الثغرات الأمنية عبر قنوات الإفصاح الخاصة.
 
 ---
 
@@ -400,6 +520,8 @@ npm test
   <b>Jules</b>
   <br/>
   <sub>🎨 UI/UX Agent · مهندس التنفيذ والواجهة</sub>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/Google-Jules%20AI-4285F4?style=flat-square&logo=google"/>
 </td>
 
 <td align="center" width="220">
@@ -407,7 +529,9 @@ npm test
   <br/><br/>
   <b>Antigravity</b>
   <br/>
-  <sub>⚙️ Systems Architect & Security AI</sub>
+  <sub>⚙️ Systems Architect & Security AI · مهندس الأنظمة والأمن</sub>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/Google-DeepMind-EA4335?style=flat-square&logo=google"/>
 </td>
 
 <td align="center" width="220">
@@ -415,7 +539,9 @@ npm test
   <br/><br/>
   <b>Codex Agent</b>
   <br/>
-  <sub>🔐 Ed25519 & DNA Protocol</sub>
+  <sub>🔐 Ed25519 Encryption & DNA Protocol · مسؤول تشفير Ed25519 وبروتوكول DNA</sub>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/OpenAI-Codex-10a37f?style=flat-square&logo=openai&logoColor=white"/>
 </td>
 
 </tr>

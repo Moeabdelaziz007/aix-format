@@ -1,9 +1,8 @@
 {
   "name": "aix-format",
-  "version": "1.3.0",
-  "description": "AIX (Artificial Intelligence eXchange) - Standard file format for AI agents. Sovereign Protocol v1.3 with TypeScript types and Meta Arbiter support.",
+  "version": "1.2.0",
+  "description": "AIX (Artificial Intelligence eXchange) - Standard file format for AI agents (Pre-release)",
   "main": "core/parser.js",
-  "types": "types/aix.d.ts",
   "type": "module",
   "bin": {
     "aix-validate": "./bin/aix-validate.js",
@@ -14,10 +13,6 @@
     "test:verbose": "node --test --test-reporter=spec \"tests/**/*.test.js\"",
     "validate": "node bin/aix-validate.js",
     "validate:examples": "node bin/aix-validate.js examples/persona-agent.aix && node bin/aix-validate.js examples/tool-agent.aix && node bin/aix-validate.js examples/hybrid-agent.aix",
-    "generate:types:unified": "json2ts -i schemas/aix.schema.json -o types/aix.d.ts --strictIndexSignatures --unreachableDefinitions",
-    "generate:types": "json2ts -i \"schemas/**/*.json\" -o types/",
-    "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build",
     "lint": "echo 'Linting not configured yet'",
     "format": "echo 'Formatting not configured yet'",
     "docs": "echo 'Documentation generation not configured yet'"
@@ -33,11 +28,7 @@
     "ai-agents",
     "llm",
     "machine-learning",
-    "standardization",
-    "typescript",
-    "meta-arbiter",
-    "pi-network",
-    "sovereign-protocol"
+    "standardization"
   ],
   "author": {
     "name": "Mohamed H Abdelaziz",
@@ -70,7 +61,6 @@
     "schemas/",
     "examples/",
     "docs/",
-    "types/",
     "LICENSE.md",
     "COPYRIGHT.md",
     "README.md"
@@ -85,12 +75,7 @@
   ],
   "dependencies": {
     "js-yaml": "^4.1.1",
-    "smol-toml": "^1.3.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
-  },
-  "devDependencies": {
-    "json-schema-to-typescript": "^15.0.4",
-    "typescript": "^5.4.5"
   }
 }

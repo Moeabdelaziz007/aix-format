@@ -605,7 +605,7 @@ export class AIXParser {
   /**
    * Validate requirements section
    */
-  validateRequirements(requirements) {
+    validateRequirements(requirements) {
     if (requirements.hardware) {
       const hw = requirements.hardware;
       if (hw.cpu_cores !== undefined && (!Number.isInteger(hw.cpu_cores) || hw.cpu_cores < 1)) {
@@ -648,6 +648,8 @@ export class AIXParser {
       }
     }
   }
+
+
 
   /**
    * Validate pricing section
@@ -708,6 +710,7 @@ export class AIXParser {
       }
     }
   }
+
 
   /**
    * Validate Pi Network section
@@ -775,100 +778,251 @@ export class AIXParser {
 
   // ─── AI-SBOM / ABOM Validation ──────────────────────────────────────────────
 
+  /**
+   * Validate ABOM section — AI-SBOM compatible (v1.3+)
+   *
+   * Top-level ABOM fields validated:
+   *   spec_version   (optional string)  — AI-SBOM spec revision, e.g. "1.0"
+   *   generated      (optional ISO8601) — timestamp this ABOM was produced
+   *   tools          (optional array)   — toolchain that produced this ABOM
+   *   constituents   (required array)   — list of agent dependencies
+   *
+   * Per-constituent mandatory fields (AI-SBOM core):
+   *   name, version, type, purl
+   *
+   * Per-constituent optional-but-validated fields:
+   *   supplier, integrity_hash, signature, trust_tier, security_status,
+   *   license, source_registry
+   */
   validateABOM(abom) {
     const sec = 'abom';
 
+    // ── Top-level metadata ────────────────────────────────────────────────────
     if (abom.spec_version !== undefined && typeof abom.spec_version !== 'string') {
-      this.errors.push({ code: 'INVALID_TYPE', section: sec, field: 'spec_version', message: 'abom.spec_version must be a string (e.g. "1.0")' });
+      this.errors.push({
+        code: 'INVALID_TYPE',
+        section: sec,
+        field: 'spec_version',
+        message: 'abom.spec_version must be a string (e.g. "1.0")'
+      });
     }
 
     if (abom.generated !== undefined && !this.isValidISO8601(abom.generated)) {
-      this.errors.push({ code: 'INVALID_TIMESTAMP', section: sec, field: 'generated', message: 'abom.generated must be a valid ISO 8601 timestamp' });
+      this.errors.push({
+        code: 'INVALID_TIMESTAMP',
+        section: sec,
+        field: 'generated',
+        message: 'abom.generated must be a valid ISO 8601 timestamp'
+      });
     }
 
     if (abom.tools !== undefined) {
       if (!Array.isArray(abom.tools)) {
-        this.errors.push({ code: 'INVALID_TYPE', section: sec, field: 'tools', message: 'abom.tools must be an array' });
+        this.errors.push({
+          code: 'INVALID_TYPE',
+          section: sec,
+          field: 'tools',
+          message: 'abom.tools must be an array'
+        });
       } else {
         abom.tools.forEach((tool, i) => {
           if (!tool.name) {
-            this.errors.push({ code: 'MISSING_FIELD', section: `${sec}.tools`, index: i, field: 'name', message: `abom.tools[${i}] is missing required field 'name'` });
+            this.errors.push({
+              code: 'MISSING_FIELD',
+              section: `${sec}.tools`,
+              index: i,
+              field: 'name',
+              message: `abom.tools[${i}] is missing required field 'name'`
+            });
           }
         });
       }
     }
 
+    // ── Constituents array ────────────────────────────────────────────────────
     if (!abom.constituents) {
-      this.warnings.push({ code: 'ABOM_EMPTY', section: sec, message: 'abom.constituents is missing or empty — consider listing all agent dependencies' });
+      // ABOM without constituents is a warning, not a hard error
+      this.warnings.push({
+        code: 'ABOM_EMPTY',
+        section: sec,
+        message: 'abom.constituents is missing or empty — consider listing all agent dependencies'
+      });
       return;
     }
 
     if (!Array.isArray(abom.constituents)) {
-      this.errors.push({ code: 'INVALID_TYPE', section: sec, field: 'constituents', message: 'abom.constituents must be an array' });
+      this.errors.push({
+        code: 'INVALID_TYPE',
+        section: sec,
+        field: 'constituents',
+        message: 'abom.constituents must be an array'
+      });
       return;
     }
 
-    abom.constituents.forEach((item, index) => { this._validateABOMConstituent(item, index); });
+    abom.constituents.forEach((item, index) => {
+      this._validateABOMConstituent(item, index);
+    });
   }
 
+  /**
+   * Validate a single ABOM constituent against AI-SBOM spec.
+   * @private
+   */
   _validateABOMConstituent(item, index) {
     const sec = `abom.constituents[${index}]`;
     const label = item.name ? `'${item.name}'` : `at index ${index}`;
 
+    // ── Mandatory core fields (AI-SBOM minimum) ───────────────────────────────
     const mandatory = ['name', 'version', 'type', 'purl'];
     for (const field of mandatory) {
       if (!item[field]) {
-        this.errors.push({ code: 'MISSING_FIELD', section: sec, field, message: `Constituent ${label} is missing required AI-SBOM field '${field}'` });
+        this.errors.push({
+          code: 'MISSING_FIELD',
+          section: sec,
+          field,
+          message: `Constituent ${label} is missing required AI-SBOM field '${field}'`
+        });
       }
     }
 
+    // ── type enum ─────────────────────────────────────────────────────────────
     if (item.type && !ABOM_VALID_TYPES.includes(item.type)) {
-      this.errors.push({ code: 'INVALID_VALUE', section: sec, field: 'type', message: `Constituent ${label} type '${item.type}' is invalid. Must be one of: ${ABOM_VALID_TYPES.join(', ')}` });
+      this.errors.push({
+        code: 'INVALID_VALUE',
+        section: sec,
+        field: 'type',
+        message: `Constituent ${label} type '${item.type}' is invalid. Must be one of: ${ABOM_VALID_TYPES.join(', ')}`
+      });
     }
 
+    // ── purl format (Package URL) ─────────────────────────────────────────────
     if (item.purl && !ABOM_PURL_RE.test(item.purl)) {
-      this.errors.push({ code: 'INVALID_PURL', section: sec, field: 'purl', message: `Constituent ${label} has invalid purl '${item.purl}'.` });
+      this.errors.push({
+        code: 'INVALID_PURL',
+        section: sec,
+        field: 'purl',
+        message: `Constituent ${label} has invalid purl '${item.purl}'. Must follow pkg:type/namespace/name@version format`
+      });
     }
 
-    if (item.integrity_hash !== undefined && (typeof item.integrity_hash !== 'string' || !ABOM_INTEGRITY_RE.test(item.integrity_hash))) {
-      this.errors.push({ code: 'INVALID_INTEGRITY_HASH', section: sec, field: 'integrity_hash', message: `Constituent ${label} integrity_hash must follow 'algorithm:hexdigest' format` });
+    // ── integrity_hash format ─────────────────────────────────────────────────
+    if (item.integrity_hash !== undefined) {
+      if (typeof item.integrity_hash !== 'string' || !ABOM_INTEGRITY_RE.test(item.integrity_hash)) {
+        this.errors.push({
+          code: 'INVALID_INTEGRITY_HASH',
+          section: sec,
+          field: 'integrity_hash',
+          message: `Constituent ${label} integrity_hash must follow 'algorithm:hexdigest' format (e.g. sha256:abcdef...)`
+        });
+      }
     }
 
+    // ── trust_tier enum ───────────────────────────────────────────────────────
     if (item.trust_tier !== undefined) {
       if (!ABOM_VALID_TRUST_TIERS.includes(item.trust_tier)) {
-        this.errors.push({ code: 'INVALID_VALUE', section: sec, field: 'trust_tier', message: `Constituent ${label} trust_tier '${item.trust_tier}' is invalid.` });
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: sec,
+          field: 'trust_tier',
+          message: `Constituent ${label} trust_tier '${item.trust_tier}' is invalid. Must be one of: ${ABOM_VALID_TRUST_TIERS.join(', ')}`
+        });
       } else {
-        if (item.trust_tier === 'revoked') this.errors.push({ code: 'ABOM_REVOKED_CONSTITUENT', section: sec, field: 'trust_tier', message: `SECURITY: Constituent ${label} has trust_tier='revoked'.` });
-        if (item.trust_tier === 'unverified') this.warnings.push({ code: 'ABOM_UNVERIFIED_CONSTITUENT', section: sec, field: 'trust_tier', message: `Constituent ${label} has trust_tier='unverified'.` });
-        if (item.trust_tier === 'verified' && !item.integrity_hash) this.warnings.push({ code: 'ABOM_VERIFIED_WITHOUT_HASH', section: sec, field: 'integrity_hash', message: `Constituent ${label} claims trust_tier='verified' but provides no integrity_hash.` });
+        // HARD FAIL — revoked dependency must block agent loading
+        if (item.trust_tier === 'revoked') {
+          this.errors.push({
+            code: 'ABOM_REVOKED_CONSTITUENT',
+            section: sec,
+            field: 'trust_tier',
+            message: `SECURITY: Constituent ${label} has trust_tier='revoked'. Revoked dependencies must be removed before deployment.`
+          });
+        }
+        // WARN — unverified should be reviewed before production
+        if (item.trust_tier === 'unverified') {
+          this.warnings.push({
+            code: 'ABOM_UNVERIFIED_CONSTITUENT',
+            section: sec,
+            field: 'trust_tier',
+            message: `Constituent ${label} has trust_tier='unverified'. Verify before production deployment.`
+          });
+        }
+        // WARN — verified without integrity_hash is suspicious
+        if (item.trust_tier === 'verified' && !item.integrity_hash) {
+          this.warnings.push({
+            code: 'ABOM_VERIFIED_WITHOUT_HASH',
+            section: sec,
+            field: 'integrity_hash',
+            message: `Constituent ${label} claims trust_tier='verified' but provides no integrity_hash. Add hash to prove integrity.`
+          });
+        }
       }
     }
 
+    // ── security_status enum ─────────────────────────────────────────────────
     if (item.security_status !== undefined) {
       if (!ABOM_VALID_SEC_STATUSES.includes(item.security_status)) {
-        this.errors.push({ code: 'INVALID_VALUE', section: sec, field: 'security_status', message: `Constituent ${label} security_status '${item.security_status}' is invalid.` });
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: sec,
+          field: 'security_status',
+          message: `Constituent ${label} security_status '${item.security_status}' is invalid. Must be one of: ${ABOM_VALID_SEC_STATUSES.join(', ')}`
+        });
       } else {
-        if (item.security_status === 'revoked') this.errors.push({ code: 'ABOM_REVOKED_CONSTITUENT', section: sec, field: 'security_status', message: `SECURITY: Constituent ${label} has security_status='revoked'.` });
-        if (item.security_status === 'vulnerable') this.warnings.push({ code: 'ABOM_VULNERABLE_CONSTITUENT', section: sec, field: 'security_status', message: `Constituent ${label} has known vulnerabilities.` });
+        // HARD FAIL — revoked via security_status
+        if (item.security_status === 'revoked') {
+          this.errors.push({
+            code: 'ABOM_REVOKED_CONSTITUENT',
+            section: sec,
+            field: 'security_status',
+            message: `SECURITY: Constituent ${label} has security_status='revoked'. This dependency must be replaced before deployment.`
+          });
+        }
+        // WARN — known vulnerability
+        if (item.security_status === 'vulnerable') {
+          this.warnings.push({
+            code: 'ABOM_VULNERABLE_CONSTITUENT',
+            section: sec,
+            field: 'security_status',
+            message: `Constituent ${label} has known vulnerabilities (security_status='vulnerable'). Update or mitigate before production.`
+          });
+        }
       }
     }
 
+    // ── supplier field (optional but should be a non-empty string) ────────────
     if (item.supplier !== undefined && (typeof item.supplier !== 'string' || item.supplier.trim() === '')) {
-      this.errors.push({ code: 'INVALID_VALUE', section: sec, field: 'supplier', message: `Constituent ${label} supplier must be a non-empty string` });
+      this.errors.push({
+        code: 'INVALID_VALUE',
+        section: sec,
+        field: 'supplier',
+        message: `Constituent ${label} supplier must be a non-empty string`
+      });
     }
 
+    // ── license field (optional string) ──────────────────────────────────────
     if (item.license !== undefined && typeof item.license !== 'string') {
-      this.errors.push({ code: 'INVALID_TYPE', section: sec, field: 'license', message: `Constituent ${label} license must be a string` });
+      this.errors.push({
+        code: 'INVALID_TYPE',
+        section: sec,
+        field: 'license',
+        message: `Constituent ${label} license must be a string (SPDX identifier preferred, e.g. 'MIT', 'Apache-2.0')`
+      });
     }
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
 
   /**
    * Validate security (checksums and signatures)
    */
   validateSecurity(data, content) {
-    if (!data.security || !data.security.checksum) return;
+    if (!data.security || !data.security.checksum) {
+      return; // Already reported in structure validation
+    }
 
     const { algorithm, value } = data.security.checksum;
+
+    // Calculate checksum on content without security section
     const contentWithoutSecurity = this.removeSecuritySection(content);
     const calculated = this.calculateChecksum(contentWithoutSecurity, algorithm);
 
@@ -882,6 +1036,9 @@ export class AIXParser {
     }
   }
 
+  /**
+   * Remove security section from content for checksum calculation
+   */
   removeSecuritySection(content) {
     const lines = content.split('\n');
     const filtered = [];
@@ -890,12 +1047,14 @@ export class AIXParser {
 
     for (const line of lines) {
       const trimmed = line.trim();
+      // Detect security section start
       if (trimmed.startsWith('security:')) {
         inSecurity = true;
         securityIndent = line.search(/\S/);
         continue;
       }
       
+      // Check if we've reached another top-level section
       if (inSecurity) {
         const currentIndent = line.search(/\S/);
         if (currentIndent !== -1 && currentIndent <= securityIndent && trimmed !== '') {
@@ -903,16 +1062,23 @@ export class AIXParser {
         }
       }
 
-      if (!inSecurity) filtered.push(line);
+      if (!inSecurity) {
+        filtered.push(line);
+      }
     }
 
     return filtered.join('\n').trim();
   }
 
+  /**
+   * Calculate checksum
+   */
   calculateChecksum(content, algorithm = 'sha256') {
     const normalized = content.trim().replace(/\r\n/g, '\n');
     return crypto.createHash(algorithm).update(normalized, 'utf8').digest('hex');
   }
+
+
 
   timingSafeEqualHex(a, b) {
     if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
@@ -923,6 +1089,9 @@ export class AIXParser {
     }
   }
 
+  /**
+   * Validation helpers
+   */
   isValidID(id) {
     const axiomRegex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
     const webRegex = /^did:web:[a-zA-Z0-9.\-]+(:[a-zA-Z0-9.\-]+)*$/i;
@@ -932,6 +1101,8 @@ export class AIXParser {
   isValidISO8601(timestamp) {
     const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
     if (!regex.test(timestamp)) return false;
+
+    // Validate actual date
     try {
       const date = new Date(timestamp);
       return !isNaN(date.getTime());
@@ -946,7 +1117,12 @@ export class AIXParser {
   }
 
   isValidURL(url) {
-    try { new URL(url); return true; } catch { return false; }
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
@@ -957,9 +1133,6 @@ export class AIXAgent {
   constructor(data, warnings = []) {
     this.data = data;
     this.warnings = warnings;
-    // FIX: AIXAgent needs its own errors array for standalone validation calls
-    // (e.g. validateLiveVoice called outside of AIXParser context)
-    this.errors = [];
   }
 
   get meta() { return this.data.meta; }
@@ -978,30 +1151,69 @@ export class AIXAgent {
   get abom() { return this.data.abom; }
   get lineage() { return this.data.meta?.lineage || []; }
 
+  /**
+   * Get agent capabilities
+   */
   getCapabilities() {
     const capabilities = [];
-    if (this.skills.length > 0) capabilities.push(...this.skills.filter(s => s.enabled !== false).map(s => s.name));
-    if (this.apis.length > 0) capabilities.push('api_integration');
-    if (this.mcp) capabilities.push('mcp_servers');
-    if (this.requirements?.vla) capabilities.push('vla');
+
+    if (this.skills.length > 0) {
+      capabilities.push(...this.skills.filter(s => s.enabled !== false).map(s => s.name));
+    }
+
+    if (this.apis.length > 0) {
+      capabilities.push('api_integration');
+    }
+
+    if (this.mcp) {
+      capabilities.push('mcp_servers');
+    }
+
+    if (this.requirements && this.requirements.vla) {
+      capabilities.push('vla');
+    }
+
     if (this.memory) {
       if (this.memory.episodic?.enabled) capabilities.push('episodic_memory');
       if (this.memory.semantic?.enabled) capabilities.push('semantic_memory');
       if (this.memory.procedural?.enabled) capabilities.push('procedural_memory');
     }
+
     return capabilities;
   }
 
+  /**
+   * Check if operation is authorized
+   */
   isAuthorized(operation) {
-    if (!this.security?.capabilities) return true;
+    if (!this.security.capabilities) {
+      return true; // No restrictions
+    }
+
     const { allowed_operations } = this.security.capabilities;
-    if (allowed_operations && !allowed_operations.includes(operation)) return false;
+
+    if (allowed_operations && !allowed_operations.includes(operation)) {
+      return false;
+    }
+
     return true;
   }
 
+  /**
+   * Return an AI-SBOM summary of this agent's ABOM for CI reporting.
+   * @returns {{ total: number, verified: number, unverified: number, revoked: number, vulnerable: number, missing_hash: number }}
+   */
   abomSummary() {
     const constituents = this.abom?.constituents || [];
-    const summary = { total: constituents.length, verified: 0, community: 0, unverified: 0, revoked: 0, vulnerable: 0, missing_hash: 0 };
+    const summary = {
+      total: constituents.length,
+      verified: 0,
+      community: 0,
+      unverified: 0,
+      revoked: 0,
+      vulnerable: 0,
+      missing_hash: 0
+    };
     for (const c of constituents) {
       const tier = c.trust_tier || 'unverified';
       if (summary[tier] !== undefined) summary[tier]++;
@@ -1011,35 +1223,23 @@ export class AIXAgent {
     return summary;
   }
 
+  /**
+   * Get agent summary
+   */
   toString() {
     return `AIX Agent: ${this.meta.name} (${this.meta.id})`;
   }
 
   /**
-   * Validate Live Voice settings.
-   * Results are stored in this.errors and this.warnings.
-   * @param {object} voice - live_voice section from AIX manifest
-   * @returns {{ errors: Array, warnings: Array }} validation result
+   * Validate Live Voice settings
    */
   validateLiveVoice(voice) {
-    // Reset per-call so repeated calls don't accumulate stale results
-    this.errors = [];
-
-    if (!voice || typeof voice !== 'object') {
-      this.errors.push({
-        code: 'INVALID_INPUT',
-        section: 'live_voice',
-        message: 'validateLiveVoice: voice argument must be a non-null object'
-      });
-      return { errors: this.errors, warnings: this.warnings };
-    }
-
     if (!voice.provider) {
       this.errors.push({
         code: 'MISSING_FIELD',
         section: 'live_voice',
         field: 'provider',
-        message: 'live_voice requires a provider.'
+        message: "live_voice requires a provider."
       });
     } else {
       const allowedProviders = ['openai-realtime', 'hume', 'elevenlabs', 'generic'];
@@ -1048,11 +1248,10 @@ export class AIXAgent {
           code: 'INVALID_VALUE',
           section: 'live_voice',
           field: 'provider',
-          message: 'live_voice provider must be one of: ' + allowedProviders.join(', ')
+          message: "live_voice provider must be one of: " + allowedProviders.join(', ')
         });
       }
     }
-
-    return { errors: this.errors, warnings: this.warnings };
   }
+
 }
