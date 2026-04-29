@@ -534,6 +534,16 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
   <img src="https://img.shields.io/badge/Google-DeepMind-EA4335?style=flat-square&logo=google"/>
 </td>
 
+<td align="center" width="220">
+  <img src="https://img.shields.io/badge/AI-Codex%20Agent-111827?style=for-the-badge&logo=openai&logoColor=white" height="40"/>
+  <br/><br/>
+  <b>Codex Agent</b>
+  <br/>
+  <sub>🔐 Ed25519 Encryption & DNA Protocol · مسؤول تشفير Ed25519 وبروتوكول DNA</sub>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/OpenAI-Codex-10a37f?style=flat-square&logo=openai&logoColor=white"/>
+</td>
+
 </tr>
 </table>
 

@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: true,
+  poweredByHeader: false,
+  outputFileTracingRoot: path.join(__dirname, "../../"),
+  transpilePackages: ["aix-format"],
+  experimental: {
+    externalDir: true,
+  },
 };
 
 export default nextConfig;

@@ -1,27 +1,30 @@
+@import "tailwindcss";
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
+@source "../../../core/**/*.{js,ts,jsx,tsx,mdx}";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @theme {
-  --color-background: #0c1324;
+  --color-background: #090909;
 
-  --color-surface: #0c1324;
-  --color-surface-bright: #33394c;
-  --color-surface-container: #191f31;
-  --color-surface-container-high: #23293c;
-  --color-surface-container-highest: #2e3447;
-  --color-surface-container-low: #151b2d;
-  --color-surface-container-lowest: #070d1f;
+  --color-surface: #101010;
+  --color-surface-bright: #2b2b2b;
+  --color-surface-container: #171717;
+  --color-surface-container-high: #1f1f1f;
+  --color-surface-container-highest: #2a2a2a;
+  --color-surface-container-low: #121212;
+  --color-surface-container-lowest: #080808;
 
-  --color-primary: #00dbe9;
-  --color-primary-dim: #008f98;
-  --color-secondary: #d2bbff;
+  --color-primary: #39ff14;
+  --color-primary-dim: #1ea50f;
+  --color-secondary: #95a5a6;
 
-  --color-on-background: #dce1fb;
-  --color-on-surface: #dce1fb;
-  --color-on-surface-variant: #c6c6cd;
+  --color-on-background: #f4f4f4;
+  --color-on-surface: #f1f1f1;
+  --color-on-surface-variant: #a3a3a3;
 
-  --color-glass-border: rgba(69, 70, 77, 0.15);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
 
   --font-display: var(--font-manrope);
   --font-body: var(--font-inter);
@@ -41,19 +44,23 @@
 
 @layer utilities {
   .glass-panel {
-    background: rgba(46, 52, 71, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background:
+      linear-gradient(135deg, rgba(57, 255, 20, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%),
+      rgba(20, 20, 20, 0.55);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
     border: 1px solid var(--color-glass-border);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   }
 
   .glass-panel-heavy {
-    background: rgba(35, 41, 60, 0.6);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
-    border: 1px solid rgba(0, 219, 233, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background:
+      radial-gradient(circle at top left, rgba(57, 255, 20, 0.13), transparent 60%),
+      rgba(17, 17, 17, 0.72);
+    backdrop-filter: blur(38px);
+    -webkit-backdrop-filter: blur(38px);
+    border: 1px solid rgba(57, 255, 20, 0.14);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
   }
 
   .text-gradient {

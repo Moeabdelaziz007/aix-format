@@ -1,0 +1,20 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build --workspace=studio",
+  "devCommand": "npm run dev --workspace=studio",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.axiomid.app"
+        }
+      ],
+      "destination": "https://axiomid.app/$1",
+      "permanent": true
+    }
+  ]
+}
