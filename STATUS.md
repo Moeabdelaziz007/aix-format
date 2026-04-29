@@ -335,5 +335,5 @@ This work represents applied research in:
 
 *Making AI agents portable, secure, and interoperable.*
 
-**Copyright © 2025 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
+**Copyright © 2026 Mohamed H Abdelaziz / AMRIKYY AI Solutions**
 

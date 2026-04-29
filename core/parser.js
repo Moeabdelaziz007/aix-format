@@ -5,7 +5,7 @@
  * Zero-dependency parser for AIX (Artificial Intelligence eXchange) files.
  * Supports YAML, JSON, and TOML formats with built-in validation.
  * 
- * Copyright © 2025 Mohamed Abdelaziz / AMRIKYY AI Solutions
+ * Copyright © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions
  * Licensed under MIT License - See LICENSE.md
  */
 

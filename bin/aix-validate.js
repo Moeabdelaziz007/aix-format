@@ -9,7 +9,7 @@
  * 
  * Usage: aix-validate <file.aix> [--verbose] [--security] [--strict-kyc]
  * 
- * Copyright © 2025 Mohamed Abdelaziz / AMRIKYY AI Solutions
+ * Copyright © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions
  * Licensed under MIT License - See LICENSE.md
  */
 

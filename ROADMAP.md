@@ -802,7 +802,7 @@ Mohamed, you're building the future of agent interoperability. Let's make it uns
 **"AIX: The Internet Protocol of AI Agents"**
 
 **Built by:** Mohamed H Abdelaziz / AMRIKYY AI Solutions  
-**Copyright © 2025** All Rights Reserved.
+**Copyright © 2026** All Rights Reserved.
 
 
 ## 🧠 Phase 4: Sovereign Automated Agent Ecosystem (Q3 2026)
