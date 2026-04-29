@@ -46,15 +46,31 @@
   - Integration with `axiomid.app` for identity.
   - One-click export to Pi App Studio format.
 
-## Implementation Progress
+## Phase 4: Sovereign Protocol v1.2 (Completed 2026-04-29)
+### Key Accomplishments
+- **Schema Evolution (v1.2)**:
+  - **Agent Lineage**: Added `lineage` to `meta` for genealogical tracking.
+  - **ABOM (Agent Bill of Materials)**: Introduced root-level `abom` for supply chain transparency.
+  - **Economics Layer**: Consolidated pricing into `economics` root, adding `pi_smart_contract` for Pi Network M2M settlements.
+- **Core Parser Upgrades**:
+  - Refactored `AIXParser` to use `js-yaml` for robust multi-format support.
+  - Added validation logic for new Sovereign structures (`lineage`, `abom`, `economics`).
+  - Enhanced AxiomID DID parser to support `did:web` alongside `did:axiom`.
+- **Validation & Examples**:
+  - Updated `examples/pi-agent.aix` to v1.2 standard.
+  - Verified v1.2 compatibility with `bin/aix-validate.js`.
+
+### Implementation Progress
 - [x] Analyze Jules AI contributions (Rating: 9/10).
 - [x] Update Parser logic for Pi Network validation.
 - [x] Update JSON Schema with Pi definitions.
 - [x] Create `examples/pi-agent.aix`.
+- [x] Evolve Schema to v1.2 (Lineage, ABOM, Economics).
+- [x] Refactor Parser for v1.2 structures and `js-yaml` robustness.
 - [ ] Design and build "Pi AIX Studio" POC.
 
-### Implementation Strategy for AIX-Pi
-1.  **Identity Mapping**: Bridge `axiomid.app` DIDs with Pi Network KYCed accounts.
-2.  **Payment Layer**: Extend `pricing` section to support `currency: PI` and Pi SDK payment flows.
-3.  **Dev Studio Tooling**: Create a generator that converts AIX manifests into Pi App Studio configurations.
-4.  **Smart Contracts**: Use AIX to define PiRC-2 subscription parameters.
+### AIX v1.2 Design Philosophy
+The "Sovereign Era" update focuses on the three pillars of AI independence:
+1. **Provenance**: Knowing where an agent came from (Lineage).
+2. **Transparency**: Knowing what an agent is made of (ABOM).
+3. **Autonomy**: Providing the economic tools for self-sustenance (Pi Smart Contracts).

@@ -1,0 +1,29 @@
+# AIX Format - Sovereign AI Agent Standard
+
+The Artificial Intelligence eXchange (AIX) is a Tier 1 sovereign open-source standard for defining, distributing, and securing AI agents. It prioritizes **Identity** (Pi Network KYC), **Integrity** (Ed25519 signatures), and **Economics** (M2M micro-transactions).
+
+## Core Specification v1.2.0
+
+### Key Objects
+- **meta**: Agent provenance (name, version, lineage).
+- **identity_layer**: Cryptographic binding to a verified identity (did:axiom, did:web).
+- **economics**: M2M settlement configuration (pi_smart_contract).
+- **abom**: Agent Bill of Materials (base models, tools, MCP servers).
+- **security**: SHA-256 checksums and Ed25519 signatures.
+
+### File Formats
+- .aix (Primary manifest, supports YAML/JSON/TOML)
+
+### Development Constraints
+- Use `core/parser.js` for all manifest interactions.
+- Schema: `schemas/aix-enhanced.schema.json`.
+- Validation: `bin/aix-validate.js`.
+
+## Tooling & CLI
+- `npm test`: Run full suite.
+- `node bin/aix-validate.js <file> --strict-kyc`: Production-grade validation.
+
+## Documentation References
+- [README.md](file:///Users/cryptojoker710/Desktop/aix-format/README.md) - Vision & Onboarding
+- [AXIOM_AGENTS.md](file:///Users/cryptojoker710/Desktop/aix-format/AXIOM_AGENTS.md) - Engineering Bible for Agents
+- [openmemory.md](file:///Users/cryptojoker710/Desktop/aix-format/openmemory.md) - Project History & Context

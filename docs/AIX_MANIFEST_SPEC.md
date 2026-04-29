@@ -1,9 +1,9 @@
-# AIX Manifest Specification v1.1
+# AIX Manifest Specification v1.2
 
 **Title:** AIX Manifest File Format - Detached Signature Architecture  
-**Version:** 1.1  
+**Version:** 1.2  
 **Status:** Stable  
-**Date:** April 2026
+**Date:** May 2026
 **Author:** Mohamed H Abdelaziz  
 **Organization:** AMRIKYY AI Solutions  
 **Contact:** amrikyy@gmail.com
@@ -44,7 +44,7 @@ agent.aix.manifest → Manifest file (hashes + signatures)
 The `.aix` file contains **only agent content**, with **NO security metadata**:
 
 ```yaml
-aix_version: "1.1"
+aix_version: "1.2"
 
 meta:
   id: "550e8400-e29b-41d4-a716-446655440001"

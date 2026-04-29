@@ -1,7 +1,7 @@
 # 🌌 AXIOM SOVEREIGN AGENT MANIFEST
 
 ## 📜 Protocol Overview
-**Version:** 0.4.0 (Alpha-Sovereign)
+**Version:** 1.2.0 (Sovereign)
 **Standard:** AIX-GFM-VLA
 **Identity:** `did:axiom:axiomid.app:<id>` | `did:web:<domain>`
 

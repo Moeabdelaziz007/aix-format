@@ -1,9 +1,9 @@
-# AIX File Format Specification v1.1
+# AIX File Format Specification v1.2
 
 **Title:** AIX (Artificial Intelligence e**X**change) File Format Specification  
-**Version:** 1.1  
+**Version:** 1.2  
 **Status:** Stable  
-**Date:** April 2026
+**Date:** May 2026
 **Author:** Mohamed H Abdelaziz  
 **Organization:** AMRIKYY AI Solutions  
 **Contact:** amrikyy@gmail.com  

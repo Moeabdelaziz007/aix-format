@@ -2,7 +2,7 @@
 
 ## AIX (Artificial Intelligence eXchange) Format Specification
 
-**Version:** 1.0  
+**Version:** 1.2.0  
 **Copyright © 2026 Mohamed H Abdelaziz**
 **Organization:** AMRIKYY AI Solutions  
 **All Rights Reserved.**

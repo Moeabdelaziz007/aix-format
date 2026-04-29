@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://amrikyy.ai/schemas/aix-enhanced.schema.json",
   "title": "Enhanced AIX Format Schema",
-  "description": "Enhanced JSON Schema for AIX (Artificial Intelligence eXchange) file format with requirements and pricing fields. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026",
+  "description": "Enhanced JSON Schema for AIX (Artificial Intelligence eXchange) v1.2 - Sovereign Protocol. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026",
   "type": "object",
   "required": [
     "meta",
@@ -164,6 +164,36 @@
         "runtime_version": {
           "type": "string",
           "description": "Required runtime version"
+        },
+        "lineage": {
+          "type": "array",
+          "description": "Agent Genealogy and heritage tracking (Agent Lineage)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "parent_id": {
+                "type": "string",
+                "description": "DID or ID of the parent agent"
+              },
+              "relationship": {
+                "type": "string",
+                "enum": [
+                  "fork",
+                  "clone",
+                  "ancestor",
+                  "template"
+                ]
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "signature": {
+                "type": "string",
+                "description": "Cryptographic proof of lineage"
+              }
+            }
+          }
         }
       },
       "additionalProperties": true
@@ -701,104 +731,193 @@
         }
       }
     },
-    "pricing": {
+    "abom": {
       "type": "object",
-      "description": "Pricing model for agent usage",
+      "description": "Agent Bill of Materials (ABOM) for supply chain and dependency transparency",
       "properties": {
-        "model": {
-          "type": "string",
-          "description": "Pricing model type",
-          "enum": [
-            "pay_per_call",
-            "subscription",
-            "freemium",
-            "tiered"
-          ],
-          "default": "pay_per_call"
-        },
-        "cost_per_call": {
-          "type": "object",
-          "description": "Cost per API call",
-          "properties": {
-            "amount": {
-              "type": "number",
-              "description": "Cost amount",
-              "minimum": 0
-            },
-            "currency": {
-              "type": "string",
-              "description": "Currency code (ISO 4217)",
-              "default": "SOL",
-              "examples": [
-                "PI",
-                "SOL",
-                "USD",
-                "EUR"
-              ]
-            }
-          }
-        },
-        "subscription": {
-          "type": "object",
-          "description": "Subscription pricing",
-          "properties": {
-            "monthly_fee": {
-              "type": "object",
-              "properties": {
-                "amount": {
-                  "type": "number",
-                  "minimum": 0
-                },
-                "currency": {
-                  "type": "string",
-                  "default": "SOL"
-                }
-              }
-            },
-            "included_calls": {
-              "type": "integer",
-              "description": "Number of calls included in subscription",
-              "minimum": 0
-            },
-            "additional_call_cost": {
-              "type": "object",
-              "properties": {
-                "amount": {
-                  "type": "number",
-                  "minimum": 0
-                },
-                "currency": {
-                  "type": "string",
-                  "default": "SOL"
-                }
-              }
-            }
-          }
-        },
-        "tiered_pricing": {
+        "constituents": {
           "type": "array",
-          "description": "Tiered pricing based on usage",
+          "description": "List of constituent modules, base models, and toolsets",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "version"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Constituent name"
+              },
+              "version": {
+                "type": "string",
+                "description": "Constituent version"
+              },
+              "hash": {
+                "type": "string",
+                "description": "SHA-256 hash for integrity"
+              },
+              "license": {
+                "type": "string",
+                "description": "License of the constituent"
+              }
+            }
+          }
+        },
+        "attestations": {
+          "type": "array",
+          "description": "Cryptographic attestations for the agent's materials",
           "items": {
             "type": "object",
             "properties": {
-              "min_calls": {
-                "type": "integer",
-                "minimum": 0
+              "type": {
+                "type": "string"
               },
-              "max_calls": {
-                "type": "integer",
-                "minimum": 0
+              "value": {
+                "type": "string"
               },
-              "cost_per_call": {
+              "signer": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "economics": {
+      "type": "object",
+      "description": "Economic and transaction layer for agent settlements and payments",
+      "properties": {
+        "pi_smart_contract": {
+          "type": "object",
+          "description": "Pi Network Smart Contract interface for automated settlements",
+          "required": [
+            "address",
+            "network"
+          ],
+          "properties": {
+            "address": {
+              "type": "string",
+              "description": "Contract address on the Pi Network"
+            },
+            "network": {
+              "type": "string",
+              "enum": [
+                "mainnet",
+                "testnet",
+                "sandbox"
+              ]
+            },
+            "escrow_enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "abi_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "pricing": {
+          "type": "object",
+          "description": "Pricing model for agent usage (Legacy Pricing included in Economics Layer)",
+          "properties": {
+            "model": {
+              "type": "string",
+              "description": "Pricing model type",
+              "enum": [
+                "pay_per_call",
+                "subscription",
+                "freemium",
+                "tiered"
+              ],
+              "default": "pay_per_call"
+            },
+            "cost_per_call": {
+              "type": "object",
+              "description": "Cost per API call",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "description": "Cost amount",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "description": "Currency code (ISO 4217)",
+                  "default": "PI",
+                  "examples": [
+                    "PI",
+                    "SOL",
+                    "USD",
+                    "EUR"
+                  ]
+                }
+              }
+            },
+            "subscription": {
+              "type": "object",
+              "description": "Subscription pricing",
+              "properties": {
+                "monthly_fee": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string",
+                      "default": "PI"
+                    }
+                  }
+                },
+                "included_calls": {
+                  "type": "integer",
+                  "description": "Number of calls included in subscription",
+                  "minimum": 0
+                },
+                "additional_call_cost": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string",
+                      "default": "PI"
+                    }
+                  }
+                }
+              }
+            },
+            "tiered_pricing": {
+              "type": "array",
+              "description": "Tiered pricing based on usage",
+              "items": {
                 "type": "object",
                 "properties": {
-                  "amount": {
-                    "type": "number",
+                  "min_calls": {
+                    "type": "integer",
                     "minimum": 0
                   },
-                  "currency": {
-                    "type": "string",
-                    "default": "SOL"
+                  "max_calls": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "cost_per_call": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "currency": {
+                        "type": "string",
+                        "default": "PI"
+                      }
+                    }
                   }
                 }
               }
@@ -964,8 +1083,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique Axiom identifier enforcing did:axiom:axiomid.app:<id> format.",
-          "pattern": "^did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+$"
+          "description": "Unique Axiom identifier enforcing did:axiom or did:web format.",
+          "pattern": "^(did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+|did:web:[a-zA-Z0-9.\\-]+(:[a-zA-Z0-9.\\-]+)*)$"
         },
         "authority": {
           "type": "string",

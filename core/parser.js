@@ -11,6 +11,7 @@
 
 import fs from 'fs';
 import crypto from 'crypto';
+import yaml from 'js-yaml';
 
 /**
  * AIXParser - Main parser class for AIX files
@@ -124,181 +125,10 @@ export class AIXParser {
   }
 
   /**
-   * Parse YAML content (simplified implementation)
-   * Note: This is a basic YAML parser for demonstration.
-   * For production, consider using a full YAML library.
+   * Parse YAML content using js-yaml
    */
   parseYAML(content) {
-    const result = {};
-    const lines = content.split('\n');
-    let currentPath = [];
-    let currentObj = result;
-    let multilineKey = null;
-    let multilineContent = [];
-    let inMultiline = false;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      
-      // Skip comments and empty lines
-      if (line.trim().startsWith('#') || line.trim() === '') continue;
-
-      const indent = line.search(/\S/);
-      if (indent === -1) continue;
-
-      const trimmed = line.trim();
-
-      // Handle multi-line string end
-      if (inMultiline && indent <= currentPath[currentPath.length - 1]?.indent) {
-        // Save multi-line content
-        const parent = currentPath[currentPath.length - 1]?.obj || result;
-        parent[multilineKey] = multilineContent.join('\n');
-        inMultiline = false;
-        multilineKey = null;
-        multilineContent = [];
-      }
-
-      // Multi-line string content
-      if (inMultiline) {
-        multilineContent.push(trimmed);
-        continue;
-      }
-
-      // Array item
-      if (trimmed.startsWith('- ')) {
-        const value = trimmed.substring(2).trim();
-        
-        while (currentPath.length > 0 && currentPath[currentPath.length - 1].indent >= indent) {
-          currentPath.pop();
-        }
-        
-        const parent = currentPath.length > 0 ? currentPath[currentPath.length - 1].obj : result;
-        const lastKey = currentPath.length > 0 ? currentPath[currentPath.length - 1].key : null;
-        
-        if (lastKey && !Array.isArray(parent[lastKey])) {
-          if (parent[lastKey] === '' || parent[lastKey] === null || parent[lastKey] === undefined || Object.keys(parent[lastKey]).length === 0) {
-            parent[lastKey] = [];
-          } else {
-            parent[lastKey] = [parent[lastKey]];
-          }
-        }
-        
-        if (lastKey) {
-          let parsedValue;
-          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
-            // Object in array
-            parsedValue = this.parseYAMLObject(value);
-          } else {
-            parsedValue = this.parseYAMLValue(value);
-          }
-
-          if (Array.isArray(parent)) {
-            parent.push(parsedValue);
-          } else {
-            parent[lastKey].push(parsedValue);
-          }
-        } else if (Array.isArray(parent)) {
-          let parsedValue;
-          if (value.includes(':') && !value.match(/^[a-zA-Z0-9_]+:\/\//)) {
-            parsedValue = this.parseYAMLObject(value);
-          } else {
-            parsedValue = this.parseYAMLValue(value);
-          }
-          parent.push(parsedValue);
- main
-        }
-        continue;
-      }
-
-      // Key-value pair
-      if (trimmed.includes(':') && !trimmed.match(/^[a-zA-Z0-9_]+:\/\//)) {
-        const colonIndex = trimmed.indexOf(':');
-        const key = trimmed.substring(0, colonIndex).trim();
-        let value = trimmed.substring(colonIndex + 1).trim();
-
-        // Adjust current object based on indentation
-        while (currentPath.length > 0 && currentPath[currentPath.length - 1].indent >= indent) {
-          currentPath.pop();
-        }
-        
-        currentObj = currentPath.length > 0 ? currentPath[currentPath.length - 1].newObj : result;
-
-        if (value === '' || value === '|' || value === '>') {
-          // New object or multi-line string
-          if (value === '|' || value === '>') {
-            multilineKey = key;
-            multilineContent = [];
-            inMultiline = true;
-            currentObj[key] = '';
-          } else {
-            // It could be an object or an array, so we init with an empty object.
-            // If it's an array, it will be replaced by [] in the array logic.
-            const newObj = {};
-            currentObj[key] = newObj;
-            currentPath.push({ indent, obj: currentObj, key, newObj });
-          }
-        } else {
-          // It's a property on the last key if we are properly indented
-          currentObj[key] = this.parseYAMLValue(value);
-        }
-      }
-    }
-
-    // Handle remaining multi-line content
-    if (inMultiline && multilineKey) {
-      const parent = currentPath[currentPath.length - 1]?.obj || result;
-      parent[multilineKey] = multilineContent.join('\n');
-    }
-
-    return result;
-  }
-
-  /**
-   * Parse YAML value to appropriate JavaScript type
-   */
-  parseYAMLValue(value) {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    if (value === 'null') return null;
-    if (value.startsWith('[') && value.endsWith(']')) {
-      try {
-        return JSON.parse(value);
-      } catch {
-        return value;
-      }
-    }
-    if (value.startsWith('{') && value.endsWith('}')) {
-      try {
-        return JSON.parse(value);
-      } catch {
-        return value;
-      }
-    }
-    if (value.startsWith('"') && value.endsWith('"')) {
-      return value.slice(1, -1);
-    }
-    if (value.startsWith("'") && value.endsWith("'")) {
-      return value.slice(1, -1);
-    }
-    if (!isNaN(value) && value !== '') {
-      return Number(value);
-    }
-    return value;
-  }
-
-  /**
-   * Parse YAML object from string
-   */
-  parseYAMLObject(str) {
-    const obj = {};
-    const parts = str.split(',');
-    for (const part of parts) {
-      if (part.includes(':')) {
-        const [key, value] = part.split(':').map(s => s.trim());
-        obj[key] = this.parseYAMLValue(value);
-      }
-    }
-    return obj;
+    return yaml.load(content);
   }
 
   /**
@@ -381,6 +211,8 @@ export class AIXParser {
     if (data.pricing) this.validatePricing(data.pricing);
     if (data.identity_layer) this.validateIdentityLayer(data.identity_layer);
     if (data.pi_network) this.validatePiNetwork(data.pi_network);
+    if (data.economics) this.validateEconomics(data.economics);
+    if (data.abom) this.validateABOM(data.abom);
   }
 
   /**
@@ -428,6 +260,30 @@ export class AIXParser {
         message: 'Invalid semantic version format'
       });
     }
+
+    // Validate lineage if present
+    if (meta.lineage) {
+      if (!Array.isArray(meta.lineage)) {
+        this.errors.push({
+          code: 'INVALID_TYPE',
+          section: 'meta',
+          field: 'lineage',
+          message: 'Lineage must be an array'
+        });
+      } else {
+        meta.lineage.forEach((entry, index) => {
+          if (!entry.parent_id) {
+            this.errors.push({
+              code: 'MISSING_FIELD',
+              section: 'meta.lineage',
+              index,
+              field: 'parent_id',
+              message: `Lineage entry at index ${index} is missing 'parent_id'`
+            });
+          }
+        });
+      }
+    }
   }
 
   /**
@@ -446,22 +302,39 @@ export class AIXParser {
       }
     }
 
-    if (identity_layer.authority && identity_layer.authority !== 'axiomid.app') {
-      this.errors.push({
-        code: 'INVALID_AUTHORITY',
-        section: 'identity_layer',
-        field: 'authority',
-        message: 'Authority must be axiomid.app'
-      });
-    }
+    if (identity_layer.id) {
+      if (!this.isValidID(identity_layer.id)) {
+        this.errors.push({
+          code: 'INVALID_ID',
+          section: 'identity_layer',
+          field: 'id',
+          message: 'Invalid ID format'
+        });
+      }
 
-    if (identity_layer.id && !this.isValidID(identity_layer.id)) {
-      this.errors.push({
-        code: 'INVALID_ID',
-        section: 'identity_layer',
-        field: 'id',
-        message: 'Invalid ID format'
-      });
+      // Cross-validate authority
+      if (identity_layer.authority) {
+        if (identity_layer.id.startsWith('did:axiom:')) {
+          if (identity_layer.authority !== 'axiomid.app') {
+            this.errors.push({
+              code: 'INVALID_AUTHORITY',
+              section: 'identity_layer',
+              field: 'authority',
+              message: "Authority must be 'axiomid.app' for did:axiom"
+            });
+          }
+        } else if (identity_layer.id.startsWith('did:web:')) {
+          const domain = identity_layer.id.split(':')[2];
+          if (identity_layer.authority !== domain) {
+            this.warnings.push({
+              code: 'AUTHORITY_MISMATCH',
+              section: 'identity_layer',
+              field: 'authority',
+              message: `Authority '${identity_layer.authority}' does not match did:web domain '${domain}'`
+            });
+          }
+        }
+      }
     }
 
     if (identity_layer.issuedAt && !this.isValidISO8601(identity_layer.issuedAt)) {
@@ -822,40 +695,6 @@ export class AIXParser {
     }
   }
 
-  /**
-   * Validate identity_layer section
-   */
-  validateIdentityLayer(identity_layer) {
-    const required = ['id', 'authority', 'issuedAt'];
-    for (const field of required) {
-      if (!identity_layer[field]) {
-        this.errors.push({
-          code: 'MISSING_FIELD',
-          section: 'identity_layer',
-          field,
-          message: `Required field 'identity_layer.${field}' is missing`
-        });
-      }
-    }
-
-    if (identity_layer.authority && identity_layer.authority !== 'axiomid.app') {
-      this.errors.push({
-        code: 'INVALID_AUTHORITY',
-        section: 'identity_layer',
-        field: 'authority',
-        message: `Authority must be 'axiomid.app'`
-      });
-    }
-
-    if (identity_layer.issuedAt && !this.isValidISO8601(identity_layer.issuedAt)) {
-      this.errors.push({
-        code: 'INVALID_TIMESTAMP',
-        section: 'identity_layer',
-        field: 'issuedAt',
-        message: 'Invalid ISO 8601 timestamp'
-      });
-    }
-  }
 
   /**
    * Validate Pi Network section
@@ -889,6 +728,62 @@ export class AIXParser {
         field: 'sdk_version',
         message: 'Invalid Pi SDK version format'
       });
+    }
+  }
+
+  /**
+   * Validate economics section (v1.2)
+   */
+  validateEconomics(economics) {
+    if (economics.pricing) {
+      this.validatePricing(economics.pricing);
+    }
+
+    if (economics.pi_smart_contract) {
+      const psc = economics.pi_smart_contract;
+      if (!psc.address) {
+        this.errors.push({
+          code: 'MISSING_FIELD',
+          section: 'economics.pi_smart_contract',
+          field: 'address',
+          message: "Pi smart contract requires an 'address'"
+        });
+      }
+      if (psc.network && !['pi-mainnet', 'pi-testnet'].includes(psc.network)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: 'economics.pi_smart_contract',
+          field: 'network',
+          message: "Network must be 'pi-mainnet' or 'pi-testnet'"
+        });
+      }
+    }
+  }
+
+  /**
+   * Validate ABOM section (v1.2)
+   */
+  validateABOM(abom) {
+    if (abom.constituents) {
+      if (!Array.isArray(abom.constituents)) {
+        this.errors.push({
+          code: 'INVALID_TYPE',
+          section: 'abom',
+          field: 'constituents',
+          message: 'Constituents must be an array'
+        });
+      } else {
+        abom.constituents.forEach((item, index) => {
+          if (!item.name || !item.version) {
+            this.errors.push({
+              code: 'MISSING_FIELD',
+              section: 'abom.constituents',
+              index,
+              message: "Constituent must have 'name' and 'version'"
+            });
+          }
+        });
+      }
     }
   }
 
@@ -961,8 +856,9 @@ export class AIXParser {
    * Validation helpers
    */
   isValidID(id) {
-    const regex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
-    return regex.test(id);
+    const axiomRegex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
+    const webRegex = /^did:web:[a-zA-Z0-9.\-]+(:[a-zA-Z0-9.\-]+)*$/i;
+    return axiomRegex.test(id) || webRegex.test(id);
   }
 
   isValidISO8601(timestamp) {
@@ -1014,6 +910,9 @@ export class AIXAgent {
   get identity_layer() { return this.data.identity_layer; }
   get kyc_proof() { return this.data.kyc_proof; }
   get pi_network() { return this.data.pi_network; }
+  get economics() { return this.data.economics; }
+  get abom() { return this.data.abom; }
+  get lineage() { return this.data.meta?.lineage || []; }
 
   /**
    * Get agent capabilities

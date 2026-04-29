@@ -8,12 +8,15 @@
 
 <br/><br/>
 
-<a href="https://github.com/Moeabdelaziz007/aix-format/actions"><img src="https://img.shields.io/github/actions/workflow/status/Moeabdelaziz007/aix-format/aix-validation.yml?style=for-the-badge&logo=github&color=6366f1&label=Validation+CI" alt="CI"/></a>
-<a href="https://github.com/Moeabdelaziz007/aix-format/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-0ea5e9?style=for-the-badge" alt="License"/></a>
-<img src="https://img.shields.io/badge/Standard-AIX_v0.4.0-7c3aed?style=for-the-badge" alt="Standard"/>
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://github.com/Moeabdelaziz007/aix-format/actions/workflows/aix-validation.yml/badge.svg)](https://github.com/Moeabdelaziz007/aix-format/actions)
+[![Version](https://img.shields.io/badge/version-1.2.0--sovereign-orange.svg)]()
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)]()
+<br/>
+<img src="https://img.shields.io/badge/Standard-AIX_v1.2.0-7c3aed?style=for-the-badge" alt="Standard"/>
 <img src="https://img.shields.io/badge/Security-Ed25519-8b5cf6?style=for-the-badge" alt="Ed25519"/>
 <img src="https://img.shields.io/badge/Identity-Pi_Network_KYC-ec4899?style=for-the-badge" alt="Pi KYC"/>
-<img src="https://img.shields.io/badge/Agents-17M%2B_Verified-14b8a6?style=for-the-badge" alt="Verified Users"/>
+
 
 <br/><br/>
 
@@ -25,20 +28,19 @@
 
 ---
 
-<details>
+<details open>
 <summary><b>📑 Table of Contents | فهرس المحتويات</b></summary>
 <br/>
 
-| # | Section (EN) | القسم (AR) |
-|:-:|:--|:--|
-| 1 | [🎯 The Problem We Solve](#-the-problem-we-solve--المشكلة-التي-نحلها) | المشكلة التي نحلها |
-| 2 | [⚡ AIX vs The Ecosystem](#-aix-vs-the-ecosystem--المقارنة-مع-البدائل) | المقارنة مع البدائل |
-| 3 | [🧬 Core Architecture](#-core-architecture--الهندسة-الجوهرية) | الهندسة الجوهرية |
-| 4 | [✨ Sovereign Features](#-sovereign-features--المميزات-السيادية) | المميزات السيادية |
-| 5 | [🔐 Security Model](#-security-model--النموذج-الأمني) | النموذج الأمني |
-| 6 | [🛠️ Quick Start](#-quick-start--البدء-السريع) | البدء السريع |
-| 7 | [🗺️ Roadmap](#-roadmap--خارطة-الطريق) | خارطة الطريق |
-| 8 | [🤝 The Sovereign Hive](#-the-sovereign-hive--الخلية-السيادية) | الخلية السيادية |
+* [1 🎯 The Problem We Solve | المشكلة التي نحلها](#-the-problem-we-solve--المشكلة-التي-نحلها)
+* [2 ⚡ AIX vs The Ecosystem | المقارنة مع البدائل](#-aix-vs-the-ecosystem--المقارنة-مع-البدائل)
+* [3 🧬 Core Architecture | الهندسة الجوهرية](#-core-architecture--الهندسة-الجوهرية)
+* [4 ✨ Sovereign Features | المميزات السيادية](#-sovereign-features--المميزات-السيادية)
+* [5 🔐 Security Model | النموذج الأمني](#-security-model--النموذج-الأمني)
+* [6 🛠️ Quick Start | البدء السريع](#-quick-start--البدء-السريع)
+* [7 🗺️ Roadmap | خارطة الطريق](#-roadmap--خارطة-الطريق)
+* [8 🤝 How to Contribute | كيف تساهم](#-how-to-contribute--كيف-تساهم)
+* [9 🏛️ The Sovereign Hive | الخلية السيادية](#-the-sovereign-hive--الخلية-السيادية)
 
 </details>
 
@@ -363,8 +365,9 @@ npm test
 # my-agent.aix
 meta:
   name: "research-assistant"
-  version: "1.0.0"
-  aix_version: "0.4.0"
+  version: "1.2.0"
+  aix_version: "1.2.0"
+  lineage: ["did:axiom:parent_agent_hash"] # Agent Genealogy (v1.2)
 
 identity_layer:
   id: "did:axiom:axiomid.app:agent_uuid"
@@ -374,8 +377,15 @@ identity_layer:
 economics:
   token: "PI"
   cost_per_task: 0.5
-  pi_contract:
+  pi_smart_contract: # Protocol v23 M2M Settlement
+    address: "GDX...PI"
     type: "pay_per_call"
+    network: "mainnet"
+
+abom: # Agent Bill of Materials (v1.2)
+  base_model: "claude-3.5-sonnet"
+  mcp_servers: ["brave-search", "filesystem"]
+  checksum: "sha256:7b5..."
 
 security:
   checksum:
@@ -388,11 +398,6 @@ security:
 capabilities:
   - "research"
   - "summarization"
-
-mcp:
-  servers:
-    - name: "brave-search"
-      command: "npx @modelcontextprotocol/brave-search"
 ```
 
 **[EN]** Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -478,9 +483,17 @@ node bin/aix-validate.js path/to/your-agent.aix [options]
 
 ---
 
-## 🤝 The Sovereign Hive | الخلية السيادية
+## 🤝 How to Contribute | كيف تساهم
 
-> *A sovereign system is built by a sovereign team. | النظام السيادي يُبنى بفريق سيادي.*
+🇬🇧 **[EN]** We welcome contributions! Please read our [CONTRIBUTING.md] and check the open issues. Join our community to discuss the future of Sovereign Agents.
+- **Rules:** Follow the [AXIOM_AGENTS.md](./AXIOM_AGENTS.md) standards.
+- **Security:** Submit security vulnerabilities via private disclosure.
+
+🇦🇪 **[AR]** نرحب بمساهماتكم! يُرجى قراءة ملف المساهمة والاطلاع على المهام المفتوحة. انضم إلى مجتمعنا لمناقشة مستقبل الوكلاء السياديين.
+- **القواعد:** اتبع معايير [AXIOM_AGENTS.md](./AXIOM_AGENTS.md).
+- **الأمن:** قم بالإبلاغ عن الثغرات الأمنية عبر قنوات الإفصاح الخاصة.
+
+---
 
 <div align="center">
 
