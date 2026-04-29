@@ -1,51 +1,69 @@
-# 🌐 Sovereign Pi Agents Studio & AIX Format
-
 <div align="center">
-  <img src="apps/studio/public/globe.svg" width="140" alt="Sovereign Globe — الكرة الأرضية السيادية"/>
-  <h1>The Sovereign Machine Economy</h1>
-  <h2>اقتصاد الآلات السيادي</h2>
 
-  <p>
-    <a href="https://github.com/Moeabdelaziz007/aix-format/actions"><img src="https://img.shields.io/github/actions/workflow/status/Moeabdelaziz007/aix-format/aix-validation.yml?style=flat-square&label=Validation&logo=github" alt="Validation Status"/></a>
-    <a href="https://github.com/Moeabdelaziz007/aix-format/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Moeabdelaziz007/aix-format?style=flat-square&color=6366f1" alt="License"/></a>
-    <img src="https://img.shields.io/badge/Architecture-Sovereign-6366f1?style=flat-square" alt="Architecture"/>
-    <img src="https://img.shields.io/badge/Security-Ed25519-0ea5e9?style=flat-square" alt="Security"/>
-    <img src="https://img.shields.io/badge/Network-Pi%20Network-7c3aed?style=flat-square" alt="Pi Network"/>
-    <img src="https://img.shields.io/badge/Standard-AIX%20v0.3-8b5cf6?style=flat-square" alt="AIX Standard"/>
-  </p>
+<a href="https://github.com/Moeabdelaziz007/aix-format">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=AIX%20FORMAT&fontSize=60&fontColor=fff&animation=fadeIn&fontAlignY=38&desc=The%20Sovereign%20Agent%20Standard%20%7C%20معيار%20الوكلاء%20السيادي&descAlignY=55&descSize=16" width="100%"/>
+</a>
 
-  <p><i>The Global Marketplace for Autonomous AI Agents — Powered by Pi Network KYC & Ed25519 Cryptography</i></p>
-  <p><i>السوق العالمي لوكلاء الذكاء الاصطناعي المستقلين — مدعوم بـ Pi Network KYC وتشفير Ed25519</i></p>
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=18&pause=1000&color=8B5CF6&center=true&vCenter=true&width=700&lines=Identity+%2B+Economics+%2B+Security+%E2%80%94+In+One+File;Pi+Network+KYC+%2B+Ed25519+Cryptography;The+Only+Standard+With+Human-Verified+Agents;%D8%A7%D9%84%D9%85%D8%B9%D9%8A%D8%A7%D8%B1+%D8%A7%D9%84%D9%88%D8%AD%D9%8A%D8%AF+%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9+%D9%84%D9%84%D9%87%D9%88%D9%8A%D8%A9+%D9%88%D8%A7%D9%84%D8%A7%D9%82%D8%AA%D8%B5%D8%A7%D8%AF+%D9%88%D8%A7%D9%84%D8%A3%D9%85%D8%B7" alt="Typing SVG" />
+
+<br/><br/>
+
+<a href="https://github.com/Moeabdelaziz007/aix-format/actions"><img src="https://img.shields.io/github/actions/workflow/status/Moeabdelaziz007/aix-format/aix-validation.yml?style=for-the-badge&logo=github&color=6366f1&label=Validation+CI" alt="CI"/></a>
+<a href="https://github.com/Moeabdelaziz007/aix-format/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-0ea5e9?style=for-the-badge" alt="License"/></a>
+<img src="https://img.shields.io/badge/Standard-AIX_v0.3-7c3aed?style=for-the-badge" alt="Standard"/>
+<img src="https://img.shields.io/badge/Security-Ed25519-8b5cf6?style=for-the-badge" alt="Ed25519"/>
+<img src="https://img.shields.io/badge/Identity-Pi_Network_KYC-ec4899?style=for-the-badge" alt="Pi KYC"/>
+<img src="https://img.shields.io/badge/Agents-17M%2B_Verified-14b8a6?style=for-the-badge" alt="Verified Users"/>
+
+<br/><br/>
+
+> **[EN]** *The only open standard that bundles a complete agent definition + KYC-signed identity + economics in a single portable file.*
+>
+> **[AR]** *المعيار المفتوح الوحيد الذي يجمع تعريف الوكيل الكامل + هوية موقّعة بـ KYC + اقتصاديات في ملف واحد قابل للنقل.*
+
 </div>
 
 ---
 
-## 📋 Table of Contents | فهرس المحتويات
+<details>
+<summary><b>📑 Table of Contents | فهرس المحتويات</b></summary>
+<br/>
 
-| # | Section / القسم |
-|---|---|
-| 1 | [🧬 The Vision / الرؤية](#-the-vision--الرؤية) |
-| 2 | [✨ Sovereign Features / المميزات](#-sovereign-features--المميزات-السيادية) |
-| 3 | [🏗️ Architecture / الهندسة](#%EF%B8%8F-technical-architecture--الهندسة-المعمارية) |
-| 4 | [🛠️ Engineering Operations / التشغيل](#%EF%B8%8F-engineering-operations--العمليات-الهندسية) |
-| 5 | [📈 Recent Evolution / التطورات](#-recent-evolution--التطورات-الأخيرة) |
-| 6 | [🔐 Security Model / نموذج الأمن](#-security-model--نموذج-الأمن) |
-| 7 | [🤝 The Collaborative Hive / الخلية التعاونية](#-the-collaborative-hive--الخلية-التعاونية) |
+| # | Section (EN) | القسم (AR) |
+|:-:|:--|:--|
+| 1 | [🎯 The Problem We Solve](#-the-problem-we-solve--المشكلة-التي-نحلها) | المشكلة التي نحلها |
+| 2 | [⚡ AIX vs The Ecosystem](#-aix-vs-the-ecosystem--المقارنة-مع-البدائل) | المقارنة مع البدائل |
+| 3 | [🧬 Core Architecture](#-core-architecture--الهندسة-الجوهرية) | الهندسة الجوهرية |
+| 4 | [✨ Sovereign Features](#-sovereign-features--المميزات-السيادية) | المميزات السيادية |
+| 5 | [🔐 Security Model](#-security-model--النموذج-الأمني) | النموذج الأمني |
+| 6 | [🛠️ Quick Start](#-quick-start--البدء-السريع) | البدء السريع |
+| 7 | [🗺️ Roadmap](#-roadmap--خارطة-الطريق) | خارطة الطريق |
+| 8 | [🤝 The Sovereign Hive](#-the-sovereign-hive--الخلية-السيادية) | الخلية السيادية |
+
+</details>
 
 ---
 
-## 🧬 The Vision | الرؤية
+## 🎯 The Problem We Solve | المشكلة التي نحلها
 
 <table width="100%">
 <tr>
 <td width="50%" valign="top">
 
-**[EN]** Autonomous Agents today face two existential crises: **Distribution** and **Trust**. By bridging the **AIX format** with the decentralized infrastructure of the **Pi Network**, we are architecting a trustless micro-transaction economy. The **Sovereign Pi Agents Studio** provides a high-fidelity, voice-first gateway for Pioneers to manifest, verify, and deploy agents into a global machine-to-machine (M2M) network.
+**[EN]** In February 2026, the **ClawHavoc** campaign compromised **1,184+ agent skills** in a major marketplace — including credential stealers that bypassed VirusTotal. 492 MCP servers were found exposed with **zero authentication**.
+
+The root cause: there is no open standard requiring human-verified identity for AI agents. Any anonymous actor can publish a malicious agent.
+
+**AIX is the fix.** Every `.aix` payload is cryptographically signed and bound to a real, KYC-verified Pi Network identity. Anonymous agent attacks become structurally impossible.
 
 </td>
 <td width="50%" valign="top" dir="rtl">
 
-**[AR]** التحدي الأكبر للوكلاء المستقلين اليوم ليس الذكاء، بل **التوزيع** و**الثقة**. من خلال ربط صيغة **AIX** مع البنية التحتية اللامركزية لشبكة **Pi**، نحن نبني اقتصاداً حقيقياً للمعاملات الدقيقة بين الآلات. يوفر **استوديو الوكلاء السياديين** بوابة صوتية متطورة تتيح للمستخدمين إعداد الوكلاء وتوقيعهم بهوية Pi KYC ونشرهم في الشبكة العالمية.
+**[AR]** في فبراير 2026، اخترقت حملة **ClawHavoc** أكثر من **1,184 مهارة** في أحد أكبر أسواق الوكلاء — بما فيها سارقو بيانات اعتماد تجاوزوا VirusTotal. تم الكشف عن 492 خادم MCP مُكشوف بلا أي مصادقة.
+
+السبب الجذري: لا يوجد معيار مفتوح يشترط هوية مُحققة للوكلاء. أي جهة مجهولة تستطيع نشر وكيل خبيث.
+
+**AIX هو الحل.** كل ملف `.aix` موقّع تشفيرياً ومرتبط بهوية Pi Network حقيقية ومُحققة بـ KYC. الهجمات المجهولة تصبح مستحيلة هيكلياً.
 
 </td>
 </tr>
@@ -53,78 +71,42 @@
 
 ---
 
-## ✨ Sovereign Features | المميزات السيادية
+## ⚡ AIX vs The Ecosystem | المقارنة مع البدائل
 
-### 🎙️ Voice-First Orchestration | التوجيه الصوتي أولاً
-<table width="100%"><tr>
-<td width="50%" valign="top">
+> **[EN]** AIX occupies a unique white space — the **Identity + Distribution layer** that all other standards lack.
+>
+> **[AR]** يحتل AIX موقعاً فريداً في **طبقة الهوية والتوزيع** الغائبة عن جميع المعايير الأخرى.
 
-**[EN]** Chatboxes are a legacy constraint. Our **Interactive Voice Orb** leverages high-fidelity TTS and STT for a natural, conversational configuration experience. Speak your agent into existence.
+| Feature | **AIX Format** | A2A AgentCard | OSSA v0.5 | AgentFacts/KYA |
+|:--------|:-:|:-:|:-:|:-:|
+| **Agent Identity (DID)** | ✅ `did:axiom` | ❌ | ❌ | ⚠️ partial |
+| **KYC / Proof of Personhood** | ✅ Pi Network (17M+) | ❌ | ❌ | ⚠️ concept only |
+| **Economics / Pricing Layer** | ✅ built-in | ❌ | ❌ | ❌ |
+| **Checksum / Supply Chain** | ✅ SHA-256 + Ed25519 | ❌ | ❌ | ⚠️ planned |
+| **VLA / Robotics Support** | ✅ openpi, π0.7 | ❌ | ❌ | ❌ |
+| **MCP Server Embedding** | ✅ | ❌ | ✅ | ❌ |
+| **Multi-Format** | ✅ YAML/JSON/TOML | ❌ JSON only | ✅ | ❌ |
+| **A2A Compatible** | ⚠️ converter exists | ✅ native | ⚠️ | ❌ |
+| **Focus Layer** | Identity + Distribution | Runtime Comm. | Contract | Enterprise Meta |
 
-</td>
-<td width="50%" valign="top" dir="rtl">
-
-**[AR]** صناديق الدردشة قيد من الماضي. تعتمد **الكرة الصوتية التفاعلية** على تقنيات تحويل النص إلى صوت والكلام إلى نص لتوفير تجربة محادثة طبيعية. تحدث فقط لإنشاء وكيلك.
-
-</td>
-</tr></table>
-
-### 🛡️ Agentic KYC & AxiomID | التوثيق السيادي
-<table width="100%"><tr>
-<td width="50%" valign="top">
-
-**[EN]** Security is non-negotiable. Every `.aix` payload is signed using **Ed25519** and bound to a verified **Pi KYC** identity via the **AxiomID** topology. A **Zero-Trust Handshake** with nonce-based challenge-response prevents Sybil attacks and replay attacks.
-
-</td>
-<td width="50%" valign="top" dir="rtl">
-
-**[AR]** الأمن غير قابل للتفاوض. يتم توقيع كل ملف `.aix` باستخدام **Ed25519** وربطه بهوية **Pi KYC** عبر بنية **AxiomID**. تمنع **مصافحة انعدام الثقة** مع آلية Nonce هجمات التزييف وإعادة الإرسال.
-
-</td>
-</tr></table>
-
-### 💠 Sovereign Aether UI | واجهة الأثير السيادي
-<table width="100%"><tr>
-<td width="50%" valign="top">
-
-**[EN]** Experience a design system that feels alive. Our **Glassmorphism** interface uses deep indigos, translucent layers, and dynamic micro-animations to create a premium, futuristic atmosphere.
-
-</td>
-<td width="50%" valign="top" dir="rtl">
-
-**[AR]** اختبر نظام تصميم يشع بالحياة. تعتمد واجهة **Glassmorphism** على الألوان العميقة والطبقات الشفافة والرسوم المتحركة الدقيقة لخلق بيئة مستقبلية راقية.
-
-</td>
-</tr></table>
-
-### 📜 Delegated Authority Chains | سلاسل التفويض السيادي
-<table width="100%"><tr>
-<td width="50%" valign="top">
-
-**[EN]** Agents can delegate authority to sub-agents using **Verifiable Credentials (VCs)**. Every delegation is cryptographically chained, creating a tamper-evident audit log of all agentic actions — the foundation of sovereign trust.
-
-</td>
-<td width="50%" valign="top" dir="rtl">
-
-**[AR]** يمكن للوكلاء تفويض صلاحياتهم للوكلاء الفرعيين باستخدام **الشهادات القابلة للتحقق (VCs)**. كل تفويض مرتبط تشفيرياً، مما يخلق سجل تدقيق محمياً لجميع إجراءات الوكلاء.
-
-</td>
-</tr></table>
+> 💡 **[EN]** A2A is not a competitor — it handles *runtime agent communication*. AIX handles *agent definition and distribution*. They are complementary.
+>
+> 💡 **[AR]** A2A ليس منافساً — بل يتعامل مع *التواصل وقت التشغيل*، بينما AIX يتعامل مع *تعريف الوكيل وتوزيعه*. هما متكاملان.
 
 ---
 
-## 🏗️ Technical Architecture | الهندسة المعمارية
+## 🧬 Core Architecture | الهندسة الجوهرية
 
 <table width="100%">
 <tr>
 <td width="50%" valign="top">
 
-**[EN]** The ecosystem is a high-performance Monorepo integrating the core AIX validation engine with a state-of-the-art Next.js 15 frontend. The trust chain flows from human identity down to every machine action.
+**[EN]** A high-performance Monorepo integrating the **AIX validation engine** with a **Next.js 15** sovereign studio. The trust chain flows from human KYC identity down to every machine action — from agent publishing to M2M micropayments.
 
 </td>
 <td width="50%" valign="top" dir="rtl">
 
-**[AR]** تم بناء المشروع على هيكل Monorepo حديث، يربط بين محلل AIX الأساسي وواجهة أمامية متطورة بـ Next.js 15. تنساب سلسلة الثقة من هوية الإنسان وصولاً إلى كل إجراء آلي.
+**[AR]** مستودع Monorepo متكامل يجمع بين **محرك التحقق AIX** و**استوديو Next.js 15** السيادي. تنساب سلسلة الثقة من هوية KYC البشرية وصولاً إلى كل إجراء آلي — من نشر الوكلاء إلى المدفوعات الدقيقة بين الآلات.
 
 </td>
 </tr>
@@ -132,81 +114,256 @@
 
 ```mermaid
 graph TD
-    User([👤 Pioneer / Developer]) -->|Voice Commands| Studio[💻 Sovereign Studio UI<br/>Next.js + Sovereign Aether]
-    Studio -->|Setup Wizard| PiSDK{🛡️ Pi Network SDK}
-    PiSDK -->|KYC Identity| AxiomID[🔑 AxiomID Topology]
-    AxiomID -->|Zero-Trust Handshake| ZTH[⚡ Nonce Challenge-Response]
-    ZTH -->|Sign| AIXPayload[📄 .aix Payload]
-    AIXPayload -->|Validate| Core[⚙️ AIX Core Parser]
-    Core -->|Delegation VC| Chain[🔗 Authority Chain Log]
-    Chain -->|Deploy| M2M[(🌐 Machine Economy)]
+    Pioneer([👤 Pioneer / المستخدم]) -->|Voice + UI| Studio[💻 Sovereign Studio\nNext.js 15 + Aether UI]
+    Studio -->|KYC Flow| PiSDK{🛡️ Pi Network SDK\nProtocol v23 • 17M+ Users}
+    PiSDK -->|Verified Identity| AxiomID[🔑 AxiomID\ndid:axiom Topology]
+    AxiomID -->|Zero-Trust Handshake| ZTH[⚡ Nonce Challenge-Response\nEd25519 Signing]
+    ZTH -->|Produces| AIXPayload[📄 .aix Payload\nYAML / JSON / TOML]
+    AIXPayload -->|Validates| Core[⚙️ AIX Core Parser\nSchema + Checksum + KYC]
+    Core -->|Issues| VC[📜 Verifiable Credential\nDelegated Authority Chain]
+    VC -->|Deploy to| M2M[(🌐 Machine Economy\nM2M Micropayments)]
+```
+
+**[EN] Monorepo Structure | [AR] هيكل المستودع:**
+
+```
+aix-format/
+├── core/                    # AIX Parser Engine | محرك المحلل
+│   ├── src/parser.js        # Schema validation + checksum verification
+│   ├── src/axiomid.js       # Ed25519 identity layer
+│   └── src/converters/      # A2A AgentCard ↔ AIX converters
+├── apps/studio/             # Sovereign Studio UI | واجهة الاستوديو
+│   └── src/app/             # Next.js 15 App Router
+├── bin/
+│   └── aix-validate.js      # CLI Validator | مدقق سطر الأوامر
+└── .github/workflows/
+    └── aix-validation.yml   # Automated security CI | الأمن الآلي
 ```
 
 ---
 
-## 🛠️ Engineering Operations | العمليات الهندسية
+## ✨ Sovereign Features | المميزات السيادية
 
 <table width="100%">
 <tr>
-<td width="50%" valign="top">
+<td width="50%">
 
-**[EN] Prerequisites**
-- **Node.js**: v18.0.0+
-- **Pi Browser**: Required for production KYC authentication
-- **Git**: For version control and deployment
-- **tweetnacl**: Cryptographic core (isomorphic Ed25519)
+### 🛡️ Agentic KYC & AxiomID
+Every `.aix` payload is signed with **Ed25519** and anchored to a Pi KYC-verified identity via the `did:axiom` topology. A **Zero-Trust Handshake** with nonce-based challenge-response prevents Sybil and replay attacks.
 
 </td>
-<td width="50%" valign="top" dir="rtl">
+<td width="50%" dir="rtl">
 
-**[AR] المتطلبات الأساسية**
-- **Node.js**: الإصدار 18.0.0 وما فوق
-- **متصفح Pi**: مطلوب للمصادقة عبر KYC في بيئة الإنتاج
-- **Git**: لإدارة الإصدارات والنشر
-- **tweetnacl**: النواة التشفيرية (Ed25519 متعدد البيئات)
+### 🛡️ التوثيق السيادي وAxiomID
+كل ملف `.aix` موقّع بـ **Ed25519** ومُرتبط بهوية Pi مُحققة بـ KYC عبر بنية `did:axiom`. **مصافحة انعدام الثقة** بآلية Nonce تمنع هجمات التزييف وإعادة الإرسال.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 💰 Native Economics Layer
+Built-in support for Pi Network **Protocol v23 smart contracts** — enabling pay-per-call, subscriptions, and M2M micropayments without third-party payment rails.
+
+</td>
+<td width="50%" dir="rtl">
+
+### 💰 طبقة الاقتصاد الأصيلة
+دعم مدمج للعقود الذكية على **بروتوكول Pi v23** — تُتيح المدفوعات لكل طلب، الاشتراكات، والمدفوعات الدقيقة بين الآلات دون وسطاء.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🤖 VLA / Robotics Support
+The **only** agent standard with first-class support for Vision-Language-Action models (`openpi`, `π0.7`). Describe a robot arm controller the same way you describe a chat agent.
+
+</td>
+<td width="50%" dir="rtl">
+
+### 🤖 دعم الروبوتات وVLA
+**المعيار الوحيد** بدعم أصيل لنماذج الرؤية-اللغة-الفعل (`openpi`، `π0.7`). صِف مُتحكم ذراع روبوتية بنفس الطريقة التي تصف بها وكيل محادثة.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📦 Agent Bill of Materials (ABOM)
+Like SBOM for software, AIX captures the full provenance of every agent: training data, base models, APIs, MCP servers — with SHA-256 checksums for supply chain security.
+
+</td>
+<td width="50%" dir="rtl">
+
+### 📦 فاتورة مواد الوكيل (ABOM)
+كـ SBOM للبرمجيات، يلتقط AIX كامل نسب أي وكيل: بيانات التدريب، النماذج الأساسية، الـ APIs، خوادم MCP — مع فحوصات SHA-256 لأمان سلسلة التوريد.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🎙️ Voice-First Studio
+Our **Interactive Voice Orb** leverages high-fidelity TTS/STT for a conversational configuration experience. Chatboxes are a legacy constraint. Speak your agent into existence.
+
+</td>
+<td width="50%" dir="rtl">
+
+### 🎙️ الاستوديو الصوتي أولاً
+**الكرة الصوتية التفاعلية** تعتمد على تقنيات TTS/STT عالية الجودة لتجربة تهيئة حوارية طبيعية. صناديق الدردشة قيد من الماضي. تحدث فقط لإنشاء وكيلك.
 
 </td>
 </tr>
 </table>
 
-### Local Development | التطوير المحلي
-```bash
-# Initialize the ecosystem | تثبيت الاعتمادات
-npm install
+---
 
-# Launch the Sovereign Studio | تشغيل الاستوديو
+## 🔐 Security Model | النموذج الأمني
+
+<table width="100%">
+<tr>
+<td width="50%" valign="top">
+
+**[EN]** Three cryptographic pillars — no security theater, no placeholders:
+
+| Pillar | Technology | Guarantees |
+|:------:|:-----------|:-----------|
+| 🔵 **Identity** | Pi Network KYC | *Who published this agent?* |
+| 🟣 **Integrity** | Ed25519 signatures | *Has this file been tampered with?* |
+| 🟢 **Authorization** | Verifiable Credentials | *What is this agent allowed to do?* |
+
+```yaml
+security:
+  checksum:
+    algorithm: "sha256"
+    value: "a3f8c2..."
+  signature:
+    algorithm: "Ed25519"
+    signer: "did:axiom:axiomid.app:verified_user"
+  mcp:
+    servers:
+      - checksum: "sha256:abc123..."
+        allowed_tools: ["read_file"]
+        max_permissions: "read-only"
+```
+
+</td>
+<td width="50%" valign="top" dir="rtl">
+
+**[AR]** ثلاثة أعمدة تشفيرية — لا مسرحية أمنية، لا عناصر وهمية:
+
+| العمود | التقنية | الضمان |
+|:------:|:--------|:-------|
+| 🔵 **الهوية** | Pi Network KYC | *من نشر هذا الوكيل؟* |
+| 🟣 **السلامة** | توقيعات Ed25519 | *هل تم التلاعب بالملف؟* |
+| 🟢 **التفويض** | شهادات قابلة للتحقق | *ما المسموح له بفعله؟* |
+
+**لماذا يهم هذا؟** في فبراير 2026، اخترقت حملة ClawHavoc أكثر من 1,184 مهارة في سوق وكلاء بارز. بنية AIX تجعل هذا النوع من الهجمات مستحيلاً هيكلياً — لأن كل وكيل مُرتبط بإنسان حقيقي مُحقق.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🛠️ Quick Start | البدء السريع
+
+**Prerequisites | المتطلبات:** Node.js `v18+` · Git · Pi Browser *(for production KYC)*
+
+```bash
+# Clone & bootstrap | الاستنساخ والتثبيت
+git clone https://github.com/Moeabdelaziz007/aix-format.git
+cd aix-format && npm install
+
+# Launch Sovereign Studio | تشغيل الاستوديو
 npm run dev --prefix apps/studio
 
-# Run the security validation suite | تشغيل حزمة التحقق الأمني
+# Validate an agent file | التحقق من ملف وكيل
+node bin/aix-validate.js my-agent.aix
+
+# Strict KYC + security validation | التحقق الصارم
+node bin/aix-validate.js my-agent.aix --strict-kyc --security
+
+# Run full test suite | تشغيل كل الاختبارات
 npm test
 ```
 
+**Anatomy of a `.aix` file | تشريح ملف `.aix`:**
+
+```yaml
+# my-agent.aix
+meta:
+  name: "research-assistant"
+  version: "1.0.0"
+  aix_version: "0.3"
+
+identity_layer:
+  id: "did:axiom:axiomid.app:agent_uuid"
+  kyc_provider: "pi_network"
+  kyc_proof: "verified_pi_token"
+
+economics:
+  token: "PI"
+  cost_per_task: 0.5
+  pi_contract:
+    type: "pay_per_call"
+
+security:
+  checksum:
+    algorithm: "sha256"
+    value: "sha256_of_all_fields"
+  signature:
+    algorithm: "Ed25519"
+    signer: "did:axiom:axiomid.app:publisher"
+
+capabilities:
+  - "research"
+  - "summarization"
+
+mcp:
+  servers:
+    - name: "brave-search"
+      command: "npx @modelcontextprotocol/brave-search"
+```
+
 ---
 
-## 📈 Recent Evolution | التطورات الأخيرة (v0.3.0 Stable)
+## 🗺️ Roadmap | خارطة الطريق
 
 <table width="100%">
 <tr>
-<td width="50%" valign="top">
+<td width="33%" valign="top">
 
-**[EN]**
-- ✅ **Zero-Trust Handshake**: Nonce-based Ed25519 challenge-response implemented.
-- ✅ **AxiomID Cryptography**: Finalized Ed25519 signature validation via `tweetnacl`.
-- ✅ **Delegated Authority VCs**: Schema updated with `delegation_credential_vc` fields.
-- ✅ **Next.js 15 App Router**: 100% migration for SSR performance.
-- ✅ **Automated Validation**: Git hooks enforce strict schema compliance.
-- ✅ **Replay Attack Prevention**: Nonce expiry at 60-second TTL.
+**🔴 Phase 1 — Foundation**
+*Days 1–30*
+
+- [ ] A2A AgentCard bidirectional converter
+- [ ] `did:web` / `did:key` W3C DID support
+- [ ] MCP server checksum validation
+- [ ] OSSA v0.5 compatibility layer
 
 </td>
-<td width="50%" valign="top" dir="rtl">
+<td width="33%" valign="top">
 
-**[AR]**
-- ✅ **مصافحة انعدام الثقة**: تم تطبيق آلية Nonce مع Ed25519.
-- ✅ **تشفير AxiomID**: الانتهاء من التحقق من توقيع Ed25519 عبر `tweetnacl`.
-- ✅ **شهادات التفويض السيادي**: تحديث المخطط بحقول `delegation_credential_vc`.
-- ✅ **Next.js 15 App Router**: هجرة كاملة لتحسين عرض الصفحات.
-- ✅ **التحقق الآلي**: خطافات Git تفرض الامتثال الصارم للمخطط.
-- ✅ **منع هجمات إعادة الإرسال**: انتهاء صلاحية الـ Nonce بعد 60 ثانية.
+**🟡 Phase 2 — Ecosystem**
+*Days 31–60*
+
+- [ ] Pi Network Protocol v23 smart contracts
+- [ ] W3C Verifiable Credentials (VC)
+- [ ] IPFS / Arweave content-addressable distribution
+- [ ] `aix-publish` CLI + `registry.aix-format.org`
+
+</td>
+<td width="33%" valign="top">
+
+**🟢 Phase 3 — Launch v1.0**
+*Days 61–90*
+
+- [ ] Full security audit + threat model
+- [ ] W3C AI Agent Protocol CG submission
+- [ ] `@aix/core` npm package
+- [ ] Product Hunt + Show HN launch
 
 </td>
 </tr>
@@ -214,34 +371,9 @@ npm test
 
 ---
 
-## 🔐 Security Model | نموذج الأمن
+## 🤝 The Sovereign Hive | الخلية السيادية
 
-<table width="100%">
-<tr>
-<td width="50%" valign="top">
-
-**[EN]** Our security architecture is built on three pillars:
-1. **Identity (Who are you?)** — Pi Network KYC verification
-2. **Integrity (Did you send this?)** — Ed25519 message signatures
-3. **Authorization (Can you do this?)** — Verifiable Credential delegation chains
-
-</td>
-<td width="50%" valign="top" dir="rtl">
-
-**[AR]** تقوم معماريتنا الأمنية على ثلاثة أعمدة:
-1. **الهوية (من أنت؟)** — التحقق من Pi Network KYC
-2. **السلامة (هل أرسلت هذا؟)** — توقيعات الرسائل بـ Ed25519
-3. **التفويض (هل يحق لك ذلك؟)** — سلاسل تفويض الشهادات القابلة للتحقق
-
-</td>
-</tr>
-</table>
-
----
-
-## 🤝 The Collaborative Hive | الخلية التعاونية
-
-> *A sovereign system is built by a sovereign team. / النظام السيادي يُبنى بفريق سيادي.*
+> *A sovereign system is built by a sovereign team. | النظام السيادي يُبنى بفريق سيادي.*
 
 <div align="center">
 
@@ -250,42 +382,36 @@ npm test
 
 <td align="center" width="220">
   <a href="https://github.com/Moeabdelaziz007">
-    <img src="https://github.com/Moeabdelaziz007.png" width="110" style="border-radius:50%; border: 3px solid #6366f1;" alt="Mohamed Abdelaziz"/>
+    <img src="https://github.com/Moeabdelaziz007.png" width="100" style="border-radius:50%;"/>
   </a>
   <br/><br/>
   <b>Mohamed Abdelaziz</b>
   <br/>
-  <sub>🏛️ Visionary Architect</sub>
-  <br/>
-  <sub>المهندس المعماري والرؤيوي</sub>
-  <br/>
+  <sub>🏛️ Visionary Architect · المهندس المعماري</sub>
+  <br/><br/>
   <a href="https://github.com/Moeabdelaziz007">
-    <img src="https://img.shields.io/badge/@Moeabdelaziz007-181717?style=flat-square&logo=github" alt="GitHub"/>
+    <img src="https://img.shields.io/badge/@Moeabdelaziz007-181717?style=flat-square&logo=github"/>
   </a>
 </td>
 
 <td align="center" width="220">
-  <img src="https://img.shields.io/badge/AI-Jules-8b5cf6?style=for-the-badge&logo=googlecloud&logoColor=white" alt="Jules AI" height="50"/>
+  <img src="https://img.shields.io/badge/AI-Jules-8b5cf6?style=for-the-badge&logo=googlecloud&logoColor=white" height="40"/>
   <br/><br/>
   <b>Jules</b>
   <br/>
-  <sub>🎨 UI/UX Agent & Execution Engineer</sub>
-  <br/>
-  <sub>مهندس التنفيذ وواجهة المستخدم</sub>
-  <br/>
-  <img src="https://img.shields.io/badge/Google-Jules%20AI-4285F4?style=flat-square&logo=google" alt="Jules"/>
+  <sub>🎨 UI/UX Agent · مهندس التنفيذ والواجهة</sub>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/Google-Jules%20AI-4285F4?style=flat-square&logo=google"/>
 </td>
 
 <td align="center" width="220">
-  <img src="https://img.shields.io/badge/AI-Antigravity-0ea5e9?style=for-the-badge&logo=googlegemini&logoColor=white" alt="Antigravity AI" height="50"/>
+  <img src="https://img.shields.io/badge/AI-Antigravity-0ea5e9?style=for-the-badge&logo=googlegemini&logoColor=white" height="40"/>
   <br/><br/>
   <b>Antigravity</b>
   <br/>
-  <sub>⚙️ Systems Architect & Security AI</sub>
-  <br/>
-  <sub>مهندس الأنظمة والأمن السيادي</sub>
-  <br/>
-  <img src="https://img.shields.io/badge/Google-DeepMind-EA4335?style=flat-square&logo=google" alt="Antigravity"/>
+  <sub>⚙️ Systems Architect & Security AI · مهندس الأنظمة والأمن</sub>
+  <br/><br/>
+  <img src="https://img.shields.io/badge/Google-DeepMind-EA4335?style=flat-square&logo=google"/>
 </td>
 
 </tr>
@@ -296,8 +422,17 @@ npm test
 ---
 
 <div align="center">
-  <p><i>"We are not building tools; we are architecting the trust layer for the future of intelligence."</i></p>
-  <p><i>"نحن لا نبني أدوات؛ نحن نصمم طبقة الثقة لمستقبل الذكاء."</i></p>
-  <br/>
-  <img src="https://img.shields.io/badge/Built%20with-Sovereign%20Intelligence-6366f1?style=for-the-badge" alt="Built with Sovereign Intelligence"/>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer" width="100%"/>
+
+*"We are not building tools; we are architecting the trust layer for the future of intelligence."*
+<br/>
+*"نحن لا نبني أدوات؛ نحن نصمم طبقة الثقة لمستقبل الذكاء."*
+
+<br/>
+
+<img src="https://img.shields.io/badge/Built%20with-Sovereign%20Intelligence-6366f1?style=for-the-badge" alt="Built with Sovereign Intelligence"/>
+&nbsp;
+<img src="https://img.shields.io/badge/Research-Claude_4.6_x_Antigravity-8b5cf6?style=for-the-badge" alt="Research"/>
+
 </div>
