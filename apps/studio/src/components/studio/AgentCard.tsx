@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { Shield, BrainCircuit, Zap, MoreHorizontal, TrendingUp } from "lucide-react";
 
@@ -13,7 +14,14 @@ interface AgentCardProps {
   tasksCompleted?: number;
 }
 
-export function AgentCard({
+// ─── Status config — stable, defined outside component ───────────────────────
+const STATUS_CONFIG = {
+  online:  { label: "Online",  dot: "status-online",  textColor: "text-[var(--color-success)]"  },
+  offline: { label: "Offline", dot: "status-offline", textColor: "text-[var(--color-on-surface-faint)]" },
+  busy:    { label: "Busy",    dot: "status-busy",    textColor: "text-[var(--color-warning)]"  },
+} as const;
+
+export const AgentCard = memo(function AgentCard({
   name,
   role,
   price,
@@ -22,11 +30,7 @@ export function AgentCard({
   successRate = 98.4,
   tasksCompleted = 1247,
 }: AgentCardProps) {
-  const statusConfig = {
-    online:  { label: "Online",  dot: "status-online",  textColor: "text-[var(--color-success)]"  },
-    offline: { label: "Offline", dot: "status-offline", textColor: "text-[var(--color-on-surface-faint)]" },
-    busy:    { label: "Busy",    dot: "status-busy",    textColor: "text-[var(--color-warning)]"  },
-  }[status];
+  const statusConfig = STATUS_CONFIG[status];
 
   return (
     <motion.div
@@ -52,11 +56,10 @@ export function AgentCard({
 
         {/* ── Top row ── */}
         <div className="flex items-start justify-between">
-          {/* Icon */}
           <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center border flex-shrink-0"
             style={{
-              background: `linear-gradient(135deg, ${color}18, ${color}30)`,
+              background:  `linear-gradient(135deg, ${color}18, ${color}30)`,
               borderColor: `${color}30`,
               boxShadow:   `0 0 16px ${color}20`,
             }}
@@ -65,13 +68,14 @@ export function AgentCard({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Status pill */}
             <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] ${statusConfig.textColor}`}>
               <span className={`status-dot ${statusConfig.dot}`} />
               {statusConfig.label}
             </span>
-            {/* Context menu */}
-            <button className="btn btn-ghost btn-sm w-7 h-7 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Agent options">
+            <button
+              className="btn btn-ghost btn-sm w-7 h-7 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Agent options"
+            >
               <MoreHorizontal className="w-4 h-4" />
             </button>
           </div>
@@ -89,14 +93,14 @@ export function AgentCard({
             <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Success Rate</p>
             <div className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-[var(--color-success)]" />
-              <span className="text-sm font-bold text-white">{successRate}%</span>
+              <span className="text-sm font-bold text-white tabular-nums">{successRate}%</span>
             </div>
           </div>
           <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
             <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Tasks Done</p>
             <div className="flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-              <span className="text-sm font-bold text-white">{tasksCompleted.toLocaleString()}</span>
+              <span className="text-sm font-bold text-white tabular-nums">{tasksCompleted.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -107,28 +111,23 @@ export function AgentCard({
             <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider">Cost / Task</p>
             <p className="text-lg font-bold text-white mt-0.5 flex items-center gap-1">
               <span style={{ color }} className="text-base">π</span>
-              {price}
+              <span className="tabular-nums">{price}</span>
             </p>
           </div>
 
+          {/*
+            FIX: Replaced inline onMouseEnter/Leave JS handlers with CSS-only hover.
+            JS event handlers on buttons force React re-renders + paint on every
+            mouse movement — causing the 150ms input delay seen on adjacent inputs.
+            CSS transitions are GPU-composited and never touch the React tree.
+          */}
           <button
-            className="btn btn-sm rounded-xl transition-all"
+            className="agent-card-hire-btn btn btn-sm rounded-xl"
             style={{
-              background:   `linear-gradient(135deg, ${color}22, ${color}11)`,
-              borderColor:  `${color}40`,
-              color:        color,
-              border:       `1px solid ${color}40`,
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = color;
-              (e.currentTarget as HTMLButtonElement).style.color = "#050507";
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 20px ${color}60`;
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = `linear-gradient(135deg, ${color}22, ${color}11)`;
-              (e.currentTarget as HTMLButtonElement).style.color = color;
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
-            }}
+              // CSS custom properties so the :hover rule in globals.css can read them
+              ["--agent-color" as string]: color,
+            } as React.CSSProperties}
+            aria-label={`Hire ${name}`}
           >
             Hire Agent
           </button>
@@ -146,4 +145,4 @@ export function AgentCard({
       </div>
     </motion.div>
   );
-}
+});
