@@ -64,34 +64,18 @@ export default function LiveValidator({
     setHash("");
 
     try {
-      const content = await file.text();
-      let parsed: Record<string, unknown> | null = null;
-      if (file.name.endsWith(".json") || content.trim().startsWith("{")) {
-        parsed = JSON.parse(content) as Record<string, unknown>;
-      } else {
-        const [{ load }] = await Promise.all([import("js-yaml")]);
-        parsed = load(content) as Record<string, unknown>;
       let parsed: Record<string, unknown>;
-
       if (name.endsWith(".json") || content.trim().startsWith("{")) {
         parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
         parsed = parseYamlLight(content);
       }
-
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
-
-      // We don't have deep type info, so cast to a structure to check fields safely
-      const parsedAny = parsed as any;
-      const hasSig = Boolean(parsedAny?.security?.signature?.value && parsedAny?.security?.signature?.algorithm);
-      setSigState(hasSig ? "valid-structure" : "missing");
       setValidation(validateAix(parsed));
-    } catch (e: unknown) {
+    } catch (e) {
       setError(
-        `Invalid AIX payload: ${
-          e instanceof Error ? e.message : String(e)
-        }`
+        `Invalid AIX payload: ${e instanceof Error ? e.message : String(e)}`
       );
       setValidation(null);
     }
@@ -101,6 +85,7 @@ export default function LiveValidator({
     if (propContent) {
       processContent(propContent, propFileName || "live-builder.aix");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propContent, propFileName]);
 
   const handleFile = async (file: File) => {
@@ -114,7 +99,6 @@ export default function LiveValidator({
       <p className="text-xs text-[var(--color-on-surface-variant)] mb-4">
         Drop a .aix file to inspect SHA-256 DNA, required fields, and signature status.
       </p>
-
       <div
         onDragEnter={(e) => { e.preventDefault(); setDragging(true); }}
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -140,60 +124,48 @@ export default function LiveValidator({
             className="sr-only"
             type="file"
             accept=".aix,.json,.yaml,.yml"
-            onChange={(e) =>
-              e.target.files?.[0] && handleFile(e.target.files[0])
-            }
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           />
         </label>
       </div>
-
       {fileName && (
         <p className="mt-4 text-xs text-gray-400 truncate" title={fileName}>File: {fileName}</p>
       )}
-
       {hash && (
-        <p className="mt-2 text-[10px] font-mono break-all text-cyan-200/80">
-          SHA-256: {hash}
-        </p>
+        <p className="mt-2 text-[10px] font-mono break-all text-cyan-200/80">SHA-256: {hash}</p>
       )}
-
       {validation && (
         <div className="mt-3 space-y-2">
-          {/* Structural validity */}
           <div className="flex items-center gap-2 text-sm">
-            {validation.valid ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            ) : (
-              <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-            )}
+            {validation.valid
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              : <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />}
             <span className={validation.valid ? "text-emerald-300" : "text-amber-300"}>
-              {validation.valid ? `Valid AIX — ${validation.fieldCount} top-level fields` : `Invalid: missing ${validation.missing.join(", ")}`}
+              {validation.valid
+                ? `Valid AIX \u2014 ${validation.fieldCount} top-level fields`
+                : `Invalid: missing ${validation.missing.join(", ")}`}
             </span>
           </div>
-
-          {/* Signature status */}
           <div className="flex items-center gap-2 text-sm">
-            {sigState === "valid-structure" ? (
-              <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            ) : (
-              <ShieldX className="w-4 h-4 text-amber-400 flex-shrink-0" />
-            )}
+            {sigState === "valid-structure"
+              ? <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              : <ShieldX className="w-4 h-4 text-amber-400 flex-shrink-0" />}
             <span className={sigState === "valid-structure" ? "text-emerald-300" : "text-amber-300/80"}>
               {statusLabel}
             </span>
           </div>
         </div>
       )}
-
       {!validation && !error && hash === "" && (
         <div className="mt-3 flex items-center gap-2 text-sm text-[var(--color-on-surface-faint)]">
           <ShieldX className="w-4 h-4" />
           <span>{statusLabel}</span>
         </div>
       )}
-
       {error && (
-        <p className="mt-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>
+        <p className="mt-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          {error}
+        </p>
       )}
     </div>
   );
