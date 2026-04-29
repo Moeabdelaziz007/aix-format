@@ -460,6 +460,16 @@
         }
       }
     },
+    "capabilities": {
+      "type": "object",
+      "description": "Agentic capabilities and features",
+      "properties": {
+        "streaming": { "type": "boolean", "default": false },
+        "push_notifications": { "type": "boolean", "default": false },
+        "state_history": { "type": "boolean", "default": false },
+        "voice_interaction": { "type": "boolean", "default": false }
+      }
+    },
     "mcp": {
       "type": "object",
       "description": "Model Context Protocol configuration",
@@ -733,53 +743,60 @@
     },
     "abom": {
       "type": "object",
-      "description": "Agent Bill of Materials (ABOM) for supply chain and dependency transparency",
+      "description": "Agent Bill of Materials (ABOM) - AI-SBOM (CycloneDX 1.6 compatible) for supply chain transparency",
       "properties": {
-        "constituents": {
+        "models": {
           "type": "array",
-          "description": "List of constituent modules, base models, and toolsets",
+          "description": "Base models and architectures utilized by the agent",
           "items": {
             "type": "object",
-            "required": [
-              "name",
-              "version"
-            ],
+            "required": ["name", "version"],
             "properties": {
-              "name": {
-                "type": "string",
-                "description": "Constituent name"
-              },
-              "version": {
-                "type": "string",
-                "description": "Constituent version"
-              },
-              "hash": {
-                "type": "string",
-                "description": "SHA-256 hash for integrity"
-              },
-              "license": {
-                "type": "string",
-                "description": "License of the constituent"
-              }
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "parameters": { "type": "string", "description": "e.g. 70B, 8B" },
+              "weights_hash": { "type": "string" }
             }
           }
         },
-        "attestations": {
+        "datasets": {
           "type": "array",
-          "description": "Cryptographic attestations for the agent's materials",
+          "description": "Training or fine-tuning datasets used",
           "items": {
             "type": "object",
             "properties": {
-              "type": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              },
-              "signer": {
-                "type": "string"
-              }
+              "name": { "type": "string" },
+              "provenance": { "type": "string" },
+              "sensitivity": { "type": "string", "enum": ["public", "proprietary", "sensitive"] }
             }
+          }
+        },
+        "constituents": {
+          "type": "array",
+          "description": "Software components and dependencies",
+          "items": {
+            "type": "object",
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "hash": { "type": "string" },
+              "license": { "type": "string" }
+            }
+          }
+        },
+        "governance": {
+          "type": "object",
+          "properties": {
+            "ethical_constraints": { "type": "array", "items": { "type": "string" } },
+            "compliance_attestations": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "environmental_impact": {
+          "type": "object",
+          "properties": {
+            "training_energy_kwh": { "type": "number" },
+            "carbon_offset": { "type": "boolean" }
           }
         }
       }
@@ -933,6 +950,17 @@
         "checksum"
       ],
       "properties": {
+        "authentication": {
+          "type": "array",
+          "description": "Supported authentication schemes",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scheme": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
         "checksum": {
           "type": "object",
           "required": [

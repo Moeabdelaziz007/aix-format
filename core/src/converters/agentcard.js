@@ -25,11 +25,11 @@ export function fromA2A(agentCardJson = {}) {
       objective: 'pending_signature'
     },
     skills: Array.isArray(agentCardJson.skills) ? agentCardJson.skills : [],
-    apis: {
+    capabilities: {
       streaming: capabilities.streaming ?? false,
       push_notifications: capabilities.pushNotifications ?? false,
       state_history: capabilities.stateTransitionHistory ?? false,
-      raw_capabilities: capabilities
+      voice_interaction: capabilities.voiceInteraction ?? false
     },
     distribution: { endpoint: agentCardJson.url || '' },
     identity_layer: {
