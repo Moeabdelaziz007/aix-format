@@ -1,3 +1,16 @@
+export type DeployStatus = 
+  'idle' | 'deploying' | 'deployed' | 'failed';
+
+export interface DeploymentRecord {
+  agentId: string;
+  deployedAt: string;
+  endpointUrl: string;      // e.g. https://axiomid.app/agents/{did}
+  mcpUrl: string;           // e.g. https://axiomid.app/api/mcp-discovery
+  status: DeployStatus;
+  txHash?: string;          // wallet tx hash (for PROMPT 3)
+  network?: string;         // 'ethereum' | 'polygon' (for PROMPT 3)
+}
+
 export interface AgentRecord {
   id: string;
   name: string;
@@ -7,6 +20,7 @@ export interface AgentRecord {
   did?: string;
   kyc_tier?: 'unverified' | 'basic' | 'verified' | 'institutional';
   abom?: AbomRecord;
+  deployment?: DeploymentRecord;
   // Extended fields for UI state (kept as optional to maintain compatibility with MISSION 9)
   manifest?: any;
   color?: string;

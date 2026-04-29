@@ -13,55 +13,56 @@ import {
   Fingerprint,
   Activity,
   UserCheck,
-  AlertCircle
+  AlertCircle,
+  Rocket
 } from 'lucide-react';
-import { AgentRecord } from '@/lib/types';
+import { AgentRecord, DeploymentRecord } from '@/lib/types';
 import DiscoveryPreview from '@/components/studio/DiscoveryPreview';
 import { useLocalAgents } from '@/hooks/useLocalAgents';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
+import DeployModal from '@/components/studio/DeployModal';
+import { useSearchParams } from 'next/navigation';
 
 export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { getAgent, loaded } = useLocalAgents();
   const [agent, setAgent] = useState<AgentRecord | null>(null);
+  const [showDeploy, setShowDeploy] = useState(false);
+
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [deployStep, setDeployStep] = useState(0);
+  const [deployComplete, setDeployComplete] = useState(false);
+
+  const DEPLOY_STEPS = [
+    "Validating AIX Manifest Integrity...",
+    "Verifying Sovereign DID (AxiomID)...",
+    "Provisioning Encrypted Compute Node...",
+    "Injecting Agent Bill of Materials (ABOM)...",
+    "Syncing with MCP Global Registry...",
+    "Agent Finalizing Handshake..."
+  ];
 
   useEffect(() => {
     if (loaded) {
       const found = getAgent(id);
       if (found) {
         setAgent(found);
+        // Check for deployment action
+        if (searchParams.get('action') === 'deploy') {
+          setShowDeploy(true);
+        }
       }
     }
-  }, [id, getAgent, loaded]);
+  }, [id, getAgent, loaded, searchParams]);
 
-  if (!loaded) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <Activity className="w-8 h-8 text-indigo-500 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!agent) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mb-6">
-          <AlertCircle className="w-10 h-10 text-red-500" />
-        </div>
-        <h1 className="text-3xl font-black text-white mb-2">Agent Not Found</h1>
-        <p className="text-zinc-400 mb-8 max-w-md">The agent ID "{id}" could not be found in your local studio database.</p>
-        <Link 
-          href="/my-agents" 
-          className="flex items-center gap-2 px-8 py-3 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl border border-zinc-800 transition"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to My Agents
-        </Link>
-      </div>
-    );
-  }
+  const handleDeployed = (deployment: DeploymentRecord) => {
+    if (agent) {
+      setAgent({ ...agent, deployment });
+    }
+  };
 
   const handleDownload = () => {
     const blob = new Blob([agent.yaml], { type: 'application/x-aix' });
@@ -70,6 +71,30 @@ export default function AgentDetailPage() {
     a.download = `${agent.name.toLowerCase().replace(/\s+/g, '-')}.aix`;
     a.click();
   };
+
+  if (!loaded) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!agent) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-center px-4">
+        <AlertCircle className="w-16 h-16 text-zinc-700 mb-6" />
+        <h1 className="text-3xl font-black text-white mb-2">Agent Not Found</h1>
+        <p className="text-zinc-500 mb-8 max-w-md">The agent you are looking for does not exist in your local storage or has been deleted.</p>
+        <Link 
+          href="/my-agents" 
+          className="px-8 py-4 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-2xl transition-all border border-white/5"
+        >
+          Return to My Agents
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-indigo-500/30">
@@ -104,13 +129,24 @@ export default function AgentDetailPage() {
             </div>
           </div>
           
-          <button 
-            onClick={handleDownload}
-            className="w-full lg:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(99,102,241,0.2)] hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Download className="w-5 h-5" />
-            Download .aix
-          </button>
+          <div className="flex gap-4 w-full lg:w-auto">
+            {!agent.deployment && (
+              <button 
+                onClick={() => setShowDeploy(true)}
+                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(99,102,241,0.2)] hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Rocket className="w-5 h-5" />
+                Deploy Agent
+              </button>
+            )}
+            <button 
+              onClick={handleDownload}
+              className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-black rounded-2xl transition-all border border-white/5 hover:text-white"
+            >
+              <Download className="w-5 h-5" />
+              Download .aix
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -194,6 +230,34 @@ export default function AgentDetailPage() {
               </div>
             </div>
 
+            {/* Deployment Status */}
+            {agent.deployment && (
+              <div className="p-8 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 backdrop-blur-xl">
+                <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  Live Deployment
+                </h3>
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Public Endpoint</p>
+                    <p className="font-mono text-xs text-emerald-300 break-all bg-black/20 p-3 rounded-xl border border-white/5">
+                      {agent.deployment.endpointUrl}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">MCP URL</p>
+                    <p className="font-mono text-xs text-emerald-300 break-all bg-black/20 p-3 rounded-xl border border-white/5">
+                      {agent.deployment.mcpUrl}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-zinc-500 text-[10px] font-bold">
+                    <Calendar className="w-3 h-3" />
+                    Deployed on {new Date(agent.deployment.deployedAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Source Code */}
             <div className="p-8 rounded-3xl bg-zinc-900 border border-zinc-800 overflow-hidden group">
               <div className="flex items-center justify-between mb-6">
@@ -211,6 +275,15 @@ export default function AgentDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Deploy Modal */}
+        {showDeploy && (
+          <DeployModal 
+            agent={agent} 
+            onClose={() => setShowDeploy(false)} 
+            onDeployed={handleDeployed} 
+          />
+        )}
       </main>
 
       <SovereignStatusBar />
