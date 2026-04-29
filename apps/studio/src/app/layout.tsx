@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import { Analytics } from '@vercel/analytics/next';
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({
 
         {/* Pi Network SDK */}
         <Script src="https://sdk.minepi.com/pi-sdk.js" strategy="beforeInteractive" />
+        <Analytics />
       </body>
     </html>
   );
