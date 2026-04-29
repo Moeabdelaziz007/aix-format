@@ -104,6 +104,40 @@ describe('PiKycAdapter Unit Tests', () => {
   });
 });
 
+
+
+  it('supports did:web mode and adds security metadata fields', () => {
+    const keypair = nacl.sign.keyPair();
+    const token = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.token';
+    const signature = nacl.sign.detached(naclUtil.decodeUTF8(token), keypair.secretKey);
+
+    const result = PiKycAdapter.generateIdentity({
+      user: { uid: 'web_user_1' },
+      accessToken: token,
+      signature: naclUtil.encodeBase64(signature),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey)
+    }, { didMethod: 'did:web', didAuthority: 'example.com', challengeNonce: 'nonce-123', uidSalt: 'salt-1' });
+
+    assert.ok(result.identity_layer.id.startsWith('did:web:example.com:'));
+    assert.equal(result.kyc_proof.version, '2.0');
+    assert.equal(result.kyc_proof.uid_hash_salted, true);
+    assert.ok(result.kyc_proof.challenge_binding_hash);
+    assert.ok(result.identity_layer.publicKey.fingerprint);
+  });
+
+  it('rejects expired JWT when expiry enforcement is enabled', () => {
+    const keypair = nacl.sign.keyPair();
+    const payload = Buffer.from(JSON.stringify({ exp: 1 }), 'utf8').toString('base64url');
+    const token = `a.${payload}.c`;
+    const signature = nacl.sign.detached(naclUtil.decodeUTF8(token), keypair.secretKey);
+
+    assert.throws(() => PiKycAdapter.generateIdentity({
+      user: { uid: 'jwt_user' },
+      accessToken: token,
+      signature: naclUtil.encodeBase64(signature),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey)
+    }, { enforceJwtExpiry: true }), /expired/);
+  });
 describe('PiKycAdapter Integration', () => {
   it('full flow: mock Pi proof produces schema-valid identity_layer', () => {
     // 1. Mock Pi Auth

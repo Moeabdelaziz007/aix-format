@@ -6,7 +6,7 @@ export class PiKycAdapter {
   /**
    * Verify Pi KYC proof and generate an identity layer and KYC proof.
    */
-  static generateIdentity(piAuthResult) {
+  static generateIdentity(piAuthResult, options = {}) {
     const { user, accessToken, signature, publicKey } = piAuthResult;
 
     if (!user || !user.uid) {
@@ -52,31 +52,48 @@ export class PiKycAdapter {
       throw new Error('Invalid signature');
     }
 
-    // Generate SHA-256 hash of the UID
-    const uidHash = crypto.createHash('sha256').update(user.uid).digest('hex').slice(0, 32);
+    const normalizedUid = user.uid.trim();
+    const normalizedToken = accessToken.trim();
 
-    // Generate SHA-256 hash of the accessToken
-    const accessTokenHash = crypto.createHash('sha256').update(accessToken).digest('hex');
+    PiKycAdapter.validateJwtTimestamps(normalizedToken, options);
 
-    const did = `did:axiom:axiomid.app:${uidHash}`;
+    // Generate privacy-preserving UID hash (salted when configured)
+    const uidSalt = options.uidSalt || process.env.AIX_UID_HASH_SALT || '';
+    const uidHash = crypto.createHash('sha256').update(`${normalizedUid}:${uidSalt}`).digest('hex').slice(0, 32);
+
+    // Generate SHA-256 hash of the access token and optional challenge binding
+    const accessTokenHash = crypto.createHash('sha256').update(normalizedToken).digest('hex');
+    const challengeBinding = options.challengeNonce
+      ? crypto.createHash('sha256').update(`${normalizedToken}:${options.challengeNonce}`).digest('hex')
+      : undefined;
+
+    const didMethod = options.didMethod || 'did:axiom';
+    const didAuthority = options.didAuthority || 'axiomid.app';
+    const did = PiKycAdapter.buildDid(didMethod, didAuthority, uidHash);
     const timestamp = new Date().toISOString();
 
     const identity_layer = {
       id: did,
-      authority: "axiomid.app",
+      authority: didAuthority,
       issuedAt: timestamp,
       publicKey: {
         algorithm: "Ed25519",
         value: publicKey,
-        encoding: "base64"
+        encoding: "base64",
+        fingerprint: crypto.createHash('sha256').update(publicKey).digest('hex').slice(0, 16)
       }
     };
 
         const kyc_proof = {
+      version: '2.0',
       provider: "pi_network",
+      assurance_level: options.assuranceLevel || 'substantial',
       uid_hash: uidHash,
+      uid_hash_algorithm: 'sha256',
+      uid_hash_salted: Boolean(uidSalt),
       verified_at: timestamp,
-      access_token_hash: accessTokenHash
+      access_token_hash: accessTokenHash,
+      challenge_binding_hash: challengeBinding
     };
 
     if (piAuthResult.vlaDevice) {
@@ -87,6 +104,31 @@ export class PiKycAdapter {
     }
 
 return { identity_layer, kyc_proof };
+  }
+
+  static buildDid(method, authority, subject) {
+    if (method === 'did:web') return `did:web:${authority}:${subject}`;
+    return `${method}:${authority}:${subject}`;
+  }
+
+  static validateJwtTimestamps(token, options = {}) {
+    if (!options.enforceJwtExpiry) return;
+    const parts = token.split('.');
+    if (parts.length < 2) throw new Error('Invalid Pi Auth Result: JWT format required when enforceJwtExpiry is enabled');
+
+    try {
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+      const now = Math.floor(Date.now() / 1000);
+      if (typeof payload.exp === 'number' && payload.exp < now) {
+        throw new Error('JWT has expired');
+      }
+      if (typeof payload.nbf === 'number' && payload.nbf > now + 60) {
+        throw new Error('JWT not active yet');
+      }
+    } catch (err) {
+      if (err.message === 'JWT has expired' || err.message === 'JWT not active yet') throw err;
+      throw new Error('Invalid Pi Auth Result: unable to parse JWT payload timestamps');
+    }
   }
 
   static isValidBase64(value) {

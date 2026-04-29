@@ -801,7 +801,8 @@ export class AIXParser {
     const contentWithoutSecurity = this.removeSecuritySection(content);
     const calculated = this.calculateChecksum(contentWithoutSecurity, algorithm);
 
-    if (calculated !== value) {
+    const safeEqual = this.timingSafeEqualHex(calculated, value);
+    if (!safeEqual) {
       this.warnings.push({
         code: 'CHECKSUM_MISMATCH',
         section: 'security',
@@ -850,6 +851,17 @@ export class AIXParser {
   calculateChecksum(content, algorithm = 'sha256') {
     const normalized = content.trim().replace(/\r\n/g, '\n');
     return crypto.createHash(algorithm).update(normalized, 'utf8').digest('hex');
+  }
+
+
+
+  timingSafeEqualHex(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    try {
+      return crypto.timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
+    } catch {
+      return false;
+    }
   }
 
   /**
