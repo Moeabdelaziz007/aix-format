@@ -56,6 +56,7 @@ export class PiKycAdapter {
     const normalizedToken = accessToken.trim();
 
     PiKycAdapter.validateJwtTimestamps(normalizedToken, options);
+    PiKycAdapter.validateJwtHeader(normalizedToken, options);
 
     // Generate privacy-preserving UID hash (salted when configured)
     const uidSalt = options.uidSalt || process.env.AIX_UID_HASH_SALT || '';
@@ -96,6 +97,12 @@ export class PiKycAdapter {
       challenge_binding_hash: challengeBinding
     };
 
+    PiKycAdapter.enforceAssurancePolicy(kyc_proof.assurance_level, options);
+
+    if (options.blockchainAnchor) {
+      kyc_proof.blockchain_anchor = PiKycAdapter.buildBlockchainAnchor(options.blockchainAnchor, accessTokenHash, timestamp);
+    }
+
     if (piAuthResult.vlaDevice) {
       kyc_proof.vla_device_registry = {
         adapter: piAuthResult.vlaDevice.adapter || 'generic',
@@ -129,6 +136,45 @@ return { identity_layer, kyc_proof };
       if (err.message === 'JWT has expired' || err.message === 'JWT not active yet') throw err;
       throw new Error('Invalid Pi Auth Result: unable to parse JWT payload timestamps');
     }
+  }
+
+
+
+  static validateJwtHeader(token, options = {}) {
+    if (!options.enforceJwtAlg) return;
+    const parts = token.split('.');
+    if (parts.length < 2) throw new Error('Invalid JWT format for header validation');
+    try {
+      const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+      const allowed = options.allowedJwtAlgs || ['EdDSA'];
+      if (!allowed.includes(header.alg)) {
+        throw new Error(`JWT signing algorithm '${header.alg}' is not allowed`);
+      }
+    } catch (err) {
+      if (err.message.includes('not allowed')) throw err;
+      throw new Error('Invalid Pi Auth Result: unable to parse JWT header');
+    }
+  }
+
+  static enforceAssurancePolicy(level, options = {}) {
+    if (!options.minAssuranceLevel) return;
+    const order = ['low', 'substantial', 'high'];
+    if (order.indexOf(level) < order.indexOf(options.minAssuranceLevel)) {
+      throw new Error(`Insufficient assurance level: required ${options.minAssuranceLevel}, got ${level}`);
+    }
+  }
+
+  static buildBlockchainAnchor(anchor, accessTokenHash, timestamp) {
+    if (!anchor.chain || !anchor.txid) {
+      throw new Error('Invalid blockchainAnchor: chain and txid are required');
+    }
+    return {
+      chain: anchor.chain,
+      txid: anchor.txid,
+      block_height: anchor.blockHeight,
+      anchored_at: anchor.anchoredAt || timestamp,
+      anchor_hash: crypto.createHash('sha256').update(`${anchor.chain}:${anchor.txid}:${accessTokenHash}`).digest('hex')
+    };
   }
 
   static isValidBase64(value) {
