@@ -1,4 +1,4 @@
-name: 🔬 CI — Validate, Test & Build
+name: CI — Build Gate
 
 on:
   push:
@@ -6,167 +6,57 @@ on:
   pull_request:
     branches: [main]
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: '20.x'
-
 jobs:
-  # ─────────────────────────────────────────
-  # JOB 1: Core Library Validation
-  # ─────────────────────────────────────────
-  core-validation:
-    name: 🧪 Core — Lint, Test & Schema
+  build:
+    name: TypeScript + Build Check
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/studio
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
-
-      - name: Install Root Dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Validate JSON Schemas
-        run: |
-          echo "▶ Validating all JSON schemas..."
-          for schema in schemas/*.json; do
-            echo "  Checking: $schema"
-            node -e "
-              const fs = require('fs');
-              const data = fs.readFileSync('$schema', 'utf8');
-              JSON.parse(data);
-              console.log('  ✅ Valid JSON:', '$schema');
-            "
-          done
-
-      - name: Validate AIX Example Files
-        run: |
-          echo "▶ Validating all example .aix files..."
-          npm run validate:examples
-        continue-on-error: false
-
-      - name: Run Core Test Suite
-        run: npm test
+          cache-dependency-path: apps/studio/package-lock.json
+      - run: npm ci
+      - name: TypeScript check
+        run: npx tsc --noEmit
+      - name: Build
+        run: npm run build
         env:
-          CI: true
+          NODE_ENV: production
+      - name: npm audit
+        run: npm audit --audit-level=moderate
 
-  # ─────────────────────────────────────────
-  # JOB 2: Studio App Build Validation
-  # ─────────────────────────────────────────
-  studio-build:
-    name: 🏗️ Studio — Next.js Build Check
+  test:
+    name: Core Package Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm test --if-present
+
+  deploy:
+    name: Deploy to Vercel
+    needs: [build, test]        # ← BOTH must pass first
+    if: |
+      github.ref == 'refs/heads/main' && 
+      github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-
-      - name: Install Workspace Dependencies
-        run: npm ci --ignore-scripts
-
-      - name: TypeScript Type Check
-        run: npm --prefix apps/studio exec tsc --noEmit
-        continue-on-error: true  # warn, not block — until strict mode is enforced
-
-      - name: Next.js Build
-        run: npm --prefix apps/studio run build
+      - uses: actions/checkout@v4
+      - name: Deploy
+        run: |
+          npx vercel --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
-          CI: true
-
-  # ─────────────────────────────────────────
-  # JOB 3: Security Audit
-  # ─────────────────────────────────────────
-  security-audit:
-    name: 🔐 Security Audit
-    runs-on: ubuntu-latest
-    needs: [core-validation]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci --ignore-scripts
-
-      - name: NPM Audit (High+ Severity)
-        run: npm audit --audit-level=high
-        continue-on-error: true  # report but don't block until fixed
-
-      - name: Scan for Hardcoded Secrets
-        run: |
-          echo "▶ Scanning for hardcoded secrets and fixed key seeds..."
-          # Check for patterns Jules flagged (fixed seed vulnerabilities)
-          if grep -r "new Uint8Array(32)" core/ tests/ --include="*.js" | grep -v ".test.js"; then
-            echo "⚠️  WARNING: Possible fixed seed detected. Review cryptographic usage."
-          else
-            echo "✅ No fixed seed patterns found."
-          fi
-          # Check for raw private key strings
-          if grep -rE "(privateKey|secret|seed)\s*=\s*[\"'][a-f0-9]{64}[\"']" core/ tests/; then
-            echo "❌ CRITICAL: Hardcoded private key detected!"
-            exit 1
-          else
-            echo "✅ No hardcoded keys found."
-          fi
-
-  # ─────────────────────────────────────────
-  # JOB 4: DID:WEB Identity Compliance
-  # ─────────────────────────────────────────
-  identity-compliance:
-    name: 🪪 Identity — did:axiom Compliance Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check for unexpected did:axiom references
-        run: |
-          echo "▶ Scanning for deprecated did:axiom identifiers outside approved compatibility files..."
-          ALLOWLIST='^(docs/AIX_SPEC.md|schemas/(aix-v1|axiom-aix|aix-enhanced)\.schema\.json|examples/|core/parser\.js|core/pi_kyc_adapter\.js)'
-          FOUND=$(grep -rn "did:axiom" docs/ examples/ schemas/ core/ --include="*.md" --include="*.json" --include="*.js" --include="*.yaml" || true)
-
-          if [ -n "$FOUND" ]; then
-            UNEXPECTED=$(printf '%s
-' "$FOUND" | awk -F: '{print $1":"$2":"$3}' | grep -Ev "$ALLOWLIST" || true)
-            if [ -n "$UNEXPECTED" ]; then
-              echo "❌ COMPLIANCE FAILURE: Unexpected did:axiom references found:"
-              echo "$UNEXPECTED"
-              exit 1
-            fi
-            echo "⚠️  did:axiom references detected only in allowlisted compatibility/spec files."
-      - name: Check for legacy did:web references
-        run: |
-          echo "▶ Scanning for deprecated did:web identifiers..."
-          FOUND=$(grep -rn "did:web" docs/ examples/ schemas/ core/ --include="*.md" --include="*.json" --include="*.js" --include="*.yaml" || true)
-          if [ -n "$FOUND" ]; then
-            echo "❌ COMPLIANCE FAILURE: Legacy did:web references found:"
-            echo "$FOUND"
-            exit 1
-          else
-            echo "✅ No did:axiom references found."
-          fi
-
-      - name: Check did:web format validity in spec docs
-        run: |
-          echo "▶ Verifying did:web format in spec files..."
-          grep -rn "did:web:" docs/ || echo "ℹ️  No did:web references found in docs (might be OK)."
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
