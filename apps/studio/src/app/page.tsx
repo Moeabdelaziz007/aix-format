@@ -44,32 +44,6 @@ export default function Home() {
             </div>
           </div>
 
-          <section className="w-full mt-2">
-            <h2 className="text-2xl font-bold text-white mb-4">AI Partners</h2>
-            <motion.div
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.25 }}
-              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.18 } } }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-4"
-            >
-              {[
-                { name: "Jules", role: "UI/UX Agent" },
-                { name: "Antigravity", role: "Systems & Security AI" },
-                { name: "Codex Agent", role: "Ed25519 Encryption & DNA Protocol" },
-              ].map((agent) => (
-                <motion.div
-                  key={agent.name}
-                  variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }}
-                  className="glass-panel rounded-2xl p-5 border border-white/5"
-                >
-                  <h3 className="text-lg text-white font-semibold">{agent.name}</h3>
-                  <p className="text-sm text-[var(--color-on-surface-variant)] mt-1">{agent.role}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          </section>
-
           <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
             <div className="flex flex-col gap-6">
               <h2 className="text-2xl font-bold text-white mb-2">My Agents</h2>
