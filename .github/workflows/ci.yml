@@ -133,7 +133,7 @@ jobs:
   # JOB 4: DID:WEB Identity Compliance
   # ─────────────────────────────────────────
   identity-compliance:
-    name: 🪪 Identity — did:web Compliance Check
+    name: 🪪 Identity — did:axiom Compliance Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -154,6 +154,14 @@ jobs:
               exit 1
             fi
             echo "⚠️  did:axiom references detected only in allowlisted compatibility/spec files."
+      - name: Check for legacy did:web references
+        run: |
+          echo "▶ Scanning for deprecated did:web identifiers..."
+          FOUND=$(grep -rn "did:web" docs/ examples/ schemas/ core/ --include="*.md" --include="*.json" --include="*.js" --include="*.yaml" || true)
+          if [ -n "$FOUND" ]; then
+            echo "❌ COMPLIANCE FAILURE: Legacy did:web references found:"
+            echo "$FOUND"
+            exit 1
           else
             echo "✅ No did:axiom references found."
           fi

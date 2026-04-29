@@ -188,7 +188,7 @@ name = "Example Agent"
 ```yaml
 meta:
   version: string          # AIX format version (semver), REQUIRED
-  id: string              # did:axiom or did:web format, REQUIRED
+  id: string              # did:axiom:axiomid.app format, REQUIRED
   abom: object            # Agent Bill of Materials, REQUIRED
   name: string            # Agent name, REQUIRED
   created: string         # ISO 8601 timestamp, REQUIRED
@@ -214,7 +214,7 @@ meta:
 **Validation Rules:**
 
 - `version` **MUST** follow Semantic Versioning (semver) format
-- `id` **MUST** be a valid `did:axiom` or `did:web` identifier
+- `id` **MUST** be a valid `did:axiom` or `did:axiom:axiomid.app` identifier
 - `created` and `updated` **MUST** be valid ISO 8601 timestamps
 - `name` **MUST** be 1-100 characters
 - `tags` **SHOULD** contain 1-10 tags, each 1-50 characters
@@ -692,7 +692,7 @@ pricing:
 
 ```json
 "identity_layer": {
-  "id": string,               // Unique identifier (did:axiom or did:web format), REQUIRED
+  "id": string,               // Unique identifier (did:axiom:axiomid.app format), REQUIRED
   "authority": string,        // Root authority domain, must be "axiomid.app", REQUIRED
   "issuedAt": string,         // ISO 8601 timestamp of issuance, REQUIRED
   "expiresAt": string,        // ISO 8601 timestamp of expiration, OPTIONAL
@@ -703,7 +703,7 @@ pricing:
 
 **Validation Rules:**
 
-- `id` **MUST** be a valid `did:axiom` or `did:web` identifier.
+- `id` **MUST** be a valid `did:axiom` or `did:axiom:axiomid.app` identifier.
 - `authority` **MUST** resolve to `axiomid.app`.
 - `issuedAt` **MUST** be a valid ISO 8601 date-time string.
 - `publicKey.algorithm` **MUST** be one of: `Ed25519`, `secp256k1`.
@@ -1091,7 +1091,7 @@ persona:
 
 meta:
   version: "1.0"
-  id: "did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
+  id: "did:axiom:axiomid.app:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
   name: "Complete Example Agent"
   description: "Demonstrates all AIX features"
   created: "2026-04-24T10:30:00Z"
@@ -1158,7 +1158,7 @@ pricing:
 identity_layer:
   network: "solana"
   wallet_pubkey: "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g"
-  did_document: "did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
+  did_document: "did:axiom:axiomid.app:axiomid.app:550e8400-e29b-41d4-a716-446655440000"
 
 economics:
   token: "AXIOM"
