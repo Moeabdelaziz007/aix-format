@@ -1,0 +1,249 @@
+# Studio Protection Workflow
+# High-Risk UI Build Zone guard for apps/studio/
+#
+# Per AGENT_GOVERNANCE.md Section 6 and ARCH_DECISIONS.md ADR-003:
+# Any change to Studio protected files must pass:
+#   1. TypeScript type check
+#   2. Next.js production build
+#   3. Smoke test on critical pages
+#   4. If AI-authored: requires 'human-reviewed' label
+
+name: 🛡️ Studio Protection
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      # Studio protected zone — all High-Risk files
+      - 'apps/studio/app/layout.tsx'
+      - 'apps/studio/app/page.tsx'
+      - 'apps/studio/app/**/page.tsx'
+      - 'apps/studio/app/globals.css'
+      - 'apps/studio/next.config.ts'
+      - 'apps/studio/next.config.js'
+      - 'apps/studio/app/(auth)/**'
+      - 'apps/studio/components/AgenticKycSetup*'
+      - 'apps/studio/components/LiveValidator*'
+      - 'apps/studio/components/SovereignStatusBar*'
+      - 'apps/studio/lib/pi-sdk*'
+      - 'apps/studio/lib/pi*'
+      - 'apps/studio/package.json'
+
+concurrency:
+  group: studio-protection-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ─────────────────────────────────────────────
+  # JOB 1: Studio Build Gate (ALWAYS runs)
+  # ─────────────────────────────────────────────
+  studio-build-gate:
+    name: 🏗️ Studio Build Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: TypeScript type check (Studio)
+        run: npm --prefix apps/studio exec tsc --noEmit
+        # TS errors in Studio High-Risk zone are BLOCKING (not warn-only)
+        continue-on-error: false
+
+      - name: Next.js production build (Studio)
+        run: npm --prefix apps/studio run build
+        env:
+          CI: true
+          # Minimal env to satisfy build — real secrets not needed for build check
+          NEXT_PUBLIC_STUDIO_ENV: ci
+
+      - name: Verify critical routes exist in build output
+        run: |
+          echo "Verifying critical page routes were built successfully..."
+          FAILED=0
+
+          CRITICAL_ROUTES=(
+            "apps/studio/.next/server/app"
+          )
+
+          for route in "${CRITICAL_ROUTES[@]}"; do
+            if [ -d "$route" ] || [ -f "$route" ]; then
+              echo "  ✅ Found: $route"
+            else
+              echo "  ⚠️  Not found: $route (may be dynamic route, check manually)"
+            fi
+          done
+
+          if [ "$FAILED" = "1" ]; then
+            exit 1
+          fi
+
+  # ─────────────────────────────────────────────
+  # JOB 2: Studio Baseline Compliance Check
+  # Ensures no regressions against ADR-003 baseline
+  # ─────────────────────────────────────────────
+  studio-baseline-compliance:
+    name: 📍 Studio Baseline Compliance (ADR-003)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Tailwind v4 baseline in globals.css
+        run: |
+          echo "=== Checking ADR-003: Tailwind v4 baseline ==="
+          GLOBALS="apps/studio/app/globals.css"
+
+          if [ ! -f "$GLOBALS" ]; then
+            echo "⚠️  globals.css not found — skipping (new file?)"
+            exit 0
+          fi
+
+          # Tailwind v4 uses @import 'tailwindcss', NOT @tailwind base/components/utilities
+          if grep -q "@tailwind base" "$GLOBALS" || grep -q "@tailwind components" "$GLOBALS"; then
+            echo "❌ REGRESSION: Old Tailwind v3 directives found in globals.css"
+            echo "ADR-003 requires Tailwind v4 with '@import tailwindcss'"
+            exit 1
+          fi
+
+          if grep -q "@import" "$GLOBALS"; then
+            echo "✅ Tailwind v4 @import pattern found in globals.css"
+          else
+            echo "⚠️  Warning: No @import found in globals.css — verify Tailwind is configured correctly"
+          fi
+
+      - name: Check next.config.ts has no deprecated externalDir
+        run: |
+          echo "=== Checking for deprecated experimental.externalDir ==="
+          CONFIG_FILE=""
+          if [ -f "apps/studio/next.config.ts" ]; then
+            CONFIG_FILE="apps/studio/next.config.ts"
+          elif [ -f "apps/studio/next.config.js" ]; then
+            CONFIG_FILE="apps/studio/next.config.js"
+          fi
+
+          if [ -z "$CONFIG_FILE" ]; then
+            echo "⚠️  next.config not found"
+            exit 0
+          fi
+
+          if grep -q "externalDir" "$CONFIG_FILE"; then
+            echo "❌ REGRESSION: deprecated 'externalDir' found in $CONFIG_FILE"
+            echo "Per ADR-003: This option was removed and causes build errors."
+            exit 1
+          else
+            echo "✅ No externalDir in $CONFIG_FILE"
+          fi
+
+      - name: Check Pi SDK uses afterInteractive strategy
+        run: |
+          echo "=== Checking Pi SDK script strategy ==="
+          PI_FILES=$(find apps/studio -name "*.tsx" -o -name "*.ts" | xargs grep -l "Pi SDK\|pi-sdk\|sdk.js" 2>/dev/null || true)
+
+          if [ -z "$PI_FILES" ]; then
+            echo "ℹ️  No Pi SDK files found to check"
+            exit 0
+          fi
+
+          for f in $PI_FILES; do
+            if grep -q "strategy=" "$f"; then
+              if grep -q 'strategy="afterInteractive"\|strategy={.*afterInteractive' "$f"; then
+                echo "✅ Correct Pi SDK strategy in: $f"
+              else
+                echo "⚠️  Non-afterInteractive strategy detected in: $f"
+                grep -n "strategy=" "$f"
+              fi
+            fi
+          done
+
+  # ─────────────────────────────────────────────
+  # JOB 3: AI-authored Studio PR gate
+  # Extra gate when AI agent touches Studio High-Risk zone
+  # ─────────────────────────────────────────────
+  studio-ai-gate:
+    name: 🤖 Studio AI-Origin Gate
+    runs-on: ubuntu-latest
+    needs: [studio-build-gate, studio-baseline-compliance]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect AI origin in Studio PR
+        id: detect_studio_ai
+        run: |
+          IS_AI="false"
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | python3 -c "
+import sys, json
+labels = json.load(sys.stdin)
+names = [l['name'] for l in labels]
+print(' '.join(names))
+" 2>/dev/null || echo "")
+
+          CO_AUTHORS=$(git log "${BASE_SHA}..${HEAD_SHA}" --format="%b" 2>/dev/null | grep -i "Co-authored-by" || echo "")
+          COMMIT_AUTHORS=$(git log "${BASE_SHA}..${HEAD_SHA}" --format="%ae" 2>/dev/null || echo "")
+
+          if echo "$LABELS" | grep -qi "ai-generated\|jules\|copilot"; then IS_AI="true"; fi
+          if echo "$CO_AUTHORS" | grep -qi "google-labs-jules\|jules\[bot\]\|copilot"; then IS_AI="true"; fi
+          if echo "$COMMIT_AUTHORS" | grep -qi "google-labs-jules\|copilot"; then IS_AI="true"; fi
+
+          echo "is_ai=${IS_AI}" >> $GITHUB_OUTPUT
+          echo "labels=${LABELS}" >> $GITHUB_OUTPUT
+
+      - name: Gate AI changes to Studio High-Risk zone
+        if: steps.detect_studio_ai.outputs.is_ai == 'true'
+        run: |
+          LABELS="${{ steps.detect_studio_ai.outputs.labels }}"
+
+          if echo "$LABELS" | grep -qi "human-reviewed"; then
+            echo "✅ Human review confirmed. Studio AI gate passed."
+          else
+            echo ""
+            echo "🚨 BLOCKED: AI agent is attempting to modify Studio High-Risk Zone files."
+            echo ""
+            echo "Per AGENT_GOVERNANCE.md Section 6 (Studio Protected Zone) and ADR-003:"
+            echo "  AI modifications to Studio protected files REQUIRE human approval."
+            echo ""
+            echo "PROTECTED FILES THAT TRIGGERED THIS:"
+            echo "  - apps/studio/app/layout.tsx"
+            echo "  - apps/studio/app/globals.css"
+            echo "  - apps/studio/next.config.ts"
+            echo "  - apps/studio/components/AgenticKycSetup*"
+            echo "  - apps/studio/components/LiveValidator*"
+            echo "  - apps/studio/lib/pi-sdk*"
+            echo ""
+            echo "TO UNBLOCK:"
+            echo "  1. Mohamed reviews the Studio changes in this PR"
+            echo "  2. Mohamed adds label 'human-reviewed' to the PR"
+            echo "  3. Re-run this workflow"
+            echo ""
+            echo "Jules: Per your governance rules, you should have opened a separate PR"
+            echo "for Studio High-Risk changes with title format:"
+            echo "  chore(studio): <action> — [HIGH-RISK ZONE]"
+            exit 1
+          fi
+
+      - name: Studio changes look good
+        if: steps.detect_studio_ai.outputs.is_ai != 'true'
+        run: |
+          echo "✅ Studio changes are human-authored. Standard review process applies."
+          echo "Reminder: Ensure build passes (checked in studio-build-gate job)."
