@@ -1,0 +1,656 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiomid.app/schemas/aix.schema.json",
+  "$comment": "AIX Format v1.3 — Unified Canonical Bundled Schema. Supersedes aix-v1.schema.json, axiom-aix.schema.json, aix-enhanced.schema.json. © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions",
+  "title": "AIX Format",
+  "description": "Unified JSON Schema for AIX (Artificial Intelligence eXchange) v1.3 — Sovereign Protocol. The Digital DNA of autonomous AI agents. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026",
+  "type": "object",
+  "required": ["meta", "persona", "security", "identity_layer"],
+
+  "$defs": {
+    "SemVer": {
+      "type": "string",
+      "description": "Semantic versioning string (e.g. 1.0.0, 1.2.0-beta.1)",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$",
+      "examples": ["1.0.0", "1.3.0", "2.0.0-beta.1"]
+    },
+    "ISODateTime": {
+      "type": "string",
+      "description": "ISO 8601 date-time string",
+      "format": "date-time",
+      "examples": ["2026-04-29T20:00:00Z"]
+    },
+    "UUIDv4": {
+      "type": "string",
+      "description": "UUID v4 identifier",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+    },
+    "AxiomDID": {
+      "type": "string",
+      "description": "Axiom Decentralized Identifier — did:axiom:axiomid.app:<id>",
+      "pattern": "^did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+$",
+      "examples": ["did:axiom:axiomid.app:agent-xyz-001"]
+    },
+    "PublicKey": {
+      "type": "object",
+      "description": "Public key material for cryptographic verification",
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["Ed25519", "secp256k1"],
+          "description": "Cryptographic algorithm used to generate the key pair"
+        },
+        "value": {
+          "type": "string",
+          "description": "Base64url-encoded public key bytes"
+        },
+        "encoding": {
+          "type": "string",
+          "enum": ["base64url", "hex"],
+          "default": "base64url"
+        }
+      }
+    },
+    "Signature": {
+      "type": "object",
+      "description": "Cryptographic signature over the canonical payload hash",
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["Ed25519", "secp256k1"],
+          "description": "Algorithm used to produce the signature"
+        },
+        "value": {
+          "type": "string",
+          "description": "Base64url-encoded signature bytes"
+        },
+        "canonicalization": {
+          "type": "string",
+          "enum": ["JCS", "RFC8785"],
+          "default": "JCS",
+          "description": "JSON canonicalization scheme used before signing"
+        }
+      }
+    },
+    "MetaArbiterConfig": {
+      "type": "object",
+      "description": "Meta Arbiter — 'العقل المدبر' — orchestration config for the agent's internal subsystem controller. Controls activation thresholds, coordination strategy, and growth monitoring.",
+      "properties": {
+        "activation_threshold": {
+          "type": "number",
+          "description": "Minimum score (0-1) required to activate a subsystem",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.6
+        },
+        "concurrent_systems_limit": {
+          "type": "integer",
+          "description": "Maximum number of subsystems running simultaneously",
+          "minimum": 1,
+          "default": 3
+        },
+        "response_time_target_sec": {
+          "type": "number",
+          "description": "Target maximum response time in seconds",
+          "minimum": 0.1,
+          "default": 5.0
+        },
+        "resource_allocation_ratio": {
+          "type": "number",
+          "description": "Maximum fraction of resources allocated to active systems",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.8
+        },
+        "growth_milestones_enabled": {
+          "type": "boolean",
+          "description": "Enable cognitive growth milestone tracking (GrowthMonitor)",
+          "default": false
+        },
+        "coordination_strategy": {
+          "type": "string",
+          "description": "Default inter-system coordination strategy",
+          "enum": ["sequential", "parallel", "hierarchical", "collaborative", "competitive"],
+          "default": "collaborative"
+        },
+        "decision_criteria": {
+          "type": "object",
+          "description": "Weighted criteria for subsystem activation decisions (weights should sum to 1.0)",
+          "properties": {
+            "urgency": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.3
+            },
+            "complexity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.25
+            },
+            "resource_availability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.2
+            },
+            "user_preference": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.15
+            },
+            "system_capability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.1
+            }
+          },
+          "additionalProperties": false
+        },
+        "alert_thresholds": {
+          "type": "object",
+          "description": "SystemMonitor alert thresholds (mirrors SystemMonitor.alert_thresholds)",
+          "properties": {
+            "response_time_sec": { "type": "number", "default": 5.0 },
+            "accuracy": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.85 },
+            "error_rate": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.05 },
+            "resource_usage": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.80 }
+          },
+          "additionalProperties": false
+        },
+        "growth_milestone_level": {
+          "type": "string",
+          "description": "Target cognitive growth milestone level (GrowthMonitor)",
+          "enum": ["beginner", "intermediate", "advanced", "expert"],
+          "default": "beginner"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Agent metadata and identification",
+      "required": ["version", "id", "name", "created", "author"],
+      "properties": {
+        "version": { "$ref": "#/$defs/SemVer" },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier — UUID v4 or AxiomDID",
+          "examples": ["550e8400-e29b-41d4-a716-446655440000", "did:axiom:axiomid.app:agent-001"]
+        },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "description": { "type": "string" },
+        "created": { "$ref": "#/$defs/ISODateTime" },
+        "updated": { "$ref": "#/$defs/ISODateTime" },
+        "author": { "type": "string", "minLength": 1 },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 50 },
+          "maxItems": 10
+        },
+        "license": { "type": "string", "examples": ["MIT", "Apache-2.0"] },
+        "homepage": { "type": "string", "format": "uri" },
+        "repository": { "type": "string", "format": "uri" },
+        "documentation": { "type": "string", "format": "uri" },
+        "icon": { "type": "string", "description": "Base64-encoded icon or URL" },
+        "language": { "type": "string", "pattern": "^[a-z]{2}$", "examples": ["en", "ar"] },
+        "framework": { "type": "string", "examples": ["openai", "anthropic", "gemini"] },
+        "runtime_version": { "type": "string" },
+        "lineage": {
+          "type": "array",
+          "description": "Agent genealogy and heritage tracking",
+          "items": {
+            "type": "object",
+            "required": ["parent_id"],
+            "properties": {
+              "parent_id": { "type": "string", "description": "DID or UUID of the parent agent" },
+              "relationship": { "type": "string", "enum": ["fork", "clone", "ancestor", "template"] },
+              "timestamp": { "$ref": "#/$defs/ISODateTime" },
+              "signature": { "type": "string", "description": "Cryptographic proof of lineage" }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "persona": {
+      "type": "object",
+      "description": "Agent personality and behavior",
+      "required": ["role", "instructions"],
+      "properties": {
+        "role": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "tone": { "type": "string", "examples": ["friendly", "professional", "technical"] },
+        "style": { "type": "string", "examples": ["concise", "detailed"] },
+        "instructions": { "type": "string", "minLength": 1, "maxLength": 10000 },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "personality_traits": { "type": "object", "additionalProperties": { "type": "string" } },
+        "example_responses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": { "type": "string" },
+              "answer": { "type": "string" }
+            }
+          }
+        },
+        "temperature": { "type": "number", "minimum": 0.0, "maximum": 2.0 },
+        "context_window": { "type": "integer", "minimum": 1 },
+        "response_format": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+
+    "security": {
+      "type": "object",
+      "description": "Security and integrity data",
+      "required": ["checksum"],
+      "properties": {
+        "checksum": {
+          "type": "object",
+          "required": ["algorithm", "value"],
+          "properties": {
+            "algorithm": { "type": "string", "enum": ["sha256", "sha512", "blake3"] },
+            "value": { "type": "string", "pattern": "^[0-9a-f]+$" },
+            "scope": { "type": "string", "default": "content" }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "properties": {
+            "algorithm": { "type": "string", "enum": ["RSA-SHA256", "Ed25519", "ECDSA-SHA256"] },
+            "value": { "type": "string" },
+            "public_key": { "type": "string" },
+            "signer": { "type": "string" },
+            "timestamp": { "$ref": "#/$defs/ISODateTime" }
+          }
+        },
+        "encryption": {
+          "type": "object",
+          "properties": {
+            "encrypted": { "type": "boolean", "default": false },
+            "algorithm": { "type": "string", "enum": ["AES-256-GCM", "ChaCha20-Poly1305", "none"] },
+            "key_fingerprint": { "type": "string" }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "allowed_operations": { "type": "array", "items": { "type": "string" } },
+            "restricted_operations": { "type": "array", "items": { "type": "string" } },
+            "restricted_domains": { "type": "array", "items": { "type": "string" } },
+            "max_api_calls_per_minute": { "type": "integer", "minimum": 1 },
+            "max_memory_mb": { "type": "integer", "minimum": 1 },
+            "sandbox": { "type": "boolean", "default": false }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "standards": { "type": "array", "items": { "type": "string" } },
+            "certifications": { "type": "array", "items": { "type": "string" } },
+            "audit_log": { "type": "boolean", "default": false }
+          }
+        }
+      }
+    },
+
+    "identity_layer": {
+      "type": "object",
+      "description": "AxiomID Identity block. axiomid.app is the Root Authority for all issued identities.",
+      "required": ["id", "authority", "issuedAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/AxiomDID" },
+        "authority": {
+          "type": "string",
+          "const": "axiomid.app",
+          "description": "Root authority domain. Must resolve to axiomid.app."
+        },
+        "issuedAt": { "$ref": "#/$defs/ISODateTime" },
+        "expiresAt": { "$ref": "#/$defs/ISODateTime" },
+        "publicKey": { "$ref": "#/$defs/PublicKey" },
+        "signature": { "$ref": "#/$defs/Signature" }
+      }
+    },
+
+    "skills": {
+      "type": "array",
+      "description": "Agent capabilities",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "description": { "type": "string" },
+          "enabled": { "type": "boolean", "default": true },
+          "parameters": { "type": "object" },
+          "triggers": { "type": "array", "items": { "type": "string" } },
+          "examples": { "type": "array", "items": { "type": "string" } },
+          "priority": { "type": "integer", "minimum": 1, "maximum": 10 },
+          "timeout": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+
+    "apis": {
+      "type": "array",
+      "description": "API integrations",
+      "items": {
+        "type": "object",
+        "required": ["name", "base_url"],
+        "properties": {
+          "name": { "type": "string" },
+          "base_url": { "type": "string", "format": "uri" },
+          "description": { "type": "string" },
+          "version": { "type": "string" },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["bearer", "api_key", "oauth2", "basic", "none"] },
+              "location": { "type": "string", "enum": ["header", "query", "body"] },
+              "key_name": { "type": "string" }
+            }
+          },
+          "endpoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string" },
+                "method": { "type": "string", "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"] },
+                "description": { "type": "string" },
+                "parameters": { "type": "array", "items": { "type": "object" } }
+              }
+            }
+          },
+          "rate_limit": {
+            "type": "object",
+            "properties": {
+              "requests": { "type": "integer", "minimum": 1 },
+              "period": { "type": "integer", "minimum": 1 }
+            }
+          },
+          "timeout": { "type": "integer", "minimum": 1 },
+          "retry": {
+            "type": "object",
+            "properties": {
+              "max_attempts": { "type": "integer", "minimum": 1 },
+              "backoff": { "type": "string", "enum": ["exponential", "linear", "constant"] }
+            }
+          }
+        }
+      }
+    },
+
+    "mcp": {
+      "type": "object",
+      "description": "Model Context Protocol configuration",
+      "properties": {
+        "servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "command"],
+            "properties": {
+              "name": { "type": "string" },
+              "command": { "type": "string" },
+              "args": { "type": "array", "items": { "type": "string" } },
+              "env": { "type": "object", "additionalProperties": { "type": "string" } },
+              "description": { "type": "string" },
+              "capabilities": { "type": "array", "items": { "type": "string" } },
+              "timeout": { "type": "integer", "minimum": 1 },
+              "auto_start": { "type": "boolean", "default": false }
+            }
+          }
+        }
+      }
+    },
+
+    "memory": {
+      "type": "object",
+      "description": "Memory system configuration",
+      "properties": {
+        "episodic": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "max_messages": { "type": "integer", "minimum": 1 },
+            "retention_days": { "type": "integer", "minimum": 1 },
+            "storage": { "type": "string", "enum": ["local", "cloud", "vector_db", "database"] }
+          }
+        },
+        "semantic": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "embedding_model": { "type": "string" },
+            "vector_db": { "type": "string" },
+            "similarity_threshold": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "max_results": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "procedural": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "storage": { "type": "string" },
+            "max_workflows": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "backend": { "type": "string", "enum": ["file", "database", "redis", "s3", "postgresql", "sqlite"] },
+            "config": { "type": "object" }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "economics": {
+      "type": "object",
+      "description": "Economic and transaction layer for agent settlements and payments",
+      "properties": {
+        "pi_smart_contract": {
+          "type": "object",
+          "required": ["address", "network"],
+          "properties": {
+            "address": { "type": "string" },
+            "network": { "type": "string", "enum": ["mainnet", "testnet", "sandbox"] },
+            "escrow_enabled": { "type": "boolean", "default": false },
+            "abi_url": { "type": "string", "format": "uri" }
+          }
+        },
+        "pricing": {
+          "type": "object",
+          "properties": {
+            "model": { "type": "string", "enum": ["pay_per_call", "subscription", "freemium", "tiered"], "default": "pay_per_call" },
+            "cost_per_call": {
+              "type": "object",
+              "properties": {
+                "amount": { "type": "number", "minimum": 0 },
+                "currency": { "type": "string", "default": "PI", "examples": ["PI", "SOL", "USD"] }
+              }
+            },
+            "subscription": {
+              "type": "object",
+              "properties": {
+                "monthly_fee": {
+                  "type": "object",
+                  "properties": {
+                    "amount": { "type": "number", "minimum": 0 },
+                    "currency": { "type": "string", "default": "PI" }
+                  }
+                },
+                "included_calls": { "type": "integer", "minimum": 0 },
+                "additional_call_cost": {
+                  "type": "object",
+                  "properties": {
+                    "amount": { "type": "number", "minimum": 0 },
+                    "currency": { "type": "string", "default": "PI" }
+                  }
+                }
+              }
+            },
+            "tiered_pricing": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "min_calls": { "type": "integer", "minimum": 0 },
+                  "max_calls": { "type": "integer", "minimum": 0 },
+                  "cost_per_call": {
+                    "type": "object",
+                    "properties": {
+                      "amount": { "type": "number", "minimum": 0 },
+                      "currency": { "type": "string", "default": "PI" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "pi_network": {
+      "type": "object",
+      "description": "Pi Network specific configuration and SDK integration",
+      "required": ["app_id", "environment"],
+      "properties": {
+        "app_id": { "type": "string" },
+        "environment": { "type": "string", "enum": ["sandbox", "production"] },
+        "sdk_version": { "type": "string" },
+        "payment_provider": { "type": "string" },
+        "kyc_required": { "type": "boolean", "default": true }
+      }
+    },
+
+    "abom": {
+      "type": "object",
+      "description": "Agent Bill of Materials (ABOM) — AI-SBOM compatible supply chain transparency",
+      "properties": {
+        "spec_version": { "type": "string" },
+        "generated": { "$ref": "#/$defs/ISODateTime" },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" }
+            }
+          }
+        },
+        "constituents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "type": { "type": "string", "enum": ["model", "dataset", "library", "tool", "plugin", "agent", "runtime"] },
+              "purl": { "type": "string" },
+              "hash": { "type": "string" },
+              "integrity_hash": { "type": "string" },
+              "license": { "type": "string" },
+              "supplier": { "type": "string" },
+              "trust_tier": { "type": "string", "enum": ["verified", "community", "unverified", "revoked"] },
+              "security_status": { "type": "string", "enum": ["clean", "vulnerable", "revoked", "unknown"] },
+              "source_registry": { "type": "string" }
+            }
+          }
+        },
+        "attestations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "value": { "type": "string" },
+              "signer": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "live_voice": {
+      "type": "object",
+      "description": "Live Voice Models integration for human-like conversational experiences",
+      "required": ["enabled", "provider"],
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "provider": { "type": "string", "enum": ["openai-realtime", "hume", "elevenlabs", "generic"] },
+        "voice_id": { "type": "string" },
+        "latency_mode": { "type": "string", "enum": ["ultra_low", "standard", "high_quality"], "default": "standard" }
+      }
+    },
+
+    "requirements": {
+      "type": "object",
+      "description": "Agent resource requirements for deployment and execution",
+      "properties": {
+        "hardware": {
+          "type": "object",
+          "properties": {
+            "cpu_cores": { "type": "integer", "minimum": 1 },
+            "memory_mb": { "type": "integer", "minimum": 1 },
+            "storage_mb": { "type": "integer", "minimum": 1 },
+            "gpu_required": { "type": "boolean", "default": false },
+            "gpu_memory_mb": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "software": {
+          "type": "object",
+          "properties": {
+            "runtime": { "type": "string" },
+            "dependencies": { "type": "array", "items": { "type": "string" } },
+            "python_version": { "type": "string" },
+            "node_version": { "type": "string" }
+          }
+        },
+        "network": {
+          "type": "object",
+          "properties": {
+            "internet_access": { "type": "boolean", "default": false },
+            "bandwidth_mbps": { "type": "number", "minimum": 0 },
+            "allowed_domains": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "vla": {
+          "type": "object",
+          "required": ["adapter"],
+          "properties": {
+            "adapter": { "type": "string", "enum": ["openpi", "π0.7", "generic"] },
+            "vision": { "type": "object", "additionalProperties": true },
+            "language": { "type": "object", "additionalProperties": true },
+            "action": { "type": "object", "additionalProperties": true }
+          }
+        }
+      }
+    },
+
+    "meta_arbiter": {
+      "$ref": "#/$defs/MetaArbiterConfig",
+      "description": "Optional Meta Arbiter runtime configuration — wires into the agent's orchestration layer"
+    }
+  },
+
+  "additionalProperties": true
+}
