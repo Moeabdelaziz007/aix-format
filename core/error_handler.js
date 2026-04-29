@@ -163,3 +163,39 @@ export class TimeoutError extends Error {
 }
 
 
+
+export class TokenBucket {
+  constructor(capacity, refillRate) {
+    this.capacity = capacity;
+    this.tokens = capacity;
+    this.refillRate = refillRate;  // tokens per second
+    this.lastRefill = Date.now();
+  }
+
+  tryConsume(tokens = 1) {
+    this.refill();
+
+    if (this.tokens >= tokens) {
+      this.tokens -= tokens;
+      return true;
+    }
+
+    return false;
+  }
+
+  refill() {
+    const now = Date.now();
+    const elapsed = (now - this.lastRefill) / 1000;
+    const tokensToAdd = elapsed * this.refillRate;
+
+    this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);
+    this.lastRefill = now;
+  }
+
+  getWaitTime() {
+    if (this.tokens >= 1) return 0;
+
+    const tokensNeeded = 1 - this.tokens;
+    return (tokensNeeded / this.refillRate) * 1000;
+  }
+}
