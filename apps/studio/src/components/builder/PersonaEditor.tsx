@@ -32,8 +32,8 @@ export function PersonaEditor() {
         </div>
         <div className="flex flex-wrap gap-2 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.08] min-h-[52px]">
           {traits.map((trait, i) => (
-            <span 
-              key={i} 
+            <span
+              key={i}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-primary-dim)]/20 border border-[var(--color-primary-dim)]/30 text-[var(--color-primary)] text-xs font-medium group"
             >
               {trait}
@@ -42,7 +42,7 @@ export function PersonaEditor() {
               </button>
             </span>
           ))}
-          <input 
+          <input
             placeholder="Add trait..."
             className="flex-1 bg-transparent border-none outline-none text-xs text-white min-w-[100px]"
             onKeyDown={addTrait}
@@ -56,7 +56,7 @@ export function PersonaEditor() {
           System Instructions
         </label>
         <div className="relative">
-          <textarea 
+          <textarea
             placeholder="Define the core behavioral logic and constraints for the agent..."
             className="input min-h-[200px] resize-none py-4 font-mono text-xs leading-relaxed"
             value={prompt}

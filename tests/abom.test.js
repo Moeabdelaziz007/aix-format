@@ -1,8 +1,3 @@
-/**
- * tests/abom.test.js — AI-SBOM ABOM validation unit tests
- * Tests the upgraded validateABOM logic in core/parser.js
- */
-
 import { AIXParser } from '../core/parser.js';
 
 // ── Minimal valid AIX manifest template ────────────────────────────────────

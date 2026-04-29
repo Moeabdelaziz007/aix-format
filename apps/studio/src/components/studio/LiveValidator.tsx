@@ -1,101 +1,68 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { UploadCloud, CheckCircle2, ShieldCheck, ShieldX, AlertTriangle } from "lucide-react";
+import { parseYamlLight } from "@/lib/utils";
 
-async function sha256Hex(input: string): Promise<string> {
+// Minimal SHA-256 for the browser.
+async function sha256Hex(text: string) {
   const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function parseYamlLight(yaml: string): Record<string, unknown> {
-  const root: Record<string, unknown> = {};
-  const lines = yaml.split(/\r?\n/);
-  const stack: Array<{ indent: number; obj: Record<string, unknown>; lastKey: string | null }> = [
-    { indent: -1, obj: root, lastKey: null },
-  ];
-  for (const raw of lines) {
-    const line = raw.replace(/#.*$/, "").trimEnd();
-    if (!line.trim()) continue;
-    const indent = line.search(/\S/);
-    const content = line.trim();
-    while (stack.length > 1 && stack[stack.length - 1].indent >= indent) stack.pop();
-    const frame = stack[stack.length - 1];
-    const parent = frame.obj;
-    if (content.startsWith("- ")) {
-      const itemValue = content.slice(2).trim().replace(/^['"]|['"]$/g, "");
-      if (frame.lastKey) {
-        const existing = parent[frame.lastKey];
-        if (Array.isArray(existing)) (existing as string[]).push(itemValue);
-        else parent[frame.lastKey] = [itemValue];
-      }
-    } else if (content.includes(":")) {
-      const colonIdx = content.indexOf(":");
-      const key = content.slice(0, colonIdx).trim();
-      const val = content.slice(colonIdx + 1).trim();
-      if (val === "" || val === "|") {
-        const child: Record<string, unknown> = {};
-        parent[key] = child;
-        frame.lastKey = key;
-        stack.push({ indent, obj: child, lastKey: null });
-      } else if (val === "[]") {
-        parent[key] = [];
-        frame.lastKey = key;
-      } else {
-        parent[key] = val.replace(/^['"]|['"]$/g, "");
-        frame.lastKey = key;
-      }
-    }
-  }
-  return root;
+// Minimal static checker
+function validateAix(parsed: Record<string, unknown> | null) {
+  if (!parsed || typeof parsed !== "object") return { valid: false, missing: ["<not an object>"] };
+  const reqs = ["meta", "persona", "security", "identity_layer"];
+  const missing = reqs.filter((r) => !(r in parsed));
+
+  const parsedAny = parsed as any;
+  const hasSig = Boolean(parsedAny?.security?.signature?.value && parsedAny?.security?.signature?.algorithm);
+
+  return {
+    valid: missing.length === 0,
+    missing,
+    fieldCount: Object.keys(parsed).length,
+    hasSignature: hasSig,
+  };
 }
 
-const REQUIRED_AIX_KEYS = ["aix_version", "identity", "metadata", "capabilities"] as const;
-
-type ValidationResult = {
-  valid: boolean;
-  missing: string[];
-  hasSignature: boolean;
-  fieldCount: number;
-};
-
-function validateAix(parsed: Record<string, unknown>): ValidationResult {
-  const missing = REQUIRED_AIX_KEYS.filter((k) => !(k in parsed));
-  const security = parsed.security as Record<string, unknown> | undefined;
-  const sig = security?.signature as Record<string, unknown> | undefined;
-  const hasSignature = Boolean(sig?.value);
-  const fieldCount = Object.keys(parsed).length;
-  return { valid: missing.length === 0, missing, hasSignature, fieldCount };
-}
-
-export default function LiveValidator({
-  content: propContent,
-  fileName: propFileName,
-}: {
+interface LiveValidatorProps {
   content?: string;
   fileName?: string;
-}) {
-  const [dragging, setDragging] = useState(false);
-  const [hash, setHash] = useState<string>("");
-  const [validation, setValidation] = useState<ValidationResult | null>(null);
-  const [fileName, setFileName] = useState<string>(propFileName || "");
-  const [error, setError] = useState<string>("");
+}
 
-  const statusLabel = useMemo(() => {
-    if (!validation) return "Awaiting AIX DNA";
-    if (!validation.valid) return `Missing fields: ${validation.missing.join(", ")}`;
-    return validation.hasSignature
-      ? "Trust Chain: Signature Present"
-      : "Trust Chain: Signature Missing";
-  }, [validation]);
+export default function LiveValidator({ 
+  content: propContent, 
+  fileName: propFileName 
+}: LiveValidatorProps) {
+  const [dragging, setDragging] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [hash, setHash] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [validation, setValidation] = useState<{
+    valid: boolean;
+    missing: string[];
+    fieldCount?: number;
+    hasSignature?: boolean;
+  } | null>(null);
+
+  type SigState = "missing" | "valid-structure" | "unknown";
+  const [sigState, setSigState] = useState<SigState>("unknown");
+
+  let statusLabel = "Waiting for payload...";
+  if (sigState === "missing") statusLabel = "Identity missing — Unsigned";
+  if (sigState === "valid-structure") statusLabel = "Identity detected — Signed";
 
   const processContent = async (content: string, name: string) => {
-    setError("");
     setFileName(name);
+    setError(null);
+    setValidation(null);
+    setHash("");
+
     try {
       let parsed: Record<string, unknown>;
       if (name.endsWith(".json") || content.trim().startsWith("{")) {
@@ -125,12 +92,6 @@ export default function LiveValidator({
     const content = await file.text();
     await processContent(content, file.name);
   };
-
-  const sigState = validation?.hasSignature
-    ? "valid-structure"
-    : validation
-    ? "missing"
-    : "unknown";
 
   return (
     <div className="rounded-2xl border border-[var(--color-glass-border)] bg-[rgba(12,16,28,0.5)] p-5 backdrop-blur-xl">
