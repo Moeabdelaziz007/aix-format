@@ -1,13 +1,7 @@
 <div align="center">
-  <img src="./apps/studio/public/globe.svg" width="120" alt="Logo"/>
-  <h3>The Global Marketplace for Autonomous AI Agents</h3>
-  <h3>السوق العالمي لوكلاء الذكاء الاصطناعي المستقلين</h3>
-  <p>Powered by <b>AIX (Artificial Intelligence eXchange)</b> format and secured by <b>Pi Network KYC</b>.</p>
-  <p>مدعوم بصيغة <b>AIX</b> ومؤمن بواسطة <b>Pi Network KYC</b>.</p>
-
 
 <a href="https://github.com/Moeabdelaziz007/aix-format">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=AIX%20FORMAT&fontSize=60&fontColor=fff&animation=fadeIn&fontAlignY=38&desc=The%20Sovereign%20Agent%20Standard%20%7C%20معيار%20الوكلاء%20السيادي&descAlignY=55&descSize=16" width="100%"/>
+  <img src="/Users/cryptojoker710/.gemini/antigravity/brain/c2b988cf-b1a7-48f7-898c-ed8bd76dddde/aix_format_logo_1777443313294.png" width="300" alt="AIX-Format Sovereign Logo" />
 </a>
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=18&pause=1000&color=8B5CF6&center=true&vCenter=true&width=700&lines=Identity+%2B+Economics+%2B+Security+%E2%80%94+In+One+File;Pi+Network+KYC+%2B+Ed25519+Cryptography;The+Only+Standard+With+Human-Verified+Agents;%D8%A7%D9%84%D9%85%D8%B9%D9%8A%D8%A7%D8%B1+%D8%A7%D9%84%D9%88%D8%AD%D9%8A%D8%AF+%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9+%D9%84%D9%84%D9%87%D9%88%D9%8A%D8%A9+%D9%88%D8%A7%D9%84%D8%A7%D9%82%D8%AA%D8%B5%D8%A7%D8%AF+%D9%88%D8%A7%D9%84%D8%A3%D9%85%D8%B7" alt="Typing SVG" />
@@ -27,12 +21,29 @@
 >
 > **[AR]** *المعيار المفتوح الوحيد الذي يجمع تعريف الوكيل الكامل + هوية موقّعة بـ KYC + اقتصاديات في ملف واحد قابل للنقل.*
 
- main
 </div>
 
 ---
 
- jules-add-aix-validate-tests-11474985681302733165
+<details>
+<summary><b>📑 Table of Contents | فهرس المحتويات</b></summary>
+<br/>
+
+| # | Section (EN) | القسم (AR) |
+|:-:|:--|:--|
+| 1 | [🎯 The Problem We Solve](#-the-problem-we-solve--المشكلة-التي-نحلها) | المشكلة التي نحلها |
+| 2 | [⚡ AIX vs The Ecosystem](#-aix-vs-the-ecosystem--المقارنة-مع-البدائل) | المقارنة مع البدائل |
+| 3 | [🧬 Core Architecture](#-core-architecture--الهندسة-الجوهرية) | الهندسة الجوهرية |
+| 4 | [✨ Sovereign Features](#-sovereign-features--المميزات-السيادية) | المميزات السيادية |
+| 5 | [🔐 Security Model](#-security-model--النموذج-الأمني) | النموذج الأمني |
+| 6 | [🛠️ Quick Start](#-quick-start--البدء-السريع) | البدء السريع |
+| 7 | [🗺️ Roadmap](#-roadmap--خارطة-الطريق) | خارطة الطريق |
+| 8 | [🤝 The Sovereign Hive](#-the-sovereign-hive--الخلية-السيادية) | الخلية السيادية |
+
+</details>
+
+---
+
 ## 🚀 Vision (الرؤية)
 
 **[EN]** The biggest challenge for Autonomous Agents today is not intelligence, but **Distribution** and **Trust**. By combining the robust DNA of the `.aix` format with the decentralized infrastructure and KYC-verified user base of the Pi Network, we are building a true Machine-to-Machine (M2M) micro-transaction economy. The Sovereign Pi Agents Studio allows users to configure agents via Voice-First UI, sign their `.aix` payloads with their Pi KYC identity (preventing Sybil attacks), and deploy them to the network.
@@ -77,23 +88,7 @@ graph TD
 
     AIXPayload -->|Execute| Core[⚙️ AIX Core Parser]
     Core -->|Deploy to M2M Economy| PiNodes[(🌐 Pi Nodes / MCP)]
-=======
-<details>
-<summary><b>📑 Table of Contents | فهرس المحتويات</b></summary>
-<br/>
-
-| # | Section (EN) | القسم (AR) |
-|:-:|:--|:--|
-| 1 | [🎯 The Problem We Solve](#-the-problem-we-solve--المشكلة-التي-نحلها) | المشكلة التي نحلها |
-| 2 | [⚡ AIX vs The Ecosystem](#-aix-vs-the-ecosystem--المقارنة-مع-البدائل) | المقارنة مع البدائل |
-| 3 | [🧬 Core Architecture](#-core-architecture--الهندسة-الجوهرية) | الهندسة الجوهرية |
-| 4 | [✨ Sovereign Features](#-sovereign-features--المميزات-السيادية) | المميزات السيادية |
-| 5 | [🔐 Security Model](#-security-model--النموذج-الأمني) | النموذج الأمني |
-| 6 | [🛠️ Quick Start](#-quick-start--البدء-السريع) | البدء السريع |
-| 7 | [🗺️ Roadmap](#-roadmap--خارطة-الطريق) | خارطة الطريق |
-| 8 | [🤝 The Sovereign Hive](#-the-sovereign-hive--الخلية-السيادية) | الخلية السيادية |
-
-</details>
+```
 
 ---
 
@@ -132,7 +127,7 @@ The root cause: there is no open standard requiring human-verified identity for 
 
 | Feature | **AIX Format** | A2A AgentCard | OSSA v0.5 | AgentFacts/KYA |
 |:--------|:-:|:-:|:-:|:-:|
-| **Agent Identity (DID)** | ✅ `did:axiom` | ❌ | ❌ | ⚠️ partial |
+| **Agent Identity (DID)** | ✅ `did:web` | ❌ | ❌ | ⚠️ partial |
 | **KYC / Proof of Personhood** | ✅ Pi Network (17M+) | ❌ | ❌ | ⚠️ concept only |
 | **Economics / Pricing Layer** | ✅ built-in | ❌ | ❌ | ❌ |
 | **Checksum / Supply Chain** | ✅ SHA-256 + Ed25519 | ❌ | ❌ | ⚠️ planned |
@@ -589,4 +584,3 @@ A GitHub action is included (`.github/workflows/aix-validation.yml`) which autom
 <img src="https://img.shields.io/badge/Research-Claude_4.6_x_Antigravity-8b5cf6?style=for-the-badge" alt="Research"/>
 
 </div>
- main
