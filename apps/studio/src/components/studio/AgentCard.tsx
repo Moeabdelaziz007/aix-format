@@ -1,70 +1,148 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, BrainCircuit, Activity } from "lucide-react";
+import { Shield, BrainCircuit, Zap, MoreHorizontal, TrendingUp } from "lucide-react";
 
 interface AgentCardProps {
   name: string;
   role: string;
   price: string;
-  status: "online" | "offline";
-  color: string;
+  status: "online" | "offline" | "busy";
+  color?: string;
+  successRate?: number;
+  tasksCompleted?: number;
 }
 
-export function AgentCard({ name, role, price, status, color }: AgentCardProps) {
+export function AgentCard({
+  name,
+  role,
+  price,
+  status,
+  color = "#00d4ff",
+  successRate = 98.4,
+  tasksCompleted = 1247,
+}: AgentCardProps) {
+  const statusConfig = {
+    online:  { label: "Online",  dot: "status-online",  textColor: "text-[var(--color-success)]"  },
+    offline: { label: "Offline", dot: "status-offline", textColor: "text-[var(--color-on-surface-faint)]" },
+    busy:    { label: "Busy",    dot: "status-busy",    textColor: "text-[var(--color-warning)]"  },
+  }[status];
+
   return (
     <motion.div
-      whileHover={{ y: -5 }}
-      className="group relative rounded-2xl glass-panel overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,0,0,0.3)] hover:border-[var(--color-primary)]/30"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      className="card group relative overflow-hidden p-0"
     >
-      {/* Subtle background glow based on agent color */}
+      {/* Top accent bar */}
       <div
-        className="absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-20 blur-[60px] transition-opacity group-hover:opacity-40"
+        className="absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity"
+        style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
+      />
+
+      {/* Ambient background glow */}
+      <div
+        className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity duration-500"
         style={{ backgroundColor: color }}
       />
 
-      <div className="p-6 relative z-10 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-6">
+      <div className="relative z-10 p-6 flex flex-col gap-5">
+
+        {/* ── Top row ── */}
+        <div className="flex items-start justify-between">
+          {/* Icon */}
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/10"
-            style={{ background: `linear-gradient(135deg, ${color}22, ${color}44)` }}
+            className="w-12 h-12 rounded-2xl flex items-center justify-center border flex-shrink-0"
+            style={{
+              background: `linear-gradient(135deg, ${color}18, ${color}30)`,
+              borderColor: `${color}30`,
+              boxShadow:   `0 0 16px ${color}20`,
+            }}
           >
-            <BrainCircuit className="w-7 h-7" style={{ color }} />
+            <BrainCircuit className="w-6 h-6" style={{ color }} />
           </div>
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(12,19,36,0.6)] border border-[var(--color-glass-border)]">
-            <div className={`w-2 h-2 rounded-full ${status === 'online' ? 'bg-[#00e3fd] animate-pulse' : 'bg-gray-500'}`} />
-            <span className="text-[10px] font-medium uppercase tracking-wider text-white">
-              {status}
+          <div className="flex items-center gap-2">
+            {/* Status pill */}
+            <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] ${statusConfig.textColor}`}>
+              <span className={`status-dot ${statusConfig.dot}`} />
+              {statusConfig.label}
             </span>
+            {/* Context menu */}
+            <button className="btn btn-ghost btn-sm w-7 h-7 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Agent options">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
+        {/* ── Info ── */}
         <div>
-          <h3 className="text-xl font-display font-semibold text-white mb-1">{name}</h3>
-          <p className="text-sm text-[var(--color-on-surface-variant)]">{role}</p>
+          <h3 className="text-base font-display font-bold text-white tracking-tight leading-tight">{name}</h3>
+          <p className="text-[13px] text-[var(--color-on-surface-variant)] mt-0.5">{role}</p>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-[var(--color-glass-border)] flex items-center justify-between mt-auto">
+        {/* ── Metrics ── */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
+            <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Success Rate</p>
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-[var(--color-success)]" />
+              <span className="text-sm font-bold text-white">{successRate}%</span>
+            </div>
+          </div>
+          <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05]">
+            <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider mb-1">Tasks Done</p>
+            <div className="flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+              <span className="text-sm font-bold text-white">{tasksCompleted.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Footer ── */}
+        <div className="flex items-center justify-between pt-4 border-t border-white/[0.05] mt-auto">
           <div>
-            <p className="text-xs text-[var(--color-on-surface-variant)] uppercase tracking-wider mb-1">Cost Per Task</p>
-            <p className="text-lg font-semibold text-white flex items-center gap-1">
-              <span style={{ color }}>π</span> {price}
+            <p className="text-[10px] text-[var(--color-on-surface-faint)] uppercase tracking-wider">Cost / Task</p>
+            <p className="text-lg font-bold text-white mt-0.5 flex items-center gap-1">
+              <span style={{ color }} className="text-base">π</span>
+              {price}
             </p>
           </div>
 
-          <button className="px-5 py-2.5 rounded-xl bg-[var(--color-surface-container-high)] text-white text-sm font-medium border border-[var(--color-glass-border)] hover:bg-[var(--color-surface-container-highest)] hover:border-[var(--color-primary)]/50 transition-all">
+          <button
+            className="btn btn-sm rounded-xl transition-all"
+            style={{
+              background:   `linear-gradient(135deg, ${color}22, ${color}11)`,
+              borderColor:  `${color}40`,
+              color:        color,
+              border:       `1px solid ${color}40`,
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = color;
+              (e.currentTarget as HTMLButtonElement).style.color = "#050507";
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 20px ${color}60`;
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = `linear-gradient(135deg, ${color}22, ${color}11)`;
+              (e.currentTarget as HTMLButtonElement).style.color = color;
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
+            }}
+          >
             Hire Agent
           </button>
         </div>
 
-        {/* KYC Badge Overlay - Only visible on hover for clean UI */}
-        <div className="absolute top-0 left-0 w-full p-2 translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-300">
-          <div className="mx-auto w-fit flex items-center gap-1.5 bg-[var(--color-secondary)]/10 backdrop-blur-md border border-[var(--color-secondary)]/20 px-3 py-1 rounded-full">
-            <Shield className="w-3 h-3 text-[var(--color-secondary)]" />
-            <span className="text-[10px] font-medium text-[var(--color-secondary)]">AxiomID Verified</span>
-          </div>
-        </div>
+        {/* KYC verified hover badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          whileHover={{ opacity: 1, y: 0 }}
+          className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)] px-3 py-1 rounded-full pointer-events-none"
+        >
+          <Shield className="w-3 h-3 text-[var(--color-success)]" />
+          <span className="text-[10px] font-semibold text-[var(--color-success)]">AxiomID Verified</span>
+        </motion.div>
       </div>
     </motion.div>
   );
