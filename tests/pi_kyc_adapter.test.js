@@ -83,7 +83,7 @@ describe('PiKycAdapter Unit Tests', () => {
     const keypair = nacl.sign.keyPair();
     const wrongKeypair = nacl.sign.keyPair(); // Different keypair
     const mockUid = 'user_12345';
-    const mockAccessToken = 'token';
+    const mockAccessToken = 'this_is_a_sufficiently_long_token_string';
 
     const messageUint8 = naclUtil.decodeUTF8(mockAccessToken);
     // Sign with WRONG secret key

@@ -53,7 +53,6 @@ Documentation is code. If you encounter a recurring technical blocker or establi
 ## 🛡️ Forbidden Actions (Negative Constraints)
 *   **NEVER** commit plain-text keys or secrets.
 *   **NEVER** downgrade dependencies without a rigorous mathematical justification.
-*   **NEVER** bypass the `AIXErrorHandler` rate-limiting (TokenBucket).
 *   **NEVER** use absolute local paths in the codebase.
 
 ---

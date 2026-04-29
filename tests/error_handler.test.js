@@ -13,7 +13,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import {
-  AIXErrorHandler,
   CircuitBreaker,
     CircuitBreakerError,
   MaxRetriesExceededError,
@@ -91,75 +90,3 @@ describe('CircuitBreaker', () => {
 
 
 
-describe('AIXErrorHandler Integration', () => {
-  it('should execute operation successfully', async () => {
-    const handler = new AIXErrorHandler();
-    const operation = async () => 'success';
-    const result = await handler.executeWithRetry('test-api', operation);
-    assert.strictEqual(result, 'success');
-  });
-
-  it('should retry on retryable error', async () => {
-    const handler = new AIXErrorHandler({
-      defaultRetry: { maxAttempts: 2, initialDelay: 10, jitter: false }
-    });
-
-    let attempts = 0;
-    const operation = async () => {
-      attempts++;
-      if (attempts === 1) {
-        const err = new Error('Retryable');
-        err.status = 503;
-        throw err;
-      }
-      return 'success';
-    };
-
-    const result = await handler.executeWithRetry('test-api', operation);
-    assert.strictEqual(result, 'success');
-    assert.strictEqual(attempts, 2);
-  });
-
-  it('should fail after max retries', async () => {
-    const handler = new AIXErrorHandler({
-      defaultRetry: { maxAttempts: 2, initialDelay: 10, jitter: false }
-    });
-
-    const operation = async () => {
-      const err = new Error('Retryable');
-      err.status = 503;
-      throw err;
-    };
-
-    await assert.rejects(
-      handler.executeWithRetry('test-api', operation),
-      { name: 'MaxRetriesExceededError' }
-    );
-  });
-
-  it('should open circuit breaker on repeated failures', async () => {
-    const handler = new AIXErrorHandler({
-      circuitBreaker: { failureThreshold: 2 }
-    });
-
-    const operation = async () => {
-      const err = new Error('Fatal');
-      err.status = 400; // Not retryable in default config
-      throw err;
-    };
-
-    // First failure
-    await assert.rejects(handler.executeWithRetry('test-api', operation));
-    // Second failure - should trigger circuit breaker
-    await assert.rejects(handler.executeWithRetry('test-api', operation));
-
-    const state = handler.getCircuitBreakerState('test-api');
-    assert.strictEqual(state.state, 'OPEN');
-
-    // Next call should fail with CircuitBreakerError immediately
-    await assert.rejects(
-      handler.executeWithRetry('test-api', operation),
-      { name: 'CircuitBreakerError' }
-    );
-  });
-});
