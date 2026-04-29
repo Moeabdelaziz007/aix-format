@@ -85,6 +85,16 @@ export default function Home() {
           AMRIKYY AI Solutions
         </a>
       </footer>
+          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
+            AIX Format Spec
+          </a>
+          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
+            Pi Network Integration
+          </a>
+          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
+            AMRIKYY AI Solutions
+          </a>
+        </footer>
       </div>
     </div>
   );

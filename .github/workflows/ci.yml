@@ -77,7 +77,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: apps/studio/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install Studio Dependencies
         run: npm ci
@@ -136,18 +136,18 @@ jobs:
   # JOB 4: DID:WEB Identity Compliance
   # ─────────────────────────────────────────
   identity-compliance:
-    name: 🪪 Identity — did:web Compliance Check
+    name: 🪪 Identity — did:axiom Compliance Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check for legacy did:axiom references
+      - name: Check for legacy did:web references
         run: |
-          echo "▶ Scanning for deprecated did:axiom identifiers..."
-          FOUND=$(grep -rn "did:axiom" docs/ examples/ schemas/ core/ --include="*.md" --include="*.json" --include="*.js" --include="*.yaml" || true)
+          echo "▶ Scanning for deprecated did:web identifiers..."
+          FOUND=$(grep -rn "did:web" docs/ examples/ schemas/ core/ --include="*.md" --include="*.json" --include="*.js" --include="*.yaml" || true)
           if [ -n "$FOUND" ]; then
-            echo "❌ COMPLIANCE FAILURE: Legacy did:axiom references found:"
+            echo "❌ COMPLIANCE FAILURE: Legacy did:web references found:"
             echo "$FOUND"
             exit 1
           else
