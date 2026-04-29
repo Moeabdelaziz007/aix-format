@@ -14,6 +14,13 @@ import crypto from 'crypto';
 import yaml from 'js-yaml';
 import { AIXErrorHandler } from './error_handler.js';
 
+// ─── AI-SBOM constituent field enumerations ───────────────────────────────────
+const ABOM_VALID_TYPES        = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'];
+const ABOM_VALID_TRUST_TIERS  = ['verified', 'community', 'unverified', 'revoked'];
+const ABOM_VALID_SEC_STATUSES = ['clean', 'vulnerable', 'revoked', 'unknown'];
+const ABOM_INTEGRITY_RE       = /^[a-zA-Z0-9-]+:[a-fA-F0-9]{32,}$/;   // alg:hexdigest
+const ABOM_PURL_RE            = /^pkg:[a-zA-Z][a-zA-Z0-9+\-.]*\/.+/;   // pkg:type/...
+
 /**
  * AIXParser - Main parser class for AIX files
  */
@@ -775,32 +782,241 @@ export class AIXParser {
     }
   }
 
+  // ─── AI-SBOM / ABOM Validation ──────────────────────────────────────────────
+
   /**
-   * Validate ABOM section (v1.2)
+   * Validate ABOM section — AI-SBOM compatible (v1.3+)
+   *
+   * Top-level ABOM fields validated:
+   *   spec_version   (optional string)  — AI-SBOM spec revision, e.g. "1.0"
+   *   generated      (optional ISO8601) — timestamp this ABOM was produced
+   *   tools          (optional array)   — toolchain that produced this ABOM
+   *   constituents   (required array)   — list of agent dependencies
+   *
+   * Per-constituent mandatory fields (AI-SBOM core):
+   *   name, version, type, purl
+   *
+   * Per-constituent optional-but-validated fields:
+   *   supplier, integrity_hash, signature, trust_tier, security_status,
+   *   license, source_registry
    */
   validateABOM(abom) {
-    if (abom.constituents) {
-      if (!Array.isArray(abom.constituents)) {
+    const sec = 'abom';
+
+    // ── Top-level metadata ────────────────────────────────────────────────────
+    if (abom.spec_version !== undefined && typeof abom.spec_version !== 'string') {
+      this.errors.push({
+        code: 'INVALID_TYPE',
+        section: sec,
+        field: 'spec_version',
+        message: 'abom.spec_version must be a string (e.g. "1.0")'
+      });
+    }
+
+    if (abom.generated !== undefined && !this.isValidISO8601(abom.generated)) {
+      this.errors.push({
+        code: 'INVALID_TIMESTAMP',
+        section: sec,
+        field: 'generated',
+        message: 'abom.generated must be a valid ISO 8601 timestamp'
+      });
+    }
+
+    if (abom.tools !== undefined) {
+      if (!Array.isArray(abom.tools)) {
         this.errors.push({
           code: 'INVALID_TYPE',
-          section: 'abom',
-          field: 'constituents',
-          message: 'Constituents must be an array'
+          section: sec,
+          field: 'tools',
+          message: 'abom.tools must be an array'
         });
       } else {
-        abom.constituents.forEach((item, index) => {
-          if (!item.name || !item.version) {
+        abom.tools.forEach((tool, i) => {
+          if (!tool.name) {
             this.errors.push({
               code: 'MISSING_FIELD',
-              section: 'abom.constituents',
-              index,
-              message: "Constituent must have 'name' and 'version'"
+              section: `${sec}.tools`,
+              index: i,
+              field: 'name',
+              message: `abom.tools[${i}] is missing required field 'name'`
             });
           }
         });
       }
     }
+
+    // ── Constituents array ────────────────────────────────────────────────────
+    if (!abom.constituents) {
+      // ABOM without constituents is a warning, not a hard error
+      this.warnings.push({
+        code: 'ABOM_EMPTY',
+        section: sec,
+        message: 'abom.constituents is missing or empty — consider listing all agent dependencies'
+      });
+      return;
+    }
+
+    if (!Array.isArray(abom.constituents)) {
+      this.errors.push({
+        code: 'INVALID_TYPE',
+        section: sec,
+        field: 'constituents',
+        message: 'abom.constituents must be an array'
+      });
+      return;
+    }
+
+    abom.constituents.forEach((item, index) => {
+      this._validateABOMConstituent(item, index);
+    });
   }
+
+  /**
+   * Validate a single ABOM constituent against AI-SBOM spec.
+   * @private
+   */
+  _validateABOMConstituent(item, index) {
+    const sec = `abom.constituents[${index}]`;
+    const label = item.name ? `'${item.name}'` : `at index ${index}`;
+
+    // ── Mandatory core fields (AI-SBOM minimum) ───────────────────────────────
+    const mandatory = ['name', 'version', 'type', 'purl'];
+    for (const field of mandatory) {
+      if (!item[field]) {
+        this.errors.push({
+          code: 'MISSING_FIELD',
+          section: sec,
+          field,
+          message: `Constituent ${label} is missing required AI-SBOM field '${field}'`
+        });
+      }
+    }
+
+    // ── type enum ─────────────────────────────────────────────────────────────
+    if (item.type && !ABOM_VALID_TYPES.includes(item.type)) {
+      this.errors.push({
+        code: 'INVALID_VALUE',
+        section: sec,
+        field: 'type',
+        message: `Constituent ${label} type '${item.type}' is invalid. Must be one of: ${ABOM_VALID_TYPES.join(', ')}`
+      });
+    }
+
+    // ── purl format (Package URL) ─────────────────────────────────────────────
+    if (item.purl && !ABOM_PURL_RE.test(item.purl)) {
+      this.errors.push({
+        code: 'INVALID_PURL',
+        section: sec,
+        field: 'purl',
+        message: `Constituent ${label} has invalid purl '${item.purl}'. Must follow pkg:type/namespace/name@version format`
+      });
+    }
+
+    // ── integrity_hash format ─────────────────────────────────────────────────
+    if (item.integrity_hash !== undefined) {
+      if (typeof item.integrity_hash !== 'string' || !ABOM_INTEGRITY_RE.test(item.integrity_hash)) {
+        this.errors.push({
+          code: 'INVALID_INTEGRITY_HASH',
+          section: sec,
+          field: 'integrity_hash',
+          message: `Constituent ${label} integrity_hash must follow 'algorithm:hexdigest' format (e.g. sha256:abcdef...)` 
+        });
+      }
+    }
+
+    // ── trust_tier enum ───────────────────────────────────────────────────────
+    if (item.trust_tier !== undefined) {
+      if (!ABOM_VALID_TRUST_TIERS.includes(item.trust_tier)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: sec,
+          field: 'trust_tier',
+          message: `Constituent ${label} trust_tier '${item.trust_tier}' is invalid. Must be one of: ${ABOM_VALID_TRUST_TIERS.join(', ')}`
+        });
+      } else {
+        // HARD FAIL — revoked dependency must block agent loading
+        if (item.trust_tier === 'revoked') {
+          this.errors.push({
+            code: 'ABOM_REVOKED_CONSTITUENT',
+            section: sec,
+            field: 'trust_tier',
+            message: `SECURITY: Constituent ${label} has trust_tier='revoked'. Revoked dependencies must be removed before deployment.`
+          });
+        }
+        // WARN — unverified should be reviewed before production
+        if (item.trust_tier === 'unverified') {
+          this.warnings.push({
+            code: 'ABOM_UNVERIFIED_CONSTITUENT',
+            section: sec,
+            field: 'trust_tier',
+            message: `Constituent ${label} has trust_tier='unverified'. Verify before production deployment.`
+          });
+        }
+        // WARN — verified without integrity_hash is suspicious
+        if (item.trust_tier === 'verified' && !item.integrity_hash) {
+          this.warnings.push({
+            code: 'ABOM_VERIFIED_WITHOUT_HASH',
+            section: sec,
+            field: 'integrity_hash',
+            message: `Constituent ${label} claims trust_tier='verified' but provides no integrity_hash. Add hash to prove integrity.`
+          });
+        }
+      }
+    }
+
+    // ── security_status enum ─────────────────────────────────────────────────
+    if (item.security_status !== undefined) {
+      if (!ABOM_VALID_SEC_STATUSES.includes(item.security_status)) {
+        this.errors.push({
+          code: 'INVALID_VALUE',
+          section: sec,
+          field: 'security_status',
+          message: `Constituent ${label} security_status '${item.security_status}' is invalid. Must be one of: ${ABOM_VALID_SEC_STATUSES.join(', ')}`
+        });
+      } else {
+        // HARD FAIL — revoked via security_status
+        if (item.security_status === 'revoked') {
+          this.errors.push({
+            code: 'ABOM_REVOKED_CONSTITUENT',
+            section: sec,
+            field: 'security_status',
+            message: `SECURITY: Constituent ${label} has security_status='revoked'. This dependency must be replaced before deployment.`
+          });
+        }
+        // WARN — known vulnerability
+        if (item.security_status === 'vulnerable') {
+          this.warnings.push({
+            code: 'ABOM_VULNERABLE_CONSTITUENT',
+            section: sec,
+            field: 'security_status',
+            message: `Constituent ${label} has known vulnerabilities (security_status='vulnerable'). Update or mitigate before production.`
+          });
+        }
+      }
+    }
+
+    // ── supplier field (optional but should be a non-empty string) ────────────
+    if (item.supplier !== undefined && (typeof item.supplier !== 'string' || item.supplier.trim() === '')) {
+      this.errors.push({
+        code: 'INVALID_VALUE',
+        section: sec,
+        field: 'supplier',
+        message: `Constituent ${label} supplier must be a non-empty string`
+      });
+    }
+
+    // ── license field (optional string) ──────────────────────────────────────
+    if (item.license !== undefined && typeof item.license !== 'string') {
+      this.errors.push({
+        code: 'INVALID_TYPE',
+        section: sec,
+        field: 'license',
+        message: `Constituent ${label} license must be a string (SPDX identifier preferred, e.g. 'MIT', 'Apache-2.0')`
+      });
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
 
   /**
    * Validate security (checksums and signatures)
@@ -987,6 +1203,30 @@ export class AIXAgent {
     }
 
     return true;
+  }
+
+  /**
+   * Return an AI-SBOM summary of this agent's ABOM for CI reporting.
+   * @returns {{ total: number, verified: number, unverified: number, revoked: number, vulnerable: number, missing_hash: number }}
+   */
+  abomSummary() {
+    const constituents = this.abom?.constituents || [];
+    const summary = {
+      total: constituents.length,
+      verified: 0,
+      community: 0,
+      unverified: 0,
+      revoked: 0,
+      vulnerable: 0,
+      missing_hash: 0
+    };
+    for (const c of constituents) {
+      const tier = c.trust_tier || 'unverified';
+      if (summary[tier] !== undefined) summary[tier]++;
+      if (c.security_status === 'vulnerable') summary.vulnerable++;
+      if (!c.integrity_hash) summary.missing_hash++;
+    }
+    return summary;
   }
 
   /**
