@@ -1,0 +1,15 @@
+.npm-cache/
+.npm-global/
+.npm_cache/
+node_modules/
+.next/
+dist/
+build/
+.cache/
+.git/
+.cursor/
+.qodo/
+.vercel/
+*.log
+*.tmp
+package-lock.json
