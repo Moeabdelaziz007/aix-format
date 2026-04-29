@@ -56,6 +56,9 @@ temp/
 .cache/
 .eslintcache
 .npm/
+.npm-cache/
+.npm_cache/
+.npmrc
 
 # Playwright
 playwright-report/
