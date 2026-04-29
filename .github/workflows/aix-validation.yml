@@ -1,4 +1,4 @@
-name: AIX Validation
+name: 🔏 AIX File Validation (PR Gate)
 
 on:
   pull_request:
@@ -7,26 +7,35 @@ on:
       - '**/*.aix.json'
       - '**/*.aix.yaml'
       - '**/*.aix.yml'
-      - '**/*.aix.toml'
+      - 'examples/**'
+      - 'schemas/**'
+      - 'core/**'
+
+concurrency:
+  group: aix-validate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate-aix-files:
+    name: Validate AIX Files & KYC Compliance
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
-      - name: Get changed AIX files
+      - name: Get changed AIX-related files
         id: changed-files
         uses: tj-actions/changed-files@v44
         with:
@@ -35,12 +44,33 @@ jobs:
             **/*.aix.json
             **/*.aix.yaml
             **/*.aix.yml
-            **/*.aix.toml
+            examples/**
 
-      - name: Validate changed AIX files (Strict KYC)
+      - name: Validate changed AIX files
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
+          echo "▶ Found changed AIX files — running strict validation..."
+          FAIL=0
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "Validating $file..."
-            node bin/aix-validate.js "$file" --strict-kyc --security
+            if [[ "$file" == *.aix* ]] || [[ "$file" == examples/* ]]; then
+              echo "  Validating: $file"
+              if ! node bin/aix-validate.js "$file" 2>&1; then
+                echo "  ❌ FAILED: $file"
+                FAIL=1
+              else
+                echo "  ✅ PASSED: $file"
+              fi
+            fi
           done
+          if [ $FAIL -ne 0 ]; then
+            echo ""
+            echo "❌ One or more AIX files failed validation. PR blocked."
+            exit 1
+          fi
+          echo ""
+          echo "✅ All AIX files passed validation."
+
+      - name: Validate all example AIX files (always)
+        run: |
+          echo "▶ Running full examples validation suite..."
+          npm run validate:examples

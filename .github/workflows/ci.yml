@@ -1,0 +1,160 @@
+name: 🔬 CI — Validate, Test & Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  # ─────────────────────────────────────────
+  # JOB 1: Core Library Validation
+  # ─────────────────────────────────────────
+  core-validation:
+    name: 🧪 Core — Lint, Test & Schema
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Root Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate JSON Schemas
+        run: |
+          echo "▶ Validating all JSON schemas..."
+          for schema in schemas/*.json; do
+            echo "  Checking: $schema"
+            node -e "
+              const fs = require('fs');
+              const data = fs.readFileSync('$schema', 'utf8');
+              JSON.parse(data);
+              console.log('  ✅ Valid JSON:', '$schema');
+            "
+          done
+
+      - name: Validate AIX Example Files
+        run: |
+          echo "▶ Validating all example .aix files..."
+          npm run validate:examples
+        continue-on-error: false
+
+      - name: Run Core Test Suite
+        run: npm test
+        env:
+          CI: true
+
+  # ─────────────────────────────────────────
+  # JOB 2: Studio App Build Validation
+  # ─────────────────────────────────────────
+  studio-build:
+    name: 🏗️ Studio — Next.js Build Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/studio
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/studio/package-lock.json
+
+      - name: Install Studio Dependencies
+        run: npm ci
+
+      - name: TypeScript Type Check
+        run: npx tsc --noEmit
+        continue-on-error: true  # warn, not block — until strict mode is enforced
+
+      - name: Next.js Build
+        run: npm run build
+        env:
+          CI: true
+
+  # ─────────────────────────────────────────
+  # JOB 3: Security Audit
+  # ─────────────────────────────────────────
+  security-audit:
+    name: 🔐 Security Audit
+    runs-on: ubuntu-latest
+    needs: [core-validation]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: NPM Audit (High+ Severity)
+        run: npm audit --audit-level=high
+        continue-on-error: true  # report but don't block until fixed
+
+      - name: Scan for Hardcoded Secrets
+        run: |
+          echo "▶ Scanning for hardcoded secrets and fixed key seeds..."
+          # Check for patterns Jules flagged (fixed seed vulnerabilities)
+          if grep -r "new Uint8Array(32)" core/ tests/ --include="*.js" | grep -v ".test.js"; then
+            echo "⚠️  WARNING: Possible fixed seed detected. Review cryptographic usage."
+          else
+            echo "✅ No fixed seed patterns found."
+          fi
+          # Check for raw private key strings
+          if grep -rE "(privateKey|secret|seed)\s*=\s*[\"'][a-f0-9]{64}[\"']" core/ tests/; then
+            echo "❌ CRITICAL: Hardcoded private key detected!"
+            exit 1
+          else
+            echo "✅ No hardcoded keys found."
+          fi
+
+  # ─────────────────────────────────────────
+  # JOB 4: DID:WEB Identity Compliance
+  # ─────────────────────────────────────────
+  identity-compliance:
+    name: 🪪 Identity — did:web Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for legacy did:axiom references
+        run: |
+          echo "▶ Scanning for deprecated did:axiom identifiers..."
+          FOUND=$(grep -rn "did:axiom" docs/ examples/ schemas/ core/ --include="*.md" --include="*.json" --include="*.js" --include="*.yaml" || true)
+          if [ -n "$FOUND" ]; then
+            echo "❌ COMPLIANCE FAILURE: Legacy did:axiom references found:"
+            echo "$FOUND"
+            exit 1
+          else
+            echo "✅ All identity references use did:web standard."
+          fi
+
+      - name: Check did:web format validity in spec docs
+        run: |
+          echo "▶ Verifying did:web format in spec files..."
+          grep -rn "did:web:" docs/ || echo "ℹ️  No did:web references found in docs (might be OK)."

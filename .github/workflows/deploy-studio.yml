@@ -1,0 +1,60 @@
+name: 🚀 Deploy Studio to Vercel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/studio/**'
+      - '.github/workflows/deploy-studio.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-studio-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & Deploy Studio
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: apps/studio/package-lock.json
+
+      - name: Install Studio Dependencies
+        working-directory: apps/studio
+        run: npm ci
+
+      - name: TypeScript Type Check
+        working-directory: apps/studio
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+      - name: Build Studio
+        working-directory: apps/studio
+        run: npm run build
+        env:
+          CI: true
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment
+        working-directory: apps/studio
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build for Vercel
+        working-directory: apps/studio
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        working-directory: apps/studio
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

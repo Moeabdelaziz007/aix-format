@@ -1,4 +1,4 @@
-name: Sovereign Protocol Weekly Health Check
+name: 🏥 Sovereign Protocol — Weekly Health Check
 
 on:
   schedule:
@@ -12,29 +12,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.x'
+          cache: 'npm'
 
-      - name: Validate Schema and Integrity
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate JSON Schemas
         run: |
-          echo "Validating Schemas..."
-          npm install -g ajv-cli
-          ajv compile -s schemas/aix-enhanced.schema.json
-          ajv compile -s schemas/manifest.schema.json
+          echo "▶ Compiling all JSON schemas..."
+          for schema in schemas/*.json; do
+            echo "  Checking: $schema"
+            node -e "
+              const fs = require('fs');
+              JSON.parse(fs.readFileSync('$schema', 'utf8'));
+              console.log('  ✅ Valid:', '$schema');
+            "
+          done
 
-      - name: Run Health Check
+      - name: Run Full Test Suite
+        run: npm test
+        env:
+          CI: true
+
+      - name: Validate All Example Files
+        run: npm run validate:examples
+
+      - name: Identity Compliance Check
         run: |
-          echo "Running Deep Architecture Audit..."
-          # Log audit date
-          echo "Last Audit: $(date)" >> STATUS.md
-          echo "Audited by Sovereign Protocol Maintainer GitHub Action." >> STATUS.md
+          echo "▶ Checking did:web compliance..."
+          FOUND=$(grep -rn "did:axiom" docs/ examples/ schemas/ core/ 2>/dev/null || true)
+          if [ -n "$FOUND" ]; then
+            echo "❌ Legacy did:axiom references:"
+            echo "$FOUND"
+            exit 1
+          fi
+          echo "✅ did:web compliance: PASS"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add STATUS.md
-          git commit -m "docs: Weekly Architecture Audit update" || echo "No changes to commit"
+      - name: Post Summary to Job
+        run: |
+          echo "### 🏥 Sovereign Protocol Health Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| JSON Schemas | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+          echo "| Core Tests | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Example Files | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+          echo "| Identity (did:web) | ✅ Compliant |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run date:** $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY

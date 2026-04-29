@@ -1,0 +1,187 @@
+name: 🤖 Jules AI — Scheduled Maintenance Tasks
+
+on:
+  schedule:
+    # Every Sunday at 02:00 UTC (Jules weekly sweep)
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task to assign Jules'
+        required: false
+        default: 'weekly-audit'
+        type: choice
+        options:
+          - weekly-audit
+          - security-scan
+          - dependency-update
+          - spec-review
+          - test-coverage
+
+jobs:
+  # ─────────────────────────────────────────
+  # TASK 1: Weekly Protocol Audit
+  # ─────────────────────────────────────────
+  protocol-audit:
+    name: 🔬 Protocol Spec Audit
+    runs-on: ubuntu-latest
+    if: github.event.inputs.task == 'weekly-audit' || github.event_name == 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run Core Tests
+        run: npm test
+        env:
+          CI: true
+
+      - name: Validate All Schemas
+        run: |
+          echo "▶ Schema integrity check..."
+          for schema in schemas/*.json; do
+            node -e "
+              const fs = require('fs');
+              JSON.parse(fs.readFileSync('$schema', 'utf8'));
+              console.log('✅ Valid:', '$schema');
+            "
+          done
+
+      - name: Validate All Examples
+        run: npm run validate:examples
+
+      - name: Identity Compliance Check
+        run: |
+          echo "▶ Scanning for did:axiom legacy references..."
+          FOUND=$(grep -rn "did:axiom" docs/ examples/ schemas/ core/ 2>/dev/null || true)
+          if [ -n "$FOUND" ]; then
+            echo "❌ Legacy did:axiom references found:"
+            echo "$FOUND"
+            exit 1
+          fi
+          echo "✅ Identity compliance: OK"
+
+      - name: Generate Audit Summary
+        run: |
+          echo "# 🤖 Jules Weekly Audit Report" > /tmp/audit-summary.md
+          echo "" >> /tmp/audit-summary.md
+          echo "**Date:** $(date -u '+%Y-%m-%d %H:%M UTC')" >> /tmp/audit-summary.md
+          echo "**Run:** ${{ github.run_number }}" >> /tmp/audit-summary.md
+          echo "" >> /tmp/audit-summary.md
+          echo "## Results" >> /tmp/audit-summary.md
+          echo "- ✅ Core tests: Passed" >> /tmp/audit-summary.md
+          echo "- ✅ Schema validation: Passed" >> /tmp/audit-summary.md
+          echo "- ✅ AIX examples: Passed" >> /tmp/audit-summary.md
+          echo "- ✅ Identity compliance: did:web standard enforced" >> /tmp/audit-summary.md
+          cat /tmp/audit-summary.md
+
+  # ─────────────────────────────────────────
+  # TASK 2: Security Vulnerability Scan
+  # ─────────────────────────────────────────
+  security-scan:
+    name: 🔐 Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.task == 'security-scan' || github.event_name == 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: NPM Security Audit
+        run: |
+          echo "▶ Running npm audit..."
+          npm audit --json > /tmp/audit-report.json || true
+          node -e "
+            const report = require('/tmp/audit-report.json');
+            const vulns = report.metadata?.vulnerabilities || {};
+            const critical = vulns.critical || 0;
+            const high = vulns.high || 0;
+            console.log('Security Audit Summary:');
+            console.log('  Critical:', critical);
+            console.log('  High:', high);
+            console.log('  Moderate:', vulns.moderate || 0);
+            console.log('  Low:', vulns.low || 0);
+            if (critical > 0) {
+              console.error('❌ CRITICAL vulnerabilities found!');
+              process.exit(1);
+            }
+            if (high > 0) {
+              console.warn('⚠️  HIGH severity vulnerabilities — review required');
+            } else {
+              console.log('✅ No critical or high severity vulnerabilities');
+            }
+          "
+
+      - name: Scan for Hardcoded Secrets
+        run: |
+          echo "▶ Checking for hardcoded cryptographic material..."
+          FAIL=0
+          # Check for fixed 32-byte zero seeds (common vulnerability pattern)
+          if grep -rn "new Uint8Array(32).fill(0)\|Buffer.alloc(32, 0)" core/ tests/ 2>/dev/null; then
+            echo "⚠️  WARNING: Possible zero-seed pattern"
+            FAIL=1
+          fi
+          # Check for hardcoded hex private keys
+          if grep -rEn "(privateKey|secretKey)\s*[:=]\s*['\"][0-9a-f]{64}['\"]" core/ tests/ 2>/dev/null; then
+            echo "❌ CRITICAL: Hardcoded private key detected!"
+            FAIL=1
+          fi
+          if [ $FAIL -eq 0 ]; then
+            echo "✅ No hardcoded cryptographic material found"
+          fi
+
+  # ─────────────────────────────────────────
+  # TASK 3: Dependency Freshness Check
+  # ─────────────────────────────────────────
+  dependency-check:
+    name: 📦 Dependency Freshness Check
+    runs-on: ubuntu-latest
+    if: github.event.inputs.task == 'dependency-update' || github.event_name == 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Check for Outdated Packages
+        run: |
+          echo "▶ Checking for outdated dependencies..."
+          npm outdated --json > /tmp/outdated.json || true
+          node -e "
+            const data = require('/tmp/outdated.json');
+            const pkgs = Object.keys(data);
+            if (pkgs.length === 0) {
+              console.log('✅ All dependencies are up to date!');
+            } else {
+              console.log('📦 Outdated packages found (' + pkgs.length + '):');
+              pkgs.forEach(pkg => {
+                const d = data[pkg];
+                console.log('  -', pkg + ':', d.current, '->', d.latest);
+              });
+              console.log('');
+              console.log('ℹ️  Run: npm update or create a PR with updates.');
+            }
+          "

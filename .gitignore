@@ -57,12 +57,7 @@ temp/
 .eslintcache
 .npm/
 
-# Next.js
-.next/
-out/
-
 # Playwright
-test-results/
 playwright-report/
-blob-report/
-playwright/.cache/
+test-results/
+.playwright/

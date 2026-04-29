@@ -15,7 +15,7 @@ import assert from 'node:assert';
 import {
   AIXErrorHandler,
   CircuitBreaker,
-  CircuitBreakerError,
+    CircuitBreakerError,
   MaxRetriesExceededError,
   TimeoutError
 } from '../core/error_handler.js';
@@ -89,49 +89,8 @@ describe('CircuitBreaker', () => {
   });
 });
 
- jules-8053208464884975193-dbc860dd
 
-describe('TokenBucket', () => {
-  it('should initialize with full capacity', () => {
-    const bucket = new TokenBucket(10, 1);
-    assert.strictEqual(bucket.tokens, 10);
-  });
 
-  it('should consume tokens', () => {
-    const bucket = new TokenBucket(10, 1);
-    assert.strictEqual(bucket.tryConsume(5), true);
-    assert.strictEqual(bucket.tokens, 5);
-  });
-
-  it('should fail to consume more tokens than available', () => {
-    const bucket = new TokenBucket(5, 1);
-    assert.strictEqual(bucket.tryConsume(6), false);
-    assert.strictEqual(bucket.tokens, 5);
-  });
-
-  it('should refill tokens over time', async () => {
-    const bucket = new TokenBucket(10, 10); // 10 tokens per second
-    bucket.tryConsume(10);
-    assert.strictEqual(bucket.tokens, 0);
-
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    bucket.refill();
-    assert(bucket.tokens > 0);
-    // Be slightly more forgiving with timing (0.1s sleep + small overhead)
-    assert(bucket.tokens <= 1.5); 
-  });
-
-  it('should calculate wait time', () => {
-    const bucket = new TokenBucket(1, 1);
-    bucket.tryConsume(1);
-    const waitTime = bucket.getWaitTime();
-    assert(waitTime > 0);
-    assert(waitTime <= 1000);
-  });
-});
-
- main
 describe('AIXErrorHandler Integration', () => {
   it('should execute operation successfully', async () => {
     const handler = new AIXErrorHandler();

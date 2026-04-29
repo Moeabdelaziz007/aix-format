@@ -950,48 +950,6 @@
               "default": false
             }
           }
-        },
-        "oauth_config": {
-          "type": "object",
-          "description": "Explicit OAuth configurations aligned with MCP (Enterprise Readiness)",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": false
-            },
-            "providers": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "client_id": {
-                    "type": "string"
-                  },
-                  "auth_url": {
-                    "type": "string"
-                  },
-                  "token_url": {
-                    "type": "string"
-                  },
-                  "scopes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "required": [
-                  "name",
-                  "client_id",
-                  "auth_url",
-                  "token_url"
-                ]
-              }
-            }
-          }
         }
       }
     },
@@ -1006,8 +964,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique Axiom identifier (UUID v4 or DID format).",
-          "pattern": "^(did:axiom:(axiomid\\.app:)?[a-zA-Z0-9._\\\\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$"
+          "description": "Unique Axiom identifier enforcing did:axiom:axiomid.app:<id> format.",
+          "pattern": "^did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+$"
         },
         "authority": {
           "type": "string",
@@ -1084,41 +1042,6 @@
               "description": "JSON canonicalization scheme used before signing."
             }
           }
-        },
-        "kyc_proof": {
-          "type": "object",
-          "description": "Pi KYC cryptographic proof and verification data",
-          "properties": {
-            "provider": {
-              "type": "string",
-              "enum": [
-                "Pi Network",
-                "Other"
-              ],
-              "default": "Pi Network"
-            },
-            "proof_hash": {
-              "type": "string",
-              "description": "Cryptographic hash of the KYC proof"
-            },
-            "verified_at": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "status": {
-              "type": "string",
-              "enum": [
-                "verified",
-                "pending",
-                "rejected"
-              ]
-            }
-          },
-          "required": [
-            "provider",
-            "proof_hash",
-            "status"
-          ]
         }
       }
     },
@@ -1156,103 +1079,6 @@
             "high_quality"
           ],
           "default": "standard"
-        }
-      }
-    },
-    "presentation_layer": {
-      "type": "object",
-      "description": "A2UI Configuration for Agents generating UI elements",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": false
-        },
-        "frameworks": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Allowed UI frameworks (e.g., React, Tailwind, Next.js)"
-        },
-        "components": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Allowed component libraries or types"
-        }
-      }
-    },
-    "capabilities": {
-      "type": "object",
-      "properties": {
-        "memory_retention": {
-          "type": "object",
-          "description": "VLA (Vision-Language-Action) and Cognitive memory retention traits. Defines how the agent stores and recalls past events and semantic knowledge.",
-          "properties": {
-            "temporal_memory": {
-              "type": "boolean",
-              "default": false,
-              "description": "True if the agent can remember sequences of events over time (Episodic Memory)."
-            },
-            "early_fusion": {
-              "type": "boolean",
-              "default": false,
-              "description": "True if the agent supports Early Fusion (EF), combining multiple modalities (e.g., vision + audio) simultaneously in memory."
-            },
-            "semantic_storage": {
-              "type": "string",
-              "enum": [
-                "local_vector_db",
-                "cloud_sync",
-                "ephemeral"
-              ],
-              "default": "ephemeral",
-              "description": "Where the agent's semantic knowledge base is stored. 'ephemeral' means memory is cleared after the session."
-            },
-            "context_window_limit": {
-              "type": "integer",
-              "description": "The maximum number of tokens or events the agent can hold in active working memory.",
-              "minimum": 0
-            }
-          }
-        }
-      }
-    },
-    "agent_routing": {
-      "type": "object",
-      "description": "Protocols for Agent-to-Agent communication",
-      "properties": {
-        "role": {
-          "type": "string",
-          "enum": [
-            "Orchestrator",
-            "Specialist",
-            "Worker",
-            "Observer"
-          ],
-          "description": "The agent's role within a multi-agent network"
-        },
-        "protocols": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Supported communication protocols (e.g., HTTP, WebSockets, MCP)"
-        },
-        "endpoints": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string"
-              },
-              "url": {
-                "type": "string"
-              }
-            }
-          }
         }
       }
     }
