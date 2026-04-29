@@ -126,6 +126,7 @@ export default function LiveValidator({
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
+
       setValidation(validateAix(parsed));
     } catch (e: unknown) {
       setError(
