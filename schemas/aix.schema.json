@@ -560,7 +560,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["name", "version"],
+            "required": ["name", "version", "type", "purl"],
             "properties": {
               "name": { "type": "string" },
               "version": { "type": "string" },
@@ -652,5 +652,5 @@
     }
   },
 
-  "additionalProperties": true
+  "additionalProperties": false
 }
