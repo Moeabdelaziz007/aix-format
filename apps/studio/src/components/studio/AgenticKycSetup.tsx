@@ -1,5 +1,5 @@
 "use client";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ShieldCheck, UserCheck, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,16 +9,29 @@ const stepInactive = "border-[var(--color-glass-border)] bg-[var(--color-surface
 
 export const AgenticKycSetup = memo(function AgenticKycSetup() {
   const [step, setStep] = useState(1);
+  // ─── Refs to hold timer IDs so we can clear them on unmount ─────────────
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // useCallback so the button reference is stable (no child re-renders)
+  // Clear all pending timers when component unmounts (prevents memory leaks
+  // and React "setState on unmounted component" warnings)
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+    };
+  }, []);
+
   const startKyc = useCallback(() => {
+    // Clear any previously queued timers before starting a fresh sequence
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+
     setStep(2);
     const t1 = setTimeout(() => {
       setStep(3);
       const t2 = setTimeout(() => setStep(4), 2500);
-      return () => clearTimeout(t2);
+      timersRef.current.push(t2);
     }, 2500);
-    return () => clearTimeout(t1);
+    timersRef.current.push(t1);
   }, []);
 
   return (
@@ -64,7 +77,7 @@ export const AgenticKycSetup = memo(function AgenticKycSetup() {
             <div>
               <h4 className="font-semibold text-white">Pi Browser Verification</h4>
               <p className="text-xs text-[var(--color-on-surface-variant)]">
-                {step === 2 ? "Waiting for your approval on Pi App…" : "Please open your Pi Browser app to approve."}
+                {step === 2 ? "Waiting for your approval on Pi App\u2026" : "Please open your Pi Browser app to approve."}
               </p>
             </div>
           </div>
@@ -84,7 +97,7 @@ export const AgenticKycSetup = memo(function AgenticKycSetup() {
             <div>
               <h4 className="font-semibold text-white">AxiomID Generated</h4>
               <p className="text-xs text-[var(--color-on-surface-variant)]">
-                {step === 4 ? "DID successfully attached to AIX payload." : "Generating cryptographic signature…"}
+                {step === 4 ? "DID successfully attached to AIX payload." : "Generating cryptographic signature\u2026"}
               </p>
             </div>
           </div>
