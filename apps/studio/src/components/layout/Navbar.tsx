@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Shield, Cpu, Activity, Wallet, LogOut, ChevronDown } from "lucide-react";
+import { Shield, Cpu, Activity, Wallet, LogOut, ChevronDown, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,17 +30,51 @@ declare global {
 }
 
 const navLinks = [
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/my-agents", label: "My Agents" },
-  { href: "/network-status", label: "Network Status" },
+  { href: "/",               label: "Studio"          },
+  { href: "/marketplace",    label: "Marketplace"     },
+  { href: "/my-agents",      label: "My Agents"       },
+  { href: "/spec",           label: "AIX Spec"         },
+  { href: "/network-status", label: "Network"         },
 ];
 
+/* ─── SVG Logo ─── */
+function AxiomLogo({ size = 36 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" aria-label="Axiom Studio">
+      <defs>
+        <linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#00d4ff" />
+          <stop offset="100%" stopColor="#8b5cf6" />
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+      {/* Outer ring */}
+      <circle cx="18" cy="18" r="16" stroke="url(#lg1)" strokeWidth="1.5" opacity="0.4" />
+      {/* Inner hex-ish mark */}
+      <path
+        d="M18 6 L28 12 L28 24 L18 30 L8 24 L8 12 Z"
+        stroke="url(#lg1)" strokeWidth="1.5" fill="none" filter="url(#glow)"
+      />
+      {/* Center A mark */}
+      <path
+        d="M13 24 L18 13 L23 24 M15.5 20.5 H20.5"
+        stroke="url(#lg1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        filter="url(#glow)"
+      />
+    </svg>
+  );
+}
+
 export function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [user, setUser] = useState<PiUser | null>(null);
+  const [isScrolled,     setIsScrolled]     = useState(false);
+  const [user,           setUser]           = useState<PiUser | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [showUserMenu,   setShowUserMenu]   = useState(false);
+  const [authError,      setAuthError]      = useState<string | null>(null);
+  const [mobileOpen,     setMobileOpen]     = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -50,8 +84,7 @@ export function Navbar() {
   }, []);
 
   const onIncompletePaymentFound = (payment: unknown) => {
-    console.log("Incomplete payment found — will complete:", payment);
-    // TODO: call your backend /payments/incomplete to complete or cancel
+    console.log("Incomplete payment found:", payment);
   };
 
   const handlePiAuth = async () => {
@@ -59,158 +92,218 @@ export function Navbar() {
     setAuthError(null);
     try {
       if (typeof window !== "undefined" && window.Pi) {
-        // Initialize Pi SDK v2.0
         window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
-
-        // Request scopes: username (identity) + payments (wallet)
-        const scopes = ["username", "payments"];
-        const authResult: PiAuthResult = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
-
+        const authResult = await window.Pi.authenticate(["username", "payments"], onIncompletePaymentFound);
         setUser(authResult.user);
       } else {
-        // Dev fallback — mock user outside Pi Browser
-        console.warn("Pi SDK not loaded. Using development mock.");
-        await new Promise(r => setTimeout(r, 1200));
-        setUser({ username: "Pioneer_Dev", uid: "dev_uid_" + Math.random().toString(36).slice(2, 8) });
+        await new Promise(r => setTimeout(r, 1000));
+        setUser({ username: "Pioneer_Dev", uid: "dev_" + Math.random().toString(36).slice(2, 8) });
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Authentication failed";
-      console.error("Pi Auth Error:", err);
-      setAuthError(message);
+      const msg = err instanceof Error ? err.message : "Authentication failed";
+      setAuthError(msg);
       setTimeout(() => setAuthError(null), 4000);
     } finally {
       setIsAuthenticating(false);
     }
   };
 
-  const handleDisconnect = () => {
-    setUser(null);
-    setShowUserMenu(false);
-  };
+  const handleDisconnect = () => { setUser(null); setShowUserMenu(false); };
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b",
-        isScrolled
-          ? "bg-[rgba(12,19,36,0.85)] backdrop-blur-xl border-[var(--color-glass-border)] py-4"
-          : "bg-transparent border-transparent py-6"
-      )}
-    >
-      <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-primary shadow-[0_0_20px_rgba(0,219,233,0.3)] group-hover:shadow-[0_0_30px_rgba(0,219,233,0.5)] transition-shadow">
-            <Cpu className="text-[var(--color-surface)] w-5 h-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-display font-bold text-lg leading-tight text-white tracking-tight">Sovereign Studio</span>
-            <span className="text-[10px] uppercase tracking-widest text-[var(--color-primary)] font-semibold flex items-center gap-1">
-              <Shield className="w-3 h-3" /> Pi Network Secured
-            </span>
-          </div>
-        </Link>
+    <>
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+          isScrolled
+            ? "bg-[rgba(5,5,7,0.92)] backdrop-blur-2xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(0,212,255,0.04)]"
+            : "bg-transparent border-b border-transparent"
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-6">
 
-        {/* Nav Links */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "text-sm font-medium transition-colors",
-                pathname === link.href
-                  ? "text-white"
-                  : "text-[var(--color-on-surface-variant)] hover:text-white"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Auth Zone */}
-        <div className="relative">
-          <AnimatePresence mode="wait">
-            {authError && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                className="absolute -top-10 right-0 bg-red-500/20 border border-red-500/30 text-red-300 text-xs px-3 py-1.5 rounded-lg whitespace-nowrap"
-              >
-                {authError}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {user ? (
+          {/* ── Logo ── */}
+          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
             <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(v => !v)}
-                className="flex items-center gap-3 glass-panel px-4 py-2 rounded-full border border-[var(--color-primary-dim)]/30 hover:border-[var(--color-primary)]/50 transition"
-              >
-                <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-pulse" />
-                <span className="text-sm font-medium text-white">{user.username}</span>
-                <div className="h-4 w-[1px] bg-[var(--color-glass-border)] mx-1" />
-                <span className="text-xs text-[var(--color-secondary)] flex items-center gap-1">
-                  <Activity className="w-3 h-3" /> KYC Verified
-                </span>
-                <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform", showUserMenu && "rotate-180")} />
-              </button>
-
-              <AnimatePresence>
-                {showUserMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-56 glass-panel-heavy rounded-xl border border-white/10 overflow-hidden shadow-2xl"
-                  >
-                    <div className="px-4 py-3 border-b border-white/5">
-                      <p className="text-xs text-gray-500">Connected as</p>
-                      <p className="text-sm font-semibold text-white mt-0.5">{user.username}</p>
-                      <p className="text-[10px] font-mono text-gray-600 mt-0.5 truncate">{user.uid}</p>
-                    </div>
-                    <div className="px-2 py-2">
-                      <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
-                        <Wallet className="w-4 h-4" /> Pi Wallet
-                      </button>
-                      <button
-                        onClick={handleDisconnect}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition"
-                      >
-                        <LogOut className="w-4 h-4" /> Disconnect
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div className="absolute inset-0 rounded-xl bg-[rgba(0,212,255,0.15)] blur-md group-hover:bg-[rgba(0,212,255,0.25)] transition-all duration-300" />
+              <div className="relative w-9 h-9 rounded-xl bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.2)] flex items-center justify-center">
+                <AxiomLogo size={28} />
+              </div>
             </div>
-          ) : (
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handlePiAuth}
-              disabled={isAuthenticating}
-              className="relative overflow-hidden group px-6 py-2.5 rounded-full bg-[var(--color-surface-container-highest)] border border-[var(--color-glass-border)] hover:border-[var(--color-primary)]/50 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.2)] disabled:opacity-60"
-            >
-              <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-              <span className="relative flex items-center gap-2 text-sm font-semibold text-white">
+            <div className="hidden sm:flex flex-col leading-none">
+              <span className="font-display font-bold text-[15px] text-white tracking-tight">
+                Axiom<span className="text-[var(--color-primary)]">Studio</span>
+              </span>
+              <span className="text-[10px] font-medium tracking-[0.12em] uppercase text-[var(--color-on-surface-variant)] mt-0.5">
+                AIX · Pi Network
+              </span>
+            </div>
+          </Link>
+
+          {/* ── Nav Links ── */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navLinks.map(link => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    active
+                      ? "text-white bg-white/[0.06]"
+                      : "text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.04]"
+                  )}
+                >
+                  {link.label}
+                  {active && (
+                    <motion.div
+                      layoutId="nav-active"
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--color-primary)]"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* ── Right zone ── */}
+          <div className="flex items-center gap-3">
+
+            {/* Version badge */}
+            <span className="hidden lg:inline-flex badge badge-primary">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse" />
+              v1.2
+            </span>
+
+            {/* Auth error */}
+            <AnimatePresence>
+              {authError && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400"
+                >
+                  {authError}
+                </motion.span>
+              )}
+            </AnimatePresence>
+
+            {/* User menu or Connect button */}
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(v => !v)}
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.15)] hover:border-[rgba(0,212,255,0.3)] transition-all duration-200"
+                >
+                  <span className="status-dot status-online" />
+                  <span className="text-sm font-semibold text-white">{user.username}</span>
+                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[var(--color-primary)] bg-[rgba(0,212,255,0.08)] px-2 py-0.5 rounded-full">
+                    <Shield className="w-3 h-3" /> KYC
+                  </span>
+                  <ChevronDown className={cn("w-3.5 h-3.5 text-[var(--color-on-surface-variant)] transition-transform", showUserMenu && "rotate-180")} />
+                </button>
+
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-60 glass-heavy rounded-2xl border border-white/10 overflow-hidden z-50"
+                    >
+                      <div className="px-4 py-3.5 border-b border-white/[0.06]">
+                        <p className="text-[11px] text-[var(--color-on-surface-variant)] uppercase tracking-wider mb-1">Connected Pioneer</p>
+                        <p className="text-sm font-bold text-white">{user.username}</p>
+                        <p className="text-[10px] font-mono text-[var(--color-on-surface-faint)] mt-0.5 truncate">{user.uid}</p>
+                      </div>
+                      <div className="p-2">
+                        <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.05] transition-all">
+                          <Wallet className="w-4 h-4 text-[var(--color-accent)]" /> Pi Wallet
+                        </button>
+                        <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.05] transition-all">
+                          <Activity className="w-4 h-4 text-[var(--color-primary)]" /> Agent Dashboard
+                        </button>
+                        <div className="my-1.5 divider" />
+                        <button
+                          onClick={handleDisconnect}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--color-error)] hover:bg-red-500/10 transition-all"
+                        >
+                          <LogOut className="w-4 h-4" /> Disconnect
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <button
+                onClick={handlePiAuth}
+                disabled={isAuthenticating}
+                className="btn btn-primary btn-md flex items-center gap-2 disabled:opacity-50"
+              >
                 {isAuthenticating ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-t-transparent border-[var(--color-primary)] rounded-full animate-spin" />
-                    Connecting...
+                    <div className="w-4 h-4 border-2 border-t-transparent border-[#050507] rounded-full animate-spin" />
+                    <span>Connecting…</span>
                   </>
                 ) : (
                   <>
-                    <Wallet className="w-4 h-4 text-[var(--color-primary)]" />
-                    Connect Pi Wallet
+                    <Wallet className="w-4 h-4" />
+                    <span>Connect Pi</span>
                   </>
                 )}
-              </span>
-            </motion.button>
-          )}
+              </button>
+            )}
+
+            {/* Mobile menu toggle */}
+            <button
+              className="md:hidden btn btn-ghost btn-sm p-2"
+              onClick={() => setMobileOpen(v => !v)}
+              aria-label="Toggle menu"
+            >
+              <div className="flex flex-col gap-1 w-5">
+                <span className={cn("h-[1.5px] bg-current transition-all", mobileOpen ? "rotate-45 translate-y-[4.5px]" : "")} />
+                <span className={cn("h-[1.5px] bg-current transition-all", mobileOpen ? "opacity-0" : "")} />
+                <span className={cn("h-[1.5px] bg-current transition-all", mobileOpen ? "-rotate-45 -translate-y-[4.5px]" : "")} />
+              </div>
+            </button>
+          </div>
         </div>
-      </div>
-    </header>
+
+        {/* Mobile nav */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.nav
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden border-t border-white/[0.06] bg-[rgba(5,5,7,0.95)] backdrop-blur-2xl overflow-hidden"
+            >
+              <div className="px-5 py-4 flex flex-col gap-1">
+                {navLinks.map(link => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                      pathname === link.href
+                        ? "text-white bg-white/[0.06] border border-white/[0.08]"
+                        : "text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.04]"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </motion.nav>
+          )}
+        </AnimatePresence>
+      </header>
+    </>
   );
 }
