@@ -15,8 +15,7 @@
     "validate:examples": "node bin/aix-validate.js examples/persona-agent.aix && node bin/aix-validate.js examples/tool-agent.aix && node bin/aix-validate.js examples/hybrid-agent.aix",
     "lint": "echo 'Linting not configured yet'",
     "format": "echo 'Formatting not configured yet'",
-    "docs": "echo 'Documentation generation not configured yet'",
-    "agent:sign": "node scripts/agent-sign.js"
+    "docs": "echo 'Documentation generation not configured yet'"
   },
   "keywords": [
     "ai",

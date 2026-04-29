@@ -176,7 +176,7 @@ export class AIXParser {
         const lastKey = currentPath.length > 0 ? currentPath[currentPath.length - 1].key : null;
         
         if (lastKey && !Array.isArray(parent[lastKey])) {
-          if (parent[lastKey] === '' || parent[lastKey] === null || parent[lastKey] === undefined || (typeof parent[lastKey] === 'object' && Object.keys(parent[lastKey]).length === 0)) {
+          if (parent[lastKey] === '' || parent[lastKey] === null || parent[lastKey] === undefined || Object.keys(parent[lastKey]).length === 0) {
             parent[lastKey] = [];
           } else {
             parent[lastKey] = [parent[lastKey]];
@@ -205,6 +205,7 @@ export class AIXParser {
             parsedValue = this.parseYAMLValue(value);
           }
           parent.push(parsedValue);
+ main
         }
         continue;
       }
@@ -735,43 +736,24 @@ export class AIXParser {
           message: 'Memory MB must be a positive integer'
         });
       }
-
-      if (hw.storage_mb !== undefined && (!Number.isInteger(hw.storage_mb) || hw.storage_mb < 1)) {
-        this.errors.push({
-          code: 'INVALID_VALUE',
-          section: 'requirements.hardware',
-          field: 'storage_mb',
-          message: 'Storage MB must be a positive integer'
-        });
-      }
-
-      if (hw.gpu_memory_mb !== undefined && (!Number.isInteger(hw.gpu_memory_mb) || hw.gpu_memory_mb < 1)) {
-        this.errors.push({
-          code: 'INVALID_VALUE',
-          section: 'requirements.hardware',
-          field: 'gpu_memory_mb',
-          message: 'GPU memory MB must be a positive integer'
-        });
-      }
     }
 
     if (requirements.vla) {
-      const vla = requirements.vla;
-      if (!vla.adapter) {
+      if (!requirements.vla.adapter) {
         this.errors.push({
           code: 'MISSING_FIELD',
           section: 'requirements.vla',
           field: 'adapter',
-          message: `Required field 'requirements.vla.adapter' is missing`
+          message: "Cyber-physical agent requires a VLA adapter in requirements.vla"
         });
       } else {
-        const validAdapters = ['openpi', 'pi0.7', 'generic'];
-        if (!validAdapters.includes(vla.adapter)) {
+        const allowedAdapters = ['openpi', 'π0.7', 'generic'];
+        if (!allowedAdapters.includes(requirements.vla.adapter)) {
           this.errors.push({
             code: 'INVALID_VALUE',
             section: 'requirements.vla',
             field: 'adapter',
-            message: `Adapter must be one of: ${validAdapters.join(', ')}`
+            message: "VLA adapter must be one of: " + allowedAdapters.join(', ')
           });
         }
       }
@@ -979,7 +961,7 @@ export class AIXParser {
    * Validation helpers
    */
   isValidID(id) {
-    const regex = /^(did:axiom:(axiomid\.app:)?[a-zA-Z0-9._\-]+|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
+    const regex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
     return regex.test(id);
   }
 
