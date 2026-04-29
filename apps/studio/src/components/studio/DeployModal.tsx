@@ -11,10 +11,13 @@ import {
   Globe, 
   Zap, 
   Activity,
-  ArrowRight
+  ArrowRight,
+  Wallet
 } from 'lucide-react';
 import { AgentRecord, DeploymentRecord } from '@/lib/types';
 import { useLocalAgents } from '@/hooks/useLocalAgents';
+import { useAccount, useSignMessage } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 interface Props {
   agent: AgentRecord;
@@ -26,32 +29,71 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
   const [status, setStatus] = useState<'idle' | 'deploying' | 'done' | 'error'>('idle');
   const [result, setResult] = useState<DeploymentRecord | null>(null);
   const [error, setError] = useState('');
+  const [isSigning, setIsSigning] = useState(false);
   const { saveAgent } = useLocalAgents();
+  const { address, isConnected } = useAccount();
+  const { signMessageAsync } = useSignMessage();
 
   const handleDeploy = async () => {
+    if (!isConnected) {
+      setError('Identity wallet not linked. Please connect to continue.');
+      setStatus('error');
+      return;
+    }
+
     setStatus('deploying');
+    setIsSigning(true);
+    
     try {
-      // Small artificial delay for "sovereign feel"
-      await new Promise(r => setTimeout(r, 1500));
+      // Creative Engineering: The message structure is both informative and verifiable
+      // It links the Agent's identity (DID) and its code integrity (ABOM hash) to the Signer
+      const message = `[AIX SOVEREIGN DEPLOYMENT]
+
+Agent: ${agent.name}
+DID: ${agent.did}
+ABOM Integrity: ${agent.abom?.integrity_hash || 'None'}
+Signer: ${address}
+Timestamp: ${new Date().toISOString()}
+
+I authorize the deployment of this sovereign agent to the AIX Network. 
+This manifest is cryptographically sealed by my identity.`;
+      
+      const signature = await signMessageAsync({ message });
+      setIsSigning(false);
+
+      // Creative Engineering: Artificial delay to simulate "Network Propagation"
+      await new Promise(r => setTimeout(r, 800));
       
       const res = await fetch('/api/deploy-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(agent),
+        body: JSON.stringify({
+          ...agent,
+          signature,
+          signer: address,
+          signedMessage: message
+        }),
       });
+      
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const deployment = data.deployment as DeploymentRecord;
+      const deployment: DeploymentRecord = {
+        ...data.deployment,
+        signature,
+        signer: address
+      };
+
       setResult(deployment);
       setStatus('done');
 
-      // Persist deployment to localStorage
+      // Persist deployment to localStorage with security metadata
       saveAgent({ ...agent, deployment });
       onDeployed(deployment);
-    } catch (e) {
-      setError(String(e));
+    } catch (e: any) {
+      setError(e.message || String(e));
       setStatus('error');
+      setIsSigning(false);
     }
   };
 
@@ -98,6 +140,7 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
                 {[
                   { label: 'Sovereign DID Assigned', ok: !!agent.did, icon: <ShieldCheck className="w-4 h-4" /> },
                   { label: 'AxiomID KYC Verified', ok: !!agent.kyc_tier && agent.kyc_tier !== 'unverified', icon: <Globe className="w-4 h-4" /> },
+                  { label: 'Identity Wallet Linked', ok: isConnected, icon: <Wallet className="w-4 h-4" /> },
                   { label: 'Agent Capabilities Linked', ok: (agent.abom?.capabilities?.length ?? 0) > 0, icon: <Zap className="w-4 h-4" /> },
                   { label: 'ABOM Integrity Sealed', ok: !!agent.abom?.integrity_hash, icon: <Activity className="w-4 h-4" /> },
                 ].map(({ label, ok, icon }) => (
@@ -115,13 +158,35 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
                 ))}
               </div>
 
-              <button 
-                onClick={handleDeploy}
-                className="w-full group py-4 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-white font-black transition-all shadow-[0_20px_40px_-10px_rgba(79,70,229,0.4)] flex items-center justify-center gap-3"
-              >
-                🚀 Initialize Deployment
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+              {!isConnected ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-200/70 leading-relaxed">
+                      To deploy this sovereign agent, you must link an Ethereum-compatible wallet to sign the deployment manifest.
+                    </p>
+                  </div>
+                  <ConnectButton.Custom>
+                    {({ openConnectModal }) => (
+                      <button
+                        onClick={openConnectModal}
+                        className="w-full py-4 bg-white text-black hover:bg-zinc-200 rounded-2xl font-black transition-all shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] flex items-center justify-center gap-3"
+                      >
+                        <Wallet className="w-4 h-4" />
+                        Connect Wallet
+                      </button>
+                    )}
+                  </ConnectButton.Custom>
+                </div>
+              ) : (
+                <button 
+                  onClick={handleDeploy}
+                  className="w-full group py-4 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-white font-black transition-all shadow-[0_20px_40px_-10px_rgba(79,70,229,0.4)] flex items-center justify-center gap-3"
+                >
+                  🚀 Initialize Deployment
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+              )}
             </motion.div>
           )}
 
@@ -140,8 +205,14 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
                   <Activity className="w-8 h-8 text-indigo-400 animate-pulse" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Synchronizing with Network</h3>
-              <p className="text-zinc-500 text-sm max-w-[280px] mx-auto">Publishing agent manifest to the decentralized MCP registry...</p>
+              <h3 className="text-xl font-bold text-white mb-2">
+                {isSigning ? 'Waiting for Signature...' : 'Synchronizing with Network'}
+              </h3>
+              <p className="text-zinc-500 text-sm max-w-[280px] mx-auto">
+                {isSigning 
+                  ? 'Please sign the deployment manifest in your wallet to confirm identity.' 
+                  : 'Publishing agent manifest to the decentralized MCP registry...'}
+              </p>
             </motion.div>
           )}
 

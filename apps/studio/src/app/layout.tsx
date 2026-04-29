@@ -3,6 +3,7 @@ import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next';
+import { WalletProvider } from '@/components/providers/WalletProvider';
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -38,7 +39,9 @@ export default function RootLayout({
         </div>
 
         <div className="relative z-10 flex flex-col min-h-screen">
-          {children}
+          <WalletProvider>
+            {children}
+          </WalletProvider>
         </div>
 
         {/*

@@ -9,6 +9,8 @@ export interface DeploymentRecord {
   status: DeployStatus;
   txHash?: string;          // wallet tx hash (for PROMPT 3)
   network?: string;         // 'ethereum' | 'polygon' (for PROMPT 3)
+  signature?: string;       // Web3 signature
+  signer?: string;          // Address of the signer
 }
 
 export interface AgentRecord {
