@@ -22,8 +22,8 @@ import {
   Database
 } from "lucide-react";
 import yaml from "js-yaml";
-import Navbar from "@/components/layout/Navbar";
-import SovereignStatusBar from "@/components/layout/SovereignStatusBar";
+import { Navbar } from "@/components/layout/Navbar";
+import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";

@@ -240,7 +240,7 @@ test('numeric spec_version produces INVALID_TYPE error', () => {
 });
 
 // ── 15. abomSummary() counts correctly ───────────────────────────────────────
-test('abomSummary returns correct counts', () => {
+test('abomSummary returns correct counts', async () => {
   const parser = makeParser();
   const agent = {
     data: {

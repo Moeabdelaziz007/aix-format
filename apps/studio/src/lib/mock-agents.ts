@@ -1,0 +1,8 @@
+export const mockAgents = [
+  { id: 1, name: "Research Analyst Pro", role: "Data Scientist", price: "0.5", rating: 4.9, reviews: 128, status: "online", kyc: true, color: "#6366f1", tags: ["research", "summarization"], description: "Advanced research agent with multi-source data aggregation and Pi KYC-verified identity." },
+  { id: 2, name: "Customer Support Bot", role: "Support Specialist", price: "0.1", rating: 4.7, reviews: 342, status: "online", kyc: true, color: "#8b5cf6", tags: ["support", "nlp"], description: "24/7 sovereign support agent with verified human oversight and Ed25519 signed payloads." },
+  { id: 3, name: "Code Review Agent", role: "Senior Engineer", price: "1.0", rating: 4.8, reviews: 89, status: "online", kyc: true, color: "#06b6d4", tags: ["coding", "security"], description: "Autonomous code review and security audit agent anchored to Pi Network identity." },
+  { id: 4, name: "Robotics Controller", role: "VLA Agent", price: "2.5", rating: 4.6, reviews: 41, status: "offline", kyc: true, color: "#f59e0b", tags: ["robotics", "openpi"], description: "Vision-Language-Action agent compatible with openpi and π0.7 — the only AIX VLA agent." },
+  { id: 5, name: "Finance Forecaster", role: "Quant Analyst", price: "0.8", rating: 4.5, reviews: 212, status: "online", kyc: true, color: "#10b981", tags: ["finance", "ml"], description: "Time-series forecasting agent with M2M micropayment settlement via Pi Protocol v23." },
+  { id: 6, name: "Content Generator", role: "Creative Writer", price: "0.3", rating: 4.4, reviews: 567, status: "online", kyc: false, color: "#ec4899", tags: ["content", "creative"], description: "Multi-lingual content agent — KYC verification pending. Use in sandbox mode only." },
+];
