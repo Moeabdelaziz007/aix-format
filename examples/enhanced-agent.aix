@@ -187,3 +187,10 @@ security:
   compliance:
     standards: ["SOC2", "GDPR"]
     audit_log: true
+
+build_provenance:
+  builder: "local"
+  source_commit: "1a2b3c4d5e6f7g8h9i0j1a2b3c4d5e6f7g8h9i0j"
+  build_timestamp: "2026-04-29T15:09:36.528Z"
+  builder_signature: "mock_signature_for_example_purposes_only"
+  slsa_level: 0

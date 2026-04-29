@@ -6,11 +6,14 @@
     "created_at": "2026-11-18T12:00:00Z",
     "author": "MoeAbdelaziz",
     "description": "AI agent specialized in extracting and analyzing complex web data",
-    "tags": ["data-analysis", "web-scraping", "research"],
+    "tags": [
+      "data-analysis",
+      "web-scraping",
+      "research"
+    ],
     "license": "MIT",
     "language": "en"
   },
-  
   "persona": {
     "role": "Data Analyst",
     "description": "I specialize in extracting and analyzing complex web data with precision and accuracy. I can process large datasets, identify patterns, and provide actionable insights.",
@@ -20,7 +23,6 @@
     "context_window": 8192,
     "avatar_url": "ipfs://QmExampleAvatarHash123456789"
   },
-
   "identity_layer": {
     "network": "solana",
     "wallet_pubkey": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g",
@@ -33,12 +35,15 @@
         "expiration_date": "2026-01-15T10:00:00Z",
         "credential_subject": {
           "id": "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000",
-          "skills": ["web_scraping", "data_analysis", "pattern_recognition"]
+          "skills": [
+            "web_scraping",
+            "data_analysis",
+            "pattern_recognition"
+          ]
         }
       }
     ]
   },
-
   "economics": {
     "token": "AXIOM",
     "cost_per_task": 5,
@@ -53,14 +58,15 @@
       "recipient": "CcrbGS99N45XPZBLRxeN6q76P93iog6qGdLAiK839d6g"
     }
   },
-
   "superpowers": [
     {
       "name": "web_scraping",
       "version": "2.1.0",
       "type": "python_module",
       "description": "Advanced web scraping capability with support for dynamic content",
-      "permissions": ["internet_access"],
+      "permissions": [
+        "internet_access"
+      ],
       "parameters": {
         "max_content_length": 50000,
         "include_images": true,
@@ -95,9 +101,16 @@
       "version": "1.2.0",
       "type": "python_module",
       "description": "Create charts and visualizations from data",
-      "permissions": ["file_system"],
+      "permissions": [
+        "file_system"
+      ],
       "parameters": {
-        "chart_types": ["bar", "line", "pie", "scatter"],
+        "chart_types": [
+          "bar",
+          "line",
+          "pie",
+          "scatter"
+        ],
         "output_format": "png"
       },
       "triggers": [
@@ -108,7 +121,6 @@
       "timeout": 60
     }
   ],
-
   "requirements": {
     "hardware": {
       "cpu_cores": 2,
@@ -138,7 +150,6 @@
       ]
     }
   },
-
   "security": {
     "checksum": {
       "algorithm": "sha256",
@@ -168,8 +179,18 @@
       "sandbox": true
     },
     "compliance": {
-      "standards": ["SOC2", "GDPR"],
+      "standards": [
+        "SOC2",
+        "GDPR"
+      ],
       "audit_log": true
     }
+  },
+  "build_provenance": {
+    "builder": "local",
+    "source_commit": "1a2b3c4d5e6f7g8h9i0j1a2b3c4d5e6f7g8h9i0j",
+    "build_timestamp": "2026-04-29T15:09:36.527Z",
+    "builder_signature": "mock_signature_for_example_purposes_only",
+    "slsa_level": 0
   }
 }

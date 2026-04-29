@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
-import { signManifest } from '../core/src/security/signature.js';
+import { signManifest, signBuildProvenance } from '../core/src/security/signature.js';
 
 function detectFormat(content, filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -15,17 +15,29 @@ function parseAix(content, format) {
   return format === 'json' ? JSON.parse(content) : yaml.load(content, { schema: yaml.JSON_SCHEMA });
 }
 
+
 const args = process.argv.slice(2);
 const inputPath = args[0];
-const keyArgIndex = args.findIndex((a) => a === '--private-key');
-const kidArgIndex = args.findIndex((a) => a === '--kid');
-const privateKeyPath = keyArgIndex !== -1 ? args[keyArgIndex + 1] : null;
-const kid = kidArgIndex !== -1 ? args[kidArgIndex + 1] : 'local-ed25519';
+
+const getArg = (flag) => {
+  const idx = args.findIndex(a => a === flag);
+  return idx !== -1 ? args[idx + 1] : null;
+};
+const hasArg = (flag) => args.includes(flag);
+
+const privateKeyPath = getArg('--private-key');
+const kid = getArg('--kid') || 'local-ed25519';
+
+const addProvenance = hasArg('--provenance');
+const sourceCommit = getArg('--commit') || '';
+const sourceRepo = getArg('--repo') || '';
+const builder = getArg('--builder') || 'local';
 
 if (!inputPath || !privateKeyPath) {
-  console.error('Usage: node scripts/agent-sign.js <manifest.aix> --private-key <ed25519-private.pem> [--kid <key-id>]');
+  console.error('Usage: node scripts/agent-sign.js <manifest.aix> --private-key <ed25519-private.pem> [--kid <key-id>] [--provenance --commit <SHA> --repo <URL> --builder <name>]');
   process.exit(1);
 }
+
 
 try {
   const resolvedInput = path.resolve(inputPath);
@@ -34,8 +46,29 @@ try {
   const manifest = parseAix(raw, format);
   manifest.security = manifest.security && typeof manifest.security === 'object' ? manifest.security : {};
 
+
   const privateKeyPem = fs.readFileSync(path.resolve(privateKeyPath), 'utf8');
+
+  if (addProvenance) {
+    const buildTimestamp = new Date().toISOString();
+    const provenanceData = {
+      builder: builder,
+      source_commit: sourceCommit,
+      source_repo: sourceRepo,
+      build_timestamp: buildTimestamp
+    };
+
+    const builderSig = signBuildProvenance(provenanceData, privateKeyPem);
+
+    manifest.build_provenance = {
+      ...provenanceData,
+      builder_signature: builderSig,
+      slsa_level: 2
+    };
+  }
+
   const result = signManifest(manifest, privateKeyPem, kid);
+
 
   manifest.security.checksum = { algorithm: 'sha256', value: result.checksum };
   manifest.security.signature = result.signature;

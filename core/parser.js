@@ -228,6 +228,7 @@ export class AIXParser {
     if (data.pi_network) this.validatePiNetwork(data.pi_network);
     if (data.economics) this.validateEconomics(data.economics);
     if (data.abom) this.validateABOM(data.abom);
+    if (data.build_provenance) this.validateBuildProvenance(data.build_provenance);
   }
 
   /**
@@ -805,6 +806,57 @@ export class AIXParser {
   /**
    * Validate security (checksums and signatures)
    */
+
+  /**
+   * Validate build_provenance section
+   */
+  validateBuildProvenance(prov) {
+    if (prov.slsa_level >= 2 && !prov.builder_signature) {
+      this.errors.push({
+        code: 'MISSING_FIELD',
+        section: 'build_provenance',
+        field: 'builder_signature',
+        message: 'builder_signature is required when slsa_level >= 2'
+      });
+    }
+  }
+
+  /**
+   * Verify build_provenance signature if public key is provided
+   */
+  verifySignature(publicKeyPem) {
+    if (this.data && this.data.build_provenance && this.data.build_provenance.builder_signature && publicKeyPem) {
+      try {
+        const keyObj = crypto.createPublicKey(publicKeyPem);
+        const { builder_signature, ...provData } = this.data.build_provenance;
+        const str = JSON.stringify({
+          builder: provData.builder,
+          source_commit: provData.source_commit,
+          source_repo: provData.source_repo,
+          build_timestamp: provData.build_timestamp
+        });
+        const bytes = Buffer.from(str, 'utf8');
+        const isValid = crypto.verify(null, bytes, keyObj, Buffer.from(builder_signature, 'base64'));
+        if (!isValid) {
+          this.warnings.push({
+            code: 'INVALID_SIGNATURE',
+            section: 'build_provenance',
+            message: 'builder_signature verification failed'
+          });
+        }
+        return isValid;
+      } catch (err) {
+        this.warnings.push({
+          code: 'VERIFICATION_ERROR',
+          section: 'build_provenance',
+          message: 'Error verifying builder_signature: ' + err.message
+        });
+        return false;
+      }
+    }
+    return true;
+  }
+
   validateSecurity(data, content) {
     if (!data.security || !data.security.checksum) {
       return; // Already reported in structure validation

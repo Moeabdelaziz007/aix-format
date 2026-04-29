@@ -33,13 +33,13 @@ export function LiveValidator() {
         parsed = JSON.parse(content);
       } else {
         const [{ load }] = await Promise.all([import("js-yaml")]);
-        parsed = load(content);
+        parsed = load(content) as Record<string, unknown> | null;
       }
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
 
-      const hasSig = Boolean(parsed?.security?.signature?.value && parsed?.security?.signature?.algorithm);
+      const hasSig = Boolean((parsed?.security as any)?.signature?.value && (parsed?.security as any)?.signature?.algorithm);
       setSigState(hasSig ? "valid-structure" : "missing");
     } catch (e: unknown) {
       setError(`Invalid AIX payload: ${e instanceof Error ? e.message : String(e)}`);
