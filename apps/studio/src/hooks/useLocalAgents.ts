@@ -31,14 +31,31 @@ export function useLocalAgents() {
     }
   };
 
-  const addAgent = (agent: AgentRecord) => {
-    const exists = agents.find(a => a.id === agent.id);
+  const addAgent = (manifest: any, color: string = '#00d4ff') => {
+    const id = manifest.identity_layer?.id?.split(':').pop() || Math.random().toString(36).substring(7);
+    const newAgent: AgentRecord = {
+      id,
+      name: manifest.meta.name,
+      role: manifest.meta.role || manifest.persona?.role || 'Agent',
+      createdAt: new Date().toISOString(),
+      yaml: '', // This will be set by the caller if needed
+      manifest,
+      color,
+      status: 'online',
+      successRate: 100,
+      tasksCompleted: 0
+    };
+
+    const exists = agents.find(a => a.id === id);
+    let updatedAgents;
     if (exists) {
-      const updated = agents.map(a => a.id === agent.id ? agent : a);
-      saveAgents(updated);
+      updatedAgents = agents.map(a => a.id === id ? newAgent : a);
     } else {
-      saveAgents([...agents, agent]);
+      updatedAgents = [...agents, newAgent];
     }
+    
+    saveAgents(updatedAgents);
+    return newAgent;
   };
 
   const getAgent = (id: string) => {

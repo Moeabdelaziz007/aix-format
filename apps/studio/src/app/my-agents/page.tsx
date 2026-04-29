@@ -13,7 +13,7 @@ import { useLocalAgents } from "@/hooks/useLocalAgents";
 export default function MyAgentsPage() {
   const { agents, loading } = useLocalAgents();
 
-  const totalEarnings = agents.reduce((sum, a) => sum + (parseFloat(a.manifest.economics.token === 'PI' ? '0.5' : '0')), 0).toFixed(1);
+  const totalEarnings = agents.reduce((sum, a) => sum + (parseFloat(a.manifest.economics.currency === 'PI' ? '0.5' : '0')), 0).toFixed(1);
   const onlineCount = agents.filter(a => a.status === 'online').length;
 
   if (loading) return <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center"><Activity className="animate-spin text-[var(--color-primary)]" /></div>;

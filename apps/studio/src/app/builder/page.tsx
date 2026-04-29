@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
-import { AgentManifest } from "@/lib/types";
+import { Manifest } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { clsx, type ClassValue } from "clsx";
@@ -80,7 +80,7 @@ export default function AgentBuilderPage() {
     },
     economics: {
       pricing_model: "pay_per_call",
-      token: ""
+      currency: "PI"
     },
     abom: {
       bom_format: "CycloneDX",
@@ -175,7 +175,7 @@ export default function AgentBuilderPage() {
     await new Promise(r => setTimeout(r, 1500));
     
     try {
-      const agent = addAgent(formData as unknown as AgentManifest, "#00dbe9");
+      const agent = addAgent(formData as unknown as Manifest, "#00dbe9");
       router.push(`/agents/${agent.id}`);
     } catch (e) {
       console.error("Deployment failed", e);
@@ -468,18 +468,16 @@ export default function AgentBuilderPage() {
                         </select>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Token (Optional)</label>
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
                           <input
                             type="text"
-                            value={formData.economics.token || ""}
-                            onChange={(e) => updateEconomics("token", e.target.value)}
+                            value={formData.economics.currency || ""}
+                            onChange={(e) => updateEconomics("currency", e.target.value)}
                             placeholder="e.g. PI"
                             className="input"
                           />
                         </div>
-                      </div>
 
                       <div className="pt-6 border-t border-white/[0.05] mt-6">
                         <div className="flex items-center gap-3 text-xs text-[#8888a0]">

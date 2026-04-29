@@ -7,6 +7,64 @@ export interface AgentRecord {
   did?: string;        // did:aix:<hash>
   kyc_tier?: 'unverified' | 'basic' | 'verified' | 'institutional';
   abom?: AbomRecord;
+  manifest: Manifest;  // Parsed manifest
+  color?: string;
+  successRate?: number;
+  tasksCompleted?: number;
+}
+
+export interface Manifest {
+  meta: {
+    name: string;
+    description: string;
+    version: string;
+    role: string;
+    format_version?: string;
+    author?: string;
+  };
+  persona: {
+    role: string;
+    instructions: string;
+    tone?: string;
+  };
+  identity_layer: {
+    id: string;
+    kyc_tier?: number;
+    verified?: boolean;
+    authority?: string;
+    issuedAt?: string;
+  };
+  skills: Array<{
+    name: string;
+    description: string;
+    parameters?: object;
+  }>;
+  economics: {
+    pricing_model: string;
+    currency: string;
+  };
+  security?: {
+    checksum?: {
+      algorithm: string;
+      value: string;
+    };
+    signature?: {
+      algorithm: string;
+      value: string;
+      public_key: string;
+    };
+  };
+  abom?: {
+    bom_format: string;
+    spec_version: string;
+    risk_level: string;
+    integrity_hash: string;
+    dependencies: string[];
+  };
+  status?: string;
+  color?: string;
+  successRate?: number;
+  tasksCompleted?: number;
 }
 
 export interface AbomRecord {

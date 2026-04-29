@@ -7,6 +7,7 @@ import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { ShoppingCart, Star, Shield, Zap, Search, Filter } from "lucide-react";
 import { AgentCard } from "@/components/studio/AgentCard";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
+import { mockAgents } from "@/lib/mock-agents";
 
 const tags = ["All", "research", "support", "coding", "robotics", "finance", "content"];
 

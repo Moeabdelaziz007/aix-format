@@ -3,6 +3,13 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { 
+  BrainCircuit, 
+  MoreHorizontal, 
+  TrendingUp, 
+  Zap, 
+  Shield 
+} from "lucide-react";
 
 interface AgentCardProps {
   id: string;
