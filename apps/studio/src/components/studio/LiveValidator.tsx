@@ -2,76 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
+import { parseYamlSafe } from "@/lib/utils";
 
 async function sha256Hex(input: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-/**
- * Lightweight YAML parser for .aix manifests.
- * FIX: properly handles arrays (sequences) so `skills`, `permissions`, and
- * `tools` fields are parsed as real arrays instead of being dropped or stored
- * under a synthetic `_items` key.
- */
-function parseYamlLight(yaml: string): Record<string, unknown> {
-  const root: Record<string, unknown> = {};
-  const lines = yaml.split(/\r?\n/);
-
-  const stack: Array<{ indent: number; obj: Record<string, unknown>; lastKey: string | null }> = [
-    { indent: -1, obj: root, lastKey: null },
-  ];
-
-  for (const raw of lines) {
-    const line = raw.replace(/#.*$/, "").trimEnd();
-    if (!line.trim()) continue;
-
-    const indent = line.search(/\S/);
-    const content = line.trim();
-
-    while (stack.length > 1 && stack[stack.length - 1].indent >= indent) {
-      stack.pop();
-    }
-
-    const frame = stack[stack.length - 1];
-    const parent = frame.obj;
-
-    if (content.startsWith("- ")) {
-      const itemValue = content.slice(2).trim().replace(/^['"]|['"]$/g, "");
-      if (frame.lastKey) {
-        const existing = parent[frame.lastKey];
-        if (Array.isArray(existing)) {
-          (existing as string[]).push(itemValue);
-        } else {
-          parent[frame.lastKey] = [itemValue];
-        }
-      }
-    } else if (content.includes(":")) {
-      const colonIdx = content.indexOf(":");
-      const key = content.slice(0, colonIdx).trim();
-      const val = content.slice(colonIdx + 1).trim();
-
-      if (val === "" || val === "|") {
-        const child: Record<string, unknown> = {};
-        parent[key] = child;
-        frame.lastKey = key;
-        stack.push({ indent, obj: child, lastKey: null });
-      } else if (val === "[]") {
-        parent[key] = [];
-        frame.lastKey = key;
-      } else {
-        parent[key] = val.replace(/^['"]|['"]$/g, "");
-        frame.lastKey = key;
-      }
-    }
-  }
-
-  return root;
-}
 
 const REQUIRED_AIX_KEYS = ["meta", "persona", "security", "identity_layer"] as const;
 
@@ -121,7 +54,7 @@ export default function LiveValidator({
       if (name.endsWith(".json") || content.trim().startsWith("{")) {
         parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
-        parsed = parseYamlLight(content);
+        parsed = await parseYamlSafe(content);
       }
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));

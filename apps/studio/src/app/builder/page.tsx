@@ -21,7 +21,7 @@ import {
   FileCode,
   Database
 } from "lucide-react";
-import yaml from "js-yaml";
+import { stringifyYamlSafe } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
@@ -36,13 +36,15 @@ const STEPS = [
   { id: 1, name: "Metadata", icon: <Globe className="w-4 h-4" /> },
   { id: 2, name: "Persona", icon: <Cpu className="w-4 h-4" /> },
   { id: 3, name: "Skills", icon: <Zap className="w-4 h-4" /> },
-  { id: 4, name: "Economics", icon: <Wallet className="w-4 h-4" /> }
+  { id: 4, name: "Economics", icon: <Wallet className="w-4 h-4" /> },
+  { id: 5, name: "SBOM", icon: <Shield className="w-4 h-4" /> }
 ];
 
 export default function AgentBuilderPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [previewFormat, setPreviewFormat] = useState<"yaml" | "json">("yaml");
   const [copied, setCopied] = useState(false);
+  const [manifestContent, setManifestContent] = useState("");
 
   // Form State
   const [formData, setFormData] = useState({
@@ -72,29 +74,35 @@ export default function AgentBuilderPage() {
     economics: {
       pricing_model: "pay_per_call",
       token: ""
+    },
+    abom: {
+      bom_format: "CycloneDX",
+      spec_version: "1.6",
+      risk_level: "low",
+      dependencies: [] as string[]
     }
   });
 
-  // Generate Manifest Content
-  const manifestContent = useMemo(() => {
-    // Deep clone to avoid mutating state
-    const manifest = JSON.parse(JSON.stringify(formData));
-    
-    // Ensure identity ID matches meta name or something descriptive if meta name is empty
-    if (formData.meta.name) {
-      const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      manifest.identity_layer.id = `did:axiom:axiomid.app:agent-${slug}`;
-    }
-
-    if (previewFormat === "json") {
-      return JSON.stringify(manifest, null, 2);
-    } else {
-      try {
-        return yaml.dump(manifest, { indent: 2, lineWidth: -1 });
-      } catch (e) {
-        return "# Error generating YAML\n" + (e as Error).message;
+  // Generate Manifest Content (Async)
+  useEffect(() => {
+    const generate = async () => {
+      // Deep clone to avoid mutating state
+      const manifest = JSON.parse(JSON.stringify(formData));
+      
+      // Ensure identity ID matches meta name
+      if (formData.meta.name) {
+        const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        manifest.identity_layer.id = `did:axiom:axiomid.app:agent-${slug}`;
       }
-    }
+
+      if (previewFormat === "json") {
+        setManifestContent(JSON.stringify(manifest, null, 2));
+      } else {
+        const yml = await stringifyYamlSafe(manifest);
+        setManifestContent(yml);
+      }
+    };
+    generate();
   }, [formData, previewFormat]);
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
@@ -141,6 +149,16 @@ export default function AgentBuilderPage() {
       ...prev,
       economics: {
         ...prev.economics,
+        [field]: value
+      }
+    }));
+  };
+
+  const updateAbom = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      abom: {
+        ...prev.abom,
         [field]: value
       }
     }));
@@ -379,6 +397,54 @@ export default function AgentBuilderPage() {
                           <Shield className="w-4 h-4 text-emerald-500" />
                           <span>Sovereign Identity Protection Enabled</span>
                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 5 && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-6">
+                        <div className="flex gap-3">
+                          <Shield className="w-5 h-5 text-purple-400 shrink-0" />
+                          <p className="text-xs text-purple-300/80 leading-relaxed">
+                            Agent SBOM (ABOM) ensures supply chain security by listing all dependencies and assessing inherent risks.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">SBOM Format</label>
+                        <select
+                          value={formData.abom.bom_format}
+                          onChange={(e) => updateAbom("bom_format", e.target.value)}
+                          className="input appearance-none bg-[#0e0e12]"
+                        >
+                          <option value="CycloneDX">CycloneDX (v1.6)</option>
+                          <option value="SPDX">SPDX</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Risk Level</label>
+                        <select
+                          value={formData.abom.risk_level}
+                          onChange={(e) => updateAbom("risk_level", e.target.value)}
+                          className="input appearance-none bg-[#0e0e12]"
+                        >
+                          <option value="low">Low Risk</option>
+                          <option value="medium">Medium Risk</option>
+                          <option value="high">High Risk</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. langchain, openai, pinecone"
+                          className="input"
+                          onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
+                        />
                       </div>
                     </div>
                   )}
