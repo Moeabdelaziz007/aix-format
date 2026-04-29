@@ -73,7 +73,7 @@ function parseYamlLight(yaml: string): Record<string, unknown> {
   return root;
 }
 
-const REQUIRED_AIX_KEYS = ["aix_version", "identity", "metadata", "capabilities"] as const;
+const REQUIRED_AIX_KEYS = ["meta", "persona", "security", "identity_layer"] as const;
 
 type ValidationResult = {
   valid: boolean;

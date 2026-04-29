@@ -13,8 +13,8 @@ import {
   ExternalLink,
   Lock
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
-import SovereignStatusBar from "@/components/layout/SovereignStatusBar";
+import { Navbar } from "@/components/layout/Navbar";
+import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { DIDCard } from "@/components/studio/DIDCard";
 import { cn } from "@/lib/utils";
 

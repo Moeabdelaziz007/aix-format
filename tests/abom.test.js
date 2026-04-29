@@ -240,7 +240,7 @@ test('numeric spec_version produces INVALID_TYPE error', () => {
 });
 
 // ── 15. abomSummary() counts correctly ───────────────────────────────────────
-test('abomSummary returns correct counts', () => {
+test('abomSummary returns correct counts', async () => {
   const parser = makeParser();
   const agent = {
     data: {
@@ -256,7 +256,8 @@ test('abomSummary returns correct counts', () => {
     warnings: []
   };
   // Import abomSummary by instantiating AIXAgent
-  const { AIXAgent } = await import('../core/parser.js');
+  const module = await import('../core/parser.js');
+  const AIXAgent = module.AIXAgent;
   const inst = new AIXAgent(agent.data, []);
   const s = inst.abomSummary();
   assert(s.total === 4,       `total=${s.total} expected 4`);
