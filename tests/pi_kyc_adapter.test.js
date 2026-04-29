@@ -64,6 +64,21 @@ describe('PiKycAdapter Unit Tests', () => {
     assert.ok(result.kyc_proof.access_token_hash);
   });
 
+
+
+  it('rejects malformed base64 signature/public key payloads', () => {
+    const authResult = {
+      user: { uid: 'user_12345' },
+      accessToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.token',
+      signature: '@@not_base64@@',
+      publicKey: '@@not_base64@@'
+    };
+
+    assert.throws(
+      () => PiKycAdapter.generateIdentity(authResult),
+      /valid base64/
+    );
+  });
   it('rejects invalid signature', () => {
     const keypair = nacl.sign.keyPair();
     const wrongKeypair = nacl.sign.keyPair(); // Different keypair
@@ -89,6 +104,85 @@ describe('PiKycAdapter Unit Tests', () => {
   });
 });
 
+
+
+  it('supports did:web mode and adds security metadata fields', () => {
+    const keypair = nacl.sign.keyPair();
+    const token = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.token';
+    const signature = nacl.sign.detached(naclUtil.decodeUTF8(token), keypair.secretKey);
+
+    const result = PiKycAdapter.generateIdentity({
+      user: { uid: 'web_user_1' },
+      accessToken: token,
+      signature: naclUtil.encodeBase64(signature),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey)
+    }, { didMethod: 'did:web', didAuthority: 'example.com', challengeNonce: 'nonce-123', uidSalt: 'salt-1' });
+
+    assert.ok(result.identity_layer.id.startsWith('did:web:example.com:'));
+    assert.equal(result.kyc_proof.version, '2.0');
+    assert.equal(result.kyc_proof.uid_hash_salted, true);
+    assert.ok(result.kyc_proof.challenge_binding_hash);
+    assert.ok(result.identity_layer.publicKey.fingerprint);
+  });
+
+  it('rejects expired JWT when expiry enforcement is enabled', () => {
+    const keypair = nacl.sign.keyPair();
+    const payload = Buffer.from(JSON.stringify({ exp: 1 }), 'utf8').toString('base64url');
+    const token = `a.${payload}.c`;
+    const signature = nacl.sign.detached(naclUtil.decodeUTF8(token), keypair.secretKey);
+
+    assert.throws(() => PiKycAdapter.generateIdentity({
+      user: { uid: 'jwt_user' },
+      accessToken: token,
+      signature: naclUtil.encodeBase64(signature),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey)
+    }, { enforceJwtExpiry: true }), /expired/);
+  });
+
+
+  it('rejects disallowed JWT algorithm when enforceJwtAlg is enabled', () => {
+    const keypair = nacl.sign.keyPair();
+    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' }), 'utf8').toString('base64url');
+    const payload = Buffer.from(JSON.stringify({ exp: Math.floor(Date.now()/1000)+3600 }), 'utf8').toString('base64url');
+    const token = `${header}.${payload}.x`;
+    const signature = nacl.sign.detached(naclUtil.decodeUTF8(token), keypair.secretKey);
+
+    assert.throws(() => PiKycAdapter.generateIdentity({
+      user: { uid: 'alg_user' },
+      accessToken: token,
+      signature: naclUtil.encodeBase64(signature),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey)
+    }, { enforceJwtAlg: true, allowedJwtAlgs: ['EdDSA'] }), /not allowed/);
+  });
+
+  it('adds blockchain anchor proof metadata when configured', () => {
+    const keypair = nacl.sign.keyPair();
+    const token = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.token';
+    const signature = nacl.sign.detached(naclUtil.decodeUTF8(token), keypair.secretKey);
+    const res = PiKycAdapter.generateIdentity({
+      user: { uid: 'chain_user' },
+      accessToken: token,
+      signature: naclUtil.encodeBase64(signature),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey)
+    }, { blockchainAnchor: { chain: 'pi-mainnet', txid: '0xabc123', blockHeight: 12345 } });
+
+    assert.ok(res.kyc_proof.blockchain_anchor);
+    assert.equal(res.kyc_proof.blockchain_anchor.chain, 'pi-mainnet');
+    assert.ok(res.kyc_proof.blockchain_anchor.anchor_hash);
+  });
+
+  it('enforces minimum assurance level policy', () => {
+    const keypair = nacl.sign.keyPair();
+    const token = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.token';
+    const signature = nacl.sign.detached(naclUtil.decodeUTF8(token), keypair.secretKey);
+
+    assert.throws(() => PiKycAdapter.generateIdentity({
+      user: { uid: 'assurance_user' },
+      accessToken: token,
+      signature: naclUtil.encodeBase64(signature),
+      publicKey: naclUtil.encodeBase64(keypair.publicKey)
+    }, { assuranceLevel: 'low', minAssuranceLevel: 'substantial' }), /Insufficient assurance level/);
+  });
 describe('PiKycAdapter Integration', () => {
   it('full flow: mock Pi proof produces schema-valid identity_layer', () => {
     // 1. Mock Pi Auth

@@ -93,6 +93,9 @@ export default function Home() {
 
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-500 text-sm">
         <a className="flex items-center gap-2 hover:text-white transition-colors" href="https://axiomid.app">
+
+        <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-500 text-sm">
+        <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
           AIX Format Spec
         </a>
         <a className="flex items-center gap-2 hover:text-white transition-colors" href="https://axiomid.app">
@@ -102,6 +105,17 @@ export default function Home() {
           AMRIKYY AI Solutions
         </a>
       </footer>
+          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
+            AIX Format Spec
+          </a>
+          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
+            Pi Network Integration
+          </a>
+          <a className="flex items-center gap-2 hover:text-white transition-colors" href="#">
+            AMRIKYY AI Solutions
+          </a>
+        </footer>
+      </div>
     </div>
   );
 }

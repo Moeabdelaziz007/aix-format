@@ -81,7 +81,7 @@ export function SetupWizard() {
       const { identity_layer, kyc_proof } = await response.json();
 
       const fileText = await file.text();
-      let aixPayload = JSON.parse(fileText);
+      const aixPayload = JSON.parse(fileText);
       aixPayload.identity_layer = identity_layer;
       aixPayload.kyc_proof = kyc_proof;
 
