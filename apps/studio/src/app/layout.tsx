@@ -7,11 +7,13 @@ import { Analytics } from '@vercel/analytics/next';
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
+  display: "swap",
 });
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,8 +41,15 @@ export default function RootLayout({
           {children}
         </div>
 
-        {/* Pi Network SDK */}
-        <Script src="https://sdk.minepi.com/pi-sdk.js" strategy="beforeInteractive" />
+        {/*
+          Pi Network SDK — must use afterInteractive.
+          beforeInteractive only works for self-hosted scripts in Next.js 13+.
+          External CDN scripts with beforeInteractive will throw a build error.
+        */}
+        <Script
+          src="https://sdk.minepi.com/pi-sdk.js"
+          strategy="afterInteractive"
+        />
         <Analytics />
       </body>
     </html>

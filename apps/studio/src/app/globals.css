@@ -1,9 +1,8 @@
+/* ─── Tailwind v4 ─────────────────────────────────────────────────────────── */
+@import "tailwindcss";
+
 /* ─── Google Fonts ─────────────────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..700&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root {
@@ -36,8 +35,11 @@
   --color-error:    #ef4444;
 
   /* Typography */
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-body:    'Inter',         system-ui, sans-serif;
+  --font-display:     'Space Grotesk', system-ui, sans-serif;
+  --font-body:        'Inter',         system-ui, sans-serif;
+  /* Aliases for Next.js font variables used in layout.tsx */
+  --font-geist-sans:  var(--font-manrope, 'Space Grotesk', system-ui, sans-serif);
+  --font-geist-mono:  'Courier New', monospace;
 }
 
 /* ─── Base reset ───────────────────────────────────────────────────────────── */
@@ -79,10 +81,6 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 }
 
 /* ─── Utility: backdrop-blur isolation ────────────────────────────────────── */
-/*
-  PERF FIX: backdrop-blur on a ::before pseudo-element is GPU-composited once.
-  Avoids triggering layout reflow on every parent re-render (284ms → <16ms).
-*/
 .modal-blur-backdrop::before {
   content:         '';
   position:        fixed;
@@ -103,6 +101,12 @@ input, button, textarea, select   { font: inherit; color: inherit; }
   -webkit-backdrop-filter: blur(20px);
 }
 .glass-panel-heavy {
+  background: rgba(14, 14, 18, 0.85);
+  border:     1px solid var(--color-glass-border);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+.glass-heavy {
   background: rgba(14, 14, 18, 0.85);
   border:     1px solid var(--color-glass-border);
   backdrop-filter: blur(40px);
@@ -132,7 +136,6 @@ input, button, textarea, select   { font: inherit; color: inherit; }
   font-size:       0.875rem;
   font-weight:     600;
   cursor:          pointer;
-  /* GPU layer — prevents button repaints from blocking input events */
   will-change:     transform;
   transform:       translateZ(0);
   transition:      background 180ms ease, box-shadow 180ms ease,
@@ -150,11 +153,6 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 }
 .btn-primary:hover  { filter: brightness(1.1); box-shadow: 0 0 32px rgba(0,219,233,0.5); }
 
-/*
-  Hero CTA green-glow variant (page.tsx "Deploy New Agent" button).
-  Matches the Tailwind classes: shadow-[0_0_22px_rgba(57,255,20,0.3)] hover:brightness-110
-  Centralised here so it's a single CSS rule instead of inline Tailwind arbitrary values.
-*/
 .btn-primary-green-glow {
   background:  var(--color-primary);
   color:       #050507;
@@ -171,15 +169,7 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 
 .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
 
-/* ─── AgentCard — CSS-only hire button (replaces JS onMouseEnter/Leave) ─────── */
-/*
-  ROOT CAUSE of ~150ms input delay on adjacent inputs:
-  Inline JS event handlers (onMouseEnter/Leave) fire synchronously on the main
-  thread, trigger React setState → reconcile → repaint on every mouse move.
-  Moving to CSS transitions keeps everything on the GPU compositor thread.
-
-  Usage: <button className="agent-card-hire-btn" style={{"--agent-color": color}} />
-*/
+/* ─── AgentCard hire button ──────────────────────────────────────────────────── */
 .agent-card-hire-btn {
   background:   linear-gradient(135deg, color-mix(in srgb, var(--agent-color, #00d4ff) 13%, transparent), color-mix(in srgb, var(--agent-color, #00d4ff) 7%, transparent));
   border:       1px solid color-mix(in srgb, var(--agent-color, #00d4ff) 25%, transparent);
@@ -194,15 +184,6 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 }
 
 /* ─── Inputs ───────────────────────────────────────────────────────────────── */
-/*
-  ROOT CAUSE of 150-240ms input delay:
-  1. backdrop-filter on ancestor glass-panel forces full-page compositing on
-     every keystroke because the browser must recalculate the blurred region.
-  2. `contain: layout style` tells the browser the input cannot affect layout
-     outside itself — compositor skips the glass-panel repaint path entirely.
-  3. `will-change: auto` (NOT `contents`) — avoids over-promotion to GPU layer
-     which would create memory pressure with many inputs on screen.
-*/
 .input {
   width:            100%;
   padding:          0.625rem 1rem;
@@ -243,7 +224,7 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-/* ─── Animated gradient (used in KycModal CTA) ─────────────────────────────── */
+/* ─── Animated gradient ─────────────────────────────────────────────────────── */
 @keyframes gradient-x {
   0%, 100% { background-position: 0% 50%; }
   50%       { background-position: 100% 50%; }
