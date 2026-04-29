@@ -1,9 +1,9 @@
-# AIX File Format Specification v1.2
+# AIX File Format Specification v1.3
 
 **Title:** AIX (Artificial Intelligence e**X**change) File Format Specification  
-**Version:** 1.2  
+**Version:** 1.3  
 **Status:** Stable  
-**Date:** May 2026
+**Date:** April 2026
 **Author:** Mohamed H Abdelaziz  
 **Organization:** AMRIKYY AI Solutions  
 **Contact:** amrikyy@gmail.com  
@@ -107,7 +107,9 @@ An AIX file consists of eleven top-level sections:
 ├─────────────────────────────────┤
 │ economics   (Optional)          │  Economic model and pricing
 ├─────────────────────────────────┤
-│ security    (Required)          │  Security and integrity data
+│ security    (Required)          │  Security and integrity data        │
+├─────────────────────────────────┤
+│ discovery   (Optional)          │  W3C Discovery Metadata             │
 └─────────────────────────────────┘
 ```
 
@@ -126,6 +128,7 @@ An AIX file consists of eleven top-level sections:
 | identity_layer | No       | -       | ✓        | ✓    |
 | economics      | No       | -       | ✓        | ✓    |
 | security       | Yes      | ✓       | ✓        | ✓    |
+| discovery      | No       | -       | ✓        | ✓    |
 
 ---
 
@@ -1176,6 +1179,42 @@ security:
 
 ---
 
+### 5.12 Discovery Layer
+
+**Purpose**: Defines metadata for automated agent discovery and interoperability with W3C-style discovery mechanisms.
+
+**Structure:**
+
+```yaml
+discovery:
+  endpoints:
+    mcp: string           # URL for the MCP server endpoint
+    api: string           # URL for the agent's primary API
+    documentation: string # URL for human/AI readable docs
+  metadata:
+    well_known: boolean   # Whether to export to /.well-known/agent.aix.json
+    visibility: string    # "public", "private", "restricted"
+```
+
+**Validation Rules:**
+
+- `endpoints` **SHOULD** be valid URLs.
+- `metadata.visibility` **MUST** be one of: public, private, restricted.
+
+---
+
+### 5.13 Security Auditing Protocol
+
+**Purpose**: Establishes standard procedures for pre-execution auditing of AIX packages to prevent malicious injections.
+
+**Core Requirements:**
+
+1. **ABOM Verification**: Parsers **MUST** verify the integrity of all constituents listed in the Agent Bill of Materials.
+2. **KYC Validation**: Runtimes **SHOULD** enforce execution policies based on the `kyc_tier` (e.g., restricted access for Tier 0).
+3. **Injection Scanning**: Agents **MUST** be scanned for known prompt injection patterns before being loaded into a persistent memory context.
+
+---
+
 ## Appendix B: JSON Schema
 
 See [schemas/aix-v1.schema.json](../schemas/aix-v1.schema.json) for the complete JSON Schema definition.
@@ -1208,6 +1247,13 @@ See [schemas/axiom-aix.schema.json](../schemas/axiom-aix.schema.json) for the Ax
 - Defined Axiom standard as Digital DNA for autonomous agents
 - Updated conformance levels to include identity and economics
 - Enhanced schema with blockchain integration support
+
+### Version 1.3 (April 2026)
+
+- Introduced **aix-detective** for security auditing and prompt injection detection.
+- Added **Discovery Layer** for W3C-style agent discovery via `.well-known`.
+- Formalized **Security Auditing Protocol** for package integrity.
+- Unified MCP capability extraction for automated discovery.
 
 ---
 

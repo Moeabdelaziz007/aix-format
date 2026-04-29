@@ -1,0 +1,17 @@
+{
+  "name": "aix-detective",
+  "version": "1.0.0",
+  "description": "Security auditing tool for AIX agent packages.",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "aix-detective": "./index.js"
+  },
+  "scripts": {
+    "test": "node --test src/**/*.test.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "chalk": "^5.3.0"
+  }
+}

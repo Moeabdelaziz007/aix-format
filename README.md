@@ -61,6 +61,13 @@
 - **Agentic KYC:** Agents perform identity validations conversationally.
 - **Live Voice Futures:** Natively stream high-fidelity voice output for human-like conversational experiences.
 
+## 🛠️ Tooling Ecosystem
+
+- **`aix-validate`**: Canonical JSON Schema validator.
+- **`aix-detective`**: Security auditor for detecting prompt injections and integrity failures.
+- **`generate-discovery`**: Utility for creating `.well-known/agent.aix.json` for agent discovery.
+- **Agentic Studio**: A Next.js 15 powered IDE for building sovereign agents.
+
 **[AR]** نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، وليس للمهندسين فقط. في التحديثات القادمة، سيدعم بروتوكول AIX تقنية **Agentic KYC**—حيث سيقوم وكلاء الذكاء الاصطناعي بإرشادك خلال عملية التحقق (KYC) والإعداد بشكل تلقائي باستخدام واجهة بصرية جذابة وبدون الحاجة لأي كود (zero-code).
 
 ---
@@ -260,10 +267,13 @@ Our **Interactive Voice Orb** leverages high-fidelity TTS/STT for a conversation
 
 **[EN]** Three cryptographic pillars — no security theater, no placeholders:
 
-| Pillar | Technology | Guarantees |
-|:------:|:-----------|:-----------|
-| 🔵 **Identity** | Pi Network KYC | *Who published this agent?* |
-| 🟣 **Integrity** | Ed25519 signatures | *Has this file been tampered with?* |
+| Pillar | Technology | Feature | Status | Specification |
+| :--- | :--- | :--- |
+| **Sovereign Identity** | ✅ Production | Pi Network KYC (Tiers 0-3) |
+| **Integrity Layer** | ✅ Production | ABOM SHA-256 Verification |
+| **Meta Arbiter** | ⚡ v1.3.0 | Orchestration & Subsystems |
+| **Security Audit** | 🛡️ New | `aix-detective` CLI |
+| **Discovery** | 🔍 New | W3C Agent Discovery Support |
 | 🟢 **Authorization** | Verifiable Credentials | *What is this agent allowed to do?* |
 
 ```yaml
