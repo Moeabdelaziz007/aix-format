@@ -69,9 +69,9 @@ export function Navbar() {
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#" className="text-sm font-medium text-[var(--color-on-surface-variant)] hover:text-white transition-colors">Marketplace</a>
-          <a href="#" className="text-sm font-medium text-[var(--color-on-surface-variant)] hover:text-white transition-colors">My Agents</a>
-          <a href="#" className="text-sm font-medium text-[var(--color-on-surface-variant)] hover:text-white transition-colors">Network Status</a>
+          <a href="https://axiomid.app/marketplace" className="text-sm font-medium text-[var(--color-on-surface-variant)] hover:text-white transition-colors">Marketplace</a>
+          <a href="https://axiomid.app/agents" className="text-sm font-medium text-[var(--color-on-surface-variant)] hover:text-white transition-colors">My Agents</a>
+          <a href="https://axiomid.app/status" className="text-sm font-medium text-[var(--color-on-surface-variant)] hover:text-white transition-colors">Network Status</a>
         </nav>
 
         <div>

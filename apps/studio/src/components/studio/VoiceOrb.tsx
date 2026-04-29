@@ -13,6 +13,8 @@ interface VoiceOrbProps {
 export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [micLevel, setMicLevel] = useState(0);
+  const [pointerOffset, setPointerOffset] = useState({ x: 0, y: 0 });
   const recognitionRef = useRef<any>(null);
   const prevProcessing = useRef(isProcessing);
 
@@ -59,6 +61,19 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
     prevProcessing.current = isProcessing;
   }, [isProcessing]);
 
+  useEffect(() => {
+    if (!isListening) {
+      setMicLevel(0);
+      return;
+    }
+
+    const pulseInterval = window.setInterval(() => {
+      setMicLevel(Math.random());
+    }, 120);
+
+    return () => window.clearInterval(pulseInterval);
+  }, [isListening]);
+
   const speakText = (text: string) => {
     if (!window.speechSynthesis) return;
 
@@ -95,7 +110,16 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
 
   return (
     <div className="flex flex-col items-center justify-center gap-6">
-      <div className="relative flex items-center justify-center w-32 h-32">
+      <div
+        className="relative flex items-center justify-center w-32 h-32"
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = (event.clientX - rect.left) / rect.width - 0.5;
+          const y = (event.clientY - rect.top) / rect.height - 0.5;
+          setPointerOffset({ x: x * 10, y: y * 10 });
+        }}
+        onMouseLeave={() => setPointerOffset({ x: 0, y: 0 })}
+      >
         {(isListening || isProcessing || isSpeaking) && (
           <motion.div
             initial={{ scale: 1, opacity: 0.5 }}
@@ -125,6 +149,9 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           animate={{
+            x: pointerOffset.x,
+            y: pointerOffset.y,
+            scale: 1 + micLevel * 0.05,
             boxShadow: isSpeaking
               ? "0 0 50px rgba(210, 187, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.6)"
               : isListening
@@ -133,6 +160,7 @@ export function VoiceOrb({ onTranscript, isProcessing = false }: VoiceOrbProps) 
                   ? "0 0 30px rgba(210, 187, 255, 0.6), inset 0 0 20px rgba(0, 219, 233, 0.4)"
                   : "0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05)",
           }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
           className={cn(
             "relative z-10 flex items-center justify-center w-full h-full rounded-full transition-all duration-500",
             isProcessing || isSpeaking ? "bg-[var(--color-surface-container-high)]" : "bg-gradient-primary",
