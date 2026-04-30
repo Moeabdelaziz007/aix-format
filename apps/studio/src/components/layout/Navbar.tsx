@@ -260,7 +260,7 @@ export function Navbar() {
               </button>
             )}
 
-            <WalletButton />
+            {/* WalletButton */}
 
             {/* Mobile menu toggle */}
             <button
