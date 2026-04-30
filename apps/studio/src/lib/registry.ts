@@ -1,5 +1,10 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 import { RegistryEntry } from "./types";
+
+const kv = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 const KV_KEY = "aix_registry";
 
