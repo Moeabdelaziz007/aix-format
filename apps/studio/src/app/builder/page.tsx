@@ -102,6 +102,9 @@ export default function AgentBuilderPage() {
       spec_version: "1.6",
       risk_level: "low",
       integrity_hash: "pending",
+      capabilities: [] as string[],
+      generated_by: "AIX-Studio",
+      timestamp: new Date().toISOString(),
       dependencies: [] as string[]
     },
     mcp: {

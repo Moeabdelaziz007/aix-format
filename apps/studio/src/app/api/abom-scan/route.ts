@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import yaml from "js-yaml";
 import { scanAgent } from "../../../../../../core/abom-scanner";
-import { ScanResult } from "@/lib/types";
+import { Manifest } from "@/lib/types";
 
 /**
  * POST /api/abom-scan
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     // 1. Parse YAML to JS object
     let agent;
     try {
-      agent = yaml.load(yamlContent);
+      agent = yaml.load(yamlContent) as Partial<Manifest>;
     } catch (parseError) {
       return NextResponse.json(
         { error: "Invalid YAML format" },

@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 import path from "node:path";
+// @ts-ignore
+import packageJson from "./package.json";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -9,6 +11,10 @@ const nextConfig: NextConfig = {
   // Remove missing package, use relative imports or future-proof with aliases
   transpilePackages: [], 
   
+  env: {
+    NEXT_PUBLIC_APP_VERSION: packageJson.version,
+  },
+
   async headers() {
     return [
       {

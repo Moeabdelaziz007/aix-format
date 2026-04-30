@@ -94,6 +94,7 @@
   },
   "devDependencies": {
     "json-schema-to-typescript": "^15.0.4",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
 }

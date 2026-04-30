@@ -49,9 +49,9 @@ export default function IdentityPage() {
     setIsConnecting(true);
     setAuthError(null);
     try {
-      if (typeof window !== "undefined" && window.Pi) {
-        window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
-        const authResult = await window.Pi.authenticate(["username", "payments"], (payment: unknown) => {
+      if (typeof window !== "undefined" && (window as any).Pi) {
+        (window as any).Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
+        const authResult = await (window as any).Pi.authenticate(["username", "payments"], (payment: unknown) => {
           console.warn("Incomplete payment found:", payment);
         });
         setPiUser(authResult.user);

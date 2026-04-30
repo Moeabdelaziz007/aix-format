@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { AbomRecord } from '@/lib/types';
+import { AbomData } from '@/lib/types';
 
 export interface AbomScanResult {
   score: number;

@@ -1,4 +1,5 @@
 "use client";
+import { APP_VERSION } from "@/lib/version";
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -219,7 +220,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
           <h3 className="text-base font-display font-bold text-white tracking-tight">Sovereign Voice Engine</h3>
           <p className="text-[11px] text-[var(--color-on-surface-variant)] mt-0.5 flex items-center gap-1.5">
             <span className="status-dot status-online" />
-            Pi Network Secured · AIX v1.2
+            Pi Network Secured · AIX v${APP_VERSION}
           </p>
         </div>
         <button className="btn btn-ghost btn-sm p-2 rounded-xl" aria-label="Voice settings">
