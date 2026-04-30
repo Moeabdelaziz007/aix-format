@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
 
     // 4. Harden: Run ABOM Scan before deployment
     try {
-      const jsYaml = (await import('js-yaml')).default;
-      const yamlObj = jsYaml.load(body.yaml) as Partial<Manifest>;
+      const { parseYamlLight } = await import('@/lib/utils');
+      const yamlObj = parseYamlLight(body.yaml) as Partial<Manifest>;
       const report = scanAgent(yamlObj);
       entry.abom = {
         ...entry.abom,

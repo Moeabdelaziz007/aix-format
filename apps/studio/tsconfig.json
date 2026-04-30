@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@aix-core/storage": ["../../packages/aix-core/src/index.ts"]
     }
   },
   "include": [

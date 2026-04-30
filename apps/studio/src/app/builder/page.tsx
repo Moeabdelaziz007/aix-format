@@ -31,8 +31,7 @@ import { useAbom, AbomScanResult } from '@/hooks/useAbom';
 import { useKyc } from '@/hooks/useKyc';
 import { useDeployment } from '@/hooks/useDeployment';
 import { toast } from 'sonner';
-import yaml from 'js-yaml';
-import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
+import { stringifyYamlSafe, sha256Hex, parseYamlLight } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { AgentRecord, RegistryEntry, Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
@@ -187,7 +186,7 @@ export default function AgentBuilderPage() {
 
   const handleExportAndSave = async () => {
     try {
-      const yamlString = yaml.dump(formData);
+      const yamlString = await stringifyYamlSafe(formData);
       
       const entry: RegistryEntry = {
         did: formData.identity_layer.id,
@@ -226,8 +225,7 @@ export default function AgentBuilderPage() {
         return;
       }
 
-      // First save to registry to ensure it exists
-      const yamlString = yaml.dump(formData);
+      const yamlString = await stringifyYamlSafe(formData);
       const entry: RegistryEntry = {
         did: formData.identity_layer.id,
         name: formData.meta.name,
@@ -785,7 +783,7 @@ export default function AgentBuilderPage() {
                               </div>
       
                               <button 
-                                onClick={() => scanYaml(yaml.dump(formData))}
+                                onClick={async () => scanYaml(await stringifyYamlSafe(formData))}
                                 className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white text-sm font-bold transition border border-white/5"
                               >
                                 Trigger Deep Scan

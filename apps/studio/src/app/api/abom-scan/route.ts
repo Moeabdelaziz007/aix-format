@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import yaml from "js-yaml";
 import { scanAgent } from "../../../../../../core/abom-scanner";
 import { Manifest } from "@/lib/types";
 import { kv, NS, TTL } from "../../../../../../core/storage/redis";
-import { sha256Hex } from "@/lib/utils";
+import { sha256Hex, parseYamlLight } from "@/lib/utils";
 
 /**
  * POST /api/abom-scan
@@ -22,7 +21,6 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Generate Cache Key (SHA-256 of YAML content)
-    // Note: We use the raw YAML string for hashing to capture any structural changes.
     const contentHash = await sha256Hex(yamlContent);
     const cacheKey = `${NS.ABOM}:${contentHash}`;
 
@@ -35,14 +33,13 @@ export async function POST(req: NextRequest) {
         });
       }
     } catch (cacheError) {
-      // Fail-open: if cache fails, proceed with scan
       console.warn("[ABOM Scan] Cache lookup failed:", cacheError);
     }
 
     // 3. Parse YAML to JS object
     let agent;
     try {
-      agent = yaml.load(yamlContent) as Partial<Manifest>;
+      agent = parseYamlLight(yamlContent) as Partial<Manifest>;
     } catch (parseError) {
       return NextResponse.json(
         { error: "Invalid YAML format" },

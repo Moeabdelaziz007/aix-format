@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   // Fix monorepo tracing root - pointing to workspace root
   outputFileTracingRoot: path.join(__dirname, "../../"),
   // Remove missing package, use relative imports or future-proof with aliases
-  transpilePackages: [], 
+  transpilePackages: ["@aix-core/storage"], 
   
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
