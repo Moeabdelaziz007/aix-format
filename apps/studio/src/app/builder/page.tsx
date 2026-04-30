@@ -80,7 +80,7 @@ export default function AgentBuilderPage() {
       id: `did:axiom:axiomid.app:agent-temp`,
       authority: "axiomid.app",
       issuedAt: new Date().toISOString(),
-      kyc_tier: 0
+      kyc_tier: 'unverified'
     },
     economics: {
       pricing_model: "pay_per_call",
@@ -189,7 +189,7 @@ export default function AgentBuilderPage() {
         role: formData.persona.role || "AI Assistant",
         createdAt: new Date().toISOString(),
         yaml: manifestContent,
-        manifest: JSON.parse(JSON.stringify(formData)),
+
         did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
         kyc_tier: formData.identity_layer.kyc_tier as any,
         abom: {

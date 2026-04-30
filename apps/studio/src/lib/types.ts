@@ -120,7 +120,7 @@ export interface Manifest {
     id: string;
     authority: string;
     issuedAt: string;
-    kyc_tier?: number;
+    kyc_tier?: 'unverified' | 'basic' | 'verified' | 'institutional' | number;
   };
   economics: {
     pricing_model: string;

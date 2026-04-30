@@ -17,7 +17,7 @@ export interface MCPServerCard {
   };
   identity: {
     did: string;
-    kyc_tier?: number;
+    kyc_tier?: number | string;
     verified: boolean;
   };
   endpoints: Array<{

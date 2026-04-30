@@ -6,6 +6,7 @@ import { Shield, Cpu, Activity, Wallet, LogOut, ChevronDown, Zap } from "lucide-
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { WalletButton } from "@/components/studio/WalletButton";
 
 interface PiUser {
   username: string;
