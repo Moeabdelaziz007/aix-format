@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 // but since the studio app may not resolve the 'core' workspace smoothly in Next.js
 // out-of-the-box without config changes, and tweetnacl might need polyfills in Edge,
 // we'll implement the route properly.
-import { PiKycAdapter } from "../../../../../../../core/pi_kyc_adapter.js";
+import { PiKycAdapter } from "../../../../../../../core/pi_kyc_adapter";
 
 export async function POST(req: Request) {
   try {
