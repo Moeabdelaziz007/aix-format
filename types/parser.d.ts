@@ -315,6 +315,7 @@ export declare class AIXParser {
     private validateMetaArbiter;
     private validateABOM;
     private _validateABOMConstituent;
+    private validateBlackBox;
     private validateSecurity;
     private removeSecuritySection;
     private calculateChecksum;
