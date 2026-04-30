@@ -1,154 +1,137 @@
 /**
  * AIX Schema Integrity Tests
- * Validates the canonical structure combining ABOM, SLSA Provenance, and Unified BOM.
+ * Validates the canonical structure against the v1.3 Sovereign Protocol schema.
  */
 
+const Ajv = require('ajv');
+const addFormats = require('ajv-formats');
+const fs = require('fs');
+const path = require('path');
+
 describe('AIX Schema Integrity Validation', () => {
-    // Mocking a schema validator function for the tests
-    // In production, this would use Ajv against aix.schema.json
+    let ajv;
+    let validate;
+
+    beforeAll(() => {
+        ajv = new Ajv({ allErrors: true, strict: false });
+        addFormats(ajv);
+        
+        const schemaPath = path.resolve(__dirname, '../schemas/aix.schema.json');
+        const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+        validate = ajv.compile(schema);
+    });
+
     const validateManifest = (manifest) => {
-        const errors = [];
-
-        if (!manifest.name) errors.push('Missing name');
-        if (!manifest.version) errors.push('Missing version');
-
-        if (manifest.abom) {
-            if (manifest.abom.risk_score !== undefined) {
-                if (manifest.abom.risk_score < 0 || manifest.abom.risk_score > 100) {
-                    errors.push('risk_score out of bounds');
-                }
-            }
-            if (manifest.abom.saas_services) {
-                manifest.abom.saas_services.forEach((saas, idx) => {
-                    if (!saas.name) errors.push(`saas_service[${idx}] missing name`);
-                });
-            }
-        }
-
-        if (manifest.build_provenance) {
-            if (!manifest.build_provenance.builder_id) {
-                errors.push('build_provenance missing builder_id');
-            }
-        }
-
+        const valid = validate(manifest);
         return {
-            valid: errors.length === 0,
-            errors
+            valid,
+            errors: validate.errors ? validate.errors.map(err => `${err.instancePath} ${err.message}`) : []
         };
     };
 
-    it('1. يجب أن يمر manifest بحد أدنى (name + version فقط)', () => {
-        const manifest = { name: 'Minimal Agent', version: '1.0.0' };
+    it('1. يجب أن يفشل manifest فارغ (Missing required blocks)', () => {
+        const manifest = {};
         const result = validateManifest(manifest);
-        expect(result.valid).toBe(true);
+        expect(result.valid).toBe(false);
+        expect(result.errors.some(e => e.includes("must have required property 'meta'"))).toBe(true);
     });
 
-    it('2. يجب أن يمر manifest كامل (ABOM + SaaS-BOM + provenance)', () => {
+    it('2. يجب أن يمر manifest بحد أدنى من v1.3 (meta, persona, security, identity_layer)', () => {
         const manifest = {
-            name: 'Full Agent',
-            version: '1.0.0',
-            abom: {
-                risk_score: 45,
-                unified_bom: { ai_models: [{ model_id: 'gpt-4', provider: 'openai' }] },
-                saas_services: [{ name: 'Stripe', provider: 'Stripe Inc', compliance_tier: 'enterprise' }]
+            meta: {
+                version: '1.3.0',
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                name: 'Minimal v1.3 Agent',
+                created: '2026-04-30T10:00:00Z',
+                author: 'Test Author'
             },
-            build_provenance: {
-                builder_id: 'https://github.com/actions/runner',
-                build_type: 'https://slsa.dev/provenance/v1',
-                invocation: { config_source: { uri: 'git+https://...', digest: { sha256: 'abc' } } },
-                materials: []
+            persona: {
+                role: 'Assistant',
+                instructions: 'Be helpful.'
+            },
+            security: {
+                checksum: {
+                    algorithm: 'sha256',
+                    value: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+                }
+            },
+            identity_layer: {
+                id: 'did:axiom:axiomid.app:test-agent',
+                authority: 'axiomid.app',
+                issuedAt: '2026-04-30T10:00:00Z'
             }
         };
         const result = validateManifest(manifest);
-        expect(result.valid).toBe(true);
-    });
-
-    it('3. يجب أن يفشل saas_service بدون name', () => {
-        const manifest = {
-            name: 'Agent', version: '1.0',
-            abom: { saas_services: [{ provider: 'AWS', compliance_tier: 'basic' }] } // Missing name
-        };
-        const result = validateManifest(manifest);
-        expect(result.valid).toBe(false);
-        expect(result.errors).toContain('saas_service[0] missing name');
-    });
-
-    it('4. يجب أن يفشل build_provenance بدون builder_id', () => {
-        const manifest = {
-            name: 'Agent', version: '1.0',
-            build_provenance: { build_type: 'https://slsa.dev/provenance/v1' } // Missing builder_id
-        };
-        const result = validateManifest(manifest);
-        expect(result.valid).toBe(false);
-        expect(result.errors).toContain('build_provenance missing builder_id');
-    });
-
-    it('5. يجب أن يفشل risk_score خارج 0-100', () => {
-        const manifest = {
-            name: 'Agent', version: '1.0',
-            abom: { risk_score: 150 }
-        };
-        const result = validateManifest(manifest);
-        expect(result.valid).toBe(false);
-        expect(result.errors).toContain('risk_score out of bounds');
-    });
-
-    it('6. يجب أن يمر unified_bom فارغ (optional)', () => {
-        const manifest = {
-            name: 'Agent', version: '1.0',
-            abom: { unified_bom: {} }
-        };
-        const result = validateManifest(manifest);
-        expect(result.valid).toBe(true);
-    });
-}); {
-    "aix_version": "1.3.0",
-        "name": "OmniTrader Agent",
-            "version": "2.1.0",
-                "description": "Autonomous trading agent with KYC and full BOM transparency.",
-                    "capabilities": ["trading", "analysis"],
-                        "abom": {
-        "risk_score": 12,
-            "saas_services": [
-                {
-                    "name": "Upstash Redis",
-                    "provider": "Upstash",
-                    "compliance_tier": "enterprise",
-                    "endpoint": "https://redis.upstash.io"
-                }
-            ],
-                "unified_bom": {
-            "ai_models": [
-                {
-                    "model_id": "claude-3-5-sonnet",
-                    "provider": "Anthropic"
-                }
-            ],
-                "infrastructure": [
-                    {
-                        "provider": "Vercel",
-                        "region": "iad1"
-                    }
-                ]
-        },
-        "compliance_notes": "All inputs are sanitized before hitting LLMs."
-    },
-    "build_provenance": {
-        "builder_id": "https://github.com/actions/runner",
-            "build_type": "https://slsa.dev/provenance/v1",
-                "invocation": {
-            "config_source": {
-                "uri": "git+https://github.com/Moeabdelaziz007/aix-format",
-                    "digest": { "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
-            }
-        },
-        "materials": []
-    },
-    "monetization": {
-        "tier": "pro",
-            "pricing": {
-            "base_price": 0.01,
-                "currency": "PI"
+        if (!result.valid) {
+            console.error('Validation Errors:', result.errors);
         }
-    }
-}
+        expect(result.valid).toBe(true);
+    });
+
+    it('3. يجب أن يفشل عند استخدام enum غير صالح (security.checksum.algorithm)', () => {
+        const manifest = {
+            meta: {
+                version: '1.3.0',
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                name: 'Invalid Enum Agent',
+                created: '2026-04-30T10:00:00Z',
+                author: 'Test Author'
+            },
+            persona: {
+                role: 'Assistant',
+                instructions: 'Be helpful.'
+            },
+            security: {
+                checksum: {
+                    algorithm: 'md5', // Invalid enum
+                    value: 'abc'
+                }
+            },
+            identity_layer: {
+                id: 'did:axiom:axiomid.app:test-agent',
+                authority: 'axiomid.app',
+                issuedAt: '2026-04-30T10:00:00Z'
+            }
+        };
+        const result = validateManifest(manifest);
+        expect(result.valid).toBe(false);
+        expect(result.errors.some(e => e.includes('must be equal to one of the allowed values'))).toBe(true);
+    });
+
+    it('4. يجب أن يفشل عند نقص حقول إجبارية داخل meta', () => {
+        const manifest = {
+            meta: {
+                version: '1.3.0'
+                // Missing id, name, created, author
+            },
+            persona: { role: 'A', instructions: 'B' },
+            security: { checksum: { algorithm: 'sha256', value: 'abc' } },
+            identity_layer: { id: 'did:x', authority: 'axiomid.app', issuedAt: '2026-04-30T10:00:00Z' }
+        };
+        const result = validateManifest(manifest);
+        expect(result.valid).toBe(false);
+        expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('5. يجب أن يفشل identity_layer إذا كانت الـ authority ليست axiomid.app', () => {
+        const manifest = {
+            meta: {
+                version: '1.3.0',
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                name: 'Invalid Authority Agent',
+                created: '2026-04-30T10:00:00Z',
+                author: 'Test Author'
+            },
+            persona: { role: 'A', instructions: 'B' },
+            security: { checksum: { algorithm: 'sha256', value: 'abc' } },
+            identity_layer: {
+                id: 'did:axiom:other.app:test-agent',
+                authority: 'other.app', // Invalid const
+                issuedAt: '2026-04-30T10:00:00Z'
+            }
+        };
+        const result = validateManifest(manifest);
+        expect(result.valid).toBe(false);
+        expect(result.errors.some(e => e.includes('must be equal to constant'))).toBe(true);
+    });
+});
