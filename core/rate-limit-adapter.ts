@@ -1,19 +1,16 @@
-import { kv } from '@vercel/kv';
+import { kv as vercelKv } from '@vercel/kv';
+import { kv as upstashKv, NS } from './storage/redis.ts';
 
 /**
- * KVTokenBucket
+ * AIXTokenBucket
  * 
- * A Vercel KV-backed token bucket implementation for distributed rate limiting.
- * Uses atomic Redis operations to prevent race conditions in serverless environments.
+ * A distributed rate-limiting token bucket.
+ * Migrated from @vercel/kv to @upstash/redis (Unified Storage).
  */
-export class KVTokenBucket {
+export class AIXTokenBucket {
   private capacity: number;
   private windowMs: number;
 
-  /**
-   * @param capacity Total number of tokens allowed in the window
-   * @param windowMs Time window in milliseconds
-   */
   constructor(capacity: number, windowMs: number) {
     this.capacity = capacity;
     this.windowMs = windowMs;
@@ -21,39 +18,57 @@ export class KVTokenBucket {
 
   /**
    * Attempts to consume tokens for a given key.
-   * Atomic using Redis DECRBY + ROLLBACK pattern.
-   * 
-   * @param key The identifier for the rate limit bucket
-   * @param tokens Number of tokens to consume
-   * @returns Promise<boolean> True if tokens were consumed, false otherwise
+   * Prefers Upstash Redis, falls back to Vercel KV if available.
    */
   async consume(key: string, tokens: number = 1): Promise<boolean> {
-    const kvKey = `aix:bucket:${key}`;
+    const upstashKey = `${NS.RATE}:${key}`;
+    const legacyKey = `aix:bucket:${key}`;
+
     try {
-      // 1. Initialize if not exists (Atomic via SETNX)
-      // Note: @vercel/kv set() with nx: true is equivalent to SETNX
-      await kv.set(kvKey, this.capacity, { ex: Math.floor(this.windowMs / 1000), nx: true });
+      // 1. Try Upstash Redis first
+      if (process.env.UPSTASH_REDIS_REST_URL) {
+        // Atomic SETNX for initialization
+        await upstashKv.set(upstashKey, this.capacity, { 
+          ex: Math.floor(this.windowMs / 1000), 
+          nx: true 
+        });
 
-      // 2. Atomic decrement
-      const remaining = await kv.decrby(kvKey, tokens);
+        const remaining = await upstashKv.decr(upstashKey);
+        if (remaining < 0) {
+          await upstashKv.incr(upstashKey); // Rollback
+          return false;
+        }
+        return true;
+      }
 
-      if (remaining < 0) {
-        // 3. Rollback if over limit
-        await kv.incrby(kvKey, tokens);
+      // 2. Fallback to Legacy Vercel KV during migration
+      console.warn("[AIXTokenBucket] Falling back to Legacy Vercel KV");
+      await vercelKv.set(legacyKey, this.capacity, { ex: Math.floor(this.windowMs / 1000), nx: true });
+      const legacyRemaining = await vercelKv.decrby(legacyKey, tokens);
+      if (legacyRemaining < 0) {
+        await vercelKv.incrby(legacyKey, tokens);
         return false;
       }
       return true;
+
     } catch (error) {
-      console.error("[KVTokenBucket] Error accessing Vercel KV:", error);
-      return true; // Fail-open per protocol
+      console.error("[AIXTokenBucket] Error during consumption:", error);
+      return true; // Fail-open protocol
     }
   }
 
-  /**
-   * Resets the bucket for a given key.
-   */
   async reset(key: string): Promise<void> {
-    await kv.del(`aix:bucket:${key}`);
+    const upstashKey = `${NS.RATE}:${key}`;
+    const legacyKey = `aix:bucket:${key}`;
+    
+    await Promise.all([
+      upstashKv.del(upstashKey),
+      vercelKv.del(legacyKey)
+    ]).catch(() => {});
   }
 }
+
+// Keep export for backward compatibility during transition
+export { AIXTokenBucket as KVTokenBucket };
+
 

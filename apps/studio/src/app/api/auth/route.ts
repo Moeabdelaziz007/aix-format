@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Redis } from "@upstash/redis";
-
-const kv = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+import { kv, NS, TTL } from "../../../../core/storage/redis.ts";
 import { AuthResult, PiUser } from "@/lib/types";
 
-const SESSION_TTL = 3600; // 1 hour
+const SESSION_TTL = TTL.SESSION;
+
 
 /**
  * POST /api/auth
@@ -34,7 +30,7 @@ export async function POST(req: NextRequest) {
     
     // 2. Store session in KV
     // Pattern: aix:session:{uid}
-    const sessionKey = `aix:session:${userData.uid}`;
+    const sessionKey = `${NS.SESSION}:${userData.uid}`;
     await kv.set(sessionKey, { user: userData, accessToken }, { ex: SESSION_TTL });
 
     const result: AuthResult = {
@@ -59,7 +55,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing uid" }, { status: 400 });
   }
 
-  const session = await kv.get<AuthResult>(`aix:session:${uid}`);
+  const session = await kv.get<AuthResult>(`${NS.SESSION}:${uid}`);
   if (!session) {
     return NextResponse.json({ authenticated: false }, { status: 404 });
   }
@@ -77,6 +73,6 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Missing uid" }, { status: 400 });
   }
 
-  await kv.del(`aix:session:${uid}`);
+  await kv.del(`${NS.SESSION}:${uid}`);
   return NextResponse.json({ success: true });
 }
