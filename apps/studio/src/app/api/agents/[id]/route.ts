@@ -7,11 +7,12 @@ import { getRegistry, updateRegistryEntry, deleteRegistryEntry } from "@/lib/reg
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const entries = await getRegistry();
-    const entry = entries.find((e) => e.did === params.id);
+    const entry = entries.find((e) => e.did === id);
 
     if (!entry) {
       return NextResponse.json(
@@ -36,12 +37,13 @@ export async function GET(
  */
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await req.json();
     
-    if (body.did && body.did !== params.id) {
+    if (body.did && body.did !== id) {
       return NextResponse.json(
         { error: "ID mismatch between path and body" },
         { status: 400 }
@@ -50,7 +52,7 @@ export async function PUT(
 
     const updatedEntry = {
       ...body,
-      did: params.id
+      did: id
     };
 
     await updateRegistryEntry(updatedEntry);
@@ -70,11 +72,12 @@ export async function PUT(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await deleteRegistryEntry(params.id);
-    return NextResponse.json({ message: "Agent deleted", id: params.id });
+    const { id } = await params;
+    await deleteRegistryEntry(id);
+    return NextResponse.json({ message: "Agent deleted", id: id });
   } catch (error) {
     console.error("Agent DELETE Error:", error);
     return NextResponse.json(

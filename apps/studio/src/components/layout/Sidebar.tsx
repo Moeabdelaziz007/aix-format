@@ -1,4 +1,5 @@
 "use client";
+import { APP_VERSION } from "@/lib/version";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -79,7 +80,7 @@ export function Sidebar() {
           <div className="absolute inset-0 bg-[var(--color-primary-dim)]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           <p className="text-[10px] text-[var(--color-on-surface-variant)] uppercase mb-2">System Status</p>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-white">Parser v1.2.0</span>
+            <span className="text-xs font-mono text-white">Parser v${APP_VERSION}</span>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse shadow-[0_0_5px_var(--color-success)]" />
               <span className="text-[10px] text-[var(--color-success)] font-bold uppercase">Online</span>

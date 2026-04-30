@@ -13,8 +13,12 @@ export const mockAgents: AgentRecord[] = [
     successRate: 98,
     tasksCompleted: 1247,
     abom: {
+      bom_format: 'AIX-NATIVE',
+      spec_version: '1.0',
+      risk_level: 'low',
       capabilities: ["research", "summarization"],
       integrity_hash: "sha256:mock1",
+      dependencies: [],
       generated_by: "AIX Studio",
       timestamp: new Date().toISOString()
     }
@@ -31,8 +35,12 @@ export const mockAgents: AgentRecord[] = [
     successRate: 94,
     tasksCompleted: 3420,
     abom: {
+      bom_format: 'AIX-NATIVE',
+      spec_version: '1.0',
+      risk_level: 'low',
       capabilities: ["support", "nlp"],
       integrity_hash: "sha256:mock2",
+      dependencies: [],
       generated_by: "AIX Studio",
       timestamp: new Date().toISOString()
     }
@@ -49,8 +57,12 @@ export const mockAgents: AgentRecord[] = [
     successRate: 96,
     tasksCompleted: 890,
     abom: {
+      bom_format: 'AIX-NATIVE',
+      spec_version: '1.0',
+      risk_level: 'low',
       capabilities: ["coding", "security"],
       integrity_hash: "sha256:mock3",
+      dependencies: [],
       generated_by: "AIX Studio",
       timestamp: new Date().toISOString()
     }
@@ -67,8 +79,12 @@ export const mockAgents: AgentRecord[] = [
     successRate: 92,
     tasksCompleted: 410,
     abom: {
+      bom_format: 'AIX-NATIVE',
+      spec_version: '1.0',
+      risk_level: 'low',
       capabilities: ["robotics", "openpi"],
       integrity_hash: "sha256:mock4",
+      dependencies: [],
       generated_by: "AIX Studio",
       timestamp: new Date().toISOString()
     }
@@ -85,8 +101,12 @@ export const mockAgents: AgentRecord[] = [
     successRate: 90,
     tasksCompleted: 2120,
     abom: {
+      bom_format: 'AIX-NATIVE',
+      spec_version: '1.0',
+      risk_level: 'low',
       capabilities: ["finance", "ml"],
       integrity_hash: "sha256:mock5",
+      dependencies: [],
       generated_by: "AIX Studio",
       timestamp: new Date().toISOString()
     }
@@ -103,8 +123,12 @@ export const mockAgents: AgentRecord[] = [
     successRate: 88,
     tasksCompleted: 5670,
     abom: {
+      bom_format: 'AIX-NATIVE',
+      spec_version: '1.0',
+      risk_level: 'low',
       capabilities: ["content", "creative"],
       integrity_hash: "sha256:mock6",
+      dependencies: [],
       generated_by: "AIX Studio",
       timestamp: new Date().toISOString()
     }

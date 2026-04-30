@@ -26,9 +26,9 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      if (typeof window !== 'undefined' && window.Pi) {
-        window.Pi.init({ version: '2.0', sandbox: true });
-        const authResult = await window.Pi.authenticate(['username', 'payments'], (payment: any) => {
+      if (typeof window !== 'undefined' && (window as any).Pi) {
+        (window as any).Pi.init({ version: '2.0', sandbox: true });
+        const authResult = await (window as any).Pi.authenticate(['username', 'payments'], (payment: any) => {
           console.warn('Incomplete payment:', payment);
         });
         

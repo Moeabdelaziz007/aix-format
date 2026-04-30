@@ -129,14 +129,14 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
       id: rootId,
       type: 'agent',
       position: { x: 400, y: 0 },
-      data: { label: formData.metadata?.name || 'Sovereign Agent' },
+      data: { label: formData.meta?.name || 'Sovereign Agent' },
     });
 
     const categories = [
-      { key: 'saas', items: formData.abom?.unified_bom?.saas || [], color: COLORS.saas },
-      { key: 'ai_models', items: formData.abom?.unified_bom?.ai_models || [], color: COLORS.ai, type: 'ai' },
-      { key: 'aboms', items: formData.abom?.unified_bom?.aboms || [], color: COLORS.abom, type: 'abom' },
-      { key: 'infrastructure', items: formData.abom?.unified_bom?.infrastructure || [], color: COLORS.infra, type: 'infra' },
+      { key: 'saas', items: [], color: COLORS.saas },
+      { key: 'ai_models', items: [], color: COLORS.ai, type: 'ai' },
+      { key: 'aboms', items: [], color: COLORS.abom, type: 'abom' },
+      { key: 'infrastructure', items: [], color: COLORS.infra, type: 'infra' },
     ];
 
     let currentX = 0;

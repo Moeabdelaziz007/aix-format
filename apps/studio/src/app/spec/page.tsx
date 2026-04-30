@@ -1,4 +1,5 @@
 "use client";
+import { APP_VERSION } from "@/lib/version";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,7 +19,7 @@ const sections = [
 const specContent: Record<string, { title: string; badge?: string; body: React.ReactNode }> = {
   overview: {
     title: "AIX Format — Agent Identity Exchange",
-    badge: "v1.2",
+    badge: `v${APP_VERSION}`,
     body: (
       <div className="space-y-6">
         <p className="text-[var(--color-on-surface-variant)] text-lg leading-relaxed">
@@ -322,7 +323,7 @@ export default function SpecPage() {
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-[var(--color-primary)]/30 text-[var(--color-primary)] bg-[var(--color-primary)]/5">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse"></span>
-              v1.2 — Current
+              v${APP_VERSION} — Current
             </span>
             <button
               className="sm:hidden text-[var(--color-on-surface-variant)] hover:text-white"

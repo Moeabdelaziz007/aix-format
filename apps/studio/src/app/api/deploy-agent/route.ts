@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DeployRequest, DeployResponse, DeploymentRecord, RegistryEntry } from '@/lib/types';
+import { DeployRequest, DeploymentRecord, Manifest } from '@/lib/types';
 import { getRegistry, updateRegistryEntry } from '@/lib/registry';
 import { scanAgent } from '../../../../../../core/abom-scanner';
 
@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
 
     // 4. Harden: Run ABOM Scan before deployment
     try {
-      const yamlObj = (await import('js-yaml')).default.load(body.yaml);
+      const jsYaml = (await import('js-yaml')).default;
+      const yamlObj = jsYaml.load(body.yaml) as Partial<Manifest>;
       const report = scanAgent(yamlObj);
       entry.abom = {
         ...entry.abom,

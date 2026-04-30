@@ -1,4 +1,5 @@
 "use client";
+import { APP_VERSION } from "@/lib/version";
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -336,7 +337,7 @@ export default function DeployPage() {
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-white">Sovereign Integrity Scan</h3>
-                    <p className="text-[var(--color-on-surface-variant)]">Validating manifest against AIX v1.2 Protocol.</p>
+                    <p className="text-[var(--color-on-surface-variant)]">Validating manifest against AIX v${APP_VERSION} Protocol.</p>
                   </div>
                 </div>
 
