@@ -19,6 +19,7 @@
     "@vercel/analytics": "^2.0.1",
     "@upstash/redis": "^1.34.0",
     "@vercel/speed-insights": "^1.1.0",
+
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.4.7",

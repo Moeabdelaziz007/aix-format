@@ -3,6 +3,7 @@ import { RegistryEntry } from "./types";
 
 const KV_KEY = NS.REGISTRY;
 
+
 /**
  * Retrieves all agents from the global registry.
  */

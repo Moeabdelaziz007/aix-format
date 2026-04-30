@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { kv } from "@/lib/storage/redis";
 
+
 /**
  * GET /api/health
  * Returns system health including Redis connectivity.
