@@ -28,12 +28,17 @@ import {
   UserCheck,
   Database
 } from "lucide-react";
+<<<<<<< HEAD
 import { useRouter } from "next/navigation";
 import { useAbom } from '@/hooks/useAbom';
 import { toast } from 'sonner';
 import { stringifyYamlSafe, sha256Hex, parseYamlLight, computeManifestChecksum, cn } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { AgentRecord, Manifest, AgentSkill, McpPrompt } from "@/lib/types";
+=======
+import yaml from "js-yaml";
+import { Navbar } from "@/components/layout/Navbar";
+>>>>>>> remotes/origin/feat/identity-page-complete-12323017966989893396
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import BOMVisualizer from "@/components/studio/BOMVisualizer";

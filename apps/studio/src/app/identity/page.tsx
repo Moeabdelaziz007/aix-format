@@ -49,9 +49,15 @@ export default function IdentityPage() {
     setIsConnecting(true);
     setAuthError(null);
     try {
+<<<<<<< HEAD
       if (typeof window !== "undefined" && (window as any).Pi) {
         (window as any).Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
         const authResult = await (window as any).Pi.authenticate(["username", "payments"], (payment: unknown) => {
+=======
+      if (typeof window !== "undefined" && window.Pi) {
+        window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
+        const authResult = await window.Pi.authenticate(["username", "payments"], (payment: unknown) => {
+>>>>>>> remotes/origin/feat/identity-page-complete-12323017966989893396
           console.warn("Incomplete payment found:", payment);
         });
         setPiUser(authResult.user);
@@ -188,7 +194,11 @@ export default function IdentityPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-xl"
               >
+<<<<<<< HEAD
                 <AgenticKycSetup user={piUser} />
+=======
+                <AgenticKycSetup />
+>>>>>>> remotes/origin/feat/identity-page-complete-12323017966989893396
               </motion.div>
             )}
 

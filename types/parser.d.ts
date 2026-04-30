@@ -315,7 +315,10 @@ export declare class AIXParser {
     private validateMetaArbiter;
     private validateABOM;
     private _validateABOMConstituent;
+<<<<<<< HEAD
     private validateBlackBox;
+=======
+>>>>>>> remotes/origin/feat/identity-page-complete-12323017966989893396
     private validateSecurity;
     private removeSecuritySection;
     private calculateChecksum;
