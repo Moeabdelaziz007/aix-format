@@ -44,8 +44,12 @@ export interface AgentRecord {
 export type NormalizedAgent = AgentRecord & { isMock: boolean };
 
 export interface AbomRecord {
-  capabilities: string[];
+  bom_format: 'CycloneDX' | 'SPDX' | 'AIX-NATIVE';
+  spec_version: string;
+  risk_level: 'low' | 'medium' | 'high';
   integrity_hash: string;
+  capabilities: string[];
+  dependencies: string[]; // constituents
   generated_by: string;
   timestamp: string;
   model?: {
@@ -85,13 +89,9 @@ export interface AgentSkill {
   parameters?: Record<string, unknown>;
 }
 
-export interface AbomManifest {
-  bom_format: 'CycloneDX' | 'SPDX';
-  spec_version: string;
-  risk_level: 'low' | 'medium' | 'high';
-  integrity_hash: string;
-  dependencies: string[];
-}
+// AbomManifest is now deprecated in favor of unified AbomRecord
+// but kept as alias for backwards compatibility if needed in legacy parsers
+export type AbomManifest = AbomRecord;
 
 export interface McpPrompt {
   name: string;

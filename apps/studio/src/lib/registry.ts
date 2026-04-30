@@ -3,6 +3,9 @@ import { RegistryEntry } from "./types";
 
 const KV_KEY = "aix_registry";
 
+/**
+ * Retrieves all agents from the global registry.
+ */
 export async function getRegistry(): Promise<RegistryEntry[]> {
   try {
     const entries = await kv.get<RegistryEntry[]>(KV_KEY);
@@ -13,6 +16,9 @@ export async function getRegistry(): Promise<RegistryEntry[]> {
   }
 }
 
+/**
+ * Persists the entire registry to KV storage.
+ */
 export async function saveRegistry(entries: RegistryEntry[]): Promise<void> {
   try {
     await kv.set(KV_KEY, entries);
@@ -22,6 +28,10 @@ export async function saveRegistry(entries: RegistryEntry[]): Promise<void> {
   }
 }
 
+/**
+ * Upserts a single entry in the registry.
+ * Uses entry.did as the unique identifier.
+ */
 export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
   const entries = await getRegistry();
   const index = entries.findIndex(e => e.did === entry.did);
@@ -35,6 +45,9 @@ export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
   await saveRegistry(entries);
 }
 
+/**
+ * Removes an entry from the registry by DID.
+ */
 export async function deleteRegistryEntry(did: string): Promise<void> {
   const entries = await getRegistry();
   const filtered = entries.filter(e => e.did !== did);

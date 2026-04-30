@@ -4,11 +4,11 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
-import { ShoppingCart, Search, Filter } from "lucide-react";
+import { ShoppingCart, Search, Filter, Loader2 } from "lucide-react";
 import { AgentCard } from "@/components/studio/AgentCard";
-import { useLocalAgents } from "@/hooks/useLocalAgents";
+import { useRegistry } from "@/hooks/useRegistry";
 import { mockAgents } from "@/lib/mock-agents";
-import { AgentRecord } from "@/lib/types";
+import { AgentRecord, RegistryEntry } from "@/lib/types";
 
 const tags = ["All", "research", "support", "coding", "robotics", "finance", "content"];
 
@@ -21,43 +21,50 @@ interface MarketplaceAgent extends AgentRecord {
 }
 
 export default function MarketplacePage() {
-  const { agents: localAgents } = useLocalAgents();
+  const { entries, loading } = useRegistry();
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("All");
   const [kycFilter, setKycFilter] = useState("All");
 
   const allAgents: MarketplaceAgent[] = useMemo(() => {
-    // 1. Unify mock agents into MarketplaceAgent shape
-    const unifiedMocks: MarketplaceAgent[] = mockAgents.map(a => ({
+    // Determine source: Registry entries take precedence, mocks as fallback
+    const hasRegistryEntries = entries && entries.length > 0;
+    
+    if (hasRegistryEntries) {
+      return entries.map(a => ({
+        id: a.did,
+        name: a.name,
+        role: a.role,
+        createdAt: a.publishedAt,
+        yaml: a.yaml,
+        did: a.did,
+        isMock: false,
+        tags: a.abom?.capabilities.map(c => c.toLowerCase()) ?? a.capabilities.map(c => c.toLowerCase()) ?? [],
+        description: a.role + " — Sovereign AI Agent",
+        status: 'online',
+        kyc: a.kyc_tier !== undefined && a.kyc_tier !== 'unverified',
+        kyc_tier: a.kyc_tier as any,
+        color: '#6366f1',
+        successRate: 99.2,
+        tasksCompleted: 0,
+        deployment: a.deployment,
+        abom: a.abom
+      }));
+    }
+
+    // Fallback to mock agents
+    return mockAgents.map(a => ({
       ...a,
       isMock: true,
       tags: a.abom?.capabilities.map(c => c.toLowerCase()) ?? [],
-      description: a.yaml?.slice(0, 100) || "Sovereign AI Agent",
+      description: a.role + " — Simulated Agent",
       kyc: a.kyc_tier !== undefined && a.kyc_tier !== 'unverified'
     }));
-
-    // 2. Map local agents using robust field fallback logic
-    const unifiedLocal: MarketplaceAgent[] = localAgents.map(a => ({
-      ...a,
-      isMock: false,
-      name: a.name,
-      role: a.role,
-      tags: a.abom?.capabilities.map(c => c.toLowerCase()) ?? [],
-      description: a.yaml?.slice(0, 100) || "Sovereign AI Agent",
-      status: a.status ?? 'online',
-      kyc: a.kyc_tier !== undefined && a.kyc_tier !== 'unverified',
-      color: a.color ?? '#6366f1',
-      successRate: a.successRate ?? 98.4,
-      tasksCompleted: a.tasksCompleted ?? 0
-    }));
-
-    return [...unifiedMocks, ...unifiedLocal];
-  }, [localAgents]);
+  }, [entries]);
 
   const filtered = allAgents.filter(a => {
     const matchSearch = a.name.toLowerCase().includes(search.toLowerCase()) || 
-                       a.role.toLowerCase().includes(search.toLowerCase()) ||
-                       a.description.toLowerCase().includes(search.toLowerCase());
+                       a.role.toLowerCase().includes(search.toLowerCase());
     
     const matchTag = activeTag === "All" || a.tags.includes(activeTag.toLowerCase());
     
@@ -116,25 +123,48 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        {/* Grid */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial="hidden" animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-        >
-          {filtered.map(agent => (
-            <motion.div key={agent.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-               <AgentCard agent={agent} showDeploy={!agent.isMock} />
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-24 text-gray-500">
-            <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p className="text-lg">No agents found.</p>
-            <p className="text-sm mt-1">Try a different search or filter.</p>
+        {/* Loading State */}
+        {loading && entries.length === 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-[400px] rounded-3xl bg-white/[0.02] border border-white/5 animate-pulse relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                <div className="p-6 h-full flex flex-col justify-between">
+                  <div className="flex justify-between items-start">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5" />
+                    <div className="w-20 h-6 rounded-full bg-white/5" />
+                  </div>
+                  <div className="space-y-3">
+                    <div className="w-2/3 h-6 rounded-lg bg-white/5" />
+                    <div className="w-1/2 h-4 rounded-lg bg-white/5" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
+        ) : (
+          <>
+            {/* Grid */}
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial="hidden" animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+            >
+              {filtered.map(agent => (
+                <motion.div key={agent.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+                  <AgentCard agent={agent} showDeploy={!agent.isMock} />
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {filtered.length === 0 && (
+              <div className="text-center py-24 text-gray-500">
+                <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg">No agents found.</p>
+                <p className="text-sm mt-1">Try a different search or filter.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
       <SovereignStatusBar />
