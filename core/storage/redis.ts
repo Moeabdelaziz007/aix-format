@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import type { SetCommandOptions } from "@upstash/redis";
 
 /**
  * AIX Unified Storage Adapter
@@ -37,10 +38,21 @@ export const NS = {
  * TTL Strategies (seconds)
  */
 export const TTL = {
-  SESSION: 3600, // 1 hour
-  ABOM_CACHE: 86400, // 24 hours
-  RATE_WINDOW: 60, // 1 minute default
+  SESSION: 3600,       // 1 hour
+  ABOM_CACHE: 86400,  // 24 hours
+  RATE_WINDOW: 60,    // 1 minute default
 } as const;
+
+/** Map our generic StorageOptions → Upstash SetCommandOptions */
+function toSetOptions(options?: StorageOptions): SetCommandOptions | undefined {
+  if (!options) return undefined;
+  const opts: SetCommandOptions = {};
+  if (options.ex !== undefined) (opts as any).ex = options.ex;
+  if (options.px !== undefined) (opts as any).px = options.px;
+  if (options.nx) return { ...(opts as any), nx: true };
+  if (options.xx) return { ...(opts as any), xx: true };
+  return opts as SetCommandOptions;
+}
 
 class UpstashRedisAdapter implements StorageAdapter {
   private client: Redis;
@@ -67,7 +79,12 @@ class UpstashRedisAdapter implements StorageAdapter {
 
   async set(key: string, value: any, options?: StorageOptions): Promise<void> {
     try {
-      await this.client.set(key, value, options);
+      const upstashOpts = toSetOptions(options);
+      if (upstashOpts) {
+        await this.client.set(key, value, upstashOpts);
+      } else {
+        await this.client.set(key, value);
+      }
     } catch (error) {
       console.error(`[Storage] SET failed for ${key}:`, error);
       throw error;
