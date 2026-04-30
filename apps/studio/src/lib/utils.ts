@@ -1,5 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { sha256 } from '@noble/hashes/sha256'
+import { bytesToHex } from '@noble/hashes/utils'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -164,4 +166,14 @@ export async function sha256Hex(content: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Computes a canonical SHA-256 checksum for a manifest.
+ */
+export function computeManifestChecksum(manifest: any): string {
+  // Simple canonicalization: sort top-level keys
+  const canonical = JSON.stringify(manifest, Object.keys(manifest).sort());
+  const bytes = new TextEncoder().encode(canonical);
+  return bytesToHex(sha256(bytes));
 }
