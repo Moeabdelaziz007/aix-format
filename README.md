@@ -10,10 +10,10 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://github.com/Moeabdelaziz007/aix-format/actions/workflows/aix-validation.yml/badge.svg)](https://github.com/Moeabdelaziz007/aix-format/actions)
-[![Version](https://img.shields.io/badge/version-1.2.0--sovereign-orange.svg)]()
+[![Version](https://img.shields.io/badge/version-1.3.0--sovereign-orange.svg)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)]()
 <br/>
-<img src="https://img.shields.io/badge/Standard-AIX_v1.2.0-7c3aed?style=for-the-badge" alt="Standard"/>
+<img src="https://img.shields.io/badge/Standard-AIX_v1.3.0-7c3aed?style=for-the-badge" alt="Standard"/>
 <img src="https://img.shields.io/badge/Security-Ed25519-8b5cf6?style=for-the-badge" alt="Ed25519"/>
 <img src="https://img.shields.io/badge/Identity-Pi_Network_KYC-ec4899?style=for-the-badge" alt="Pi KYC"/>
 
@@ -60,6 +60,13 @@
 - **No-Code Setup:** You won't need to touch a single line of code or know what Ed25519 signatures are.
 - **Agentic KYC:** Agents perform identity validations conversationally.
 - **Live Voice Futures:** Natively stream high-fidelity voice output for human-like conversational experiences.
+
+## 🛠️ Tooling Ecosystem
+
+- **`aix-validate`**: Canonical JSON Schema validator.
+- **`aix-detective`**: Security auditor for detecting prompt injections and integrity failures.
+- **`generate-discovery`**: Utility for creating `.well-known/agent.aix.json` for agent discovery.
+- **Agentic Studio**: A Next.js 15 powered IDE for building sovereign agents.
 
 **[AR]** نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، وليس للمهندسين فقط. في التحديثات القادمة، سيدعم بروتوكول AIX تقنية **Agentic KYC**—حيث سيقوم وكلاء الذكاء الاصطناعي بإرشادك خلال عملية التحقق (KYC) والإعداد بشكل تلقائي باستخدام واجهة بصرية جذابة وبدون الحاجة لأي كود (zero-code).
 
@@ -129,9 +136,9 @@ The root cause: there is no open standard requiring human-verified identity for 
 | **Agent Identity (DID)** | ✅ `did:web` | ❌ | ❌ | ⚠️ partial |
 | **KYC / Proof of Personhood** | ✅ Pi Network (17M+) | ❌ | ❌ | ⚠️ concept only |
 | **Economics / Pricing Layer** | ✅ built-in | ❌ | ❌ | ❌ |
-| **Checksum / Supply Chain** | ✅ SHA-256 + Ed25519 | ❌ | ❌ | ⚠️ planned |
+| **Checksum / Supply Chain** | ✅ SHA-256 (ABOM) + Ed25519 | ❌ | ❌ | ⚠️ planned |
 | **VLA / Robotics Support** | ✅ openpi, π0.7 | ❌ | ❌ | ❌ |
-| **MCP Server Embedding** | ✅ | ❌ | ✅ | ❌ |
+| **MCP Server Card / Discovery** | ✅ .well-known / W3C Draft | ❌ | ✅ | ❌ |
 | **Multi-Format** | ✅ YAML/JSON/TOML | ❌ JSON only | ✅ | ❌ |
 | **A2A Compatible** | ⚠️ converter exists | ✅ native | ⚠️ | ❌ |
 | **Focus Layer** | Identity + Distribution | Runtime Comm. | Contract | Enterprise Meta |
@@ -260,10 +267,13 @@ Our **Interactive Voice Orb** leverages high-fidelity TTS/STT for a conversation
 
 **[EN]** Three cryptographic pillars — no security theater, no placeholders:
 
-| Pillar | Technology | Guarantees |
-|:------:|:-----------|:-----------|
-| 🔵 **Identity** | Pi Network KYC | *Who published this agent?* |
-| 🟣 **Integrity** | Ed25519 signatures | *Has this file been tampered with?* |
+| Pillar | Technology | Feature | Status | Specification |
+| :--- | :--- | :--- |
+| **Sovereign Identity** | ✅ Production | Pi Network KYC (Tiers 0-3) |
+| **Integrity Layer** | ✅ Production | ABOM SHA-256 Verification |
+| **Meta Arbiter** | ⚡ v1.3.0 | Orchestration & Subsystems |
+| **Security Audit** | 🛡️ New | `aix-detective` CLI |
+| **Discovery** | 🔍 New | W3C Agent Discovery Support |
 | 🟢 **Authorization** | Verifiable Credentials | *What is this agent allowed to do?* |
 
 ```yaml

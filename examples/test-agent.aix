@@ -1,0 +1,19 @@
+meta:
+  name: "Detective Test Agent"
+  description: "A test agent for security auditing"
+  version: "1.0.0"
+  role: "Security Tester"
+identity_layer:
+  id: "did:axiom:test123"
+  kyc_tier: 2
+  verified: true
+skills:
+  - name: "test-scan"
+    description: "Performs a test scan"
+economics:
+  pricing_model: "free"
+  currency: "PI"
+status: "online"
+color: "#ff3366"
+successRate: 95
+tasksCompleted: 100

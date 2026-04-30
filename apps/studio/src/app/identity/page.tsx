@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { 
-  Fingerprint, 
   ShieldCheck, 
   Key, 
   History, 
@@ -11,11 +10,13 @@ import {
   ShieldAlert,
   ArrowRight,
   ExternalLink,
-  Lock
+  Lock,
+  Wallet
 } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
-import SovereignStatusBar from "@/components/layout/SovereignStatusBar";
+import { Navbar } from "@/components/layout/Navbar";
+import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { DIDCard } from "@/components/studio/DIDCard";
+import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 import { cn } from "@/lib/utils";
 
 const IDENTITY_FEATURES = [
@@ -40,6 +41,51 @@ const IDENTITY_FEATURES = [
 ];
 
 export default function IdentityPage() {
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [piUser, setPiUser] = useState<{ username: string; uid: string } | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const handlePiConnect = async () => {
+    setIsConnecting(true);
+    setAuthError(null);
+    try {
+      if (typeof window !== "undefined" && window.Pi) {
+        window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
+        const authResult = await window.Pi.authenticate(["username", "payments"], (payment: unknown) => {
+          console.warn("Incomplete payment found:", payment);
+        });
+        setPiUser(authResult.user);
+      } else {
+        // Fallback for demo/development if Pi SDK not loaded
+        await new Promise(r => setTimeout(r, 1000));
+        setPiUser({
+          username: "Pioneer_Dev",
+          uid: "dev_" + Math.random().toString(36).slice(2, 8)
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Authentication failed";
+      setAuthError(msg);
+      setTimeout(() => setAuthError(null), 4000);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  // Mock vs Real data
+  const didProps = piUser ? {
+    did: `did:pi:axiom:${piUser.uid}`,
+    publicKey: "axm1" + piUser.uid + "000000000000000000",
+    kycTier: 1 as const,
+    verified: true,
+    username: piUser.username,
+  } : {
+    did: "did:pi:axiom:0x000...demo",
+    publicKey: "axm1demo000000000000000000000000",
+    kycTier: 0 as const,
+    verified: false,
+  };
+
   return (
     <div className="min-h-screen bg-[#050507] text-[#e4e4e8] font-body selection:bg-[#00dbe9]/30 overflow-x-hidden">
       <Navbar />
@@ -77,17 +123,77 @@ export default function IdentityPage() {
               >
                 Manage your Decentralized Identifier (DID), manage cryptographic keys, and authorize AI agents to act on your behalf across the Sovereign Network.
               </motion.p>
+
+              {!piUser && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <button
+                    onClick={handlePiConnect}
+                    disabled={isConnecting}
+                    className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#00dbe9] hover:bg-[#00c5d2] text-black font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_20px_rgba(0,219,233,0.2)] disabled:opacity-50 disabled:hover:scale-100"
+                  >
+                    {isConnecting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-t-transparent border-black rounded-full animate-spin" />
+                        Connecting Pi...
+                      </>
+                    ) : (
+                      <>
+                        <Wallet className="w-5 h-5" />
+                        Connect Pi Identity
+                      </>
+                    )}
+                  </button>
+                  {authError && <p className="text-red-400 mt-2 text-sm">{authError}</p>}
+                </motion.div>
+              )}
             </div>
 
-            <DIDCard 
-              did="did:axiom:axiomid.app:user-3829-f921-bc01"
-              name="Cryptojoker Sovereign"
-              type="Master Identity"
-              className="max-w-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-            />
+            {isConnecting ? (
+               <div className="max-w-xl rounded-2xl border border-white/[0.08] bg-[#0c101c]/60 p-6 h-[250px] animate-pulse">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/10" />
+                      <div>
+                        <div className="w-32 h-5 bg-white/10 rounded mb-2" />
+                        <div className="w-20 h-3 bg-white/10 rounded" />
+                      </div>
+                    </div>
+                    <div className="w-20 h-6 bg-white/10 rounded-full" />
+                  </div>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                       <div className="w-32 h-3 bg-white/10 rounded" />
+                       <div className="w-full h-10 bg-white/10 rounded-lg" />
+                    </div>
+                    <div className="space-y-2">
+                       <div className="w-24 h-3 bg-white/10 rounded" />
+                       <div className="w-full h-10 bg-white/10 rounded-lg" />
+                    </div>
+                  </div>
+               </div>
+            ) : (
+              <DIDCard
+                {...didProps}
+                className="max-w-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+              />
+            )}
+
+            {piUser && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-xl"
+              >
+                <AgenticKycSetup user={piUser} />
+              </motion.div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
-              <button className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#00dbe9] hover:bg-[#00c5d2] text-black font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_20px_rgba(0,219,233,0.2)]">
+              <button className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
                 Manage Keys
                 <ArrowRight className="w-4 h-4" />
               </button>

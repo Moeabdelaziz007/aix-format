@@ -1,9 +1,10 @@
 # 🌌 AXIOM SOVEREIGN AGENT MANIFEST
 
 ## 📜 Protocol Overview
-**Version:** 1.2.0 (Sovereign)
-**Standard:** AIX-GFM-VLA
+**Version:** 1.3.0 (Sovereign Integrity)
+**Standard:** AIX-GFM-VLA-ABOM
 **Identity:** `did:axiom:axiomid.app:<id>` | `did:web:<domain>`
+**Integrity:** SHA-256 Content Hashing (Required)
 
 This manifest defines the **Sovereign Operational Standard** for any AI agent interacting with this repository. Unlike standard documentation, this is a **Contractual Requirement** for all agentic collaborators.
 

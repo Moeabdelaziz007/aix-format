@@ -1,0 +1,55 @@
+# CODEOWNERS — AIX-Format
+# Enforces required human review at the GitHub Pull Request level.
+# These rules are enforced by GitHub directly — no PR can be merged
+# into main that touches these files without approval from the listed owners.
+#
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Owner: @Moeabdelaziz007 (Mohamed Abdelaziz)
+
+# ───────────────────────────────────────────────────────────────────────
+# GOVERNANCE & ARCHITECTURE FILES — Highest Priority
+# ───────────────────────────────────────────────────────────────────────
+AGENT_GOVERNANCE.md                    @Moeabdelaziz007
+ARCH_DECISIONS.md                      @Moeabdelaziz007
+CLAUDE.md                              @Moeabdelaziz007
+AXIOM_AGENTS.md                        @Moeabdelaziz007
+.github/CODEOWNERS                     @Moeabdelaziz007
+
+# ───────────────────────────────────────────────────────────────────────
+# CI/CD WORKFLOWS — Any change affects all automation
+# ───────────────────────────────────────────────────────────────────────
+.github/workflows/                     @Moeabdelaziz007
+
+# ───────────────────────────────────────────────────────────────────────
+# SCHEMA — Source of truth for all AIX types
+# ───────────────────────────────────────────────────────────────────────
+schemas/                               @Moeabdelaziz007
+types/                                 @Moeabdelaziz007
+
+# ───────────────────────────────────────────────────────────────────────
+# CORE LIBRARY — Parser, Error Handler, Memory
+# ───────────────────────────────────────────────────────────────────────
+core/parser.ts                         @Moeabdelaziz007
+core/parser.js                         @Moeabdelaziz007
+core/error_handler.js                  @Moeabdelaziz007
+core/memory.js                         @Moeabdelaziz007
+
+# ───────────────────────────────────────────────────────────────────────
+# STUDIO HIGH-RISK ZONE — Build configuration and auth components
+# ───────────────────────────────────────────────────────────────────────
+apps/studio/app/layout.tsx             @Moeabdelaziz007
+apps/studio/app/globals.css            @Moeabdelaziz007
+apps/studio/next.config.ts             @Moeabdelaziz007
+apps/studio/next.config.js             @Moeabdelaziz007
+apps/studio/app/(auth)/                @Moeabdelaziz007
+apps/studio/components/AgenticKycSetup.tsx   @Moeabdelaziz007
+apps/studio/components/LiveValidator.tsx     @Moeabdelaziz007
+apps/studio/components/SovereignStatusBar.tsx @Moeabdelaziz007
+apps/studio/lib/                       @Moeabdelaziz007
+
+# ───────────────────────────────────────────────────────────────────────
+# SECURITY & ECONOMICS — Identity and value layer
+# ───────────────────────────────────────────────────────────────────────
+security/                              @Moeabdelaziz007
+economics/                             @Moeabdelaziz007

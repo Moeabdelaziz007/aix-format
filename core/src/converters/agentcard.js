@@ -1,6 +1,14 @@
 const DEFAULT_SCHEMA_VERSION = 'aix/v1';
 
+function generateDID(name, url) {
+  const slug = (name || 'agent').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return `did:axiom:axiomid.app:${slug}`;
+}
+
 export function fromA2A(agentCardJson = {}) {
+  const capabilities = agentCardJson.capabilities || {};
+  const auth = agentCardJson.authentication || agentCardJson.authenticationSchemes || [];
+
   return {
     schemaVersion: DEFAULT_SCHEMA_VERSION,
     meta: {
@@ -17,11 +25,22 @@ export function fromA2A(agentCardJson = {}) {
       objective: 'pending_signature'
     },
     skills: Array.isArray(agentCardJson.skills) ? agentCardJson.skills : [],
-    apis: agentCardJson.capabilities || {},
+    capabilities: {
+      streaming: capabilities.streaming ?? false,
+      push_notifications: capabilities.pushNotifications ?? false,
+      state_history: capabilities.stateTransitionHistory ?? false,
+      voice_interaction: capabilities.voiceInteraction ?? false
+    },
     distribution: { endpoint: agentCardJson.url || '' },
     identity_layer: {
-      did: agentCardJson.provider?.url || 'pending_signature',
-      kyc_proof: 'pending_signature'
+      id: generateDID(agentCardJson.name, agentCardJson.url),
+      authority: 'axiomid.app',
+      publicKey: {
+        algorithm: 'Ed25519',
+        value: 'pending_keygen'
+      },
+      issuedAt: new Date().toISOString(),
+      kyc_proof: 'pending_kyc'
     },
     economics: {
       pricing_model: 'pending_signature',
@@ -32,11 +51,12 @@ export function fromA2A(agentCardJson = {}) {
       risk_level: 'unknown'
     },
     security: {
+      authentication: auth,
       checksum: { algorithm: 'sha256', value: 'pending_signature' },
       signature: { algorithm: 'ed25519', value: 'pending_signature' }
     },
     lineage: {
-      source_format: 'a2a/v0.2',
+      source_format: 'a2a/v1.0',
       imported_from: agentCardJson.id || 'unknown'
     }
   };
@@ -44,19 +64,29 @@ export function fromA2A(agentCardJson = {}) {
 
 export function toA2A(aixManifest = {}) {
   return {
-    specVersion: '0.2',
+    specVersion: '1.0',
     id: aixManifest.meta?.id || '',
     name: aixManifest.meta?.name || '',
     description: aixManifest.meta?.description || '',
     version: aixManifest.meta?.version || '1.0.0',
     provider: {
       name: aixManifest.meta?.author || '',
-      url: aixManifest.identity_layer?.did || ''
+      url: aixManifest.identity_layer?.id || aixManifest.identity_layer?.did || ''
     },
     url: aixManifest.distribution?.endpoint || '',
     skills: Array.isArray(aixManifest.skills) ? aixManifest.skills : [],
-    capabilities: aixManifest.apis || {},
-    authSchemes: aixManifest.security?.signature || {},
+    capabilities: {
+      streaming: aixManifest.apis?.streaming ?? false,
+      pushNotifications: aixManifest.apis?.push_notifications ?? false,
+      stateTransitionHistory: aixManifest.apis?.state_history ?? false,
+      ...aixManifest.apis?.raw_capabilities
+    },
+    authenticationSchemes: aixManifest.security?.authentication?.length > 0
+      ? aixManifest.security.authentication
+      : [{
+          scheme: 'bearer',
+          description: 'Ed25519 signed JWT'
+        }],
     tags: Array.isArray(aixManifest.meta?.tags) ? aixManifest.meta.tags : [],
     'x-aix-metadata': {
       identity_layer: aixManifest.identity_layer || {},

@@ -260,6 +260,8 @@ export function Navbar() {
               </button>
             )}
 
+            <WalletButton />
+
             {/* Mobile menu toggle */}
             <button
               className="md:hidden btn btn-ghost btn-sm p-2"

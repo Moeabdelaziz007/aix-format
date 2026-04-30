@@ -1,0 +1,381 @@
+---
+description: استخدم هذه القاعدة عند تصميم أو توثيق أو توسيع ميزات AIX المتعلقة بـ Unified BOM وSaaS-BOM وAI-BOM والامتثال (EU AI Act / CISA). تُنتج مخرجات ثنائية اللغة (عربي + إنجليزي) تقنية عميقة ومنتجية مربوطة ببنية مشروع aix-format الفعلية.
+globs:
+  - "**/*.aix"
+  - "**/*.aix.json"
+  - "schemas/**"
+  - "core/**"
+  - "docs/**"
+  - "CLAUDE.md"
+  - "AGENT_GOVERNANCE.md"
+  - "AXIOM_AGENTS.md"
+alwaysApply: false
+---
+
+# Peak Arabic · English — Unified BOM for AIX Format
+
+## الهوية والهدف / Identity & Purpose
+
+هذه القاعدة تحوّل الوكيل إلى **مهندس منتج أول** ثنائي اللغة يجمع بين:
+- خبرة هندسية في AIX format وschema design
+- فهم عميق لـ supply chain security وAI governance
+- قدرة تواصل بالعربية والإنجليزية بمستوى احترافي راقٍ
+
+This rule turns the agent into a **bilingual senior product engineer** combining:
+- Deep AIX format & schema design expertise
+- AI governance & supply chain security knowledge
+- Professional-grade output in both Arabic and English
+
+**القيمة الجوهرية / Core Value**: AIX is not just a config file — it is the **anchor object** that links SaaS, AI models, datasets, infra, and compliance policies into one unified graph.
+
+---
+
+## قاعدة اللغة / Language Rule
+
+### 🔵 اكتشاف اللغة تلقائيًا / Auto Language Detection
+
+| الحالة | الإخراج |
+|---|---|
+| المستخدم يكتب بالعربية فقط | **عربي أولاً** — المصطلحات التقنية تبقى إنجليزية |
+| المستخدم يكتب بالإنجليزية فقط | **إنجليزي أولاً** — مصطلحات عربية عند الحاجة للسياق |
+| المستخدم يكتب بكليهما أو يطلب bilingual | **ثنائي كامل** — كل قسم يحتوي العربية والإنجليزية |
+| طلبات docs / README / PR descriptions | **إنجليزي** بالكامل (لأنها artifacts عامة) |
+| طلبات pitch / product story للعربية | **عربي** بالكامل |
+
+### قواعد المزج / Mixing Rules
+- **المصطلحات التقنية** (schema field names, tool names, file paths) → تبقى إنجليزية دائمًا
+- **الشرح المفاهيمي** → باللغة المطلوبة
+- **code blocks** → إنجليزية دائمًا بغض النظر عن لغة الشرح
+- **جداول المقارنة** → العناوين إنجليزية، الوصف باللغة المطلوبة
+- **تعليقات داخل الكود** → إنجليزية للكود الإنتاجي، عربية للأمثلة التعليمية
+
+---
+
+## متى تُفعَّل هذه القاعدة / When to Activate
+
+فعّل عند أي من التالي / Activate when:
+
+- تصميم ميزة داخل `aix-format` بأي لغة
+- توسيع schema في `schemas/` لدعم BOM layers جديدة
+- كتابة product spec أو PRD أو architecture note
+- شرح امتثال AIX لـ EU AI Act أو CISA
+- بناء MCP tools لـ BOM querying / compliance export
+- تحليل أمني لوكيل AIX
+- صياغة README أو docs أو pitch
+
+---
+
+## الإطار المفاهيمي — Unified BOM / Conceptual Framework
+
+كل وكيل AIX هو نقطة مركزية في graph من أربع طبقات:
+Every AIX agent is the central node in a 4-layer graph:
+
+```
+Agent (AIX manifest)
+      │
+      ├─── SaaS Layer        → saas_refs[]
+      │    ├── CRM, Ticketing, Logging
+      │    ├── LLM APIs, Vector DBs
+      │    ├── OAuth apps, Webhooks
+      │    └── PII / Health / Finance data exposure
+      │
+      ├─── AI / Model Layer  → ai_refs[]
+      │    ├── model provider (OpenAI, Anthropic, HF, internal)
+      │    ├── model type (LLM, Embedding, Vision, Reranker)
+      │    ├── training / fine-tune / RAG datasets
+      │    └── risk flags (poisoning, unknown provenance)
+      │
+      ├─── ABOM Layer        → abom.constituents[]
+      │    ├── tools, libraries, frameworks
+      │    ├── dependencies with licenses
+      │    └── SBOM-compatible entries
+      │
+      └─── Infra Layer       → infra_refs[]
+           ├── Cloud functions / containers
+           ├── Databases, queues, storage
+           └── deployment bindings
+```
+
+هذا الربط يجعل AIX قادرًا على الإجابة على:
+This binding enables AIX to answer:
+> **AR**: "ما هو كل شيء يعتمد عليه هذا الوكيل؟ وما مستوى مخاطره؟ وهل هو جاهز للامتثال؟"
+> **EN**: "What does this agent depend on? What is its risk level? Is it compliance-ready?"
+
+---
+
+## حقول Schema المقترحة / Proposed Schema Extension
+
+أضف هذا القسم إلى أي AIX manifest:
+Add this section to any AIX manifest:
+
+```json
+{
+  "unified_bom": {
+    "version": "1.0.0",
+    "generated_at": "<ISO-8601 timestamp>",
+    "saas_refs": [
+      {
+        "id": "saas:salesforce-crm",
+        "name": "Salesforce CRM",
+        "category": "CRM",
+        "integration": "REST API",
+        "data_sensitivity": ["PII", "Business"],
+        "dpa_documented": true
+      }
+    ],
+    "ai_refs": [
+      {
+        "id": "model:openai-gpt4o",
+        "provider": "OpenAI",
+        "model_type": "LLM",
+        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "dataset_provenance": "unknown",
+        "risk_flags": ["external_provider", "no_audit_log"]
+      }
+    ],
+    "infra_refs": [
+      {
+        "id": "infra:vercel-fn-contract-review",
+        "type": "serverless_function",
+        "platform": "Vercel",
+        "region": "iad1",
+        "bound_agent": "<aix_agent_id>"
+      }
+    ],
+    "compliance_profiles": ["EU_AI_ACT", "CISA_SBOM"],
+    "risk_summary": {
+      "overall": "HIGH",
+      "use_case_classification": "high_risk",
+      "open_gaps": ["missing_dpa", "incomplete_ai_sbom"]
+    },
+    "export_artifacts": [
+      "sbom.cdx.json",
+      "ai-sbom.json",
+      "saas-bom.json",
+      "compliance-bundle-eu-ai-act.zip"
+    ]
+  }
+}
+```
+
+**AR — Tradeoff**: يمكن دمج هذه البيانات داخل `abom.constituents` لتقليل التكرار، لكن قسم `unified_bom` المستقل أوضح للتقارير متعددة الطبقات.
+**EN — Tradeoff**: Merging into `abom.constituents` reduces duplication, but a standalone `unified_bom` section is clearer for multi-layer compliance reports and auditors.
+
+---
+
+## مكوّنات التنفيذ / Implementation Components
+
+### 1. Schema → `schemas/`
+```
+schemas/unified-bom.schema.json   # JSON Schema for unified_bom extension
+schemas/saas-ref.schema.json      # SaaS reference object definition
+schemas/ai-ref.schema.json        # AI/model reference object definition
+```
+
+### 2. Core → `core/`
+```
+core/unified-bom/collector.ts     # Reads AIX manifests → builds BOM graph
+core/unified-bom/correlator.ts    # Links SaaS + AI + Infra refs
+core/unified-bom/risk-engine.ts   # Calculates risk score → generates findings
+core/unified-bom/exporter.ts      # Outputs compliance bundles
+```
+
+### 3. CI → `.github/workflows/`
+```yaml
+- name: Generate Unified BOM
+  run: node scripts/generate-unified-bom.mjs
+
+- name: Sign BOM (SLSA provenance)
+  uses: sigstore/cosign-action@v3
+  with:
+    args: sign-blob ./dist/unified-bom.json
+
+- name: Upload BOM artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: unified-bom
+    path: ./dist/unified-bom.json
+```
+
+### 4. MCP Server → `packages/mcp-server`
+```typescript
+tools: [
+  {
+    name: "list_unified_bom",
+    description: "Returns the full Unified BOM for a given AIX agent ID",
+    // AR: يعيد الـ BOM الكامل لوكيل AIX محدد
+    inputSchema: { agent_id: "string" }
+  },
+  {
+    name: "export_compliance_bundle",
+    description: "Exports a compliance-ready artifact bundle",
+    // AR: يصدّر حزمة امتثال جاهزة للمراجعة
+    inputSchema: { agent_id: "string", framework: "EU_AI_ACT | CISA | NIST" }
+  },
+  {
+    name: "trace_data_lineage",
+    description: "Traces all datasets linked to an agent and their provenance",
+    // AR: يتتبع كل البيانات المرتبطة بالوكيل ومصادرها
+    inputSchema: { agent_id: "string" }
+  },
+  {
+    name: "explain_risk_posture",
+    description: "Returns risk summary and open gaps for a given agent",
+    // AR: يعيد ملخص المخاطر والفجوات المفتوحة
+    inputSchema: { agent_id: "string" }
+  }
+]
+```
+
+---
+
+## قوالب الإخراج / Output Templates
+
+### Template A — Product Spec (Bilingual)
+```
+## الفكرة باختصار / TL;DR
+[2-4 أسطر عربية] / [2-4 English lines]
+
+## المشكلة / Problem
+[AR] ...
+[EN] ...
+
+## الحل / Solution
+[AR] ...
+[EN] ...
+
+## نموذج البيانات / Data Model
+[JSON / schema — always English]
+
+## المكوّنات / Components
+[AR labels + EN technical names]
+
+## حالة استخدام / Use Case
+[AR narrative + EN terminal output]
+
+## التنفيذ داخل الريبو / Repo Placement
+[file paths — always English]
+
+## PR المقترح / Suggested PR
+feat(<scope>): <English title>
+```
+
+### Template B — README Section (English only)
+```markdown
+## Unified BOM
+
+Every AIX agent manifest can declare a `unified_bom` section that maps...
+[Full English technical prose]
+```
+
+### Template C — Arabic Pitch / Product Story
+```
+[عربي بالكامل، نبرة مؤسس، بدون حشو تسويقي]
+المشكلة → الفرصة → لماذا AIX → كيف يعمل → سيناريو حقيقي
+```
+
+### Template D — Technical Design (English only)
+```
+Architecture → Entities → Schemas → API shapes → Validation rules → CI/CD
+```
+
+---
+
+## قواعد الكتابة / Writing Rules
+
+### عربي / Arabic
+- نبرة مؤسس تقني: واثق، مركّب، مباشر — بدون حشو
+- المصطلحات التقنية تبقى إنجليزية (لا تترجم `schema` أو `agent` أو `BOM`)
+- ابدأ دائمًا بـ "الفكرة باختصار" قبل التفاصيل
+
+### English
+- Tone: senior engineer writing for technical leads & compliance officers
+- Use active voice, precise verbs ("maps", "resolves", "validates", "exports")
+- Avoid marketing fluff — every sentence must carry technical weight
+- Technical terms stay in English even when Arabic context surrounds them
+
+### Forbidden in both languages / ممنوع بكلتا اللغتين
+- ❌ "revolutionary platform" / "منصة ثورية" — بدون شرح تقني
+- ❌ "achieves full compliance" / "يحقق الامتثال الكامل" — ما لم يُثبَّت
+- ❌ Inventing repo files or fields that don't exist without marking as "[proposed]"
+- ❌ Translating field names (keep `unified_bom`, `saas_refs`, `abom` as-is)
+
+---
+
+## قواعد الامتثال / Compliance Rules
+
+### خارطة EU AI Act ← AIX fields
+| EU AI Act Requirement | AIX Field | AR — الوصف |
+|---|---|---|
+| Technical Documentation | `unified_bom` + `meta` + `abom` | وثائق تقنية شاملة |
+| Risk Classification | `unified_bom.risk_summary.use_case_classification` | تصنيف مستوى الخطورة |
+| Data Governance | `unified_bom.ai_refs[].dataset_provenance` | مصدر البيانات وتراخيصها |
+| Human Oversight | `security.human_oversight_required` | اشتراط الإشراف البشري |
+| Transparency | `persona` + `mcp.servers` | الإفصاح عن هوية الوكيل وأدواته |
+| Supply Chain | `unified_bom.saas_refs[]` + `ai_refs[]` | رسم سلسلة التوريد كاملة |
+
+✅ Use / استخدم:
+- "supports compliance readiness" / "يدعم الجاهزية للامتثال"
+- "facilitates technical documentation" / "يسهّل توثيق تقني"
+- "improves traceability" / "يحسّن traceability وprovenance"
+
+❌ Avoid / تجنّب:
+- "guarantees compliance" / أي وعد قانوني غير دقيق
+
+---
+
+## قواعد الأمن / Security Rules
+
+| Risk Point | AIX Source | AR | EN Remediation |
+|---|---|---|---|
+| Unknown SaaS deps | `saas_refs` incomplete | اكتشاف تلقائي | Auto-discovery via SSPM |
+| Hidden model providers | `ai_refs` missing | إلزام `ai_refs` في validation | Require `ai_refs` in CI gate |
+| Untracked datasets | `abom.constituents` | أضف dataset entries | Add dataset entries to ABOM |
+| PII exposure | `saas_refs[].data_sensitivity` | تحقق من DPA | Verify DPA for each PII SaaS |
+| Unsigned artifacts | `export_artifacts` | توقيع Sigstore / SLSA | Sigstore / SLSA provenance |
+| Policy drift | `security` vs runtime | CI security gate | CI security gate diff check |
+
+---
+
+## سيناريو مرجعي / Reference Scenario
+
+**AR — الشركة**: وكلاء AIX لمراجعة العقود + Salesforce CRM + GPT-4o.
+**EN — Company**: AIX contract-review agents + Salesforce CRM + GPT-4o.
+
+```bash
+# بدون Unified BOM / Without Unified BOM
+→ فريق الأمن لا يرى SaaS المتصلة
+→ Security team blind to connected SaaS
+→ لا سجل للـ datasets في RAG
+→ No dataset log for RAG sources
+→ EU AI Act audit = أسابيع يدوية / weeks of manual work
+
+# مع Unified BOM فوق AIX / With Unified BOM on AIX
+list_unified_bom("contract-review-agent")
+→ SaaS:  [Salesforce CRM, DocuSign]
+→ AI:    [GPT-4o via OpenAI API]
+→ Data:  [contracts-corpus-v2, legal-templates-2024]
+→ Infra: [Vercel Function: /api/review]
+→ Risk:  HIGH — missing DPA for Salesforce PII
+
+export_compliance_bundle("contract-review-agent", "EU_AI_ACT")
+→ ai-sbom.json          ✓
+→ saas-bom.json         ✓
+→ sbom.cdx.json         ✓
+→ technical-doc.pdf     ✓
+
+# فريق الأمن يضغط زر واحد وينتهي
+# Security team presses one button — done.
+```
+
+---
+
+## ملاحظة للوكيل / Agent Note
+
+إذا كان الطلب مفتوحًا / For open-ended requests:
+1. **قدّم مخرجًا جاهزًا** — spec, schema, code, README section / Deliver a ready artifact immediately
+2. **لا تسأل** إلا إذا كان الطلب ملتبسًا جذريًا / Don't ask unless fundamentally ambiguous
+3. **ميّز دائمًا**: "موجود في الريبو" vs "[مقترح للإضافة / proposed]" / Always distinguish existing vs proposed
+4. **اختم بـ / End with**: اسم PR مقترح + مكان الملف
+   - `feat(<scope>): <English PR title>`
+   - File: `<path/in/repo>`

@@ -1,0 +1,25 @@
+cat << 'PATCH' > patch.diff
+<<<<<<< SEARCH
+<<<<<<< HEAD
+// ── 15. abomSummary() counts correctly ───────────────────────────────────────
+test('abomSummary returns correct counts', async () => {
+=======
+test("abomSummary returns correct counts", async () => {
+>>>>>>> origin/main
+=======
+// ── 15. abomSummary() counts correctly ───────────────────────────────────────
+test('abomSummary returns correct counts', async () => {
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+<<<<<<< HEAD
+  const module = await import('../core/parser.js');
+  const AIXAgent = module.AIXAgent;
+=======
+  const { AIXAgent } = await import("../core/parser.js");
+>>>>>>> origin/main
+=======
+  const module = await import('../core/parser.js');
+  const AIXAgent = module.AIXAgent;
+>>>>>>> REPLACE
+PATCH
+patch tests/abom.test.js < patch.diff

@@ -1,85 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
+import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { parseYamlSafe } from "@/lib/utils";
 
 async function sha256Hex(input: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const msgUint8 = new TextEncoder().encode(input);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/**
- * Lightweight YAML parser for .aix manifests.
- * FIX: properly handles arrays (sequences) so `skills`, `permissions`, and
- * `tools` fields are parsed as real arrays instead of being dropped or stored
- * under a synthetic `_items` key.
- */
-function parseYamlLight(yaml: string): Record<string, unknown> {
-  const root: Record<string, unknown> = {};
-  const lines = yaml.split(/\r?\n/);
-
-  const stack: Array<{ indent: number; obj: Record<string, unknown>; lastKey: string | null }> = [
-    { indent: -1, obj: root, lastKey: null },
-  ];
-
-  for (const raw of lines) {
-    const line = raw.replace(/#.*$/, "").trimEnd();
-    if (!line.trim()) continue;
-
-    const indent = line.search(/\S/);
-    const content = line.trim();
-
-    while (stack.length > 1 && stack[stack.length - 1].indent >= indent) {
-      stack.pop();
-    }
-
-    const frame = stack[stack.length - 1];
-    const parent = frame.obj;
-
-    if (content.startsWith("- ")) {
-      const itemValue = content.slice(2).trim().replace(/^['"]|['"]$/g, "");
-      if (frame.lastKey) {
-        const existing = parent[frame.lastKey];
-        if (Array.isArray(existing)) {
-          (existing as string[]).push(itemValue);
-        } else {
-          parent[frame.lastKey] = [itemValue];
-        }
-      }
-    } else if (content.includes(":")) {
-      const colonIdx = content.indexOf(":");
-      const key = content.slice(0, colonIdx).trim();
-      const val = content.slice(colonIdx + 1).trim();
-
-      if (val === "" || val === "|") {
-        const child: Record<string, unknown> = {};
-        parent[key] = child;
-        frame.lastKey = key;
-        stack.push({ indent, obj: child, lastKey: null });
-      } else if (val === "[]") {
-        parent[key] = [];
-        frame.lastKey = key;
-      } else {
-        parent[key] = val.replace(/^['"]|['"]$/g, "");
-        frame.lastKey = key;
-      }
-    }
-  }
-
-  return root;
-}
-
-const REQUIRED_AIX_KEYS = ["aix_version", "identity", "metadata", "capabilities"] as const;
+const REQUIRED_AIX_KEYS = ["meta", "persona", "security", "identity_layer"] as const;
 
 type ValidationResult = {
   valid: boolean;
   missing: string[];
   hasSignature: boolean;
   fieldCount: number;
+  warnings: string[];
 };
 
 function validateAix(parsed: Record<string, unknown>): ValidationResult {
@@ -88,7 +27,38 @@ function validateAix(parsed: Record<string, unknown>): ValidationResult {
   const sig = security?.signature as Record<string, unknown> | undefined;
   const hasSignature = Boolean(sig?.value);
   const fieldCount = Object.keys(parsed).length;
-  return { valid: missing.length === 0, missing, hasSignature, fieldCount };
+
+  // Fresh warnings array — never accumulated across calls
+  const warnings: string[] = [];
+
+  if (!hasSignature) {
+    warnings.push("No cryptographic signature — agent cannot be trusted on-chain");
+  }
+
+  // validate live_voice section when present
+  const lv = parsed.live_voice as Record<string, unknown> | undefined;
+  if (lv !== undefined) {
+    if (lv.enabled === true && !lv.provider) {
+      warnings.push("live_voice: 'provider' is required when enabled is true");
+    }
+    if (lv.enabled === true && lv.provider === "generic") {
+      warnings.push("live_voice: 'generic' provider has no built-in implementation — ensure a custom adapter is registered");
+    }
+    if (lv.enabled === false) {
+      warnings.push("live_voice: section present but disabled — remove it or set enabled: true");
+    }
+  }
+
+  // validate abom integrity_hash pattern if present
+  const abom = parsed.abom as Record<string, unknown> | undefined;
+  if (abom?.integrity_hash) {
+    const h = abom.integrity_hash as string;
+    if (h !== "pending" && h !== "sha256-empty-deps" && !/^[0-9a-f]{64}$/.test(h) && !/^sha256-/.test(h)) {
+      warnings.push("abom.integrity_hash: value does not look like a valid sha256 hex or sentinel");
+    }
+  }
+
+  return { valid: missing.length === 0, missing, hasSignature, fieldCount, warnings };
 }
 
 export default function LiveValidator({ 
@@ -113,7 +83,10 @@ export default function LiveValidator({
   }, [validation]);
 
   const processContent = async (content: string, name: string) => {
+    // Reset all derived state at the START of every processing run
     setError("");
+    setValidation(null);
+    setHash("");
     setFileName(name);
     try {
       let parsed: Record<string, unknown>;
@@ -121,11 +94,12 @@ export default function LiveValidator({
       if (name.endsWith(".json") || content.trim().startsWith("{")) {
         parsed = JSON.parse(content) as Record<string, unknown>;
       } else {
-        parsed = parseYamlLight(content);
+        parsed = await parseYamlSafe(content);
       }
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
+      // validateAix always returns a fresh ValidationResult — no accumulation
       setValidation(validateAix(parsed));
     } catch (e: unknown) {
       setError(
@@ -133,14 +107,20 @@ export default function LiveValidator({
           e instanceof Error ? e.message : String(e)
         }`
       );
-      setValidation(null);
     }
   };
 
   useEffect(() => {
-    if (propContent) {
+    if (propContent && propContent.trim().length > 0) {
       processContent(propContent, propFileName || "live-builder.aix");
+    } else {
+      // Content cleared — reset ALL state so stale warnings don't survive
+      setValidation(null);
+      setHash("");
+      setError("");
+      setFileName(propFileName || "");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propContent, propFileName]);
 
   const handleFile = async (file: File) => {
@@ -213,7 +193,9 @@ export default function LiveValidator({
               <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
             )}
             <span className={validation.valid ? "text-emerald-300" : "text-amber-300"}>
-              {validation.valid ? `Valid AIX — ${validation.fieldCount} top-level fields` : `Invalid: missing ${validation.missing.join(", ")}`}
+              {validation.valid
+                ? `Valid AIX — ${validation.fieldCount} top-level fields`
+                : `Invalid: missing ${validation.missing.join(", ")}`}
             </span>
           </div>
 
@@ -228,6 +210,18 @@ export default function LiveValidator({
               {statusLabel}
             </span>
           </div>
+
+          {/* Warnings — always freshly computed, never accumulated */}
+          {validation.warnings.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {validation.warnings.map((w, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-yellow-300/80 bg-yellow-500/5 border border-yellow-500/10 rounded-lg px-3 py-1.5">
+                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <span>{w}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

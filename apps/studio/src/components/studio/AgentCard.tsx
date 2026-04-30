@@ -1,36 +1,43 @@
-"use client";
+'use client';
 
-import { memo } from "react";
-import { motion } from "framer-motion";
-import { Shield, BrainCircuit, Zap, MoreHorizontal, TrendingUp } from "lucide-react";
+import { memo } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  BrainCircuit,
+  MoreHorizontal,
+  TrendingUp,
+  Zap,
+  Shield,
+  Rocket
+} from 'lucide-react';
+import { AgentRecord } from '@/lib/types';
 
-interface AgentCardProps {
-  name: string;
-  role: string;
-  price: string;
-  status: "online" | "offline" | "busy";
-  color?: string;
-  successRate?: number;
-  tasksCompleted?: number;
+interface Props {
+  agent: AgentRecord;
+  showDeploy?: boolean;
 }
 
 // ─── Status config — stable, defined outside component ───────────────────────
 const STATUS_CONFIG = {
-  online:  { label: "Online",  dot: "status-online",  textColor: "text-[var(--color-success)]"  },
-  offline: { label: "Offline", dot: "status-offline", textColor: "text-[var(--color-on-surface-faint)]" },
-  busy:    { label: "Busy",    dot: "status-busy",    textColor: "text-[var(--color-warning)]"  },
+  online:  { label: 'Online',  dot: 'status-online',  textColor: 'text-[var(--color-success)]'  },
+  offline: { label: 'Offline', dot: 'status-offline', textColor: 'text-[var(--color-on-surface-faint)]' },
+  busy:    { label: 'Busy',    dot: 'status-busy',    textColor: 'text-[var(--color-warning)]'  },
 } as const;
 
 export const AgentCard = memo(function AgentCard({
-  name,
-  role,
-  price,
-  status,
-  color = "#00d4ff",
-  successRate = 98.4,
-  tasksCompleted = 1247,
-}: AgentCardProps) {
+  agent,
+  showDeploy = false,
+}: Props) {
+  const router = useRouter();
+
+  const status = agent.status || 'online';
   const statusConfig = STATUS_CONFIG[status];
+  const color = agent.color || '#6366f1';
+  const successRate = agent.successRate || 98.4;
+  const tasksCompleted = agent.tasksCompleted || 1247;
+  const price = '0.5';
 
   return (
     <motion.div
@@ -82,10 +89,10 @@ export const AgentCard = memo(function AgentCard({
         </div>
 
         {/* ── Info ── */}
-        <div>
-          <h3 className="text-base font-display font-bold text-white tracking-tight leading-tight">{name}</h3>
-          <p className="text-[13px] text-[var(--color-on-surface-variant)] mt-0.5">{role}</p>
-        </div>
+        <Link href={`/agents/${agent.id}`} className="block group/link">
+          <h3 className="text-base font-display font-bold text-white tracking-tight leading-tight group-hover/link:text-[var(--agent-color)] transition-colors">{agent.name}</h3>
+          <p className="text-[13px] text-[var(--color-on-surface-variant)] mt-0.5">{agent.role}</p>
+        </Link>
 
         {/* ── Metrics ── */}
         <div className="grid grid-cols-2 gap-3">
@@ -115,33 +122,38 @@ export const AgentCard = memo(function AgentCard({
             </p>
           </div>
 
-          {/*
-            FIX: Replaced inline onMouseEnter/Leave JS handlers with CSS-only hover.
-            JS event handlers on buttons force React re-renders + paint on every
-            mouse movement — causing the 150ms input delay seen on adjacent inputs.
-            CSS transitions are GPU-composited and never touch the React tree.
-          */}
-          <button
-            className="agent-card-hire-btn btn btn-sm rounded-xl"
-            style={{
-              // CSS custom properties so the :hover rule in globals.css can read them
-              ["--agent-color" as string]: color,
-            } as React.CSSProperties}
-            aria-label={`Hire ${name}`}
-          >
-            Hire Agent
-          </button>
+          {showDeploy ? (
+            <button
+              onClick={() => router.push(`/agents/${agent.id}?action=deploy`)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl transition-all shadow-[0_10px_20px_rgba(99,102,241,0.2)]"
+            >
+              <Rocket className="w-3 h-3" />
+              Deploy
+            </button>
+          ) : (
+            <button
+              className="agent-card-hire-btn btn btn-sm rounded-xl"
+              style={{
+                ['--agent-color' as string]: color,
+              } as React.CSSProperties}
+              aria-label={`Hire ${agent.name}`}
+            >
+              Hire Agent
+            </button>
+          )}
         </div>
 
         {/* KYC verified hover badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          whileHover={{ opacity: 1, y: 0 }}
-          className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)] px-3 py-1 rounded-full pointer-events-none"
-        >
-          <Shield className="w-3 h-3 text-[var(--color-success)]" />
-          <span className="text-[10px] font-semibold text-[var(--color-success)]">AxiomID Verified</span>
-        </motion.div>
+        {agent.kyc_tier && agent.kyc_tier !== 'unverified' && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            whileHover={{ opacity: 1, y: 0 }}
+            className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)] px-3 py-1 rounded-full pointer-events-none"
+          >
+            <Shield className="w-3 h-3 text-[var(--color-success)]" />
+            <span className="text-[10px] font-semibold text-[var(--color-success)]">AxiomID Verified</span>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
