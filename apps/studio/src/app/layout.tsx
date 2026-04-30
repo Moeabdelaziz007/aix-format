@@ -6,12 +6,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
 import { WalletProvider } from '@/components/providers/WalletProvider';
-import dynamic from 'next/dynamic';
-
-const SovereignAether = dynamic(
-  () => import('@/components/studio/SovereignAether').then(mod => mod.SovereignAether),
-  { ssr: false, loading: () => null }
-);
+import { SovereignAetherClient } from '@/components/studio/SovereignAetherClient';
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -41,7 +36,7 @@ export default function RootLayout({
         className={`${manrope.variable} ${inter.variable} min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] font-sans antialiased overflow-x-hidden`}
       >
         <Toaster richColors theme="dark" position="bottom-right" />
-        <SovereignAether />
+        <SovereignAetherClient />
         <div className="relative z-10 flex flex-col min-h-screen">
           <WalletProvider>
             {children}
