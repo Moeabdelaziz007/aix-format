@@ -40,7 +40,8 @@
 * [6 🛠️ Quick Start | البدء السريع](#-quick-start--البدء-السريع)
 * [7 🗺️ Roadmap | خارطة الطريق](#-roadmap--خارطة-الطريق)
 * [8 🤝 How to Contribute | كيف تساهم](#-how-to-contribute--كيف-تساهم)
-* [9 🏛️ The Sovereign Hive | الخلية السيادية](#-the-sovereign-hive--الخلية-السيادية)
+* [9 📚 Documentation Suite | حقيبة التوثيق](#-documentation-suite--حقيبة-التوثيق)
+* [10 🏛️ The Sovereign Hive | الخلية السيادية](#-the-sovereign-hive--الخلية-السيادية)
 
 </details>
 
@@ -374,6 +375,18 @@ npm test
 </td>
 </tr>
 </table>
+
+---
+
+## 📚 Documentation Suite | حقيبة التوثيق
+
+**[EN]** Deep dives into building, regulating, and integrating with the AIX ecosystem.
+**[AR]** تعمق في بناء وتوثيق ودمج نظام AIX.
+
+- **[Builders Guide (دليل المطورين)](./docs/BUILDERS_GUIDE.md)**: From idea to monetization.
+- **[Regulators Note (مذكرة المنظمين)](./docs/REGULATORS_NOTE.md)**: Compliance, ABOM, and accountability.
+- **[Full Manifest Example (مثال كامل)](./docs/examples/full-agent.aix.json)**: v1.3.0 enhanced schema implementation.
+- **[Technical Specification (المواصفات الفنية)](./docs/AIX_SPEC.md)**: The core protocol details.
 
 ---
 

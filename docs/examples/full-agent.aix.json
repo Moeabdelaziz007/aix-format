@@ -1,0 +1,89 @@
+{
+  "aix_version": "1.3.0",
+  "meta": {
+    "id": "agent:axiom:market-analyst-pro",
+    "name": "Market Analyst Pro",
+    "description": "Professional market analysis agent with deep research capabilities.",
+    "version": "1.2.0",
+    "author": "did:axiom:moe_abdelaziz",
+    "license": "MIT",
+    "tags": ["finance", "crypto", "analytics"]
+  },
+  "identity_layer": {
+    "provider": "pi_network",
+    "kyc_tier": 3,
+    "proof": "sha256:d8e8f8a8..."
+  },
+  "persona": {
+    "role": "Financial Analyst",
+    "tone": "Formal and Analytical",
+    "instructions": "You provide real-time market insights using available tools. Always cite your data sources and provide a confidence score for each prediction.",
+    "constraints": [
+      "No financial advice disclaimer must be included.",
+      "Never share internal tool API keys."
+    ]
+  },
+  "security": {
+    "abom": {
+      "constituents": [
+        {
+          "name": "gemini-1.5-pro",
+          "type": "model",
+          "provider": "google",
+          "integrity": "sha256:7f8e9a0b..."
+        },
+        {
+          "name": "finance-dataset-v4",
+          "type": "dataset",
+          "provider": "axiom-registry",
+          "integrity": "sha256:1a2b3c4d..."
+        }
+      ],
+      "saas_services": [
+        {
+          "name": "CoinMarketCap API",
+          "url": "https://api.coinmarketcap.com",
+          "purpose": "Price data"
+        },
+        {
+          "name": "NewsAPI",
+          "url": "https://newsapi.org",
+          "purpose": "Sentiment analysis"
+        }
+      ],
+      "capabilities": [
+        "web_search",
+        "mcp_tools",
+        "dynamic_code_execution"
+      ]
+    },
+    "build_provenance": {
+      "builder": "github-actions",
+      "build_id": "987654321",
+      "source_repo": "https://github.com/moeabdelaziz007/market-analyst",
+      "reproducible": true
+    }
+  },
+  "mcp": {
+    "servers": [
+      {
+        "name": "finance-tools",
+        "url": "https://mcp.axiom.id/finance",
+        "capabilities": ["get_price", "get_volume"]
+      }
+    ]
+  },
+  "economics": {
+    "tier": "enterprise",
+    "pricing": {
+      "model": "pay_per_call",
+      "unit_price": 0.25,
+      "currency": "PI",
+      "grace_period_requests": 10
+    },
+    "revenue_share": {
+      "platform_fee": 0.05,
+      "builder_share": 0.95
+    }
+  }
+}
