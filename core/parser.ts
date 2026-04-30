@@ -193,18 +193,20 @@ export interface PiNetwork {
   kyc_required?: boolean;
 }
 
-export interface ABOMConstituent {
+export interface SaasService {
   name: string;
-  version: string;
-  type?: 'model' | 'dataset' | 'library' | 'tool' | 'plugin' | 'agent' | 'runtime';
-  purl?: string;
-  hash?: string;
-  integrity_hash?: string;
-  license?: string;
-  supplier?: string;
-  trust_tier?: 'verified' | 'community' | 'unverified' | 'revoked';
-  security_status?: 'clean' | 'vulnerable' | 'revoked' | 'unknown';
-  source_registry?: string;
+  provider: string;
+  version?: string;
+  compliance_tier?: 'low' | 'medium' | 'high' | 'critical';
+  endpoints?: string[];
+  data_flow?: string[];
+}
+
+export interface UnifiedBOM {
+  agents?: Array<{ did: string; name: string; version: string; }>;
+  saas?: SaasService[];
+  ai_models?: Array<{ model_id: string; provider: string; weights_hash?: string; }>;
+  infrastructure?: Array<{ provider: string; region?: string; }>;
 }
 
 export interface ABOM {
@@ -213,6 +215,22 @@ export interface ABOM {
   tools?: Array<{ name: string; version?: string; }>;
   constituents?: ABOMConstituent[];
   attestations?: Array<{ type?: string; value?: string; signer?: string; }>;
+  saas_services?: SaasService[];
+  unified_bom?: UnifiedBOM;
+  risk_score?: number;
+  compliance_notes?: string;
+}
+
+export interface BuildProvenance {
+  builder_id: string;
+  build_type: string;
+  invocation?: { config_source: { uri: string; digest: Record<string, string> } };
+  materials: Array<{ uri: string; digest: Record<string, string> }>;
+}
+
+export interface MonetizationConfig {
+  tier: 'free' | 'builder' | 'pro' | 'enterprise';
+  pricing: Record<string, unknown>;
 }
 
 export interface LiveVoice {
@@ -246,6 +264,8 @@ export interface AIXDocument {
   requirements?: Requirements;
   /** Meta Arbiter runtime config — 'العقل المدبر' orchestration layer */
   meta_arbiter?: MetaArbiterConfig;
+  build_provenance?: BuildProvenance;
+  monetization?: MonetizationConfig;
   [key: string]: unknown;
 }
 
@@ -268,6 +288,7 @@ export interface AIXValidationWarning {
 const ABOM_VALID_TYPES        = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'] as const;
 const ABOM_VALID_TRUST_TIERS  = ['verified', 'community', 'unverified', 'revoked'] as const;
 const ABOM_VALID_SEC_STATUSES = ['clean', 'vulnerable', 'revoked', 'unknown'] as const;
+const ABOM_VALID_COMPLIANCE   = ['low', 'medium', 'high', 'critical'] as const;
 const ABOM_INTEGRITY_RE       = /^[a-zA-Z0-9-]+:[a-fA-F0-9]{32,}$/;
 const ABOM_PURL_RE            = /^pkg:[a-zA-Z][a-zA-Z0-9+\-.]*\/.+/;
 
@@ -415,6 +436,8 @@ export class AIXParser {
     if (data['pi_network'])     this.validatePiNetwork(data['pi_network'] as Record<string, unknown>);
     if (data['economics'])      this.validateEconomics(data['economics'] as Record<string, unknown>);
     if (data['abom'])           this.validateABOM(data['abom'] as Record<string, unknown>);
+    if (data['build_provenance']) this.validateBuildProvenance(data['build_provenance'] as Record<string, unknown>);
+    if (data['monetization'])   this.validateMonetization(data['monetization'] as Record<string, unknown>);
   }
 
   private validateMeta(meta: Record<string, unknown>): void {
@@ -609,9 +632,66 @@ export class AIXParser {
       return;
     }
     if (!Array.isArray(abom['constituents'])) {
-      this.errors.push({ code: 'INVALID_TYPE', section: 'abom', field: 'constituents', message: 'abom.constituents must be an array' }); return;
+      this.errors.push({ code: 'INVALID_TYPE', section: 'abom', field: 'constituents', message: 'abom.constituents must be an array' });
+    } else {
+      (abom['constituents'] as unknown[]).forEach((item, index) => this._validateABOMConstituent(item as Record<string, unknown>, index));
     }
-    (abom['constituents'] as unknown[]).forEach((item, index) => this._validateABOMConstituent(item as Record<string, unknown>, index));
+
+    if (abom['saas_services']) {
+      if (!Array.isArray(abom['saas_services'])) {
+        this.errors.push({ code: 'INVALID_TYPE', section: 'abom', field: 'saas_services', message: 'abom.saas_services must be an array' });
+      } else {
+        (abom['saas_services'] as unknown[]).forEach((s, i) => this._validateSaasService(s as Record<string, unknown>, `abom.saas_services[${i}]`));
+      }
+    }
+
+    if (abom['unified_bom']) {
+      this._validateUnifiedBOM(abom['unified_bom'] as Record<string, unknown>);
+    }
+
+    if (abom['risk_score'] !== undefined) {
+      const rs = abom['risk_score'] as number;
+      if (typeof rs !== 'number' || rs < 0 || rs > 100)
+        this.errors.push({ code: 'INVALID_RANGE', section: 'abom', field: 'risk_score', message: 'risk_score must be between 0 and 100' });
+    }
+  }
+
+  private _validateSaasService(s: Record<string, unknown>, section: string): void {
+    for (const field of ['name', 'provider']) {
+      if (!s[field]) this.errors.push({ code: 'MISSING_FIELD', section, field, message: `SaaS service is missing required field '${field}'` });
+    }
+    if (s['compliance_tier'] && !ABOM_VALID_COMPLIANCE.includes(s['compliance_tier'] as typeof ABOM_VALID_COMPLIANCE[number])) {
+      this.errors.push({ code: 'INVALID_VALUE', section, field: 'compliance_tier', message: `compliance_tier must be one of: ${ABOM_VALID_COMPLIANCE.join(', ')}` });
+    }
+  }
+
+  private _validateUnifiedBOM(ubom: Record<string, unknown>): void {
+    if (ubom['saas']) {
+      if (!Array.isArray(ubom['saas'])) {
+        this.errors.push({ code: 'INVALID_TYPE', section: 'abom.unified_bom', field: 'saas', message: 'unified_bom.saas must be an array' });
+      } else {
+        (ubom['saas'] as unknown[]).forEach((s, i) => this._validateSaasService(s as Record<string, unknown>, `abom.unified_bom.saas[${i}]`));
+      }
+    }
+    // Add validation for other unified_bom fields if needed
+  }
+
+  private validateBuildProvenance(bp: Record<string, unknown>): void {
+    for (const field of ['builder_id', 'build_type', 'materials']) {
+      if (!bp[field]) this.errors.push({ code: 'MISSING_FIELD', section: 'build_provenance', field, message: `build_provenance.${field} is missing` });
+    }
+    if (bp['materials'] && !Array.isArray(bp['materials'])) {
+      this.errors.push({ code: 'INVALID_TYPE', section: 'build_provenance', field: 'materials', message: 'build_provenance.materials must be an array' });
+    }
+  }
+
+  private validateMonetization(m: Record<string, unknown>): void {
+    if (!m['tier']) this.errors.push({ code: 'MISSING_FIELD', section: 'monetization', field: 'tier', message: 'monetization.tier is missing' });
+    if (!m['pricing']) this.errors.push({ code: 'MISSING_FIELD', section: 'monetization', field: 'pricing', message: 'monetization.pricing is missing' });
+    const tiers = ['free', 'builder', 'pro', 'enterprise'];
+    if (m['tier'] && !tiers.includes(m['tier'] as string)) {
+      this.errors.push({ code: 'INVALID_VALUE', section: 'monetization', field: 'tier', message: `monetization.tier must be one of: ${tiers.join(', ')}` });
+    }
   }
 
   private _validateABOMConstituent(item: Record<string, unknown>, index: number): void {

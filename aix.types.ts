@@ -2,8 +2,9 @@ export interface SaasService {
     name: string;
     provider: string;
     version?: string;
-    compliance_tier: 'basic' | 'standard' | 'enterprise';
-    endpoint?: string;
+    compliance_tier?: 'low' | 'medium' | 'high' | 'critical';
+    endpoints?: string[];
+    data_flow?: string[];
 }
 
 export interface AgentRef {

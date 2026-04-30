@@ -51,6 +51,12 @@ export interface AbomData {
   integrity_hash: string;
   capabilities: string[];
   dependencies: string[]; // constituents
+  saas_services?: Array<{
+    name: string;
+    endpoint?: string;
+    usage_policy?: string;
+    tier?: string;
+  }>;
   generated_by: string;
   timestamp: string;
   model?: {

@@ -131,7 +131,7 @@
           "type": "number",
           "description": "Target maximum response time in seconds",
           "minimum": 0.1,
-          "default": 5.0
+          "default": 5
         },
         "resource_allocation_ratio": {
           "type": "number",
@@ -233,6 +233,50 @@
             "expert"
           ],
           "default": "beginner"
+        }
+      }
+    },
+    "SaasService": {
+      "type": "object",
+      "description": "SaaS-BOM: Integrated SaaS application and API dependency",
+      "required": [
+        "name",
+        "provider"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of API endpoints or service URLs used"
+        },
+        "data_flow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Types of data shared with this SaaS (e.g. PII, telemetry, logs)"
+        },
+        "compliance_tier": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "description": "Compliance and risk tier for the SaaS provider"
         }
       }
     }
@@ -1382,47 +1426,18 @@
             }
           }
         },
+        "saas_services": {
+          "type": "array",
+          "description": "SaaS-BOM: Integrated SaaS applications and API dependencies",
+          "items": {
+            "$ref": "#/$defs/SaasService"
+          }
+        },
         "risk_score": {
           "type": "number",
           "minimum": 0,
           "maximum": 100,
           "description": "Assessed risk score from 0 to 100"
-        },
-        "saas_services": {
-          "type": "array",
-          "description": "List of utilized SaaS services (from PR #66)",
-          "items": {
-            "type": "object",
-            "required": [
-              "name",
-              "provider",
-              "compliance_tier"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "provider": {
-                "type": "string"
-              },
-              "version": {
-                "type": "string"
-              },
-              "compliance_tier": {
-                "type": "string",
-                "enum": [
-                  "basic",
-                  "standard",
-                  "enterprise"
-                ]
-              },
-              "endpoint": {
-                "type": "string",
-                "format": "uri"
-              }
-            }
-          }
         },
         "unified_bom": {
           "type": "object",
@@ -1454,37 +1469,9 @@
             },
             "saas": {
               "type": "array",
+              "description": "Integrated SaaS components",
               "items": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "provider",
-                  "compliance_tier"
-                ],
-                "additionalProperties": false,
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "provider": {
-                    "type": "string"
-                  },
-                  "version": {
-                    "type": "string"
-                  },
-                  "compliance_tier": {
-                    "type": "string",
-                    "enum": [
-                      "basic",
-                      "standard",
-                      "enterprise"
-                    ]
-                  },
-                  "endpoint": {
-                    "type": "string",
-                    "format": "uri"
-                  }
-                }
+                "$ref": "#/$defs/SaasService"
               }
             },
             "ai_models": {

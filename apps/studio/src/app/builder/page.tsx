@@ -99,7 +99,13 @@ export default function AgentBuilderPage() {
       capabilities: [] as string[],
       generated_by: "AIX-Studio",
       timestamp: new Date().toISOString(),
-      dependencies: [] as string[]
+      dependencies: [] as string[],
+      saas_services: [] as Array<{
+        name: string;
+        endpoint?: string;
+        usage_policy?: string;
+        tier?: string;
+      }>
     },
     mcp: {
       prompts: [] as McpPrompt[]
@@ -113,6 +119,7 @@ export default function AgentBuilderPage() {
 
   const prevChecksumRef = useRef(liveChecksum);
   const [checksumAnimating, setChecksumAnimating] = useState(false);
+  const [saasBomEnabled, setSaasBomEnabled] = useState(false);
 
   useEffect(() => {
     if (prevChecksumRef.current !== liveChecksum) {
@@ -123,7 +130,7 @@ export default function AgentBuilderPage() {
     }
   }, [liveChecksum]);
 
-  // Generate Manifest Content
+  // Generate Manifest Content (Async)
   useEffect(() => {
     const generate = async () => {
       const manifest = JSON.parse(JSON.stringify(formData));
@@ -137,6 +144,18 @@ export default function AgentBuilderPage() {
         manifest.identity_layer.id = `did:axiom:axiomid.app:agent-${slug}`;
       }
 
+      // Handle SaaS-BOM toggle
+      if (!saasBomEnabled && manifest.abom) {
+        delete manifest.abom.saas_services;
+      }
+
+      // Update integrity hash based on dependencies
+      if (formData.abom.dependencies.length > 0) {
+        const depString = formData.abom.dependencies.join(",");
+        manifest.abom.integrity_hash = await sha256Hex(depString);
+      } else {
+        manifest.abom.integrity_hash = "sha256-empty-deps";
+      }
       if (previewFormat === "json") {
         setManifestContent(JSON.stringify(manifest, null, 2));
       } else if (previewFormat === "discovery") {
@@ -171,6 +190,8 @@ export default function AgentBuilderPage() {
     try {
       const yamlString = await stringifyYamlSafe(formData);
       
+      const integrityHash = await sha256Hex(manifestContent);
+      
       const entry: RegistryEntry = {
         did: formData.identity_layer.id,
         name: formData.meta.name,
@@ -179,7 +200,12 @@ export default function AgentBuilderPage() {
         kyc_tier: String(formData.identity_layer.kyc_tier || 0),
         specVersion: formData.meta.version,
         publishedAt: new Date().toISOString(),
-        yaml: yamlString
+        yaml: yamlString,
+        abom: {
+          ...formData.abom,
+          integrity_hash: integrityHash,
+          timestamp: new Date().toISOString()
+        }
       };
       // Note: publishAgent and deployAgent should be defined or imported
       // For now keeping this logic as placeholders if they were in HEAD
@@ -246,6 +272,69 @@ export default function AgentBuilderPage() {
     }
   };
 
+  const updateEconomics = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      economics: {
+        ...prev.economics,
+        [field]: value
+      }
+    }));
+  };
+
+  const updateAbom = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      abom: {
+        ...prev.abom,
+        [field]: value
+      }
+    }));
+  };
+
+  const addSaasService = () => {
+    setFormData(prev => ({
+      ...prev,
+      abom: {
+        ...prev.abom,
+        saas_services: [
+          ...(prev.abom.saas_services || []),
+          { name: "", endpoint: "", usage_policy: "Standard", tier: "free" }
+        ]
+      }
+    }));
+  };
+
+  const removeSaasService = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      abom: {
+        ...prev.abom,
+        saas_services: (prev.abom.saas_services || []).filter((_, i) => i !== index)
+      }
+    }));
+  };
+
+  const updateSaasService = (index: number, field: string, value: string) => {
+    setFormData(prev => {
+      const services = [...(prev.abom.saas_services || [])];
+      services[index] = { ...services[index], [field]: value };
+      return {
+        ...prev,
+        abom: { ...prev.abom, saas_services: services }
+      };
+    });
+  };
+
+  const updateIdentity = (field: string, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      identity_layer: {
+        ...prev.identity_layer,
+        [field]: value
+      }
+    }));
+  };
   const handleCopy = () => {
     navigator.clipboard.writeText(manifestContent);
     setCopied(true);
@@ -697,6 +786,459 @@ export default function AgentBuilderPage() {
               </div>
             </div>
 
+            {/* Form Content */}
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="space-y-6"
+                >
+                  {currentStep === 1 && (
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Agent Name</label>
+                        <input 
+                          type="text" 
+                          value={formData.meta.name}
+                          onChange={(e) => updateMeta("name", e.target.value)}
+                          placeholder="e.g. Sovereign Researcher" 
+                          className="input"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Version</label>
+                          <input 
+                            type="text" 
+                            value={formData.meta.version}
+                            onChange={(e) => updateMeta("version", e.target.value)}
+                            placeholder="1.0.0" 
+                            className="input"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Author</label>
+                          <input 
+                            type="text" 
+                            value={formData.meta.author}
+                            onChange={(e) => updateMeta("author", e.target.value)}
+                            placeholder="Your Name or Org" 
+                            className="input"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Description</label>
+                        <textarea 
+                          value={formData.meta.description}
+                          onChange={(e) => updateMeta("description", e.target.value)}
+                          placeholder="What does this agent do?" 
+                          className="input min-h-[120px] py-3 resize-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 2 && (
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Role</label>
+                        <input 
+                          type="text" 
+                          value={formData.persona.role}
+                          onChange={(e) => updatePersona("role", e.target.value)}
+                          placeholder="e.g. Expert Financial Analyst" 
+                          className="input"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Instructions</label>
+                        <textarea 
+                          value={formData.persona.instructions}
+                          onChange={(e) => updatePersona("instructions", e.target.value)}
+                          placeholder="Core behavioral guidelines..." 
+                          className="input min-h-[200px] py-3 resize-none"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Tone</label>
+                        <select 
+                          value={formData.persona.tone}
+                          onChange={(e) => updatePersona("tone", e.target.value)}
+                          className="input appearance-none bg-[#0e0e12]"
+                        >
+                          <option value="formal">Formal</option>
+                          <option value="casual">Casual</option>
+                          <option value="technical">Technical</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 3 && (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Active Skills</label>
+                        <button 
+                          onClick={addSkill}
+                          className="btn btn-sm btn-ghost hover:border-[#00dbe9]/50 text-[#00dbe9]"
+                        >
+                          <Plus className="w-3.5 h-3.5 mr-1" /> Add Skill
+                        </button>
+                      </div>
+                      
+                      {formData.skills.length === 0 ? (
+                        <div className="p-8 border-2 border-dashed border-white/[0.05] rounded-xl text-center">
+                          <p className="text-sm text-[#404050]">No custom skills defined.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {formData.skills.map((skill: AgentSkill, index: number) => (
+                            <div key={index} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-3 relative group">
+                              <button 
+                                onClick={() => removeSkill(index)}
+                                className="absolute top-2 right-2 p-1.5 text-[#404050] hover:text-[#ef4444] transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                              <div className="gap-3">
+                                <input 
+                                  placeholder="Skill name (snake_case)" 
+                                  value={skill.name}
+                                  onChange={(e) => updateSkill(index, "name", e.target.value)}
+                                  className="input py-2 text-xs mb-3"
+                                />
+                              </div>
+                              <textarea 
+                                placeholder="Describe skill functionality..." 
+                                value={skill.description}
+                                onChange={(e) => updateSkill(index, "description", e.target.value)}
+                                className="input py-2 text-xs min-h-[60px] resize-none"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* MCP Prompts Section */}
+                      <div className="pt-6 border-t border-white/[0.05] mt-6">
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">MCP Prompts (v1.3)</label>
+                          <button 
+                            onClick={() => setFormData(prev => ({ 
+                              ...prev, 
+                              mcp: { prompts: [...prev.mcp.prompts, { name: "", description: "" }] } 
+                            }))}
+                            className="btn btn-sm btn-ghost hover:border-[#00dbe9]/50 text-[#00dbe9]"
+                          >
+                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Prompt
+                          </button>
+                        </div>
+                        
+                        {formData.mcp.prompts.length === 0 ? (
+                          <div className="p-4 border border-dashed border-white/[0.05] rounded-xl text-center">
+                            <p className="text-[10px] text-[#404050]">No discovery prompts defined.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {formData.mcp.prompts.map((p: McpPrompt, i: number) => (
+                              <div key={i} className="flex gap-2 group">
+                                <input 
+                                  placeholder="Prompt Name" 
+                                  value={p.name}
+                                  onChange={(e) => {
+                                    const next = [...formData.mcp.prompts];
+                                    next[i].name = e.target.value;
+                                    setFormData(prev => ({ ...prev, mcp: { prompts: next } }));
+                                  }}
+                                  className="input py-2 text-[10px] flex-1"
+                                />
+                                <button 
+                                  onClick={() => {
+                                    const next = formData.mcp.prompts.filter((_: McpPrompt, idx: number) => idx !== i);
+                                    setFormData(prev => ({ ...prev, mcp: { prompts: next } }));
+                                  }}
+                                  className="p-2 text-[#404050] hover:text-red-400 transition-colors"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 4 && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl bg-[#00dbe9]/5 border border-[#00dbe9]/10 mb-6">
+                        <div className="flex gap-3">
+                          <AlertCircle className="w-5 h-5 text-[#00dbe9] shrink-0" />
+                          <p className="text-xs text-[#00dbe9]/80 leading-relaxed">
+                            Economics are settled via the Pi Network blockchain. Ensure your cost per call reflects the value provided by your agent.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Pricing Model</label>
+                        <select
+                          value={formData.economics.pricing_model}
+                          onChange={(e) => updateEconomics("pricing_model", e.target.value)}
+                          className="input appearance-none bg-[#0e0e12]"
+                        >
+                          <option value="pay_per_call">Pay-per-use</option>
+                          <option value="subscription">Subscription</option>
+                          <option value="free">Free</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
+                        <input
+                          type="text"
+                          value={formData.economics.currency || ""}
+                          onChange={(e) => updateEconomics("currency", e.target.value)}
+                          placeholder="e.g. PI"
+                          className="input"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 5: SBOM */}
+                  {currentStep === 5 && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-6">
+                        <div className="flex gap-3">
+                          <Shield className="w-5 h-5 text-purple-400 shrink-0" />
+                          <p className="text-xs text-purple-300/80 leading-relaxed">
+                            Agent SBOM (ABOM) ensures supply chain security by listing all dependencies and assessing inherent risks.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. langchain, openai, pinecone"
+                          className="input"
+                          onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
+                        />
+                      </div>
+
+                      <div className="pt-6 border-t border-white/[0.05] mt-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <Cloud className="w-4 h-4 text-[#00dbe9]" />
+                            <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">SaaS-BOM (v1.3)</label>
+                          </div>
+                          <button
+                            onClick={() => setSaasBomEnabled(!saasBomEnabled)}
+                            className={cn(
+                              "relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                              saasBomEnabled ? "bg-[#00dbe9]" : "bg-white/10"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                saasBomEnabled ? "translate-x-5" : "translate-x-0"
+                              )}
+                            />
+                          </button>
+                        </div>
+
+                        {saasBomEnabled && (
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <p className="text-[10px] text-[#404050]">Track 3rd-party SaaS dependencies.</p>
+                              <button
+                                onClick={addSaasService}
+                                className="btn btn-sm btn-ghost hover:border-[#00dbe9]/50 text-[#00dbe9] py-1 h-auto"
+                              >
+                                <Plus className="w-3 h-3 mr-1" /> Add Service
+                              </button>
+                            </div>
+
+                            <div className="space-y-3">
+                              {(formData.abom.saas_services || []).map((service, idx) => (
+                                <div key={idx} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-3 relative group">
+                                  <button
+                                    onClick={() => removeSaasService(idx)}
+                                    className="absolute top-2 right-2 p-1.5 text-[#404050] hover:text-[#ef4444] transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                  
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-white/40 uppercase">Service Name</label>
+                                      <input
+                                        placeholder="e.g. OpenAI API"
+                                        value={service.name}
+                                        onChange={(e) => updateSaasService(idx, "name", e.target.value)}
+                                        className="input py-2 text-xs"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-bold text-white/40 uppercase">Tier</label>
+                                      <select
+                                        value={service.tier}
+                                        onChange={(e) => updateSaasService(idx, "tier", e.target.value)}
+                                        className="input py-2 text-xs appearance-none bg-[#0e0e12]"
+                                      >
+                                        <option value="free">Free</option>
+                                        <option value="pro">Pro</option>
+                                        <option value="enterprise">Enterprise</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-white/40 uppercase">Endpoint</label>
+                                    <input
+                                      placeholder="https://api.openai.com/v1"
+                                      value={service.endpoint}
+                                      onChange={(e) => updateSaasService(idx, "endpoint", e.target.value)}
+                                      className="input py-2 text-xs"
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 6: Identity */}
+                  {currentStep === 6 && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-6">
+                        <div className="flex gap-3">
+                          <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                          <p className="text-xs text-emerald-300/80 leading-relaxed">
+                            Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {['unverified', 'basic', 'verified', 'institutional'].map((tier) => (
+                            <button
+                              key={tier}
+                              onClick={() => updateIdentity('kyc_tier', tier)}
+                              className={cn(
+                                "p-3 rounded-xl border text-left transition-all",
+                                String(formData.identity_layer.kyc_tier) === tier
+                                  ? "bg-emerald-500/10 border-emerald-500/50 text-white"
+                                  : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
+                              )}
+                            >
+                              <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="mt-8 pt-6 border-t border-white/[0.05] flex gap-3">
+              <button
+                className="btn btn-ghost border-white/10 hover:bg-white/5 flex-1"
+                onClick={handleExportAndSave}
+                disabled={isDeploying}
+              >
+                <Download className="w-4 h-4 mr-2" /> Save & Export
+              </button>
+              
+              <button
+                className={`btn btn-primary-green-glow flex-[2] ${isDeploying ? 'opacity-50 cursor-wait' : ''}`}
+                onClick={handleDeploy}
+                disabled={isDeploying}
+              >
+                {isDeploying ? (
+                  <span className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 animate-spin" /> Deploying...
+                  </span>
+                ) : (
+                  <>
+                    <Rocket className="w-4 h-4 mr-2" /> Deploy to Sovereign Cloud
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Right Panel: Live Preview & Validator */}
+        <section className="w-[60%] flex flex-col gap-6">
+          <div className="flex flex-col h-full gap-4">
+            {/* Preview Header */}
+            <div className="flex justify-between items-end px-2">
+              <div>
+                <h2 className="text-lg font-display font-bold text-white flex items-center gap-2">
+                  <Database className="w-5 h-5 text-[#00dbe9]" />
+                  Manifest Preview
+                </h2>
+                <p className="text-xs text-[#8888a0]">Real-time AIX v1.3 validation</p>
+              </div>
+              <div className="flex gap-2 p-1 bg-[#0e0e12] border border-white/[0.05] rounded-lg">
+                <button 
+                  onClick={() => setPreviewFormat("yaml")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
+                    previewFormat === "yaml" ? "bg-white/[0.08] text-white" : "text-[#404050] hover:text-[#8888a0]"
+                  )}
+                >
+                  <FileCode className="w-3 h-3" /> YAML
+                </button>
+                <button 
+                  onClick={() => setPreviewFormat("json")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
+                    previewFormat === "json" ? "bg-white/[0.08] text-white" : "text-[#404050] hover:text-[#8888a0]"
+                  )}
+                >
+                  <FileJson className="w-3 h-3" /> JSON
+                </button>
+                <button 
+                  onClick={() => setPreviewFormat("discovery")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
+                    previewFormat === "discovery" ? "bg-[var(--color-accent-primary)] text-black" : "text-[#404050] hover:text-[#8888a0]"
+                  )}
+                >
+                  <Zap className="w-3 h-3" /> Discovery
+                </button>
+                <button 
+                  onClick={() => setPreviewFormat("visualizer")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
+                    previewFormat === "visualizer" ? "bg-[#6366f1] text-white" : "text-[#404050] hover:text-[#8888a0]"
+                  )}
+                >
+                  <Cpu className="w-3 h-3" /> Graph
+                </button>
+              </div>
+            </div>
+
+              </div>
+            </div>
             {/* Content & Validation */}
             <div className="flex-1 flex flex-col gap-4 overflow-hidden">
               <div className="flex-1 glass-panel-heavy rounded-[2rem] overflow-hidden border-white/[0.08] relative group flex flex-col">

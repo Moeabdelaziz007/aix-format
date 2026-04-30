@@ -870,6 +870,52 @@
               "type": "boolean"
             }
           }
+        },
+        "saas_services": {
+          "type": "array",
+          "description": "SaaS-BOM: Integrated SaaS applications and API dependencies",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "provider"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "provider": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "endpoints": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "data_flow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Types of data shared with this SaaS (e.g. PII, telemetry)"
+              },
+              "compliance_tier": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "description": "Compliance and risk tier for the SaaS provider"
+              }
+            }
+
+          }
         }
       }
     },

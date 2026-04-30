@@ -30,7 +30,7 @@ export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getAgent, loaded } = useLocalAgents();
+  const { getAgent, saveAgent, loaded } = useLocalAgents();
   const [agent, setAgent] = useState<AgentRecord | null>(null);
   const [showDeploy, setShowDeploy] = useState(false);
 

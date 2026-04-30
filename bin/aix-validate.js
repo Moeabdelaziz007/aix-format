@@ -244,6 +244,28 @@ try {
           }
         }
       }
+
+      // v1.3 SaaS-BOM & Unified-BOM
+      if (agent.saas_services && agent.saas_services.length > 0) {
+        console.log(`\n   SaaS Services (ABOM): ${agent.saas_services.length} configured`);
+        agent.saas_services.forEach(s => {
+          console.log(`     - ${s.name} (${s.provider}): ${s.compliance_tier || 'no tier'}`);
+        });
+      }
+
+      if (agent.unified_bom) {
+        console.log('\n   Unified BOM:');
+        const ubom = agent.unified_bom;
+        if (ubom.agents) console.log(`     - Agents: ${ubom.agents.length}`);
+        if (ubom.saas) console.log(`     - SaaS: ${ubom.saas.length}`);
+        if (ubom.ai_models) console.log(`     - AI Models: ${ubom.ai_models.length}`);
+        if (ubom.infrastructure) console.log(`     - Infrastructure: ${ubom.infrastructure.length}`);
+      }
+
+      if (agent.build_provenance) {
+        console.log(`\n   Build Provenance: ${agent.build_provenance.builder_id}`);
+        console.log(`     - Type: ${agent.build_provenance.build_type}`);
+      }
     }
     
     if (agent.warnings && agent.warnings.length > 0) {

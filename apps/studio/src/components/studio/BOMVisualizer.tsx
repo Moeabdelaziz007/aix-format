@@ -133,7 +133,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
     });
 
     const categories = [
-      { key: 'saas', items: [], color: COLORS.saas },
+      { key: 'saas', items: formData.abom?.saas_services || [], color: COLORS.saas },
       { key: 'ai_models', items: [], color: COLORS.ai, type: 'ai' },
       { key: 'aboms', items: [], color: COLORS.abom, type: 'abom' },
       { key: 'infrastructure', items: [], color: COLORS.infra, type: 'infra' },

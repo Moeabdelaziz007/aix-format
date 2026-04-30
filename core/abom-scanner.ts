@@ -52,7 +52,39 @@ export function scanAgent(agent: Partial<Manifest>): ScanResult {
     });
   }
 
-  // 3. Identity & Trust
+  // 3. Analyze SaaS-BOM (SaaS Services)
+  const saasServices = abom.saas_services || [];
+  if (saasServices.length > 0) {
+    saasServices.forEach((service) => {
+      if (!service.endpoint) {
+        risks.push({
+          category: 'Supply Chain',
+          severity: 'medium',
+          message: `SaaS service ${service.name} is missing an endpoint.`
+        });
+        score -= 5;
+      }
+      if (!service.usage_policy) {
+        risks.push({
+          category: 'Compliance',
+          severity: 'low',
+          message: `SaaS service ${service.name} has no usage policy defined.`
+        });
+        score -= 2;
+      }
+      const untrustedEndpoints = ['unverified-api', 'dev-endpoint'];
+      if (service.endpoint && untrustedEndpoints.some(u => service.endpoint?.includes(u))) {
+        risks.push({
+          category: 'Supply Chain',
+          severity: 'high',
+          message: `SaaS service ${service.name} uses an untrusted endpoint: ${service.endpoint}`
+        });
+        score -= 15;
+      }
+    });
+  }
+
+  // 4. Identity & Trust
   const kycTier = identity.kyc_tier || 0;
   if (kycTier < 2) {
     risks.push({
