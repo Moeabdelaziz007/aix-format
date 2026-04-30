@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer } from "@/components/animations/FadeIn";
-import { Badge } from "@/design-system/components";
+import { Badge, Section, Container, SectionHeader, Typography } from "@/design-system/components";
 import { Edit3, Layers, ShieldCheck, Rocket } from "lucide-react";
 
 const steps = [
@@ -34,17 +34,12 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-24 relative overflow-hidden bg-surface-1/30">
-      <div className="container mx-auto px-4">
-        <FadeIn className="text-center mb-20">
-          <Badge variant="outline" className="mb-4">Workflow</Badge>
-          <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter mb-4">
-            How It Works
-          </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
-            From architecture to deployment, AIX provides a streamlined pipeline for professional agent development.
-          </p>
-        </FadeIn>
+    <Section background="surface-1" className="bg-surface-1/30">
+      <Container>
+        <SectionHeader 
+          title="How It Works"
+          subtitle="From architecture to deployment, AIX provides a streamlined pipeline for professional agent development."
+        />
 
         <div className="relative">
           {/* Connecting Line (Desktop) */}
@@ -63,18 +58,18 @@ export function HowItWorks() {
                     </div>
                   </div>
                   
-                  <h3 className="text-2xl font-black text-white mb-4 uppercase italic tracking-tight group-hover:text-primary transition-colors">
+                  <Typography variant="h4" className="mb-4 uppercase italic tracking-tight group-hover:text-primary transition-colors">
                     {step.title}
-                  </h3>
-                  <p className="text-foreground/50 leading-relaxed text-sm">
+                  </Typography>
+                  <Typography variant="body" className="text-foreground/50 text-sm">
                     {step.description}
-                  </p>
+                  </Typography>
                 </div>
               </FadeIn>
             ))}
           </StaggerContainer>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

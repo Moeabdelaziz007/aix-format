@@ -18,10 +18,10 @@ export const tokens = {
     },
     surfaces: {
       l1: "#0f0f1a",
-      l2: "#141424",
-      l3: "#1a1a2e",
-      l4: "#22223b",
-      l5: "#2a2a45",
+      l2: "#121222",
+      l3: "#16162a",
+      l4: "#1a1a2e",
+      l5: "#1e1e35",
     },
     gradients: {
       hero: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%)",

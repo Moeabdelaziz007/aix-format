@@ -1,16 +1,14 @@
 "use client";
 
-import { Card, Badge } from "@/design-system/components";
+import { Card, Badge, Section, Container, SectionHeader, Typography } from "@/design-system/components";
 import { FadeIn, StaggerContainer } from "@/components/animations/FadeIn";
 import { 
-  Shield, 
   Fingerprint, 
   Box, 
-  Zap, 
-  Coins, 
   Search,
   Lock,
-  Network
+  Network,
+  Coins
 } from "lucide-react";
 
 const features = [
@@ -54,39 +52,34 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-24 relative overflow-hidden bg-background">
-      <div className="container mx-auto px-4">
-        <FadeIn className="text-center mb-16">
-          <Badge variant="outline" className="mb-4">Capabilities</Badge>
-          <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter mb-4">
-            Sovereign Architecture
-          </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
-            The AIX format provides a standardized, secure, and interoperable foundation for the next generation of autonomous agents.
-          </p>
-        </FadeIn>
+    <Section background="dark">
+      <Container>
+        <SectionHeader 
+          title="Sovereign Architecture"
+          subtitle="The AIX format provides a standardized, secure, and interoperable foundation for the next generation of autonomous agents."
+        />
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, i) => (
             <FadeIn key={i} direction="up" delay={i * 0.05}>
-              <Card className="h-full p-8 border-white/5 hover:border-primary/20 transition-all duration-500 group relative overflow-hidden">
+              <Card className="h-full p-8 group relative overflow-hidden">
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${feature.color} opacity-[0.03] blur-3xl group-hover:opacity-10 transition-opacity`} />
                 
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg shadow-black/40`}>
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
                 
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors italic uppercase">
+                <Typography variant="h4" className="mb-3 group-hover:text-primary transition-colors italic uppercase">
                   {feature.title}
-                </h3>
-                <p className="text-foreground/50 leading-relaxed text-sm">
+                </Typography>
+                <Typography variant="body" className="text-foreground/50 text-sm">
                   {feature.description}
-                </p>
+                </Typography>
               </Card>
             </FadeIn>
           ))}
         </StaggerContainer>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

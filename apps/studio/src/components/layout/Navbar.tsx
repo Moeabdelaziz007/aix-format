@@ -8,7 +8,7 @@ import { Shield, Wallet, LogOut, ChevronDown, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button, Badge } from "@/design-system/components";
+import { Button, Badge, Typography } from "@/design-system/components";
 
 interface PiUser {
   username: string;
@@ -78,13 +78,15 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-lg shadow-primary/20">
-            <span className="text-primary-dark font-black text-xl italic leading-none">A</span>
+            <Typography variant="h4" className="text-primary-dark italic leading-none m-0">A</Typography>
           </div>
           <div className="flex flex-col leading-none">
-            <span className="text-lg font-black text-white uppercase italic tracking-tighter">
+            <Typography variant="h6" className="text-white uppercase italic tracking-tighter m-0">
               AIX<span className="text-primary">Studio</span>
-            </span>
-            <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-foreground/40">Sovereign Intel</span>
+            </Typography>
+            <Typography variant="caption" className="tracking-[0.2em] uppercase opacity-40 font-bold m-0">
+              Sovereign Intel
+            </Typography>
           </div>
         </Link>
 
@@ -101,7 +103,7 @@ export function Navbar() {
                   active ? "text-primary bg-primary/10" : "text-foreground/50 hover:text-white hover:bg-white/5"
                 )}
               >
-                {link.label}
+                <Typography variant="caption" weight="bold" className="inherit">{link.label}</Typography>
               </Link>
             );
           })}
@@ -122,7 +124,7 @@ export function Navbar() {
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-mcp flex items-center justify-center text-[10px] font-black text-white">
                   {user.username[0].toUpperCase()}
                 </div>
-                <span className="text-xs font-bold text-white uppercase italic">{user.username}</span>
+                <Typography variant="caption" weight="bold" className="text-white uppercase italic">{user.username}</Typography>
                 <ChevronDown className={cn("w-3.5 h-3.5 transition-transform text-foreground/40", showUserMenu && "rotate-180")} />
               </button>
 
@@ -181,7 +183,7 @@ export function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="px-4 py-3 rounded-xl text-sm font-bold uppercase italic tracking-wider text-foreground/60 hover:bg-white/5 hover:text-white transition-colors"
                 >
-                  {link.label}
+                  <Typography variant="body" weight="bold">{link.label}</Typography>
                 </Link>
               ))}
             </div>
@@ -189,7 +191,5 @@ export function Navbar() {
         )}
       </AnimatePresence>
     </header>
-  );
-}
   );
 }

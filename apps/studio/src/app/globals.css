@@ -13,11 +13,12 @@
   --color-danger: #ef4444;
   --color-purple-mcp: #8b5cf6;
 
+  /* Surface Elevations */
   --color-surface-1: #0f0f1a;
-  --color-surface-2: #141424;
-  --color-surface-3: #1a1a2e;
-  --color-surface-4: #22223b;
-  --color-surface-5: #2a2a45;
+  --color-surface-2: #121222;
+  --color-surface-3: #16162a;
+  --color-surface-4: #1a1a2e;
+  --color-surface-5: #1e1e35;
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);

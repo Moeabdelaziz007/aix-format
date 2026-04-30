@@ -119,3 +119,143 @@ export const Badge = ({ className, variant = "default", ...props }: BadgeProps) 
     />
   );
 };
+
+/**
+ * TYPOGRAPHY PRIMITIVES
+ */
+interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
+  variant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "body" | "caption" | "code";
+  weight?: "regular" | "medium" | "semibold" | "bold";
+  gradient?: boolean;
+}
+
+export const Typography = ({ 
+  variant = "body", 
+  weight, 
+  gradient, 
+  className, 
+  children, 
+  ...props 
+}: TypographyProps) => {
+  const tags: Record<string, keyof JSX.IntrinsicElements> = {
+    h1: "h1",
+    h2: "h2",
+    h3: "h3",
+    h4: "h4",
+    h5: "h5",
+    h6: "h6",
+    body: "p",
+    caption: "span",
+    code: "code",
+  };
+
+  const Tag = tags[variant];
+
+  const variants = {
+    h1: "text-[clamp(2.5rem,8vw,5rem)] leading-[1.1] font-bold tracking-tight",
+    h2: "text-[clamp(2rem,6vw,3.5rem)] leading-[1.2] font-bold tracking-tight",
+    h3: "text-[clamp(1.5rem,4vw,2.5rem)] leading-[1.3] font-bold",
+    h4: "text-xl sm:text-2xl font-semibold",
+    h5: "text-lg sm:text-xl font-semibold",
+    h6: "text-base sm:text-lg font-medium",
+    body: "text-base sm:text-lg text-foreground/80 leading-relaxed",
+    caption: "text-xs sm:text-sm text-foreground/60",
+    code: "font-mono text-sm bg-surface-2 px-1.5 py-0.5 rounded border border-white/5",
+  };
+
+  const weights = {
+    regular: "font-normal",
+    medium: "font-medium",
+    semibold: "font-semibold",
+    bold: "font-bold",
+  };
+
+  return (
+    <Tag
+      className={cn(
+        variants[variant],
+        weight && weights[weight],
+        gradient && "bg-gradient-to-r from-primary via-purple-mcp to-primary-accent bg-clip-text text-transparent animate-gradient-x",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Tag>
+  );
+};
+
+/**
+ * LAYOUT PRIMITIVES
+ */
+export const Container = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", className)} {...props}>
+    {children}
+  </div>
+);
+
+interface SectionProps extends HTMLMotionProps<"section"> {
+  background?: "dark" | "surface-1" | "surface-2";
+  padding?: "none" | "sm" | "md" | "lg";
+}
+
+export const Section = ({ 
+  className, 
+  background = "dark", 
+  padding = "md", 
+  children, 
+  ...props 
+}: SectionProps) => {
+  const backgrounds = {
+    dark: "bg-background",
+    "surface-1": "bg-surface-1",
+    "surface-2": "bg-surface-2",
+  };
+
+  const paddings = {
+    none: "py-0",
+    sm: "py-12 sm:py-16",
+    md: "py-20 sm:py-24",
+    lg: "py-32 sm:py-40",
+  };
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className={cn(backgrounds[background], paddings[padding], className)}
+      {...props}
+    >
+      {children}
+    </motion.section>
+  );
+};
+
+export const SectionHeader = ({ 
+  title, 
+  subtitle, 
+  alignment = "center", 
+  className 
+}: { 
+  title: string; 
+  subtitle?: string; 
+  alignment?: "left" | "center"; 
+  className?: string;
+}) => (
+  <div className={cn(
+    "mb-12 sm:mb-16",
+    alignment === "center" ? "text-center" : "text-left",
+    className
+  )}>
+    <Typography variant="h2" gradient className="mb-4">
+      {title}
+    </Typography>
+    {subtitle && (
+      <Typography variant="body" className={cn("max-w-2xl", alignment === "center" && "mx-auto")}>
+        {subtitle}
+      </Typography>
+    )}
+  </div>
+);

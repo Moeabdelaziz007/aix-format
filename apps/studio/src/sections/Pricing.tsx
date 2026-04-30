@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Button, Badge } from "@/design-system/components";
+import { Card, Button, Badge, Section, Container, SectionHeader, Typography } from "@/design-system/components";
 import { FadeIn, StaggerContainer } from "@/components/animations/FadeIn";
 import { Check, Zap, Shield, Crown } from "lucide-react";
 
@@ -48,23 +48,18 @@ const plans = [
     ],
     icon: Crown,
     buttonText: "Contact Sales",
-    variant: "purple" as const
+    variant: "outline" as const
   }
 ];
 
 export function Pricing() {
   return (
-    <section className="py-24 relative overflow-hidden bg-surface-1/30">
-      <div className="container mx-auto px-4">
-        <FadeIn className="text-center mb-16">
-          <Badge variant="outline" className="mb-4">Pricing</Badge>
-          <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter mb-4">
-            Build for <span className="text-primary">Any Scale</span>
-          </h2>
-          <p className="text-foreground/60 max-w-2xl mx-auto">
-            Transparent pricing designed to grow with your agent ecosystem.
-          </p>
-        </FadeIn>
+    <Section background="surface-1" className="bg-surface-1/30">
+      <Container>
+        <SectionHeader 
+          title="Build for Any Scale"
+          subtitle="Transparent pricing designed to grow with your agent ecosystem."
+        />
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, i) => (
@@ -88,25 +83,25 @@ export function Pricing() {
                     <plan.icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white uppercase italic">{plan.name}</h3>
-                    <p className="text-xs text-foreground/40 font-medium">Monthly billing</p>
+                    <Typography variant="h4" className="uppercase italic">{plan.name}</Typography>
+                    <Typography variant="caption" className="font-medium text-foreground/40">Monthly billing</Typography>
                   </div>
                 </div>
 
                 <div className="mb-8">
-                  <span className="text-4xl font-black text-white">{plan.price}</span>
-                  {plan.price !== "Custom" && <span className="text-foreground/40 ml-2">/mo</span>}
+                  <Typography variant="h2" className="inline-block">{plan.price}</Typography>
+                  {plan.price !== "Custom" && <Typography variant="caption" className="ml-2 text-foreground/40">/mo</Typography>}
                 </div>
 
-                <p className="text-sm text-foreground/60 mb-8 leading-relaxed">
+                <Typography variant="body" className="text-sm mb-8">
                   {plan.description}
-                </p>
+                </Typography>
 
                 <div className="flex-grow space-y-4 mb-10">
                   {plan.features.map((feature, j) => (
                     <div key={j} className="flex items-start gap-3">
                       <Check className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-white/70">{feature}</span>
+                      <Typography variant="body" className="text-sm text-white/70">{feature}</Typography>
                     </div>
                   ))}
                 </div>
@@ -118,7 +113,7 @@ export function Pricing() {
             </FadeIn>
           ))}
         </StaggerContainer>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

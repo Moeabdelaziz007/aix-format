@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Button } from "@/design-system/components";
+import { Button, Typography, Container, Section } from "@/design-system/components";
 import { ParticleBackground } from "@/components/animations/ParticleBackground";
-import { Rocket, Globe, ShieldCheck, Cpu, ChevronRight } from "lucide-react";
+import { Rocket, Globe, ShieldCheck, Cpu } from "lucide-react";
 import Link from "next/link";
 
 const stats = [
@@ -21,7 +21,7 @@ const badges = [
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden">
+    <Section padding="none" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       {/* Background Mesh */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full animate-pulse" />
@@ -30,24 +30,24 @@ export function Hero() {
       
       <ParticleBackground />
 
-      <div className="container relative z-10 mx-auto px-4 text-center">
+      <Container className="relative z-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="max-w-5xl mx-auto"
         >
-          <h1 className="text-6xl md:text-8xl lg:text-[96px] font-black tracking-tighter leading-[0.9] text-white uppercase italic mb-6">
+          <Typography variant="h1" className="uppercase italic mb-6">
             The Trust Infrastructure <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-mcp to-primary-light">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-mcp to-primary-accent animate-gradient-x">
               for the Agent Economy
             </span>
-          </h1>
+          </Typography>
           
-          <p className="text-xl md:text-2xl text-foreground/60 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <Typography variant="body" className="max-w-2xl mx-auto mb-10 text-foreground/60">
             Build, verify, and monetize AI agents with the <span className="text-white font-bold">AIX open standard</span>. 
             Sovereign identity, cryptographic provenance, and seamless discovery.
-          </p>
+          </Typography>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
             <Link href="/builder">
@@ -57,7 +57,7 @@ export function Hero() {
               </Button>
             </Link>
             <Link href="/marketplace">
-              <Button variant="outline" size="lg" className="px-10 py-8 text-lg">
+              <Button variant="secondary" size="lg" className="px-10 py-8 text-lg">
                 Explore Marketplace
               </Button>
             </Link>
@@ -75,7 +75,9 @@ export function Hero() {
                 >
                   {stat.value}
                 </motion.span>
-                <span className="text-[10px] uppercase tracking-widest font-bold text-foreground/40">{stat.label}</span>
+                <Typography variant="caption" className="uppercase tracking-widest font-bold text-foreground/40">
+                  {stat.label}
+                </Typography>
               </div>
             ))}
           </div>
@@ -85,18 +87,20 @@ export function Hero() {
             {badges.map((badge, i) => (
               <div key={i} className="flex items-center gap-2">
                 <badge.icon className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-widest">{badge.text}</span>
+                <Typography variant="caption" className="font-bold uppercase tracking-widest">
+                  {badge.text}
+                </Typography>
               </div>
             ))}
           </div>
         </motion.div>
-      </div>
+      </Container>
 
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
         <div className="w-6 h-10 border-2 border-white/10 rounded-full flex justify-center pt-2">
           <div className="w-1 h-2 bg-primary rounded-full" />
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

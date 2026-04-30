@@ -2,24 +2,24 @@
 
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { Badge, Button } from "@/design-system/components";
-import { Terminal, Play, Save, Share2 } from "lucide-react";
+import { Badge, Button, Section, Container, Typography } from "@/design-system/components";
+import { Terminal, Play, Save, Share2, ShieldCheck } from "lucide-react";
 
 export function LiveDemo() {
   return (
-    <section className="py-24 relative overflow-hidden">
-      <div className="container mx-auto px-4">
+    <Section>
+      <Container>
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <FadeIn className="lg:w-1/2" direction="left">
             <Badge variant="outline" className="mb-4">Interactive</Badge>
-            <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter mb-6 leading-tight">
+            <Typography variant="h2" className="uppercase italic mb-6 leading-tight">
               Build in <br />
               <span className="text-primary">Real-Time</span>
-            </h2>
-            <p className="text-foreground/60 text-lg mb-8 leading-relaxed">
+            </Typography>
+            <Typography variant="body" className="mb-8 text-foreground/60">
               Experience the power of the AIX Studio. Define personas, connect tools via MCP, and see your agent manifest update instantly. 
               Built-in validation ensures your agent is always protocol-compliant.
-            </p>
+            </Typography>
             
             <div className="flex flex-col gap-4">
               {[
@@ -30,7 +30,7 @@ export function LiveDemo() {
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3 text-white/80 font-medium">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  {item}
+                  <Typography variant="body" className="text-base sm:text-base text-white/80">{item}</Typography>
                 </div>
               ))}
             </div>
@@ -57,7 +57,7 @@ export function LiveDemo() {
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-md">
                       <Terminal className="w-3 h-3 text-primary" />
-                      <span className="text-[10px] text-white/40 font-mono uppercase tracking-widest">agent-manifest.aix</span>
+                      <Typography variant="caption" className="font-mono uppercase tracking-widest text-white/40">agent-manifest.aix</Typography>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -116,17 +116,15 @@ export function LiveDemo() {
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
                   </div>
                   <div>
-                    <div className="text-[10px] text-white/40 uppercase font-bold tracking-widest leading-none mb-1">Status</div>
-                    <div className="text-xs text-white font-bold">Protocol Validated</div>
+                    <Typography variant="caption" className="uppercase font-bold tracking-widest leading-none mb-1 text-white/40">Status</Typography>
+                    <Typography variant="h6" className="text-xs text-white font-bold">Protocol Validated</Typography>
                   </div>
                 </div>
               </motion.div>
             </div>
           </FadeIn>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }
-
-import { ShieldCheck as ShieldCheckIcon } from "lucide-react";
