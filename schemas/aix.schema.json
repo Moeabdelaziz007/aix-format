@@ -266,7 +266,13 @@
     "meta": {
       "type": "object",
       "description": "Agent metadata and identification",
-      "required": ["version", "id", "name", "created", "author"],
+      "required": [
+        "version",
+        "id",
+        "name",
+        "created",
+        "author"
+      ],
       "additionalProperties": true,
       "properties": {
         "version": {

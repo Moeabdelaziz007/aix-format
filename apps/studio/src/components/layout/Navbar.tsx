@@ -1,4 +1,5 @@
 "use client";
+import { WalletButton } from '@/components/studio/WalletButton';
 
 import { APP_VERSION } from "@/lib/version";
 import { useState, useEffect } from "react";

@@ -188,6 +188,10 @@ export default function AgentBuilderPage() {
   const handleExportAndSave = async () => {
     try {
       const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unnamed-agent';
+      const manifestContent = await stringifyYamlSafe(formData);
+      
+      const integrityHash = await sha256Hex(manifestContent);
+      
       const blob = new Blob([manifestContent], { type: 'text/yaml' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -197,8 +201,10 @@ export default function AgentBuilderPage() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      
       toast.success("Manifest exported successfully!");
     } catch (err) {
+      console.error(err);
       toast.error("Failed to export manifest");
     }
   };
@@ -992,7 +998,6 @@ export default function AgentBuilderPage() {
                         </select>
                       </div>
 
-<<<<<<< HEAD
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
                         <input
@@ -1002,24 +1007,14 @@ export default function AgentBuilderPage() {
                           placeholder="e.g. PI"
                           className="input"
                         />
-=======
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
-                          <input
-                            type="text"
-                            value={formData.economics.currency || ""}
-                            onChange={(e) => updateEconomics("currency", e.target.value)}
-                            placeholder="e.g. PI"
-                            className="input"
-                          />
-                        </div>
+                      </div>
 
                       <div className="pt-6 border-t border-white/[0.05] mt-6">
                         <div className="flex items-center gap-3 text-xs text-[#8888a0]">
                           <Shield className="w-4 h-4 text-emerald-500" />
                           <span>Sovereign Identity Protection Enabled</span>
                         </div>
->>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
+                      </div>
                       </div>
                     </div>
                   )}
@@ -1070,17 +1065,6 @@ export default function AgentBuilderPage() {
                             onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
                           />
                         </div>
-                      </div>
-<<<<<<< HEAD
-                      
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. langchain, openai, pinecone"
-                          className="input"
-                          onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
-                        />
                       </div>
 
                       <div className="pt-6 border-t border-white/[0.05] mt-6">
@@ -1178,39 +1162,8 @@ export default function AgentBuilderPage() {
                           <p className="text-xs text-emerald-300/80 leading-relaxed">
                             Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
                           </p>
-=======
-
-                      <div className="space-y-4 pt-6 border-t border-white/5">
-                        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-6">
-                          <div className="flex gap-3">
-                            <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-                            <p className="text-xs text-emerald-300/80 leading-relaxed">
-                              Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
-                            </p>
-                          </div>
->>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
                         </div>
 
-<<<<<<< HEAD
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['unverified', 'basic', 'verified', 'institutional'].map((tier) => (
-                            <button
-                              key={tier}
-                              onClick={() => updateIdentity('kyc_tier', tier)}
-                              className={cn(
-                                "p-3 rounded-xl border text-left transition-all",
-                                String(formData.identity_layer.kyc_tier) === tier
-                                  ? "bg-emerald-500/10 border-emerald-500/50 text-white"
-                                  : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
-                              )}
-                            >
-                              <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
-                            </button>
-                          ))}
-                        </div>
-=======
                         <div className="space-y-1.5">
                           <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
                           <div className="grid grid-cols-2 gap-3">
@@ -1349,7 +1302,6 @@ export default function AgentBuilderPage() {
                     <Download className="w-4 h-4" />
                   </button>
                 </div>
-<<<<<<< HEAD
                 
                 <div className="flex-1 overflow-hidden relative">
                   {previewFormat === "visualizer" ? (
@@ -1434,15 +1386,6 @@ export default function AgentBuilderPage() {
                       </pre>
                     </motion.div>
                   )}
-=======
-
-                <div className="h-full overflow-hidden flex flex-col">
-                  <div className="flex-1 overflow-auto custom-scrollbar p-6 font-mono text-sm leading-relaxed text-[#8888a0]">
-                    <pre className="whitespace-pre-wrap break-all">
-                      {manifestContent}
-                    </pre>
-                  </div>
->>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
                 </div>
               </div>
 
