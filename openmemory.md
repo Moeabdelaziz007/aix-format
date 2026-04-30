@@ -74,3 +74,38 @@ The "Sovereign Era" update focuses on the three pillars of AI independence:
 1. **Provenance**: Knowing where an agent came from (Lineage).
 2. **Transparency**: Knowing what an agent is made of (ABOM).
 3. **Autonomy**: Providing the economic tools for self-sustenance (Pi Smart Contracts).
+
+## CI/CD & Development Workflow Guardrails (Implemented 2026-04-30)
+
+To solve the root problem of broken production builds on Vercel, a "Triple Firewall" was implemented to protect the `main` branch. This ensures that every push to `main` is validated at multiple stages, preventing broken code from being deployed.
+
+### Layer 1: Pre-commit Hook (Local)
+
+- **File**: `.husky/pre-commit`
+- **Trigger**: Before a `git commit` is created.
+- **Actions**:
+    1.  **TypeScript Check**: Runs `npx tsc --noEmit` within `apps/studio` to catch type errors.
+    2.  **Import Validation**: Rejects commits containing explicit `.ts` imports (`from './file.ts'`).
+    3.  **Dependency Validation**: Rejects commits that import the deprecated `@vercel/kv` package.
+- **Purpose**: To catch common, low-level errors at the earliest possible stage.
+
+### Layer 2: Pre-push Hook (Local)
+
+- **File**: `.husky/pre-push`
+- **Trigger**: Before `git push` sends commits to the remote repository.
+- **Action**:
+    1.  **Production Build**: Runs `npm run build` within `apps/studio`.
+- **Purpose**: To act as a final local gate, ensuring the application builds successfully before the code is shared. If the build fails, the push is aborted.
+
+### Layer 3: GitHub Branch Protection (Remote)
+
+- **Files**: `.github/workflows/studio-ci.yml` and GitHub Repository Settings.
+- **Trigger**: On any Pull Request targeting the `main` branch.
+- **Actions**:
+    1.  **CI Workflow**: The `studio-ci.yml` workflow executes a job named `studio-build-check`.
+    2.  **CI Steps**: This job installs dependencies, runs a TypeScript check (`tsc --noEmit`), and performs a full production build (`next build`).
+    3.  **Branch Protection Rule**: The `main` branch is protected in GitHub settings to require the `studio-build-check` status check to pass before merging and to require a Pull Request for all changes.
+- **Purpose**: To provide a definitive, server-side guarantee that code merged into `main` is valid and buildable.
+
+### Supporting Scripts
+- **`apps/studio/package.json`**: A script `check:all` was added to run `tsc`, `lint`, and `build` sequentially for a complete local check.
