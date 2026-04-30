@@ -3,11 +3,13 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ShieldCheck, UserCheck, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { PiUser } from "@/lib/types";
+
 // ─── Stable class maps — defined outside component, never recreated ───────────
 const stepActive   = "border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10";
 const stepInactive = "border-[var(--color-glass-border)] bg-[var(--color-surface)]";
 
-export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: any }) {
+export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: PiUser }) {
   const [step, setStep] = useState(1);
   
   useEffect(() => {

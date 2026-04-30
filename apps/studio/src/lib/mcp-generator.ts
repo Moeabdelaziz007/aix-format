@@ -1,3 +1,5 @@
+import { Manifest, AgentSkill, McpPrompt } from "@/lib/types";
+
 /**
  * AIX to MCP Server Card Generator (2026 Roadmap Alignment)
  * Strictly follows RFC 8615 and the Agentic AI Foundation discovery spec.
@@ -10,7 +12,7 @@ export interface MCPServerCard {
   description?: string;
   capabilities: {
     tools?: Array<{ name: string; description: string; inputSchema: object }>;
-    resources?: Array<{ uri: string; name: string; mimeType?: string }>;
+    resources?: Array<{ uri: string; name: string; description?: string }>;
     prompts?: Array<{ name: string; description?: string }>;
   };
   identity: {
@@ -41,22 +43,18 @@ export interface AIXDiscovery {
 /**
  * Extracts MCP capabilities from a core AIX manifest.
  */
-export function generateMCPServerCard(aixManifest: any, serverUri: string): MCPServerCard {
-  const { meta, skills, apis, identity_layer, mcp } = aixManifest;
+export function generateMCPServerCard(aixManifest: Manifest, serverUri: string): MCPServerCard {
+  const { meta, skills, identity_layer, mcp } = aixManifest;
 
   // 1. Extract Tools from Skills
-  const tools = (skills || []).map((skill: any) => ({
+  const tools = (skills || []).map((skill: AgentSkill) => ({
     name: skill.name,
     description: skill.description,
     inputSchema: skill.parameters || { type: "object", properties: {} }
   }));
 
-  // 2. Extract Resources from APIs
-  const resources = (apis || []).map((api: any) => ({
-    uri: api.base_url,
-    name: api.name,
-    description: api.description
-  }));
+  // 2. Resources (Optional, depends on ABOM dependencies in 2026 spec)
+  const resources: Array<{ uri: string; name: string; description?: string }> = [];
 
   // 3. Build the Server Card
   return {
@@ -72,7 +70,7 @@ export function generateMCPServerCard(aixManifest: any, serverUri: string): MCPS
     identity: {
       did: identity_layer?.id || "did:unknown",
       kyc_tier: identity_layer?.kyc_tier || 0,
-      verified: identity_layer?.verified || false
+      verified: !!identity_layer?.id // Derived from presence of ID in updated schema
     },
     endpoints: [
       {
@@ -86,13 +84,13 @@ export function generateMCPServerCard(aixManifest: any, serverUri: string): MCPS
 /**
  * Generates the .well-known/agent.aix.json discovery manifest.
  */
-export function generateAIXDiscovery(aixManifest: any, serverUri: string): AIXDiscovery {
+export function generateAIXDiscovery(aixManifest: Manifest, serverUri: string): AIXDiscovery {
   const card = generateMCPServerCard(aixManifest, serverUri);
   
   return {
     format_version: "1.3.0",
     agent: {
-      id: aixManifest.meta.id,
+      id: aixManifest.identity_layer.id,
       name: aixManifest.meta.name,
       description: aixManifest.meta.description
     },

@@ -79,12 +79,34 @@ function WaveCanvas({ active, color }: { active: boolean; color: string }) {
   );
 }
 
+interface SpeechRecognitionEvent extends Event {
+  results: {
+    [key: number]: {
+      [key: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: Event) => void;
+  onend: () => void;
+}
+
 export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: VoiceOrbProps) {
   const [isListening,  setIsListening]  = useState(false);
   const [isSpeaking,   setIsSpeaking]   = useState(false);
   const [micLevel,     setMicLevel]     = useState(0);
   const [transcript,   setTranscript]   = useState("");
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const isProcessing   = extProcessing;
   const prevProcessing = useRef(isProcessing);
 
@@ -128,7 +150,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
       r.continuous = false;
       r.interimResults = false;
       r.lang = "en-US";
-      r.onresult = (e: any) => {
+      r.onresult = (e: SpeechRecognitionEvent) => {
         const t = e.results?.[0]?.[0]?.transcript ?? "";
         setTranscript(t);
         if (onTranscript) onTranscript(t);

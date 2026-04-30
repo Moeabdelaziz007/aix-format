@@ -22,7 +22,7 @@ export async function parseYamlSafe(content: string): Promise<Record<string, unk
 /**
  * Safely stringify object to YAML using js-yaml with dynamic import.
  */
-export async function stringifyYamlSafe(data: any): Promise<string> {
+export async function stringifyYamlSafe(data: unknown): Promise<string> {
   try {
     const yaml = await import("js-yaml");
     return yaml.dump(data, { indent: 2, lineWidth: -1 });

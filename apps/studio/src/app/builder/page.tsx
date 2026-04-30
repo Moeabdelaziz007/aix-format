@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
-import { Manifest } from "@/lib/types";
+import { Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { clsx, type ClassValue } from "clsx";
@@ -56,7 +56,7 @@ export default function AgentBuilderPage() {
   const [isDeploying, setIsDeploying] = useState(false);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Manifest>({
     meta: {
       name: "",
       version: "1.0.0",
@@ -69,7 +69,7 @@ export default function AgentBuilderPage() {
       instructions: "",
       tone: "formal",
     },
-    skills: [] as any[],
+    skills: [] as AgentSkill[],
     security: {
       checksum: {
         algorithm: "sha256",
@@ -80,7 +80,7 @@ export default function AgentBuilderPage() {
       id: `did:axiom:axiomid.app:agent-temp`,
       authority: "axiomid.app",
       issuedAt: new Date().toISOString(),
-      kyc_tier: "unverified" as const
+      kyc_tier: 0
     },
     economics: {
       pricing_model: "pay_per_call",
@@ -94,7 +94,7 @@ export default function AgentBuilderPage() {
       dependencies: [] as string[]
     },
     mcp: {
-      prompts: [] as any[]
+      prompts: [] as McpPrompt[]
     }
   });
 
@@ -164,7 +164,7 @@ export default function AgentBuilderPage() {
     }));
   };
 
-  const updateSkill = (index: number, field: string, value: any) => {
+  const updateSkill = (index: number, field: keyof AgentSkill, value: string) => {
     setFormData(prev => {
       const newSkills = [...prev.skills];
       newSkills[index] = { ...newSkills[index], [field]: value };
@@ -236,7 +236,7 @@ export default function AgentBuilderPage() {
     }));
   };
 
-  const updateAbom = (field: string, value: any) => {
+  const updateAbom = (field: string, value: string | string[]) => {
     setFormData(prev => ({
       ...prev,
       abom: {
@@ -246,7 +246,7 @@ export default function AgentBuilderPage() {
     }));
   };
 
-  const updateIdentity = (field: string, value: any) => {
+  const updateIdentity = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       identity_layer: {
@@ -418,7 +418,7 @@ export default function AgentBuilderPage() {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {formData.skills.map((skill: any, index: number) => (
+                          {formData.skills.map((skill: AgentSkill, index: number) => (
                             <div key={index} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] space-y-3 relative group">
                               <button 
                                 onClick={() => removeSkill(index)}
@@ -466,7 +466,7 @@ export default function AgentBuilderPage() {
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            {formData.mcp.prompts.map((p: any, i: number) => (
+                            {formData.mcp.prompts.map((p: McpPrompt, i: number) => (
                               <div key={i} className="flex gap-2 group">
                                 <input 
                                   placeholder="Prompt Name" 
@@ -480,7 +480,7 @@ export default function AgentBuilderPage() {
                                 />
                                 <button 
                                   onClick={() => {
-                                    const next = formData.mcp.prompts.filter((_: any, idx: number) => idx !== i);
+                                    const next = formData.mcp.prompts.filter((_: McpPrompt, idx: number) => idx !== i);
                                     setFormData(prev => ({ ...prev, mcp: { prompts: next } }));
                                   }}
                                   className="p-2 text-[#404050] hover:text-red-400 transition-colors"

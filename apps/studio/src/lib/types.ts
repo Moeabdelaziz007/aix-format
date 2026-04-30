@@ -1,3 +1,6 @@
+// ⚠️ NO `any` POLICY — all types must be explicit.
+// Run: cd apps/studio && npx tsc --noEmit before every commit.
+
 export type DeployStatus = 
   'idle' | 'deploying' | 'deployed' | 'failed';
 
@@ -29,13 +32,14 @@ export interface AgentRecord {
   abom?: AbomRecord;
   deployment?: DeploymentRecord;
   // Extended fields for UI state (kept as optional to maintain compatibility with MISSION 9)
-  manifest?: any;
   color?: string;
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
   published?: boolean;
 }
+
+export type NormalizedAgent = AgentRecord & { isMock: boolean };
 
 export interface AbomRecord {
   capabilities: string[];
@@ -73,6 +77,25 @@ export interface McpDiscoveryResponse {
   agents: McpAgent[];
 }
 
+export interface AgentSkill {
+  name: string;
+  description: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface AbomManifest {
+  bom_format: 'CycloneDX' | 'SPDX';
+  spec_version: string;
+  risk_level: 'low' | 'medium' | 'high';
+  integrity_hash: string;
+  dependencies: string[];
+}
+
+export interface McpPrompt {
+  name: string;
+  description?: string;
+}
+
 export interface Manifest {
   meta: {
     name: string;
@@ -86,7 +109,7 @@ export interface Manifest {
     instructions: string;
     tone: string;
   };
-  skills: any[];
+  skills: AgentSkill[];
   security: {
     checksum: {
       algorithm: string;
@@ -103,10 +126,20 @@ export interface Manifest {
     pricing_model: string;
     currency: string;
   };
-  abom: any;
+  abom: AbomManifest;
   mcp: {
-    prompts: any[];
+    prompts: McpPrompt[];
   }
+}
+
+export interface PiUser {
+  uid: string;
+  username: string;
+}
+
+export interface AuthResult {
+  user: PiUser;
+  accessToken: string;
 }
 
 // ─── New Deployment Types ──────────────────────────────────────────────────
