@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
     try {
       const { parseYamlLight } = await import('@/lib/utils');
       const yamlObj = parseYamlLight(body.yaml) as Partial<Manifest>;
+
       const report = scanAgent(yamlObj);
       entry.abom = {
         ...entry.abom,

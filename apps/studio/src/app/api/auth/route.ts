@@ -54,17 +54,21 @@ export async function POST(req: NextRequest) {
  * Checks if a session exists for a given UID.
  */
 export async function GET(req: NextRequest) {
-  const uid = req.nextUrl.searchParams.get("uid");
-  if (!uid) {
-    return NextResponse.json({ error: "Missing uid" }, { status: 400 });
-  }
+  try {
+    const uid = req.nextUrl.searchParams.get("uid");
+    if (!uid) {
+      return NextResponse.json({ error: "Missing uid" }, { status: 400 });
+    }
 
-  const session = await kv.get<AuthResult>(`${NS.SESSION}:${uid}`);
-  if (!session) {
-    return NextResponse.json({ authenticated: false }, { status: 404 });
-  }
+    const session = await kv.get<AuthResult>(`${NS.SESSION}:${uid}`);
+    if (!session) {
+      return NextResponse.json({ authenticated: false }, { status: 404 });
+    }
 
-  return NextResponse.json({ authenticated: true, user: session.user });
+    return NextResponse.json({ authenticated: true, user: session.user });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch session" }, { status: 500 });
+  }
 }
 
 /**
@@ -72,11 +76,15 @@ export async function GET(req: NextRequest) {
  * Logs out the user by deleting the session from KV.
  */
 export async function DELETE(req: NextRequest) {
-  const uid = req.nextUrl.searchParams.get("uid");
-  if (!uid) {
-    return NextResponse.json({ error: "Missing uid" }, { status: 400 });
-  }
+  try {
+    const uid = req.nextUrl.searchParams.get("uid");
+    if (!uid) {
+      return NextResponse.json({ error: "Missing uid" }, { status: 400 });
+    }
 
-  await kv.del(`${NS.SESSION}:${uid}`);
-  return NextResponse.json({ success: true });
+    await kv.del(`${NS.SESSION}:${uid}`);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to delete session" }, { status: 500 });
+  }
 }

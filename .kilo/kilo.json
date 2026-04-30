@@ -1,0 +1,9 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "mcp": {
+    "git-mcp": {
+      "type": "remote",
+      "url": "https://gitmcp.io/Moeabdelaziz007/https://github.com/Moeabdelaziz007/aix-format"
+    }
+  }
+}

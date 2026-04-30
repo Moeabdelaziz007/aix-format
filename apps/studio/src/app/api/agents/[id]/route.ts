@@ -77,7 +77,8 @@ export async function DELETE(
   try {
     const { id } = await params;
     await deleteRegistryEntry(id);
-    return NextResponse.json({ message: "Agent deleted", id: id });
+    return NextResponse.json({ message: "Agent deleted", id });
+
   } catch (error) {
     console.error("Agent DELETE Error:", error);
     return NextResponse.json(

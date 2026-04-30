@@ -1,0 +1,57 @@
+[ ' must NOT have additional properties' ]
+[ ' must NOT have additional properties' ]
+▶ AIX Schema Integrity Validation
+  ✔ 1. يجب أن يفشل manifest فارغ (Missing required blocks) (13.771052ms)
+  ✔ 2. يجب أن يمر manifest بحد أدنى من v1.3 (meta, persona, security, identity_layer) (1.200277ms)
+  ✔ 3. يجب أن يفشل عند استخدام enum غير صالح (security.checksum.algorithm) (0.4817ms)
+  ✔ 4. يجب أن يفشل عند نقص حقول إجبارية داخل meta (0.480009ms)
+  ✔ 5. يجب أن يفشل identity_layer إذا كانت الـ authority ليست axiomid.app (0.361147ms)
+  ✖ 6. يجب أن يمر manifest يحتوي على saas_services (SaaS-BOM) (6.35234ms)
+  ✖ 7. يجب أن يمر manifest يحتوي على unified_bom (0.754727ms)
+✖ AIX Schema Integrity Validation (201.939254ms)
+ℹ tests 7
+ℹ suites 1
+ℹ pass 5
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 630.154609
+
+✖ failing tests:
+
+test at tests/schema-integrity.test.js:149:5
+✖ 6. يجب أن يمر manifest يحتوي على saas_services (SaaS-BOM) (6.35234ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/cryptojoker710/Desktop/aix-format/tests/schema-integrity.test.js:172:16)
+      at Test.runInAsyncScope (node:async_hooks:212:14)
+      at Test.run (node:internal/test_runner/test:1109:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:786:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/schema-integrity.test.js:175:5
+✖ 7. يجب أن يمر manifest يحتوي على unified_bom (0.754727ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/cryptojoker710/Desktop/aix-format/tests/schema-integrity.test.js:195:16)
+      at Test.runInAsyncScope (node:async_hooks:212:14)
+      at Test.run (node:internal/test_runner/test:1109:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:786:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
