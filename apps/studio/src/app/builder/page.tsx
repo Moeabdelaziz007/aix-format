@@ -30,6 +30,7 @@ import { useLocalAgents } from "@/hooks/useLocalAgents";
 import { Manifest, AgentSkill, McpPrompt, AgentRecord } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
+import BOMVisualizer from "@/components/studio/BOMVisualizer";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -50,7 +51,8 @@ export default function AgentBuilderPage() {
   const router = useRouter();
   const { saveAgent } = useLocalAgents();
   const [currentStep, setCurrentStep] = useState(1);
-  const [previewFormat, setPreviewFormat] = useState<"yaml" | "json" | "discovery">("yaml");
+  const [previewFormat, setPreviewFormat] = useState<"yaml" | "json" | "discovery" | "visualizer">("yaml");
+
   const [copied, setCopied] = useState(false);
   const [manifestContent, setManifestContent] = useState("");
   const [isDeploying, setIsDeploying] = useState(false);
@@ -692,6 +694,15 @@ export default function AgentBuilderPage() {
                 >
                   <Zap className="w-3 h-3" /> Discovery
                 </button>
+                <button 
+                  onClick={() => setPreviewFormat("visualizer")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
+                    previewFormat === "visualizer" ? "bg-[#6366f1] text-white" : "text-[#404050] hover:text-[#8888a0]"
+                  )}
+                >
+                  <Cpu className="w-3 h-3" /> Graph
+                </button>
               </div>
             </div>
 
@@ -716,11 +727,17 @@ export default function AgentBuilderPage() {
                 </div>
                 
                 <div className="h-full overflow-hidden flex flex-col">
-                  <div className="flex-1 overflow-auto custom-scrollbar p-6 font-mono text-sm leading-relaxed text-[#8888a0]">
-                    <pre className="whitespace-pre-wrap break-all">
-                      {manifestContent}
-                    </pre>
-                  </div>
+                  {previewFormat === "visualizer" ? (
+                    <div className="flex-1 p-0">
+                      <BOMVisualizer formData={formData} />
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-auto custom-scrollbar p-6 font-mono text-sm leading-relaxed text-[#8888a0]">
+                      <pre className="whitespace-pre-wrap break-all">
+                        {manifestContent}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               </div>
 
