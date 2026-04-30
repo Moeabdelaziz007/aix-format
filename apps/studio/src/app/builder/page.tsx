@@ -192,6 +192,37 @@ export default function AgentBuilderPage() {
       
       const integrityHash = await sha256Hex(manifestContent);
       
+      const id = crypto.randomUUID();
+      const agentId = `${slug}-${id.slice(0, 4)}`;
+
+      const record: AgentRecord = {
+        id: agentId,
+        name: formData.meta.name || "Unnamed Agent",
+        role: formData.persona.role || "AI Assistant",
+        createdAt: new Date().toISOString(),
+        yaml: manifestContent,
+        did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
+        kyc_tier: formData.identity_layer.kyc_tier as any,
+        abom: {
+          capabilities: formData.skills.map(s => s.name || "unnamed_skill"),
+          integrity_hash: integrityHash,
+          generated_by: "AIX Studio Builder",
+          timestamp: new Date().toISOString(),
+          model: {
+            provider: "axiom",
+            name: "sovereign-1"
+          },
+          governance: {
+            license: "MIT"
+          }
+        }
+      };
+
+      // In-memory save (Registry will pick it up)
+      const { saveAgent } = await import("@/lib/registry");
+      await saveAgent(record);
+      
+      // Also trigger browser download
       const blob = new Blob([manifestContent], { type: 'text/yaml' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1164,6 +1195,7 @@ export default function AgentBuilderPage() {
                           </p>
                         </div>
 
+<<<<<<< HEAD
                         <div className="space-y-1.5">
                           <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
                           <div className="grid grid-cols-2 gap-3">
@@ -1181,6 +1213,25 @@ export default function AgentBuilderPage() {
                               </button>
                             ))}
                           </div>
+=======
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[0, 1, 2, 3].map((tier) => (
+                            <button
+                              key={tier}
+                              onClick={() => updateIdentity('kyc_tier', tier)}
+                              className={cn(
+                                "p-3 rounded-xl border text-left transition-all",
+                                formData.identity_layer.kyc_tier === tier
+                                  ? "bg-emerald-500/10 border-emerald-500/50 text-white"
+                                  : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
+                              )}
+                            >
+                              <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
+                            </button>
+                          ))}
+>>>>>>> remotes/origin/jules-4291459068450965295-bbfecebe
                         </div>
 
                         <div className="space-y-1.5 pt-4">

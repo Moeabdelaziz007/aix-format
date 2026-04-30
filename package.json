@@ -97,8 +97,12 @@
     "zod": "^4.4.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
     "json-schema-to-typescript": "^15.0.4",
     "ts-node": "^10.9.2",
+    "postcss": "^8.5.12",
+    "postcss-loader": "^8.2.1",
+    "tailwindcss": "^4.2.4",
     "typescript": "^5.4.5"
   }
 }
