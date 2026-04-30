@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle } from "lucide-react";
+import { UploadCloud, ShieldCheck, ShieldX, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { parseYamlSafe } from "@/lib/utils";
 
 async function sha256Hex(input: string): Promise<string> {
@@ -18,6 +18,7 @@ type ValidationResult = {
   missing: string[];
   hasSignature: boolean;
   fieldCount: number;
+  warnings: string[];
 };
 
 function validateAix(parsed: Record<string, unknown>): ValidationResult {
@@ -26,7 +27,38 @@ function validateAix(parsed: Record<string, unknown>): ValidationResult {
   const sig = security?.signature as Record<string, unknown> | undefined;
   const hasSignature = Boolean(sig?.value);
   const fieldCount = Object.keys(parsed).length;
-  return { valid: missing.length === 0, missing, hasSignature, fieldCount };
+
+  // Fresh warnings array — never accumulated across calls
+  const warnings: string[] = [];
+
+  if (!hasSignature) {
+    warnings.push("No cryptographic signature — agent cannot be trusted on-chain");
+  }
+
+  // validate live_voice section when present
+  const lv = parsed.live_voice as Record<string, unknown> | undefined;
+  if (lv !== undefined) {
+    if (lv.enabled === true && !lv.provider) {
+      warnings.push("live_voice: 'provider' is required when enabled is true");
+    }
+    if (lv.enabled === true && lv.provider === "generic") {
+      warnings.push("live_voice: 'generic' provider has no built-in implementation — ensure a custom adapter is registered");
+    }
+    if (lv.enabled === false) {
+      warnings.push("live_voice: section present but disabled — remove it or set enabled: true");
+    }
+  }
+
+  // validate abom integrity_hash pattern if present
+  const abom = parsed.abom as Record<string, unknown> | undefined;
+  if (abom?.integrity_hash) {
+    const h = abom.integrity_hash as string;
+    if (h !== "pending" && h !== "sha256-empty-deps" && !/^[0-9a-f]{64}$/.test(h) && !/^sha256-/.test(h)) {
+      warnings.push("abom.integrity_hash: value does not look like a valid sha256 hex or sentinel");
+    }
+  }
+
+  return { valid: missing.length === 0, missing, hasSignature, fieldCount, warnings };
 }
 
 export default function LiveValidator({ 
@@ -51,7 +83,10 @@ export default function LiveValidator({
   }, [validation]);
 
   const processContent = async (content: string, name: string) => {
+    // Reset all derived state at the START of every processing run
     setError("");
+    setValidation(null);
+    setHash("");
     setFileName(name);
     try {
       let parsed: Record<string, unknown>;
@@ -64,7 +99,7 @@ export default function LiveValidator({
 
       const computedHash = await sha256Hex(content.replace(/\r\n/g, "\n"));
       setHash(computedHash);
-
+      // validateAix always returns a fresh ValidationResult — no accumulation
       setValidation(validateAix(parsed));
     } catch (e: unknown) {
       setError(
@@ -72,14 +107,20 @@ export default function LiveValidator({
           e instanceof Error ? e.message : String(e)
         }`
       );
-      setValidation(null);
     }
   };
 
   useEffect(() => {
-    if (propContent) {
+    if (propContent && propContent.trim().length > 0) {
       processContent(propContent, propFileName || "live-builder.aix");
+    } else {
+      // Content cleared — reset ALL state so stale warnings don't survive
+      setValidation(null);
+      setHash("");
+      setError("");
+      setFileName(propFileName || "");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propContent, propFileName]);
 
   const handleFile = async (file: File) => {
@@ -152,7 +193,9 @@ export default function LiveValidator({
               <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
             )}
             <span className={validation.valid ? "text-emerald-300" : "text-amber-300"}>
-              {validation.valid ? `Valid AIX — ${validation.fieldCount} top-level fields` : `Invalid: missing ${validation.missing.join(", ")}`}
+              {validation.valid
+                ? `Valid AIX — ${validation.fieldCount} top-level fields`
+                : `Invalid: missing ${validation.missing.join(", ")}`}
             </span>
           </div>
 
@@ -167,6 +210,18 @@ export default function LiveValidator({
               {statusLabel}
             </span>
           </div>
+
+          {/* Warnings — always freshly computed, never accumulated */}
+          {validation.warnings.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {validation.warnings.map((w, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs text-yellow-300/80 bg-yellow-500/5 border border-yellow-500/10 rounded-lg px-3 py-1.5">
+                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                  <span>{w}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
