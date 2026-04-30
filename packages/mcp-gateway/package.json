@@ -1,0 +1,26 @@
+{
+  "name": "@aix-format/mcp-gateway",
+  "version": "1.0.0",
+  "description": "Secure gateway for AIX MCP interactions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test src/**/*.test.ts"
+  },
+  "keywords": [
+    "aix",
+    "mcp",
+    "gateway",
+    "security"
+  ],
+  "author": "AMRIKYY AI Solutions",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

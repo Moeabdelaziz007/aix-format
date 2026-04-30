@@ -189,34 +189,20 @@ export default function AgentBuilderPage() {
   };
 
   const handleExportAndSave = async () => {
-    setIsDeploying(true);
     try {
-      const id = crypto.randomUUID();
       const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unnamed-agent';
-      const agentId = `${slug}-${id.slice(0, 4)}`;
-
-      // Calculate integrity hash of the final manifest
-      const integrityHash = await sha256Hex(manifestContent);
-      
-      const record: AgentRecord = {
-        id: agentId,
-        name: formData.meta.name || "Unnamed Agent",
-        role: formData.persona.role || "AI Assistant",
-        createdAt: new Date().toISOString(),
-        yaml: manifestContent,
-        manifest: JSON.parse(JSON.stringify(formData)),
-        did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
-        kyc_tier: formData.identity_layer.kyc_tier as any,
-        abom: {
-          ...formData.abom,
-          integrity_hash: integrityHash,
-          timestamp: new Date().toISOString()
-        }
-      };
-      // Note: publishAgent and deployAgent should be defined or imported
-      // For now keeping this logic as placeholders if they were in HEAD
+      const blob = new Blob([manifestContent], { type: 'text/yaml' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${slug}.aix.yaml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("Manifest exported successfully!");
     } catch (err) {
-      toast.error("Failed to export/save");
+      toast.error("Failed to export manifest");
     }
   };
 
@@ -1257,7 +1243,6 @@ export default function AgentBuilderPage() {
                             placeholder="e.g. axiomid.app"
                           />
                         </div>
->>>>>>> remotes/origin/feat/aix-saas-ecosystem-7373274762848100795
                       </div>
                     </div>
                   )}
