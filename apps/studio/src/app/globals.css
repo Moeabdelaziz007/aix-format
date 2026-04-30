@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..700&display=swap');
-@source "../../";
 @import "tailwindcss";
 
 /* ─── Design Tokens ────────────────────────────────────────────────────────── */
@@ -36,6 +35,10 @@
   --color-error:    #ef4444;
 
   /* Typography */
+  /* FIX: layout.tsx loads Manrope + Inter via next/font and sets
+     --font-manrope / --font-inter variables. globals.css previously defined
+     --font-display / --font-body using Space Grotesk from Google Fonts CDN,
+     creating two competing font systems. Aligned to use the next/font vars. */
   --font-display: var(--font-manrope, 'Space Grotesk', system-ui, sans-serif);
   --font-body:    var(--font-inter,   'Inter',          system-ui, sans-serif);
 
@@ -67,6 +70,7 @@ html {
 
 body {
   min-height:      100dvh;
+  /* FIX: add bottom padding to prevent SovereignStatusBar from covering content */
   padding-bottom:  2.5rem;
   background:      var(--color-background);
   color:           var(--color-on-surface);
@@ -114,6 +118,12 @@ input, button, textarea, select   { font: inherit; color: inherit; }
   -webkit-backdrop-filter: blur(20px);
 }
 .glass-panel-heavy,
+.glass-heavy {
+  background: rgba(14, 14, 18, 0.85);
+  border:     1px solid var(--color-glass-border);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
 .glass-heavy {
   background: rgba(14, 14, 18, 0.85);
   border:     1px solid var(--color-glass-border);
@@ -179,6 +189,7 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 .btn-md  { padding: 0.625rem 1.25rem; font-size: 0.875rem; }
 
 /* ─── Badge ────────────────────────────────────────────────────────────────── */
+/* FIX: `badge` and `badge-primary` classes were used in Navbar but not defined */
 .badge {
   display:         inline-flex;
   align-items:     center;
@@ -196,6 +207,7 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 }
 
 /* ─── Divider ───────────────────────────────────────────────────────────────── */
+/* FIX: `.divider` was used in Navbar dropdown but not defined */
 .divider {
   height:     1px;
   background: var(--color-glass-border);

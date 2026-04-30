@@ -1,5 +1,4 @@
 "use client";
-
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { AgentCard } from '@/components/studio/AgentCard';
@@ -50,11 +49,9 @@ export default function MyAgentsPage() {
                </button>
              </div>
 
-            <button
-              onClick={() => router.push('/builder')}
+            <button onClick={() => router.push('/builder')}
               className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:brightness-110 
-                         rounded-xl text-black font-bold transition shadow-[0_10px_20px_rgba(0,219,233,0.2)]"
-            >
+                         rounded-xl text-black font-bold transition shadow-[0_10px_20px_rgba(0,219,233,0.2)]">
               <Plus className="w-4 h-4" />
               Build Agent
             </button>
@@ -77,22 +74,17 @@ export default function MyAgentsPage() {
                 The future of decentralized intelligence starts with your first manifest.
               </p>
             </div>
-            <button
-              onClick={() => router.push('/builder')}
+            <button onClick={() => router.push('/builder')}
               className="mt-4 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10
-                         rounded-xl text-white font-bold transition"
-            >
+                         rounded-xl text-white font-bold transition">
               Launch Builder
             </button>
           </motion.div>
         ) : (
-          <div
-            className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
-                : 'flex flex-col gap-4'
-            }
-          >
+          <div className={viewMode === 'grid'
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            : "flex flex-col gap-4"
+          }>
             {agents.map(agent => (
               <AgentCard key={agent.id} agent={agent} />
             ))}

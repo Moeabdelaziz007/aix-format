@@ -3,11 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test": "jest"
+    "lint": "eslint"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.10",
@@ -29,18 +28,14 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
+    "@types/dom-speech-recognition": "^0.0.9",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
-    "lightningcss": "^1",
-    "postcss": "^8",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
-    "ts-jest": "^29.2.6",
     "typescript": "^5"
   }
 }

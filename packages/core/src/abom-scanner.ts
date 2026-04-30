@@ -1,11 +1,27 @@
-/**
- * ABOM Risk Scoring Engine (2026 Compliance Standard)
- */
+import { AgentRecord, AbomManifest } from '../../apps/studio/src/lib/types';
 
-export function scanAgent(agent) {
+export interface ScanReport {
+  score: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  risks: Risk[];
+  recommendations: string[];
+  compliance: {
+    eu_cra: boolean;
+    nist_ai_rmf: boolean;
+    kyc_complete: boolean;
+  };
+}
+
+export interface Risk {
+  category: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+}
+
+export function scanAgent(agent: any): ScanReport {
   let score = 0;
-  const risks = [];
-  const recommendations = [];
+  const risks: Risk[] = [];
+  const recommendations: string[] = [];
 
   // 1. abom.integrity_hash موجود → +10
   if (agent.abom?.integrity_hash) {
@@ -66,7 +82,7 @@ export function scanAgent(agent) {
 
   // 8. مش عنده capabilities خطيرة بلا governance → +10
   const dangerousCapabilities = ['filesystem_write', 'network_raw', 'shell_exec'];
-  const hasUncheckedDangerous = agent.abom?.capabilities?.some(c =>
+  const hasUncheckedDangerous = agent.abom?.capabilities?.some((c: string) =>
     dangerousCapabilities.includes(c)
   ) && !agent.abom?.governance?.policy_url;
 
@@ -87,7 +103,7 @@ export function scanAgent(agent) {
 
   // 10. mcp.endpoints مأمونة (https فقط) → +10
   const endpoints = agent.mcp?.endpoints || [];
-  const allSecure = endpoints.length > 0 && endpoints.every(e => e.uri.startsWith('https://'));
+  const allSecure = endpoints.length > 0 && endpoints.every((e: any) => e.uri.startsWith('https://'));
   if (allSecure) {
     score += 10;
   } else if (endpoints.length > 0) {
@@ -101,7 +117,7 @@ export function scanAgent(agent) {
   score = Math.min(100, score);
 
   // Determine Grade
-  let grade = 'F';
+  let grade: ScanReport['grade'] = 'F';
   if (score >= 90) grade = 'A';
   else if (score >= 80) grade = 'B';
   else if (score >= 70) grade = 'C';

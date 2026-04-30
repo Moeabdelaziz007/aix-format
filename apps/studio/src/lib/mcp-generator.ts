@@ -17,7 +17,7 @@ export interface MCPServerCard {
   };
   identity: {
     did: string;
-    kyc_tier?: number;
+    kyc_tier?: string;
     verified: boolean;
   };
   endpoints: Array<{
@@ -69,7 +69,7 @@ export function generateMCPServerCard(aixManifest: Manifest, serverUri: string):
     },
     identity: {
       did: identity_layer?.id || "did:unknown",
-      kyc_tier: identity_layer?.kyc_tier || 0,
+      kyc_tier: identity_layer?.kyc_tier || 'unverified',
       verified: !!identity_layer?.id // Derived from presence of ID in updated schema
     },
     endpoints: [

@@ -24,13 +24,13 @@ import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import DeployModal from '@/components/studio/DeployModal';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, RefreshCw } from 'lucide-react';
 
 export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getAgent, loaded } = useLocalAgents();
+  const { getAgent, saveAgent, loaded } = useLocalAgents();
   const [agent, setAgent] = useState<AgentRecord | null>(null);
   const [showDeploy, setShowDeploy] = useState(false);
 

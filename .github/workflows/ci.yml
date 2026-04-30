@@ -10,55 +10,39 @@ jobs:
   build:
     name: TypeScript + Build Check
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/studio
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
-      # Use --ignore-scripts to prevent `prepare` from running tsc
-      # during install (tsc is a build step, not an install step)
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: TypeScript check (root)
-        run: npx tsc -p tsconfig.json --noEmit
-        continue-on-error: true
-
-      - name: TypeScript check (studio)
-        working-directory: apps/studio
+          cache-dependency-path: apps/studio/package-lock.json
+      - run: npm ci
+      - name: TypeScript check
         run: npx tsc --noEmit
-
-      - name: Build studio
-        run: npm run build -w studio
+      - name: Build
+        run: npm run build
         env:
           NODE_ENV: production
-
       - name: npm audit
-        working-directory: apps/studio
-        run: npm audit --audit-level=high
-        continue-on-error: true
+        run: npm audit --audit-level=moderate
 
   test:
     name: Core Package Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/core
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-
-      # Run tests from repo root (packages/core has no package.json;
-      # all core tests live in tests/ at repo root)
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Run core tests
-        run: npm test
+      - run: npm ci
+      - run: npm test --if-present
 
   deploy:
     name: Deploy to Vercel

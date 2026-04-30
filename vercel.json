@@ -1,10 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "npm install --ignore-scripts",
-  "buildCommand": "npm run build -w studio",
-  "devCommand": "npm run dev -w studio",
-  "outputDirectory": "apps/studio/.next",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build --workspace=studio",
+  "devCommand": "npm run dev --workspace=studio",
   "redirects": [
     {
       "source": "/(.*)",

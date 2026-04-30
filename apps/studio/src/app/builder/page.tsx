@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
-import { Manifest, AgentSkill, McpPrompt, AgentRecord } from "@/lib/types";
+import { AgentRecord, Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { clsx, type ClassValue } from "clsx";
@@ -55,6 +55,7 @@ export default function AgentBuilderPage() {
   const [manifestContent, setManifestContent] = useState("");
   const [isDeploying, setIsDeploying] = useState(false);
 
+  // Form State
   const [formData, setFormData] = useState<Manifest>({
     meta: {
       name: "",
@@ -79,7 +80,7 @@ export default function AgentBuilderPage() {
       id: `did:axiom:axiomid.app:agent-temp`,
       authority: "axiomid.app",
       issuedAt: new Date().toISOString(),
-      kyc_tier: 0
+      kyc_tier: 'unverified'
     },
     economics: {
       pricing_model: "pay_per_call",
@@ -97,15 +98,19 @@ export default function AgentBuilderPage() {
     }
   });
 
+  // Generate Manifest Content (Async)
   useEffect(() => {
     const generate = async () => {
+      // Deep clone to avoid mutating state
       const manifest = JSON.parse(JSON.stringify(formData));
       
+      // Ensure identity ID matches meta name
       if (formData.meta.name) {
         const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
         manifest.identity_layer.id = `did:axiom:axiomid.app:agent-${slug}`;
       }
 
+      // Update integrity hash based on dependencies
       if (formData.abom.dependencies.length > 0) {
         const depString = formData.abom.dependencies.join(",");
         manifest.abom.integrity_hash = await sha256Hex(depString);
@@ -116,6 +121,7 @@ export default function AgentBuilderPage() {
       if (previewFormat === "json") {
         setManifestContent(JSON.stringify(manifest, null, 2));
       } else if (previewFormat === "discovery") {
+        // Dynamic import to avoid SSR issues if any, or just use the local generator
         const { generateAIXDiscovery } = await import("@/lib/mcp-generator");
         const disc = generateAIXDiscovery(manifest, "https://agent.example.com");
         setManifestContent(JSON.stringify(disc, null, 2));
@@ -131,19 +137,31 @@ export default function AgentBuilderPage() {
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const updateMeta = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, meta: { ...prev.meta, [field]: value } }));
+    setFormData(prev => ({
+      ...prev,
+      meta: { ...prev.meta, [field]: value }
+    }));
   };
 
   const updatePersona = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, persona: { ...prev.persona, [field]: value } }));
+    setFormData(prev => ({
+      ...prev,
+      persona: { ...prev.persona, [field]: value }
+    }));
   };
 
   const addSkill = () => {
-    setFormData(prev => ({ ...prev, skills: [...prev.skills, { name: "", description: "" }] }));
+    setFormData(prev => ({
+      ...prev,
+      skills: [...prev.skills, { name: "", description: "" }]
+    }));
   };
 
   const removeSkill = (index: number) => {
-    setFormData(prev => ({ ...prev, skills: prev.skills.filter((_, i) => i !== index) }));
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.filter((_, i) => i !== index)
+    }));
   };
 
   const updateSkill = (index: number, field: keyof AgentSkill, value: string) => {
@@ -156,20 +174,26 @@ export default function AgentBuilderPage() {
 
   const handleExportAndSave = async () => {
     setIsDeploying(true);
+
+    // Simulate some processing lag for effect
     await new Promise(r => setTimeout(r, 1000));
+
     try {
       const id = crypto.randomUUID();
       const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unnamed-agent';
       const agentId = `${slug}-${id.slice(0, 4)}`;
+
+      // Calculate integrity hash of the final manifest
       const integrityHash = await sha256Hex(manifestContent);
       
+      // Build agent record
       const record: AgentRecord = {
         id: agentId,
         name: formData.meta.name || "Unnamed Agent",
         role: formData.persona.role || "AI Assistant",
         createdAt: new Date().toISOString(),
         yaml: manifestContent,
-        manifest: JSON.parse(JSON.stringify(formData)),
+        manifest: JSON.parse(JSON.stringify(formData)), // Save structured manifest
         did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
         kyc_tier: formData.identity_layer.kyc_tier as any,
         abom: {
@@ -177,14 +201,23 @@ export default function AgentBuilderPage() {
           integrity_hash: integrityHash,
           generated_by: "AIX Studio Builder",
           timestamp: new Date().toISOString(),
-          model: { provider: "axiom", name: "sovereign-1" },
-          governance: { license: "MIT" }
+          model: {
+            provider: "axiom",
+            name: "sovereign-1"
+          },
+          governance: {
+            license: "MIT"
+          }
         }
       };
 
       saveAgent(record);
-      handleDownload();
-      setTimeout(() => router.push(`/agents/${record.id}`), 500);
+      handleDownload(); // Trigger file download
+
+      // Short delay to ensure download starts before navigation
+      setTimeout(() => {
+        router.push(`/agents/${record.id}`);
+      }, 500);
     } catch (e) {
       console.error("Export and Save failed", e);
       alert("Failed to save agent locally.");
@@ -194,15 +227,33 @@ export default function AgentBuilderPage() {
   };
 
   const updateEconomics = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, economics: { ...prev.economics, [field]: value } }));
+    setFormData(prev => ({
+      ...prev,
+      economics: {
+        ...prev.economics,
+        [field]: value
+      }
+    }));
   };
 
   const updateAbom = (field: string, value: string | string[]) => {
-    setFormData(prev => ({ ...prev, abom: { ...prev.abom, [field]: value } }));
+    setFormData(prev => ({
+      ...prev,
+      abom: {
+        ...prev.abom,
+        [field]: value
+      }
+    }));
   };
 
   const updateIdentity = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, identity_layer: { ...prev.identity_layer, [field]: value } }));
+    setFormData(prev => ({
+      ...prev,
+      identity_layer: {
+        ...prev.identity_layer,
+        [field]: value
+      }
+    }));
   };
 
   const handleCopy = () => {
@@ -375,12 +426,14 @@ export default function AgentBuilderPage() {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
-                              <input 
-                                placeholder="Skill name (snake_case)" 
-                                value={skill.name}
-                                onChange={(e) => updateSkill(index, "name", e.target.value)}
-                                className="input py-2 text-xs mb-3"
-                              />
+                              <div className="gap-3">
+                                <input
+                                  placeholder="Skill name (snake_case)"
+                                  value={skill.name}
+                                  onChange={(e) => updateSkill(index, "name", e.target.value)}
+                                  className="input py-2 text-xs mb-3"
+                                />
+                              </div>
                               <textarea 
                                 placeholder="Describe skill functionality..." 
                                 value={skill.description}
@@ -392,6 +445,7 @@ export default function AgentBuilderPage() {
                         </div>
                       )}
 
+                      {/* MCP Prompts Section */}
                       <div className="pt-6 border-t border-white/[0.05] mt-6">
                         <div className="flex justify-between items-center mb-2">
                           <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">MCP Prompts (v1.3)</label>
@@ -451,6 +505,7 @@ export default function AgentBuilderPage() {
                           </p>
                         </div>
                       </div>
+
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Pricing Model</label>
                         <select
@@ -463,16 +518,18 @@ export default function AgentBuilderPage() {
                           <option value="free">Free</option>
                         </select>
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
-                        <input
-                          type="text"
-                          value={formData.economics.currency || ""}
-                          onChange={(e) => updateEconomics("currency", e.target.value)}
-                          placeholder="e.g. PI"
-                          className="input"
-                        />
-                      </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Currency (Optional)</label>
+                          <input
+                            type="text"
+                            value={formData.economics.currency || ""}
+                            onChange={(e) => updateEconomics("currency", e.target.value)}
+                            placeholder="e.g. PI"
+                            className="input"
+                          />
+                        </div>
+
                       <div className="pt-6 border-t border-white/[0.05] mt-6">
                         <div className="flex items-center gap-3 text-xs text-[#8888a0]">
                           <Shield className="w-4 h-4 text-emerald-500" />
@@ -483,88 +540,92 @@ export default function AgentBuilderPage() {
                   )}
 
                   {currentStep === 5 && (
-                    <div className="space-y-4">
-                      <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-6">
-                        <div className="flex gap-3">
-                          <Shield className="w-5 h-5 text-purple-400 shrink-0" />
-                          <p className="text-xs text-purple-300/80 leading-relaxed">
-                            Agent SBOM (ABOM) ensures supply chain security by listing all dependencies and assessing inherent risks.
-                          </p>
+                    <div className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 mb-6">
+                          <div className="flex gap-3">
+                            <Shield className="w-5 h-5 text-purple-400 shrink-0" />
+                            <p className="text-xs text-purple-300/80 leading-relaxed">
+                              Agent SBOM (ABOM) ensures supply chain security by listing all dependencies and assessing inherent risks.
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">SBOM Format</label>
-                        <select
-                          value={formData.abom.bom_format}
-                          onChange={(e) => updateAbom("bom_format", e.target.value)}
-                          className="input appearance-none bg-[#0e0e12]"
-                        >
-                          <option value="CycloneDX">CycloneDX (v1.6)</option>
-                          <option value="SPDX">SPDX</option>
-                        </select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Risk Level</label>
-                        <select
-                          value={formData.abom.risk_level}
-                          onChange={(e) => updateAbom("risk_level", e.target.value)}
-                          className="input appearance-none bg-[#0e0e12]"
-                        >
-                          <option value="low">Low Risk</option>
-                          <option value="medium">Medium Risk</option>
-                          <option value="high">High Risk</option>
-                        </select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. langchain, openai, pinecone"
-                          className="input"
-                          onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
-                        />
-                      </div>
-                    </div>
-                  )}
 
-                  {currentStep === 6 && (
-                    <div className="space-y-4">
-                      <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-6">
-                        <div className="flex gap-3">
-                          <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-                          <p className="text-xs text-emerald-300/80 leading-relaxed">
-                            Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
-                          </p>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">SBOM Format</label>
+                          <select
+                            value={formData.abom.bom_format}
+                            onChange={(e) => updateAbom("bom_format", e.target.value as any)}
+                            className="input appearance-none bg-[#0e0e12]"
+                          >
+                            <option value="CycloneDX">CycloneDX (v1.6)</option>
+                            <option value="SPDX">SPDX</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Risk Level</label>
+                          <select
+                            value={formData.abom.risk_level}
+                            onChange={(e) => updateAbom("risk_level", e.target.value as any)}
+                            className="input appearance-none bg-[#0e0e12]"
+                          >
+                            <option value="low">Low Risk</option>
+                            <option value="medium">Medium Risk</option>
+                            <option value="high">High Risk</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. langchain, openai, pinecone"
+                            className="input"
+                            onChange={(e) => updateAbom("dependencies", e.target.value.split(",").map(s => s.trim()))}
+                          />
                         </div>
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['unverified', 'basic', 'verified', 'institutional'].map((tier) => (
-                            <button
-                              key={tier}
-                              onClick={() => updateIdentity('kyc_tier', tier)}
-                              className={cn(
-                                "p-3 rounded-xl border text-left transition-all",
-                                formData.identity_layer.kyc_tier === tier
-                                  ? "bg-emerald-500/10 border-emerald-500/50 text-white"
-                                  : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
-                              )}
-                            >
-                              <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
-                            </button>
-                          ))}
+
+                      <div className="space-y-4 pt-6 border-t border-white/5">
+                        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 mb-6">
+                          <div className="flex gap-3">
+                            <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                            <p className="text-xs text-emerald-300/80 leading-relaxed">
+                              Verify your identity to increase agent trust scores. AxiomID provides zero-knowledge KYC for sovereign entities.
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-1.5 pt-4">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">DID Authority</label>
-                        <input
-                          type="text"
-                          value={formData.identity_layer.authority}
-                          onChange={(e) => updateIdentity("authority", e.target.value)}
-                          className="input"
-                          placeholder="e.g. axiomid.app"
-                        />
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {["unverified", "basic", "verified", "institutional"].map((tier) => (
+                              <button
+                                key={tier}
+                                onClick={() => updateIdentity("kyc_tier", tier)}
+                                className={`p-3 rounded-xl border text-left transition-all ${
+                                  formData.identity_layer.kyc_tier === tier
+                                    ? "bg-emerald-500/10 border-emerald-500/50 text-white"
+                                    : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
+                                }`}
+                              >
+                                <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 pt-4">
+                          <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">DID Authority</label>
+                          <input
+                            type="text"
+                            value={formData.identity_layer.authority}
+                            onChange={(e) => updateIdentity("authority", e.target.value)}
+                            className="input"
+                            placeholder="e.g. axiomid.app"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
@@ -585,7 +646,7 @@ export default function AgentBuilderPage() {
                   </span>
                 ) : (
                   <>
-                    <Rocket className="w-4 h-4 mr-2" /> Export &amp; Save Agent
+                    <Rocket className="w-4 h-4 mr-2" /> Export & Save Agent
                   </>
                 )}
               </button>
@@ -596,6 +657,7 @@ export default function AgentBuilderPage() {
         {/* Right Panel: Live Preview & Validator */}
         <section className="w-[60%] flex flex-col gap-6">
           <div className="flex flex-col h-full gap-4">
+            {/* Preview Header */}
             <div className="flex justify-between items-end px-2">
               <div>
                 <h2 className="text-lg font-display font-bold text-white flex items-center gap-2">
@@ -635,6 +697,7 @@ export default function AgentBuilderPage() {
               </div>
             </div>
 
+            {/* Content & Validation */}
             <div className="flex-1 flex flex-col gap-4 overflow-hidden">
               <div className="flex-1 glass-panel-heavy rounded-2xl overflow-hidden border-white/[0.08] relative group">
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -653,13 +716,17 @@ export default function AgentBuilderPage() {
                     <Download className="w-4 h-4" />
                   </button>
                 </div>
+
                 <div className="h-full overflow-hidden flex flex-col">
                   <div className="flex-1 overflow-auto custom-scrollbar p-6 font-mono text-sm leading-relaxed text-[#8888a0]">
-                    <pre className="whitespace-pre-wrap break-all">{manifestContent}</pre>
+                    <pre className="whitespace-pre-wrap break-all">
+                      {manifestContent}
+                    </pre>
                   </div>
                 </div>
               </div>
 
+              {/* Live Validator Component */}
               <div className="h-[250px] shrink-0">
                 <LiveValidator 
                   content={manifestContent} 
@@ -678,10 +745,19 @@ export default function AgentBuilderPage() {
       </div>
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
       `}</style>
     </div>
   );
