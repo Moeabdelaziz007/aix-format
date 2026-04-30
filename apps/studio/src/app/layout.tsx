@@ -3,6 +3,7 @@ import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next';
+import { Toaster } from 'sonner';
 import { WalletProvider } from '@/components/providers/WalletProvider';
 import { SovereignAether } from '@/components/studio/SovereignAether';
 
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${inter.variable} min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] font-sans antialiased overflow-x-hidden`}
       >
+        <Toaster richColors theme="dark" position="bottom-right" />
         <SovereignAether />
         <div className="relative z-10 flex flex-col min-h-screen">
           <WalletProvider>

@@ -16,13 +16,15 @@ import {
   AlertCircle,
   Rocket
 } from 'lucide-react';
-import { AgentRecord, DeploymentRecord } from '@/lib/types';
+import { AgentRecord, DeploymentRecord, RegistryEntry } from '@/lib/types';
 import DiscoveryPreview from '@/components/studio/DiscoveryPreview';
 import { useLocalAgents } from '@/hooks/useLocalAgents';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import DeployModal from '@/components/studio/DeployModal';
 import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
+import { ShieldCheck, ShieldAlert } from 'lucide-react';
 
 export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +37,7 @@ export default function AgentDetailPage() {
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployStep, setDeployStep] = useState(0);
   const [deployComplete, setDeployComplete] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const DEPLOY_STEPS = [
     "Validating AIX Manifest Integrity...",
@@ -65,11 +68,80 @@ export default function AgentDetailPage() {
   };
 
   const handleDownload = () => {
+    if (!agent) return;
     const blob = new Blob([agent.yaml], { type: 'application/x-aix' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `${agent.name.toLowerCase().replace(/\s+/g, '-')}.aix`;
     a.click();
+  };
+
+  const handlePublishToMcp = async () => {
+    if (!agent) return;
+    
+    setIsPublishing(true);
+    try {
+      const entry: RegistryEntry = {
+        did: agent.did || `did:aix:${agent.id}`,
+        name: agent.name,
+        role: agent.role,
+        capabilities: agent.abom?.capabilities || [],
+        kyc_tier: agent.kyc_tier || 'unverified',
+        specVersion: "1.0.0",
+        publishedAt: new Date().toISOString(),
+        yaml: agent.yaml
+      };
+
+      const res = await fetch('/api/mcp-discovery/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry)
+      });
+
+      if (!res.ok) throw new Error('Failed to register agent');
+      
+      const data = await res.json();
+      
+      const updatedAgent: AgentRecord = { ...agent, published: true };
+      saveAgent(updatedAgent);
+      setAgent(updatedAgent);
+      
+      toast.success(data.message || 'Agent published to MCP discovery');
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Failed to publish agent to MCP registry');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleUnpublishFromMcp = async () => {
+    if (!agent || !agent.did) {
+      toast.error('Agent DID not found');
+      return;
+    }
+    
+    setIsPublishing(true);
+    try {
+      const res = await fetch(`/api/mcp-discovery/register?did=${agent.did}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) throw new Error('Failed to unregister agent');
+      
+      const data = await res.json();
+      
+      const updatedAgent: AgentRecord = { ...agent, published: false };
+      saveAgent(updatedAgent);
+      setAgent(updatedAgent);
+      
+      toast.success(data.message || 'Agent removed from MCP discovery');
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Failed to unregister agent from MCP registry');
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   if (!loaded) {
@@ -144,6 +216,34 @@ export default function AgentDetailPage() {
               Download .aix
             </button>
             
+            {agent.published ? (
+              <button 
+                onClick={handleUnpublishFromMcp}
+                disabled={isPublishing}
+                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-emerald-500/30 text-emerald-400 font-black rounded-2xl transition-all hover:bg-zinc-800 disabled:opacity-50"
+              >
+                {isPublishing ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="w-4 h-4" />
+                )}
+                MCP Published
+              </button>
+            ) : (
+              <button 
+                onClick={handlePublishToMcp}
+                disabled={isPublishing}
+                className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-indigo-500/30 text-indigo-400 font-black rounded-2xl transition-all hover:bg-zinc-800 disabled:opacity-50 group"
+              >
+                {isPublishing ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                )}
+                Publish to MCP
+              </button>
+            )}
+
             {agent.status === 'online' ? (
               <a 
                 href={agent.deployment?.endpointUrl}
