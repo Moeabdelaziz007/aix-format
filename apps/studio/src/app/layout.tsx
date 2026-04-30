@@ -3,9 +3,15 @@ import { Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
 import { WalletProvider } from '@/components/providers/WalletProvider';
-import { SovereignAether } from '@/components/studio/SovereignAether';
+import dynamic from 'next/dynamic';
+
+const SovereignAether = dynamic(
+  () => import('@/components/studio/SovereignAether').then(mod => mod.SovereignAether),
+  { ssr: false, loading: () => null }
+);
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -52,6 +58,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
