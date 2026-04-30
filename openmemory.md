@@ -109,3 +109,36 @@ To solve the root problem of broken production builds on Vercel, a "Triple Firew
 
 ### Supporting Scripts
 - **`apps/studio/package.json`**: A script `check:all` was added to run `tsc`, `lint`, and `build` sequentially for a complete local check.
+## Phase 5: Security Hardening & Build Stabilization (In Progress 2026-04-30)
+
+### Key Accomplishments
+- **Security Architecture**:
+  - Implemented Rules 11 and 12 for the **ABOM Detective Scanner**.
+  - Rule 11: Mandates `build_provenance` for high-risk agents (agents with dangerous capabilities or marked as high-risk).
+  - Rule 12: Mandates `saas_services` declaration for SaaS-heavy agents.
+- **Schema & Type Standardization**:
+  - Updated `AbomData` and `Manifest.meta` in `apps/studio/src/lib/types.ts` to include risk classification and provenance fields.
+  - Aligned core types with AIX v1.3 sovereign standards.
+- **Validation Infrastructure**:
+  - Created `scripts/validate-examples.js` using `Ajv` for high-performance schema integrity checks.
+  - Added unit tests for new scanner rules in `packages/core/src/__tests__/abom-scanner.test.ts`.
+- **Build Stabilization**:
+  - Resolved critical build failures in the Studio app (merge conflicts in `builder/page.tsx` and syntax errors in `Navbar.tsx`).
+
+### Implementation Progress
+- [x] Analyze Jules AI contributions (Rating: 9/10).
+- [x] Update Parser logic for Pi Network validation.
+- [x] Update JSON Schema with Pi definitions.
+- [x] Create `examples/pi-agent.aix`.
+- [x] Evolve Schema to v1.2 (Lineage, ABOM, Economics).
+- [x] Refactor Parser for v1.2 structures and `js-yaml` robustness.
+- [x] Implement ABOM Security Scanner Rules (11 & 12).
+- [x] Standardize AIX v1.3 Types and Schema.
+- [x] Build and test validation infrastructure.
+- [ ] Finalize "Pi AIX Studio" POC and merge remaining PRs.
+
+### AIX v1.3 Security Philosophy
+The "Trust Infrastructure" update focuses on:
+1. **Verifiability**: Ensuring agent origins are cryptographically proven (Provenance).
+2. **Accountability**: Explicitly declaring external dependencies (SaaS-BOM).
+3. **Resilience**: Automating risk assessment via standardized scanner rules.
