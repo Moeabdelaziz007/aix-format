@@ -1,0 +1,22 @@
+{
+    "extends": "next/core-web-vitals",
+    "rules": {
+        "no-restricted-imports": [
+            "error",
+            {
+                "patterns": [
+                    "../../../../*",
+                    "../../../core/*",
+                    "../../core/*",
+                    "../core/*"
+                ],
+                "paths": [
+                    {
+                        "name": "@vercel/kv",
+                        "message": "Please use @/lib/storage/redis instead."
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@aix-core/storage",
+  "version": "1.3.0",
+  "description": "AIX unified storage adapter - core Redis/Session storage utilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": ["redis", "storage", "aix", "session"],
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.34.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

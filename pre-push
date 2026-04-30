@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 تشغيل فحص البناء قبل الـ Push..."
+
+if ! (cd apps/studio && npm run build); then
+  echo "❌ فشل البناء (Build)! تم إيقاف الـ Push. يرجى إصلاح الأخطاء محلياً قبل الرفع للبيئة."
+  exit 1
+fi
+
+echo "✅ البناء محلياً ناجح. جاري استكمال الـ Push..."

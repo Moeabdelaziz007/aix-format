@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "postbuild": "node --loader ts-node/esm ../../scripts/validate-routes.ts"
+    "postbuild": "node --loader ts-node/esm ../../scripts/validate-routes.ts",
+    "check:all": "npx tsc --noEmit && npm run lint && npm run build"
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.3",

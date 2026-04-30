@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 تشغيل فحوصات ما قبل الـ Commit..."
+
+# 1. فحص TypeScript (صامت)
+echo "⏳ جاري فحص TypeScript..."
+(cd apps/studio && npx tsc --noEmit) || { echo "❌ فشل فحص TypeScript. يرجى إصلاح الأخطاء."; exit 1; }
+
+# 2. فحص استيراد ملفات .ts بشكل صريح
+echo "⏳ جاري التحقق من استيراد ملفات .ts..."
+if grep -rn 'from.*\.ts"' apps/studio/src/; then
+  echo "❌ خطأ: تم العثور على استيرادات بصيغة .ts. يرجى إزالة الامتداد من مسار الاستيراد."
+  exit 1
+fi
+
+# 3. فحص استخدام @vercel/kv القديم
+echo "⏳ جاري التحقق من استخدام @vercel/kv..."
+if grep -rn '@vercel/kv' apps/studio/src/; then
+  echo "❌ خطأ: تم العثور على استخدام لحزمة @vercel/kv القديمة. يرجى إزالتها."
+  exit 1
+fi
+
+echo "✅ جميع فحوصات ما قبل الـ Commit نجحت!"
