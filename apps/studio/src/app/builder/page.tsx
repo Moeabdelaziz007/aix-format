@@ -191,7 +191,7 @@ export default function AgentBuilderPage() {
         role: formData.persona.role || "AI Assistant",
         createdAt: new Date().toISOString(),
         yaml: manifestContent,
-        manifest: JSON.parse(JSON.stringify(formData)),
+        // manifest: JSON.parse(JSON.stringify(formData)),
         did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
         kyc_tier: formData.identity_layer.kyc_tier as any,
         abom: {
@@ -606,7 +606,7 @@ export default function AgentBuilderPage() {
                               onClick={() => updateIdentity('kyc_tier', tier)}
                               className={cn(
                                 "p-3 rounded-xl border text-left transition-all",
-                                formData.identity_layer.kyc_tier === tier
+                                formData.identity_layer?.kyc_tier?.toString() === tier
                                   ? "bg-emerald-500/10 border-emerald-500/50 text-white"
                                   : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
                               )}

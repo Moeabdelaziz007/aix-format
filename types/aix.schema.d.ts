@@ -7,32 +7,12 @@
 
 /**
  * Semantic versioning string (e.g. 1.0.0, 1.2.0-beta.1)
- *
- * This interface was referenced by `AIXFormat`'s JSON-Schema
- * via the `definition` "SemVer".
  */
 export type SemVer = string;
 /**
  * ISO 8601 date-time string
- *
- * This interface was referenced by `AIXFormat`'s JSON-Schema
- * via the `definition` "ISODateTime".
  */
 export type ISODateTime = string;
-/**
- * UUID v4 identifier
- *
- * This interface was referenced by `AIXFormat`'s JSON-Schema
- * via the `definition` "UUIDv4".
- */
-export type UUIDv4 = string;
-/**
- * Axiom Decentralized Identifier — did:axiom:axiomid.app:<id>
- *
- * This interface was referenced by `AIXFormat`'s JSON-Schema
- * via the `definition` "AxiomDID".
- */
-export type AxiomDID = string;
 
 /**
  * Unified JSON Schema for AIX (Artificial Intelligence eXchange) v1.3 — Sovereign Protocol. The Digital DNA of autonomous AI agents. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026
@@ -97,7 +77,7 @@ export interface AIXFormat {
        */
       signature?: string;
     }[];
-    [k: string]: unknown | undefined;
+    [k: string]: unknown;
   };
   /**
    * Agent personality and behavior
@@ -113,7 +93,7 @@ export interface AIXFormat {
     instructions: string;
     constraints?: string[];
     personality_traits?: {
-      [k: string]: string | undefined;
+      [k: string]: string;
     };
     example_responses?: {
       question?: string;
@@ -122,7 +102,7 @@ export interface AIXFormat {
     temperature?: number;
     context_window?: number;
     response_format?: string;
-    [k: string]: unknown | undefined;
+    [k: string]: unknown;
   };
   /**
    * Security and integrity data
@@ -163,7 +143,7 @@ export interface AIXFormat {
      */
     level?: string;
     authentication?: string[];
-    [k: string]: unknown | undefined;
+    [k: string]: unknown;
   };
   /**
    * AxiomID Identity block. axiomid.app is the Root Authority for all issued identities.
@@ -198,7 +178,7 @@ export interface AIXFormat {
     description: string;
     enabled?: boolean;
     parameters?: {
-      [k: string]: unknown | undefined;
+      [k: string]: unknown;
     };
     triggers?: string[];
     examples?: string[];
@@ -223,7 +203,7 @@ export interface AIXFormat {
       method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
       description?: string;
       parameters?: {
-        [k: string]: unknown | undefined;
+        [k: string]: unknown;
       }[];
     }[];
     rate_limit?: {
@@ -245,7 +225,7 @@ export interface AIXFormat {
       command: string;
       args?: string[];
       env?: {
-        [k: string]: string | undefined;
+        [k: string]: string;
       };
       description?: string;
       capabilities?: string[];
@@ -286,7 +266,7 @@ export interface AIXFormat {
       enabled?: boolean;
       backend?: "file" | "database" | "redis" | "s3" | "postgresql" | "sqlite";
       config?: {
-        [k: string]: unknown | undefined;
+        [k: string]: unknown;
       };
     };
   };
@@ -338,7 +318,7 @@ export interface AIXFormat {
         };
       }[];
     };
-    [k: string]: unknown | undefined;
+    [k: string]: unknown;
   };
   /**
    * Pi Network specific configuration and SDK integration
@@ -394,7 +374,7 @@ export interface AIXFormat {
      */
     governance?: {
       license?: string;
-      [k: string]: unknown | undefined;
+      [k: string]: unknown;
     };
     tools?: {
       name?: string;
@@ -424,7 +404,7 @@ export interface AIXFormat {
       value?: string;
       signer?: string;
     }[];
-    [k: string]: unknown | undefined;
+    [k: string]: unknown;
   };
   /**
    * Live Voice Models integration for human-like conversational experiences
@@ -460,13 +440,13 @@ export interface AIXFormat {
     vla?: {
       adapter: "openpi" | "π0.7" | "generic";
       vision?: {
-        [k: string]: unknown | undefined;
+        [k: string]: unknown;
       };
       language?: {
-        [k: string]: unknown | undefined;
+        [k: string]: unknown;
       };
       action?: {
-        [k: string]: unknown | undefined;
+        [k: string]: unknown;
       };
     };
   };
@@ -474,9 +454,6 @@ export interface AIXFormat {
 }
 /**
  * Public key material for cryptographic verification
- *
- * This interface was referenced by `AIXFormat`'s JSON-Schema
- * via the `definition` "PublicKey".
  */
 export interface PublicKey {
   /**
@@ -491,9 +468,6 @@ export interface PublicKey {
 }
 /**
  * Cryptographic signature over the canonical payload hash
- *
- * This interface was referenced by `AIXFormat`'s JSON-Schema
- * via the `definition` "Signature".
  */
 export interface Signature {
   /**
@@ -513,61 +487,6 @@ export interface Signature {
  * Optional Meta Arbiter runtime configuration — wires into the agent's orchestration layer
  */
 export interface MetaArbiterConfig {
-  /**
-   * Minimum score (0-1) required to activate a subsystem
-   */
-  activation_threshold?: number;
-  /**
-   * Maximum number of subsystems running simultaneously
-   */
-  concurrent_systems_limit?: number;
-  /**
-   * Target maximum response time in seconds
-   */
-  response_time_target_sec?: number;
-  /**
-   * Maximum fraction of resources allocated to active systems
-   */
-  resource_allocation_ratio?: number;
-  /**
-   * Enable cognitive growth milestone tracking (GrowthMonitor)
-   */
-  growth_milestones_enabled?: boolean;
-  /**
-   * Default inter-system coordination strategy
-   */
-  coordination_strategy?: "sequential" | "parallel" | "hierarchical" | "collaborative" | "competitive";
-  /**
-   * Weighted criteria for subsystem activation decisions (weights should sum to 1.0)
-   */
-  decision_criteria?: {
-    urgency?: number;
-    complexity?: number;
-    resource_availability?: number;
-    user_preference?: number;
-    system_capability?: number;
-  };
-  /**
-   * SystemMonitor alert thresholds (mirrors SystemMonitor.alert_thresholds)
-   */
-  alert_thresholds?: {
-    response_time_sec?: number;
-    accuracy?: number;
-    error_rate?: number;
-    resource_usage?: number;
-  };
-  /**
-   * Target cognitive growth milestone level (GrowthMonitor)
-   */
-  growth_milestone_level?: "beginner" | "intermediate" | "advanced" | "expert";
-}
-/**
- * Meta Arbiter — 'العقل المدبر' — orchestration config for the agent's internal subsystem controller. Controls activation thresholds, coordination strategy, and growth monitoring.
- *
- * This interface was referenced by `AIXFormat`'s JSON-Schema
- * via the `definition` "MetaArbiterConfig".
- */
-export interface MetaArbiterConfig1 {
   /**
    * Minimum score (0-1) required to activate a subsystem
    */

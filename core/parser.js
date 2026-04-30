@@ -229,6 +229,7 @@ export class AIXParser {
     if (data.pi_network) this.validatePiNetwork(data.pi_network);
     if (data.economics) this.validateEconomics(data.economics);
     if (data.abom) this.validateABOM(data.abom);
+    if (data.black_box) this.validateBlackBox(data.black_box);
   }
 
   /**

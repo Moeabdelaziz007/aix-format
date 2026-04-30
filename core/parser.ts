@@ -470,6 +470,9 @@ export class AIXParser {
     }
   }
 
+
+
+
   private validateSecurityStructure(security: Record<string, unknown>): void {
     const cs = security['checksum'] as Record<string, unknown> | undefined;
     if (!cs) { this.errors.push({ code: 'MISSING_FIELD', section: 'security', field: 'checksum', message: 'Required field security.checksum is missing' }); return; }
@@ -637,6 +640,31 @@ export class AIXParser {
         this.errors.push({ code: 'INVALID_VALUE', section: sec, field: 'security_status', message: `security_status '${ss}' is invalid` });
       if (ss === 'revoked') this.errors.push({ code: 'ABOM_REVOKED_CONSTITUENT', section: sec, field: 'security_status', message: `SECURITY: Constituent ${label} has security_status='revoked'. Must be replaced before deployment.` });
       if (ss === 'vulnerable') this.warnings.push({ code: 'ABOM_VULNERABLE_CONSTITUENT', section: sec, field: 'security_status', message: `Constituent ${label} has known vulnerabilities. Update before production.` });
+    }
+  }
+
+
+  private validateBlackBox(black_box: Record<string, unknown>): void {
+    if (black_box['enabled'] !== undefined && typeof black_box['enabled'] !== 'boolean') {
+      this.errors.push({ code: 'INVALID_TYPE', section: 'black_box', field: 'enabled', message: 'black_box.enabled must be a boolean' });
+    }
+
+    if (black_box['traces'] !== undefined) {
+      if (!Array.isArray(black_box['traces'])) {
+        this.errors.push({ code: 'INVALID_TYPE', section: 'black_box', field: 'traces', message: 'black_box.traces must be an array' });
+      } else {
+        (black_box['traces'] as Record<string, unknown>[]).forEach((trace, i) => {
+          if (!trace['timestamp'] || !this.isValidISO8601(trace['timestamp'] as string)) {
+             this.errors.push({ code: 'INVALID_TIMESTAMP', section: 'black_box', field: 'timestamp', message: `black_box.traces[${i}].timestamp must be a valid ISO 8601 timestamp` });
+          }
+          if (!trace['action']) {
+             this.errors.push({ code: 'MISSING_FIELD', section: 'black_box', field: 'action', message: `black_box.traces[${i}] is missing 'action'` });
+          }
+          if (!trace['signature'] || !(trace['signature'] as Record<string, unknown>)['value']) {
+             this.errors.push({ code: 'MISSING_FIELD', section: 'black_box', field: 'signature', message: `black_box.traces[${i}] is missing a valid signature` });
+          }
+        });
+      }
     }
   }
 

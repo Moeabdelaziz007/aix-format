@@ -7,7 +7,8 @@
   "type": "module",
   "bin": {
     "aix-validate": "./bin/aix-validate.js",
-    "aix-convert": "./bin/aix-convert.js"
+    "aix-convert": "./bin/aix-convert.js",
+    "aix-regulator-export": "./bin/aix-regulator-export.js"
   },
   "scripts": {
     "test": "node --test \"tests/**/*.test.js\"",
@@ -83,7 +84,8 @@
     "example": "examples"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "dependencies": {
     "js-yaml": "^4.1.1",
