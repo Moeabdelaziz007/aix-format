@@ -24,6 +24,8 @@ export default function MyAgentsPage() {
       createdAt: entry.publishedAt,
       did: entry.did,
       kyc_tier: entry.kyc_tier as any,
+      deployment: entry.deployment,
+      abom: entry.abom,
     } as AgentRecord));
   }, [entries]);
 

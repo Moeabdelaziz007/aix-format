@@ -21,13 +21,20 @@ import {
   FileCode,
   Database,
   Activity,
-  UserCheck
+  UserCheck,
+  ShieldCheck,
+  AlertTriangle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useRegistry } from '@/hooks/useRegistry';
+import { useAbom, AbomScanResult } from '@/hooks/useAbom';
+import { useKyc } from '@/hooks/useKyc';
+import { useDeployment } from '@/hooks/useDeployment';
+import { toast } from 'sonner';
+import yaml from 'js-yaml';
 import { stringifyYamlSafe, sha256Hex } from "@/lib/utils";
 import { Navbar } from "@/components/layout/Navbar";
-import { useLocalAgents } from "@/hooks/useLocalAgents";
-import { Manifest, AgentSkill, McpPrompt, AgentRecord } from "@/lib/types";
+import { AgentRecord, RegistryEntry, Manifest, AgentSkill, McpPrompt } from "@/lib/types";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import LiveValidator from "@/components/studio/LiveValidator";
 import BOMVisualizer from "@/components/studio/BOMVisualizer";
@@ -49,13 +56,15 @@ const STEPS = [
 
 export default function AgentBuilderPage() {
   const router = useRouter();
-  const { saveAgent } = useLocalAgents();
+  const { publishAgent } = useRegistry();
+  const { scanYaml, isScanning, report: abomReport } = useAbom();
+  const { step: kycStep, isVerified: kycVerified } = useKyc();
+  const { deployAgent, isDeploying } = useDeployment();
   const [currentStep, setCurrentStep] = useState(1);
   const [previewFormat, setPreviewFormat] = useState<"yaml" | "json" | "discovery" | "visualizer">("yaml");
 
   const [copied, setCopied] = useState(false);
   const [manifestContent, setManifestContent] = useState("");
-  const [isDeploying, setIsDeploying] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<Manifest>({
@@ -174,52 +183,76 @@ export default function AgentBuilderPage() {
   };
 
   const handleExportAndSave = async () => {
-    setIsDeploying(true);
-    
-    await new Promise(r => setTimeout(r, 1000));
-    
     try {
-      const id = crypto.randomUUID();
-      const slug = formData.meta.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unnamed-agent';
-      const agentId = `${slug}-${id.slice(0, 4)}`;
+      const yamlString = yaml.dump(formData);
       
-      const integrityHash = await sha256Hex(manifestContent);
-      
-      const record: AgentRecord = {
-        id: agentId,
-        name: formData.meta.name || "Unnamed Agent",
-        role: formData.persona.role || "AI Assistant",
-        createdAt: new Date().toISOString(),
-        yaml: manifestContent,
-        // manifest: JSON.parse(JSON.stringify(formData)),
-        did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
-        kyc_tier: formData.identity_layer.kyc_tier as any,
-        abom: {
-          capabilities: formData.skills.map(s => s.name || "unnamed_skill"),
-          integrity_hash: integrityHash,
-          generated_by: "AIX Studio Builder",
-          timestamp: new Date().toISOString(),
-          model: {
-            provider: "axiom",
-            name: "sovereign-1"
-          },
-          governance: {
-            license: "MIT"
-          }
-        }
+      const entry: RegistryEntry = {
+        did: formData.identity_layer.id,
+        name: formData.meta.name,
+        role: formData.persona.role,
+        capabilities: formData.skills.map(s => s.name),
+        kyc_tier: String(formData.identity_layer.kyc_tier || 0),
+        specVersion: formData.meta.version,
+        publishedAt: new Date().toISOString(),
+        yaml: yamlString
       };
 
-      saveAgent(record);
-      handleDownload();
+      await publishAgent(entry);
       
-      setTimeout(() => {
-        router.push(`/agents/${record.id}`);
-      }, 500);
-    } catch (e) {
-      console.error("Export and Save failed", e);
-      alert("Failed to save agent locally.");
-    } finally {
-      setIsDeploying(false);
+      const blob = new Blob([yamlString], { type: 'text/yaml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${formData.meta.name.toLowerCase().replace(/\s+/g, '-')}.aix`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('Agent saved to registry and exported successfully');
+    } catch (error) {
+      console.error('Save failed:', error);
+      toast.error('Failed to save agent to registry');
+    }
+  };
+
+  const handleDeploy = async () => {
+    try {
+      if (!formData.meta.name) {
+        toast.error("Please name your agent before deploying");
+        return;
+      }
+
+      // First save to registry to ensure it exists
+      const yamlString = yaml.dump(formData);
+      const entry: RegistryEntry = {
+        did: formData.identity_layer.id,
+        name: formData.meta.name,
+        role: formData.persona.role,
+        capabilities: formData.skills.map(s => s.name),
+        kyc_tier: String(formData.identity_layer.kyc_tier || 0),
+        specVersion: formData.meta.version,
+        publishedAt: new Date().toISOString(),
+        yaml: yamlString
+      };
+      await publishAgent(entry);
+
+      // Then trigger deployment
+      await deployAgent({
+        agentId: entry.did,
+        target: 'vercel',
+        config: {
+          projectName: formData.meta.name.toLowerCase().replace(/\s+/g, '-'),
+          token: 'sk_simulated_aix_token_123'
+        },
+        yaml: yamlString
+      });
+
+      toast.success('Agent deployment initiated!');
+      router.push('/my-agents');
+    } catch (err) {
+      console.error('Deployment failed:', err);
+      // Error handled by hook/toast
     }
   };
 
@@ -526,13 +559,6 @@ export default function AgentBuilderPage() {
                           className="input"
                         />
                       </div>
-
-                      <div className="pt-6 border-t border-white/[0.05] mt-6">
-                        <div className="flex items-center gap-3 text-xs text-[#8888a0]">
-                          <Shield className="w-4 h-4 text-emerald-500" />
-                          <span>Sovereign Identity Protection Enabled</span>
-                        </div>
-                      </div>
                     </div>
                   )}
 
@@ -547,32 +573,7 @@ export default function AgentBuilderPage() {
                           </p>
                         </div>
                       </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">SBOM Format</label>
-                        <select
-                          value={formData.abom.bom_format}
-                          onChange={(e) => updateAbom("bom_format", e.target.value)}
-                          className="input appearance-none bg-[#0e0e12]"
-                        >
-                          <option value="CycloneDX">CycloneDX (v1.6)</option>
-                          <option value="SPDX">SPDX</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Risk Level</label>
-                        <select
-                          value={formData.abom.risk_level}
-                          onChange={(e) => updateAbom("risk_level", e.target.value)}
-                          className="input appearance-none bg-[#0e0e12]"
-                        >
-                          <option value="low">Low Risk</option>
-                          <option value="medium">Medium Risk</option>
-                          <option value="high">High Risk</option>
-                        </select>
-                      </div>
-
+                      
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">Dependency Tags (CSV)</label>
                         <input
@@ -616,17 +617,6 @@ export default function AgentBuilderPage() {
                           ))}
                         </div>
                       </div>
-
-                      <div className="space-y-1.5 pt-4">
-                        <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">DID Authority</label>
-                        <input
-                          type="text"
-                          value={formData.identity_layer.authority}
-                          onChange={(e) => updateIdentity("authority", e.target.value)}
-                          className="input"
-                          placeholder="e.g. axiomid.app"
-                        />
-                      </div>
                     </div>
                   )}
                 </motion.div>
@@ -634,19 +624,27 @@ export default function AgentBuilderPage() {
             </div>
 
             {/* Footer Actions */}
-            <div className="mt-8 pt-6 border-t border-white/[0.05]">
+            <div className="mt-8 pt-6 border-t border-white/[0.05] flex gap-3">
               <button
-                className={`btn btn-primary-green-glow w-full ${isDeploying ? 'opacity-50 cursor-wait' : ''}`}
+                className="btn btn-ghost border-white/10 hover:bg-white/5 flex-1"
                 onClick={handleExportAndSave}
+                disabled={isDeploying}
+              >
+                <Download className="w-4 h-4 mr-2" /> Save & Export
+              </button>
+              
+              <button
+                className={`btn btn-primary-green-glow flex-[2] ${isDeploying ? 'opacity-50 cursor-wait' : ''}`}
+                onClick={handleDeploy}
                 disabled={isDeploying}
               >
                 {isDeploying ? (
                   <span className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 animate-spin" /> Processing...
+                    <Activity className="w-4 h-4 animate-spin" /> Deploying...
                   </span>
                 ) : (
                   <>
-                    <Rocket className="w-4 h-4 mr-2" /> Export & Save Agent
+                    <Rocket className="w-4 h-4 mr-2" /> Deploy to Sovereign Cloud
                   </>
                 )}
               </button>
@@ -731,6 +729,72 @@ export default function AgentBuilderPage() {
                     <div className="flex-1 p-0">
                       <BOMVisualizer formData={formData} />
                     </div>
+                  ) : previewFormat === "discovery" && currentStep === 5 ? (
+                      <div className="flex flex-col gap-8 h-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                          <div className="space-y-6">
+                            <div className="glass-panel p-6 rounded-3xl border-white/10">
+                              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                                Risk Assessment
+                              </h3>
+                              
+                              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 mb-6">
+                                <div>
+                                  <p className="text-xs text-white/40 uppercase tracking-wider font-bold">Risk Score</p>
+                                  <p className={`text-4xl font-display font-black ${
+                                    (abomReport?.score || 0) > 80 ? 'text-emerald-400' : 
+                                    (abomReport?.score || 0) > 60 ? 'text-amber-400' : 'text-red-400'
+                                  }`}>
+                                    {isScanning ? '...' : abomReport?.score || 'N/A'}
+                                  </p>
+                                </div>
+                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-black ${
+                                  (abomReport?.score || 0) > 80 ? 'bg-emerald-400/10 text-emerald-400' : 
+                                  (abomReport?.score || 0) > 60 ? 'bg-amber-400/10 text-amber-400' : 'bg-red-400/10 text-red-400'
+                                }`}>
+                                  {isScanning ? '?' : abomReport?.grade || '-'}
+                                </div>
+                              </div>
+      
+                              <div className="space-y-3">
+                                {isScanning ? (
+                                  <div className="flex items-center gap-3 py-4 text-white/40">
+                                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                    Scanning DNA...
+                                  </div>
+                                ) : abomReport?.risks.length ? (
+                                  abomReport.risks.map((risk, i) => (
+                                    <div key={i} className="flex gap-3 p-3 bg-red-500/5 border border-red-500/10 rounded-xl">
+                                      <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                                      <div>
+                                        <p className="text-xs font-bold text-red-300 uppercase">{risk.category}</p>
+                                        <p className="text-sm text-red-200/70 leading-relaxed">{risk.message}</p>
+                                      </div>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                                    <p className="text-sm text-emerald-300">No critical risks detected.</p>
+                                  </div>
+                                )}
+                              </div>
+      
+                              <button 
+                                onClick={() => scanYaml(yaml.dump(formData))}
+                                className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white text-sm font-bold transition border border-white/5"
+                              >
+                                Trigger Deep Scan
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div className="glass-panel rounded-[2.5rem] overflow-hidden border-white/5 bg-black/40 min-h-[500px]">
+                            <BOMVisualizer formData={formData} />
+                          </div>
+                        </div>
+                      </div>
                   ) : (
                     <div className="flex-1 overflow-auto custom-scrollbar p-6 font-mono text-sm leading-relaxed text-[#8888a0]">
                       <pre className="whitespace-pre-wrap break-all">

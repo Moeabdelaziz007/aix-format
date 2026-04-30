@@ -19,6 +19,8 @@ export interface DeploymentRecord {
 export interface RegistryEntry extends McpAgent {
   publishedAt: string;
   yaml: string;
+  deployment?: DeploymentRecord;
+  abom?: AbomRecord;
 }
 
 export interface AgentRecord {

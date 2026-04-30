@@ -10,7 +10,10 @@ import {
   TrendingUp, 
   Zap, 
   Shield,
-  Rocket
+  Rocket,
+  Activity,
+  AlertCircle,
+  Globe
 } from 'lucide-react';
 import { AgentRecord } from '@/lib/types';
 
@@ -75,10 +78,39 @@ export const AgentCard = memo(function AgentCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] ${statusConfig.textColor}`}>
-              <span className={`status-dot ${statusConfig.dot}`} />
-              {statusConfig.label}
-            </span>
+            {agent.deployment?.status === 'deploying' ? (
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                <Activity className="w-3 h-3 animate-spin" />
+                Deploying
+              </span>
+            ) : agent.deployment?.status === 'failed' ? (
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">
+                <AlertCircle className="w-3 h-3" />
+                Failed
+              </span>
+            ) : agent.deployment?.status === 'deployed' ? (
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <Rocket className="w-3 h-3" />
+                Deployed
+              </span>
+            ) : (
+              <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] ${statusConfig.textColor}`}>
+                <span className={`status-dot ${statusConfig.dot}`} />
+                {statusConfig.label}
+              </span>
+            )}
+            
+            {agent.deployment?.status === 'deployed' && (
+              <a 
+                href={agent.deployment.endpointUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
+              >
+                <Globe className="w-3.5 h-3.5" />
+              </a>
+            )}
+            
             <button
               className="btn btn-ghost btn-sm w-7 h-7 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label="Agent options"
