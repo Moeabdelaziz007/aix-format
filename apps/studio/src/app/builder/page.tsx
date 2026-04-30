@@ -189,9 +189,9 @@ export default function AgentBuilderPage() {
         role: formData.persona.role || "AI Assistant",
         createdAt: new Date().toISOString(),
         yaml: manifestContent,
-        manifest: JSON.parse(JSON.stringify(formData)),
+        // manifest removed from AgentRecord
         did: `did:aix:${id.replace(/-/g, '').slice(0, 32)}`,
-        kyc_tier: formData.identity_layer.kyc_tier as any,
+        kyc_tier: formData.identity_layer.kyc_tier === 0 ? 'unverified' : formData.identity_layer.kyc_tier === 1 ? 'basic' : formData.identity_layer.kyc_tier === 2 ? 'verified' : 'institutional',
         abom: {
           capabilities: formData.skills.map(s => s.name || "unnamed_skill"),
           integrity_hash: integrityHash,
@@ -598,7 +598,7 @@ export default function AgentBuilderPage() {
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-[#8888a0] uppercase tracking-wider">AxiomID KYC Tier</label>
                         <div className="grid grid-cols-2 gap-3">
-                          {['unverified', 'basic', 'verified', 'institutional'].map((tier) => (
+                          {([0, 1, 2, 3] as const).map((tier) => (
                             <button
                               key={tier}
                               onClick={() => updateIdentity('kyc_tier', tier)}
@@ -609,7 +609,7 @@ export default function AgentBuilderPage() {
                                   : "bg-white/5 border-white/5 text-[#8888a0] hover:border-white/20"
                               )}
                             >
-                              <p className="text-[10px] font-bold uppercase tracking-tight">{tier}</p>
+                              <p className="text-[10px] font-bold uppercase tracking-tight">{tier === 0 ? 'unverified' : tier === 1 ? 'basic' : tier === 2 ? 'verified' : 'institutional'}</p>
                             </button>
                           ))}
                         </div>

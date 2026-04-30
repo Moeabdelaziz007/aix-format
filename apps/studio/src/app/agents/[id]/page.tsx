@@ -24,7 +24,7 @@ import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import DeployModal from '@/components/studio/DeployModal';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, RefreshCw } from 'lucide-react';
 
 export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -103,7 +103,7 @@ export default function AgentDetailPage() {
       const data = await res.json();
       
       const updatedAgent: AgentRecord = { ...agent, published: true };
-      saveAgent(updatedAgent);
+
       setAgent(updatedAgent);
       
       toast.success(data.message || 'Agent published to MCP discovery');
@@ -132,7 +132,7 @@ export default function AgentDetailPage() {
       const data = await res.json();
       
       const updatedAgent: AgentRecord = { ...agent, published: false };
-      saveAgent(updatedAgent);
+
       setAgent(updatedAgent);
       
       toast.success(data.message || 'Agent removed from MCP discovery');

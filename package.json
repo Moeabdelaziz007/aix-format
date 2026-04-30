@@ -10,8 +10,8 @@
     "aix-convert": "./bin/aix-convert.js"
   },
   "scripts": {
-    "test": "node --test \"tests/**/*.test.js\"",
-    "test:verbose": "node --test --test-reporter=spec \"tests/**/*.test.js\"",
+    "test": "node --test",
+    "test:verbose": "node --test --test-reporter=spec",
     "validate": "node bin/aix-validate.js",
     "validate:examples": "node bin/aix-validate.js examples/persona-agent.aix && node bin/aix-validate.js examples/tool-agent.aix && node bin/aix-validate.js examples/hybrid-agent.aix",
     "generate:types:unified": "json2ts -i schemas/aix.schema.json -o types/aix.d.ts --strictIndexSignatures --unreachableDefinitions",
