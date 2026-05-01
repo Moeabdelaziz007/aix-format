@@ -30,7 +30,7 @@ jobs:
           cache-dependency-path: apps/studio/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: .
+        working-directory: packages/aix-core
     steps:
       - uses: actions/checkout@v4
 
@@ -59,7 +59,7 @@ jobs:
         with:
           node-version: '24'
 
-      - run: npm ci
+      - run: npm install
       - run: npm test --if-present
 
   # ─────────────────────────────────────────

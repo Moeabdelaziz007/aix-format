@@ -35,7 +35,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Backup committed types/parser.d.ts
         run: cp types/parser.d.ts types/parser.d.ts.committed
