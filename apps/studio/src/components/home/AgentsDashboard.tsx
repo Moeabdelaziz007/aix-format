@@ -1,6 +1,6 @@
 "use client";
 
-import { AgentCard } from "@/components/studio/AgentCard";
+import { AgentCard } from "@/components/agents/AgentCard";
 import { useLocalAgents } from "@/hooks/useLocalAgents";
 import { mockAgents } from "@/lib/mock-agents";
 

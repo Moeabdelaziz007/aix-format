@@ -16,13 +16,13 @@ import {
 import { useMarketplace } from '../../hooks/useMarketplace';
 import { SearchBar } from '../../components/marketplace/SearchBar';
 import { FilterSidebar } from '../../components/marketplace/FilterSidebar';
-import { AgentCard } from '../../components/marketplace/AgentCard';
+import { AgentCard } from '@/components/agents/AgentCard';
 import { SkillCard } from '../../components/marketplace/SkillCard';
 import { MCPCard } from '../../components/marketplace/MCPCard';
 import { PluginCard } from '../../components/marketplace/PluginCard';
 import { APICard } from '../../components/marketplace/APICard';
 import { AgentDetailModal } from '../../components/marketplace/AgentDetailModal';
-import { KYABadge } from '../../components/marketplace/KYABadge';
+import { KYABadge } from '@/components/agents/AgentCard';
 import FadeIn from '../../components/animations/FadeIn';
 
 const CATEGORIES = [
@@ -144,8 +144,8 @@ export default function MarketplacePage() {
               >
                 <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mr-2">Sub-categories:</div>
                 {CATEGORIES.find(c => c.id === type)?.sub?.map(s => (
-                  <button key={s} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-white/60 hover:text-white transition-all">
-                    {s}
+                  <button key={s.name} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-white/60 hover:text-white transition-all">
+                    {s.name}
                   </button>
                 ))}
               </motion.div>
@@ -173,7 +173,7 @@ export default function MarketplacePage() {
                   };
 
                   if (view === 'list' || item.type === 'agent') {
-                    return <AgentCard {...props} view={view} />;
+                    return <AgentCard context="marketplace" item={item} view={view} onClick={props.onClick} key={props.key} />;
                   }
 
                   switch (item.type) {
@@ -181,7 +181,7 @@ export default function MarketplacePage() {
                     case 'mcp': return <MCPCard {...props} />;
                     case 'plugin': return <PluginCard {...props} />;
                     case 'api': return <APICard {...props} />;
-                    default: return <AgentCard {...props} />;
+                    default: return <AgentCard context="marketplace" item={item} onClick={props.onClick} key={props.key} />;
                   }
                 })}
               </motion.div>
