@@ -22,7 +22,23 @@ export default function DeployPage() {
   const [endpoint, setEndpoint] = useState(agent?.deployment?.endpointUrl ?? "");
   const [error, setError]     = useState("");
 
-  if (!agent) return null;
+  if (!agent) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center"
+      >
+        <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+          <Rocket className="w-8 h-8 text-white/20" />
+        </div>
+        <h2 className="text-xl font-black text-white tracking-tight mb-2">Agent Context Lost</h2>
+        <p className="text-sm text-white/40 max-w-sm">
+          We couldn't find the agent details required for deployment.
+        </p>
+      </motion.div>
+    );
+  }
 
   const isDeployed = agent.deployment?.status === "deployed";
 
@@ -82,7 +98,12 @@ export default function DeployPage() {
   const stepIndex = { idle: -1, signing: 0, deploying: 1, done: 2, error: -1 }[state];
 
   return (
-    <div className="p-6 space-y-8 max-w-2xl">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="p-6 space-y-8 max-w-2xl"
+    >
       <div>
         <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
           <Rocket className="w-6 h-6 text-blue-400" />
@@ -226,6 +247,6 @@ export default function DeployPage() {
           <><Zap className="w-4 h-4" /> {isDeployed ? "Redeploy Agent" : "Deploy Agent"}</>
         )}
       </button>
-    </div>
+    </motion.div>
   );
 }
