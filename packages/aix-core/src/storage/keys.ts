@@ -34,7 +34,8 @@ export const NS = {
   DEAD_HAND: 'aix:deadhand',        // Status, heartbeats, incidents
   
   SKILLS: 'aix:skills',         
-  INVOKE: 'aix:invoke'          
+  INVOKE: 'aix:invoke',
+  SHADOW: 'aix:shadow' // Ghost Agent Pattern: Shadow Memory
 } as const;
 
 /** Helper functions for key generation to ensure consistency */
@@ -65,7 +66,11 @@ export const KEYS = {
   stats: (agentId: string) => `agent:${agentId}:stats`,
   
   skill: (agentId: string) => `agent:${agentId}:skills`, 
-  invoke: (traceId: string) => `agent:${traceId}:invoke`
+  invoke: (traceId: string) => `agent:${traceId}:invoke`,
+  
+  // Ghost Agent Pattern
+  shadow: (processId: string) => `aix:shadow:${processId}`,
+  ghost: (agentId: string) => `agent:${agentId}:ghost`
 };
 
 export const TTL = {
@@ -91,7 +96,8 @@ export const TTL = {
   
   MEMORY: 60 * 60 * 24 * 30,    // 30 Days
   SKILLS: 0,                    // Permanent
-  INVOKE: 60 * 60               // 1 Hour
+  INVOKE: 60 * 60,               // 1 Hour
+  SHADOW: 60 * 60 * 24         // 24 Hours
 } as const;
 
 export type Namespace = keyof typeof NS;

@@ -1,5 +1,6 @@
 import { AIXManifest } from "@aix-types";
 import { SUPPORTED_VERSIONS } from "@/constants/protocol";
+import { scanAgent } from "./abom-scanner";
 
 export interface ValidationResult {
   valid: boolean;
@@ -51,14 +52,15 @@ export function validateSovereignManifest(manifest: any): ValidationResult {
   }
 
   // 4. ABOM (Risk Enforcement)
-  if (!manifest.abom) {
-    warnings.push("Missing 'abom' block. Risk score defaulted to maximum.");
-    risk_score = 100;
-  } else {
-    if (manifest.abom.risk_level === 'critical') risk_score = 100;
-    else if (manifest.abom.risk_level === 'high') risk_score = 75;
-    else if (manifest.abom.risk_level === 'medium') risk_score = 50;
-    else risk_score = 10;
+  const scanResult = scanAgent(manifest);
+  risk_score = scanResult.risk_score;
+  
+  if (scanResult.risks.length > 0) {
+    warnings.push(...scanResult.risks);
+  }
+
+  if (scanResult.tier === 'critical') {
+    errors.push("Agent poses critical security risk and cannot be validated.");
   }
 
   return {

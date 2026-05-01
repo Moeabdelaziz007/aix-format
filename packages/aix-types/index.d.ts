@@ -7,6 +7,8 @@ export type SemVer = string;
 export type ISODateTime = string;
 export type AxiomDID = string;
 export type KycTier = 'anonymous' | 'basic' | 'verified' | 'sovereign' | 'institutional';
+export type DeadHandStatus = 'dormant' | 'active' | 'triggered';
+export type ArbitrageStrategy = 'route_splitting' | 'timing_attack' | 'skill_staking';
 
 export interface PublicKey {
   algorithm: 'Ed25519' | 'secp256k1';
@@ -49,6 +51,8 @@ export interface Security {
   checksum: {
     algorithm: 'sha256' | 'sha512' | 'blake3';
     value: string;
+    nonce?: string; // Genesis Hash Replay Protection
+    prev_hash?: string; // Blockchain-style linking
   };
   sandboxed: boolean;
   level?: 'standard' | 'high' | 'sovereign';
@@ -74,6 +78,17 @@ export interface Verification {
   kyc_tier?: KycTier;
   proof_url?: string;
   is_perpetual?: boolean; // pKYC: Continuous monitoring enabled
+  dead_hand?: {
+    enabled: boolean;
+    inactivity_limit_days: number;
+    last_active_at: ISODateTime;
+    status: DeadHandStatus;
+  };
+  pi_stake?: {
+    amount: number;
+    currency: 'PI';
+    locked_until?: ISODateTime;
+  };
   zk_proof?: {
     circuit_id: string;
     nullifier?: string;
@@ -112,6 +127,16 @@ export interface Economics {
     features: string[];
     monthly_price?: number;
   }>;
+  arbitrage?: {
+    enabled: boolean;
+    strategies: ArbitrageStrategy[];
+    min_yield_threshold?: number;
+  };
+  sovereign_loop?: {
+    enabled: boolean;
+    royalty_bps: number;
+    automatic_reinvestment?: boolean;
+  };
 }
 
 export interface SaasService {
@@ -151,6 +176,13 @@ export interface AgentSkill {
   parameters?: Record<string, any>;
 }
 
+export interface GhostConfig {
+  hidden_did?: AxiomDID;
+  shadow_memory_enabled: boolean;
+  ephemeral_keys: boolean;
+  stealth_mode: boolean;
+}
+
 export interface McpPrompt {
   name: string;
   description?: string;
@@ -170,6 +202,8 @@ export interface AIXManifest {
   abom: ABOM;
   build_provenance?: BuildProvenance;
   economics: Economics;
+  is_shadow_clone?: boolean; // DNA Shadow Forking: Silent duplication for A/B tests
+  ghost_config?: GhostConfig; // Ghost Agent Pattern: Secondary identity & shadow memory
 }
 
 export interface RegistryEntry {

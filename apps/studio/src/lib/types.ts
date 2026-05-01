@@ -82,16 +82,7 @@ export interface McpDiscoveryResponse {
   agents: CanonicalRegistryEntry[];
 }
 
-export interface AgentSkill {
-  name: string;
-  description: string;
-  parameters?: Record<string, unknown>;
-}
-
-export interface McpPrompt {
-  name: string;
-  description?: string;
-}
+// Types now correctly imported from @aix-types at top of file
 
 // ─── Identity & Auth ───────────────────────────────────────────────────────
 
