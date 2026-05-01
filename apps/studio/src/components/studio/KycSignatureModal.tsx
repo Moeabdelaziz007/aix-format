@@ -123,7 +123,7 @@ export const KycSignatureModal = memo(function KycSignatureModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        // FIX: moved backdrop-blur here as a CSS class so it's GPU-composited
+        // moved backdrop-blur here as a CSS class so it's GPU-composited
         // instead of triggering layout on every re-render
         <div
           role="dialog"
