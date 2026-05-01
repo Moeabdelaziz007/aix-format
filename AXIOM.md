@@ -394,3 +394,10 @@ Any PR introducing a forbidden language is **auto-rejected** by the Reviewer nod
 - `land`: merge-ready loop (`.axiom/skills/land/SKILL.md`)
 - `dna`: sign and verify AXIOM.md genesis hash
 - `memory`: compress openmemory.md + archive checkpoint
+
+## Security Guarantees: ZK-KYC Nullifier Registry
+To prevent proof replay attacks in the ZK-KYC pipeline, AIX utilizes a robust Nullifier Registry.
+- **Double-spend Prevention**: Each verified proof is associated with a unique, deterministically generated nullifier hash.
+- **On-chain & Distributed Anchoring**: Through Upstash Redis and persistent storage, once a nullifier is registered, it cannot be reused.
+- **TTL & Expiry**: Nullifiers have an automatic 30-day TTL matching the compliance requirements, ensuring they are pruned responsibly.
+- **High Availability**: The architecture gracefully falls back to an in-memory caching mechanism if Redis is temporarily unreachable, meaning "Redis down ≠ system down."

@@ -15,7 +15,16 @@ describe('AIX ZK-KYC Pipeline (pKYC)', () => {
         expect(proof).toHaveProperty('nullifier');
         expect(proof).toHaveProperty('publicParams');
 
-        const isValid = await verifyProof(proof.token, proof.publicParams);
+        let isValid = false;
+        try {
+            isValid = await verifyProof(proof.token, proof.publicParams);
+        } catch (e) {
+            if (e.name === 'ProofReplayError') {
+                isValid = false;
+            } else {
+                throw e;
+            }
+        }
         expect(isValid).toBe(true);
     });
 
@@ -39,7 +48,16 @@ describe('AIX ZK-KYC Pipeline (pKYC)', () => {
         // In a real system, the verifyProof function or the smart contract 
         // would check `isRevoked` as part of the consensus. 
         // We simulate the failure context here.
-        const isValid = await verifyProof(proof.token, proof.publicParams);
+        let isValid = false;
+        try {
+            isValid = await verifyProof(proof.token, proof.publicParams);
+        } catch (e) {
+            if (e.name === 'ProofReplayError') {
+                isValid = false;
+            } else {
+                throw e;
+            }
+        }
         const isAccepted = isValid && !isRevoked(proof.nullifier);
 
         expect(isAccepted).toBe(false);

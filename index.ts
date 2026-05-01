@@ -1,4 +1,8 @@
 import crypto from 'crypto';
+import { NullifierRegistry, ProofReplayError } from './packages/aix-zkkyc/src/NullifierRegistry';
+
+const globalRegistry = new NullifierRegistry();
+
 
 export interface IdentityClaims {
     name: string;
@@ -35,7 +39,7 @@ export async function generateProof(claims: IdentityClaims): Promise<pKYCProof> 
     const zkProof = `snark_${crypto.randomBytes(16).toString('hex')}`;
 
     // 5. Wrap in Token
-    const payload = JSON.stringify({ commitment, proofType: 'Pedersen-SNARK', timestamp: Date.now() });
+    const payload = JSON.stringify({ commitment, proofType: 'Pedersen-SNARK', timestamp: Date.now(), nullifier });
     const token = Buffer.from(payload).toString('base64');
 
     return {
@@ -51,7 +55,25 @@ export async function generateProof(claims: IdentityClaims): Promise<pKYCProof> 
  */
 export async function verifyProof(token: string, publicParams: string): Promise<boolean> {
     const decoded = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
-    return decoded.commitment === publicParams;
+
+    // Extract nullifier from decoded token or derive if legacy
+    const proofHash = decoded.nullifier || crypto.createHash('sha256').update(token).digest('hex');
+
+    // 1. Check registry to prevent replay attacks
+    const isUsed = await globalRegistry.isNullified(proofHash);
+    if (isUsed) {
+        throw new ProofReplayError('Proof already used in a previous transaction.', 'ZK_REPLAY_001');
+    }
+
+    // 2. Verify Commitment
+    const isValid = decoded.commitment === publicParams;
+
+    if (isValid) {
+        // 3. Register nullifier to prevent future replays
+        await globalRegistry.registerNullifier(proofHash, "anonymous-agent", Date.now());
+    }
+
+    return isValid;
 }
 
 export async function revokeProof(nullifier: string): Promise<void> {
