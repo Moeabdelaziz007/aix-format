@@ -18,6 +18,12 @@ export interface StorageAdapter {
   decr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<void>;
   exists(key: string): Promise<boolean>;
+  lpush(key: string, value: any): Promise<number>;
+  lrange<T>(key: string, start: number, stop: number): Promise<T[]>;
+  ltrim(key: string, start: number, stop: number): Promise<void>;
+  sadd(key: string, ...members: any[]): Promise<number>;
+  srem(key: string, ...members: any[]): Promise<number>;
+  smembers<T>(key: string): Promise<T[]>;
 }
 
 import { NS, TTL, KEYS } from './storage/keys';
@@ -149,6 +155,30 @@ class UpstashRedisAdapter implements StorageAdapter {
       console.error(`[Storage] EXISTS failed for ${key}:`, error);
       return false;
     }
+  }
+
+  async lpush(key: string, value: any): Promise<number> {
+    return this.withRetry(() => this.client.lpush(key, value), 'LPUSH', key) as any;
+  }
+
+  async lrange<T>(key: string, start: number, stop: number): Promise<T[]> {
+    return (await this.withRetry(() => this.client.lrange<T>(key, start, stop), 'LRANGE', key)) || [];
+  }
+
+  async ltrim(key: string, start: number, stop: number): Promise<void> {
+    await this.withRetry(() => this.client.ltrim(key, start, stop), 'LTRIM', key);
+  }
+
+  async sadd(key: string, ...members: any[]): Promise<number> {
+    return this.withRetry(() => this.client.sadd(key, ...members), 'SADD', key) as any;
+  }
+
+  async srem(key: string, ...members: any[]): Promise<number> {
+    return this.withRetry(() => this.client.srem(key, ...members), 'SREM', key) as any;
+  }
+
+  async smembers<T>(key: string): Promise<T[]> {
+    return (await this.withRetry(() => this.client.smembers<T>(key), 'SMEMBERS', key)) || [];
   }
 }
 

@@ -24,6 +24,7 @@ export function VoiceWizard({
     handleVoiceTurn, 
     isListening, 
     isSpeaking, 
+    isProcessing,
     manifest, 
     messages 
   } = useVoiceWizard();
@@ -95,6 +96,8 @@ export function VoiceWizard({
                   >
                     {isListening ? (
                       <Mic className="w-10 h-10 animate-pulse" />
+                    ) : isProcessing ? (
+                      <Loader2 className="w-10 h-10 animate-spin" />
                     ) : isSpeaking ? (
                       <Volume2 className="w-10 h-10" />
                     ) : (
@@ -107,10 +110,14 @@ export function VoiceWizard({
                 <div className="space-y-4 max-w-md mx-auto">
                   <Badge variant="outline" className={`${
                     isListening ? "border-red-500 text-red-500 bg-red-500/5" :
+                    isProcessing ? "border-purple-500 text-purple-500 bg-purple-500/5" :
                     isSpeaking ? "border-blue-500 text-blue-500 bg-blue-500/5" :
                     "border-zinc-800 text-zinc-500"
                   }`}>
-                    {isListening ? "LISTENING..." : isSpeaking ? "WIZARD SPEAKING..." : "HOLD TO TALK"}
+                    {isListening ? "LISTENING..." : 
+                     isProcessing ? "THINKING..." :
+                     isSpeaking ? "WIZARD SPEAKING..." : 
+                     "HOLD TO TALK"}
                   </Badge>
                   
                   <p className="text-lg text-white font-medium leading-relaxed">
