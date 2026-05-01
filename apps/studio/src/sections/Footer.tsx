@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@/design-system/components";
+import { Badge } from "@/components/shared";
 import { Github, Twitter, MessageSquare, ExternalLink } from "lucide-react";
 
 export function Footer() {

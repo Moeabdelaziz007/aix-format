@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer } from "@/components/animations/FadeIn";
-import { Badge, Section, Container, SectionHeader, Typography } from "@/design-system/components";
+import { Badge, Section, Container, SectionHeader, Typography } from "@/components/shared";
 import { Edit3, Layers, ShieldCheck, Rocket } from "lucide-react";
 
 const steps = [

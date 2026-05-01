@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Button, Typography, Container, Section } from "@/design-system/components";
+import { Button, Typography, Container, Section } from "@/components/shared";
 import { ParticleBackground } from "@/components/animations/ParticleBackground";
 import { Mic, Keyboard, ChevronRight } from "lucide-react";
 import Link from "next/link";

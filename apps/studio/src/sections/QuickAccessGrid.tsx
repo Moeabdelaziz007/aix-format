@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Search, Hammer, PlugZap, ArrowRight } from "lucide-react";
-import { Container, Typography } from "@/design-system/components";
+import { Container, Typography } from "@/components/shared";
 import Link from "next/link";
 
 const CARDS = [

@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Star, ShieldCheck, Zap } from "lucide-react";
-import { Badge } from "@/design-system/components";
+import { Badge } from "@/components/shared";
 import { cn } from "@/lib/utils";
 
 interface FeaturedAgentCardProps {

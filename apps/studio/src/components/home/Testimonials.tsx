@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Star, Quote, ShieldCheck } from "lucide-react";
-import { Badge } from "@/design-system/components";
+import { Badge } from "@/components/shared";
 
 const testimonials = [
   {

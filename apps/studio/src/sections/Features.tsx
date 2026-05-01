@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Badge, Section, Container, SectionHeader, Typography } from "@/design-system/components";
+import { Card, Badge, Section, Container, SectionHeader, Typography } from "@/components/shared";
 import { FadeIn, StaggerContainer } from "@/components/animations/FadeIn";
 import { 
   Fingerprint, 

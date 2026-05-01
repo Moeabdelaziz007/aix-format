@@ -19,7 +19,7 @@ import { MarketplaceItem } from '../../lib/marketplace-api';
 import { KYABadge } from './KYABadge';
 import { TrustScore } from './TrustScore';
 import { RatingStars } from './RatingStars';
-import { InfoTooltip } from '../../design-system/components';
+import { InfoTooltip } from '@/components/shared';
 
 interface AgentDetailModalProps {
   item: MarketplaceItem | null;

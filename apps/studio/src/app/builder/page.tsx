@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button, Card, Input, Badge, InfoTooltip } from "@/design-system/components";
+import { Button, Card, Input, Badge, InfoTooltip } from "@/components/shared";
 import { tokens } from "@/design-system/tokens";
 import { 
   ChevronRight, 

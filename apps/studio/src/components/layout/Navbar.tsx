@@ -8,7 +8,7 @@ import { Shield, Wallet, LogOut, ChevronDown, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button, Badge, Typography } from "@/design-system/components";
+import { Button, Badge, Typography } from "@/components/shared";
 
 interface PiUser {
   username: string;

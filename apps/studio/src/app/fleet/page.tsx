@@ -24,7 +24,7 @@ import {
   Search,
   ExternalLink
 } from 'lucide-react';
-import { Badge } from '@/design-system/components';
+import { Badge } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
 export default function MissionControlPage() {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Search, Rocket, ShieldCheck, Star, Users, Briefcase } from "lucide-react";
-import { Badge } from "@/design-system/components";
+import { Badge } from "@/components/shared";
 
 const VoiceOrb = dynamic(
   () => import("@/components/studio/VoiceOrb").then(mod => mod.VoiceOrb),

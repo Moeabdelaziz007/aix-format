@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Container, Typography } from "@/design-system/components";
+import { Container, Typography } from "@/components/shared";
 import { FeaturedAgentCard } from "@/components/studio/FeaturedAgentCard";
 import { Code2, Search, LineChart, MessageSquare } from "lucide-react";
 

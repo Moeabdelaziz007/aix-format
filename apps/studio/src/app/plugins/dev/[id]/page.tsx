@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
-import { Badge, Typography } from '@/design-system/components';
+import { Badge, Typography } from '@/components/shared';
 import { 
   Download, 
   Star, 

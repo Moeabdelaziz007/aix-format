@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { Badge, Button, Section, Container, Typography } from "@/design-system/components";
+import { Badge, Button, Section, Container, Typography } from "@/components/shared";
 import { Terminal, Play, Save, Share2, ShieldCheck } from "lucide-react";
 
 export function LiveDemo() {

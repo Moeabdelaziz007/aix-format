@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
-import { Badge, Typography } from '@/design-system/components';
+import { Badge, Typography } from '@/components/shared';
 import { 
   Plus, 
   Search, 

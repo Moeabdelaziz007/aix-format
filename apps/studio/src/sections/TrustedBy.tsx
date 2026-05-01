@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Container } from "@/design-system/components";
+import { Container } from "@/components/shared";
 import { Globe, ShieldCheck, Zap, Briefcase, Database } from "lucide-react";
 
 export const TrustedBy = () => {

@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { tokens } from "@/design-system/tokens";
-import { Button, Card, Input, Badge } from "@/design-system/components";
+import { Button, Card, Input, Badge } from "@/components/shared";
 import { Navbar } from "@/components/layout/Navbar";
 import { 
   Zap, 

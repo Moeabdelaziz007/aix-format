@@ -18,7 +18,7 @@ import {
   Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Badge, InfoTooltip, Tabs, TabsList, TabsTrigger, TabsContent } from '@/design-system/components';
+import { Badge, InfoTooltip, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
