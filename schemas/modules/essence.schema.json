@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiomid.app/schemas/modules/essence.schema.json",
+  "title": "AIX Essence",
+  "description": "The unified capability unit of the AIX Protocol (Unifies Skills, MCP, Plugins, and APIs).",
+  "type": "object",
+  "properties": {
+    "essence_id": { "type": "string" },
+    "kind": { "type": "string", "enum": ["toolset", "protocol_adapter", "logical_module", "perception_layer"] },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "mcp": { "$ref": "mcp.schema.json" },
+        "skills": { 
+          "type": "array", 
+          "items": { "type": "string", "description": "References to .hermes or .skill logic files." }
+        },
+        "api_bindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "endpoint": { "type": "string" },
+              "auth_method": { "type": "string" }
+            }
+          }
+        },
+        "wasm_dna": {
+          "type": "string",
+          "description": "Path to binary Rust logic for heavy computation or security logic."
+        }
+      }
+    },
+    "governance": { "$ref": "security.schema.json" },
+    "economics": { "$ref": "economics.schema.json" }
+  },
+  "required": ["essence_id", "kind", "capabilities"]
+}

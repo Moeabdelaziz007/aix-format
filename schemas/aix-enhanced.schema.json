@@ -1,0 +1,1375 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://amrikyy.ai/schemas/aix-enhanced.schema.json",
+  "title": "Enhanced AIX Format Schema",
+  "description": "Enhanced JSON Schema for AIX (Artificial Intelligence eXchange) v1.3 - Sovereign Protocol. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026",
+  "type": "object",
+  "required": [
+    "meta",
+    "persona",
+    "security",
+    "identity_layer"
+  ],
+  "properties": {
+    "pi_network": {
+      "type": "object",
+      "description": "Pi Network specific configuration and SDK integration",
+      "required": [
+        "app_id",
+        "environment"
+      ],
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "description": "Pi App identifier from Pi Dev Studio"
+        },
+        "environment": {
+          "type": "string",
+          "enum": [
+            "sandbox",
+            "production"
+          ],
+          "description": "Pi Network execution environment"
+        },
+        "sdk_version": {
+          "type": "string",
+          "description": "Required Pi SDK version"
+        },
+        "payment_provider": {
+          "type": "string",
+          "description": "Pi payment provider identifier"
+        },
+        "kyc_required": {
+          "type": "boolean",
+          "description": "Whether the agent requires KYCed Pi users",
+          "default": true
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "description": "Agent metadata and identification",
+      "required": [
+        "version",
+        "id",
+        "name",
+        "created",
+        "author"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Agent version (semantic versioning)",
+          "pattern": "^\\d+\\.\\d+(\\.\\d+)?(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$",
+          "examples": [
+            "1.0.0"
+          ]
+        },
+        "format_version": {
+          "type": "string",
+          "description": "AIX format version",
+          "enum": [
+            "1.0",
+            "1.2",
+            "1.3"
+          ],
+          "default": "1.3"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (UUID v4)",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "examples": [
+            "550e8400-e29b-41d4-a716-446655440000"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Agent name",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "created": {
+          "type": "string",
+          "description": "Creation timestamp (ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$",
+          "examples": [
+            "2026-04-24T10:30:00Z"
+          ]
+        },
+        "updated": {
+          "type": "string",
+          "description": "Last update timestamp (ISO 8601)",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author name or identifier",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "description": "Classification tags",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "minItems": 0,
+          "maxItems": 10
+        },
+        "license": {
+          "type": "string",
+          "description": "License identifier (SPDX format)",
+          "examples": [
+            "MIT",
+            "Apache-2.0",
+            "GPL-3.0"
+          ]
+        },
+        "homepage": {
+          "type": "string",
+          "description": "Agent homepage URL",
+          "format": "uri"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Source repository URL",
+          "format": "uri"
+        },
+        "documentation": {
+          "type": "string",
+          "description": "Documentation URL",
+          "format": "uri"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Base64-encoded icon or URL"
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary language (ISO 639-1)",
+          "pattern": "^[a-z]{2}$",
+          "examples": [
+            "en",
+            "es",
+            "fr"
+          ]
+        },
+        "framework": {
+          "type": "string",
+          "description": "Target AI framework",
+          "examples": [
+            "openai",
+            "anthropic",
+            "cohere"
+          ]
+        },
+        "runtime_version": {
+          "type": "string",
+          "description": "Required runtime version"
+        },
+        "lineage": {
+          "type": "array",
+          "description": "Agent Genealogy and heritage tracking (Agent Lineage)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "parent_id": {
+                "type": "string",
+                "description": "DID or ID of the parent agent"
+              },
+              "relationship": {
+                "type": "string",
+                "enum": [
+                  "fork",
+                  "clone",
+                  "ancestor",
+                  "template"
+                ]
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "signature": {
+                "type": "string",
+                "description": "Cryptographic proof of lineage"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "persona": {
+      "type": "object",
+      "description": "Agent personality and behavior",
+      "required": [
+        "role",
+        "instructions"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": "Agent's primary role",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "tone": {
+          "type": "string",
+          "description": "Communication style",
+          "examples": [
+            "friendly",
+            "professional",
+            "casual"
+          ]
+        },
+        "style": {
+          "type": "string",
+          "description": "Response style",
+          "examples": [
+            "concise",
+            "detailed",
+            "technical"
+          ]
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Core behavioral instructions",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Behavioral constraints",
+          "items": {
+            "type": "string"
+          }
+        },
+        "personality_traits": {
+          "type": "object",
+          "description": "Personality attributes",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "example_responses": {
+          "type": "array",
+          "description": "Sample conversations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string"
+              },
+              "answer": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "temperature": {
+          "type": "number",
+          "description": "Sampling temperature",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "context_window": {
+          "type": "integer",
+          "description": "Preferred context size",
+          "minimum": 1
+        },
+        "response_format": {
+          "type": "string",
+          "description": "Preferred output format"
+        }
+      },
+      "additionalProperties": true
+    },
+    "skills": {
+      "type": "array",
+      "description": "Agent capabilities",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Skill identifier",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "description": {
+            "type": "string",
+            "description": "Skill description"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether skill is active",
+            "default": true
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Skill-specific parameters"
+          },
+          "triggers": {
+            "type": "array",
+            "description": "Activation triggers",
+            "items": {
+              "type": "string"
+            }
+          },
+          "examples": {
+            "type": "array",
+            "description": "Usage examples",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Execution priority",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Max execution time (seconds)",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "apis": {
+      "type": "array",
+      "description": "API integrations",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "base_url"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "API identifier"
+          },
+          "base_url": {
+            "type": "string",
+            "description": "API base URL",
+            "format": "uri"
+          },
+          "description": {
+            "type": "string",
+            "description": "API purpose"
+          },
+          "version": {
+            "type": "string",
+            "description": "API version"
+          },
+          "auth": {
+            "type": "object",
+            "description": "Authentication configuration",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "bearer",
+                  "api_key",
+                  "oauth2",
+                  "basic",
+                  "none"
+                ]
+              },
+              "location": {
+                "type": "string",
+                "enum": [
+                  "header",
+                  "query",
+                  "body"
+                ]
+              },
+              "key_name": {
+                "type": "string"
+              }
+            }
+          },
+          "endpoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "DELETE",
+                    "PATCH"
+                  ]
+                },
+                "description": {
+                  "type": "string"
+                },
+                "parameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "rate_limit": {
+            "type": "object",
+            "properties": {
+              "requests": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "period": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "retry": {
+            "type": "object",
+            "properties": {
+              "max_attempts": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "backoff": {
+                "type": "string",
+                "enum": [
+                  "exponential",
+                  "linear",
+                  "constant"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Agentic capabilities and features",
+      "properties": {
+        "streaming": {
+          "type": "boolean",
+          "default": false
+        },
+        "push_notifications": {
+          "type": "boolean",
+          "default": false
+        },
+        "state_history": {
+          "type": "boolean",
+          "default": false
+        },
+        "voice_interaction": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "description": "Model Context Protocol configuration",
+      "properties": {
+        "servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "command"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Server identifier"
+              },
+              "command": {
+                "type": "string",
+                "description": "Executable command"
+              },
+              "args": {
+                "type": "array",
+                "description": "Command arguments",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "env": {
+                "type": "object",
+                "description": "Environment variables",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "description": {
+                "type": "string"
+              },
+              "capabilities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "timeout": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "auto_start": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "description": "Memory system configuration",
+      "properties": {
+        "episodic": {
+          "type": "object",
+          "description": "Conversation history",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "max_messages": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "retention_days": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "storage": {
+              "type": "string",
+              "enum": [
+                "local",
+                "cloud",
+                "vector_db",
+                "database"
+              ]
+            }
+          }
+        },
+        "semantic": {
+          "type": "object",
+          "description": "Knowledge graphs",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "embedding_model": {
+              "type": "string"
+            },
+            "vector_db": {
+              "type": "string"
+            },
+            "similarity_threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "max_results": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "procedural": {
+          "type": "object",
+          "description": "Workflows and processes",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "storage": {
+              "type": "string"
+            },
+            "max_workflows": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "backend": {
+              "type": "string",
+              "enum": [
+                "file",
+                "database",
+                "redis",
+                "s3",
+                "postgresql",
+                "sqlite"
+              ]
+            },
+            "config": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "requirements": {
+      "type": "object",
+      "description": "Agent resource requirements for deployment and execution",
+      "properties": {
+        "hardware": {
+          "type": "object",
+          "description": "Hardware requirements",
+          "properties": {
+            "cpu_cores": {
+              "type": "integer",
+              "description": "Minimum CPU cores required",
+              "minimum": 1
+            },
+            "memory_mb": {
+              "type": "integer",
+              "description": "Minimum RAM in MB",
+              "minimum": 1
+            },
+            "storage_mb": {
+              "type": "integer",
+              "description": "Minimum storage in MB",
+              "minimum": 1
+            },
+            "gpu_required": {
+              "type": "boolean",
+              "description": "Whether GPU is required",
+              "default": false
+            },
+            "gpu_memory_mb": {
+              "type": "integer",
+              "description": "Minimum GPU memory in MB (if GPU required)",
+              "minimum": 1
+            }
+          }
+        },
+        "software": {
+          "type": "object",
+          "description": "Software dependencies",
+          "properties": {
+            "runtime": {
+              "type": "string",
+              "description": "Required runtime environment"
+            },
+            "dependencies": {
+              "type": "array",
+              "description": "Required software dependencies",
+              "items": {
+                "type": "string"
+              }
+            },
+            "python_version": {
+              "type": "string",
+              "description": "Required Python version (if applicable)"
+            },
+            "node_version": {
+              "type": "string",
+              "description": "Required Node.js version (if applicable)"
+            }
+          }
+        },
+        "network": {
+          "type": "object",
+          "description": "Network requirements",
+          "properties": {
+            "internet_access": {
+              "type": "boolean",
+              "description": "Whether internet access is required",
+              "default": false
+            },
+            "bandwidth_mbps": {
+              "type": "number",
+              "description": "Minimum bandwidth in Mbps",
+              "minimum": 0
+            },
+            "allowed_domains": {
+              "type": "array",
+              "description": "Domains that the agent needs to access",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "vla": {
+          "type": "object",
+          "description": "Vision-Language-Action payload requirements",
+          "required": [
+            "adapter"
+          ],
+          "properties": {
+            "adapter": {
+              "type": "string",
+              "enum": [
+                "openpi",
+                "π0.7",
+                "generic"
+              ],
+              "description": "Identifies which VLA runtime adapter should process this payload."
+            },
+            "vision": {
+              "type": "object",
+              "description": "Visual perception inputs.",
+              "additionalProperties": true
+            },
+            "language": {
+              "type": "object",
+              "description": "Natural language instruction or context.",
+              "additionalProperties": true
+            },
+            "action": {
+              "type": "object",
+              "description": "Motor or decision action outputs.",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "abom": {
+      "type": "object",
+      "description": "Agent Bill of Materials (ABOM) - AI-SBOM (CycloneDX 1.6 compatible) for supply chain transparency",
+      "properties": {
+        "integrity_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of the ABOM constituents/dependencies for integrity verification"
+        },
+        "models": {
+          "type": "array",
+          "description": "Base models and architectures utilized by the agent",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "version"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "parameters": {
+                "type": "string",
+                "description": "e.g. 70B, 8B"
+              },
+              "weights_hash": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "datasets": {
+          "type": "array",
+          "description": "Training or fine-tuning datasets used",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "provenance": {
+                "type": "string"
+              },
+              "sensitivity": {
+                "type": "string",
+                "enum": [
+                  "public",
+                  "proprietary",
+                  "sensitive"
+                ]
+              }
+            }
+          }
+        },
+        "constituents": {
+          "type": "array",
+          "description": "Software components and dependencies",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "version"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "hash": {
+                "type": "string"
+              },
+              "license": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "governance": {
+          "type": "object",
+          "properties": {
+            "ethical_constraints": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "compliance_attestations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "environmental_impact": {
+          "type": "object",
+          "properties": {
+            "training_energy_kwh": {
+              "type": "number"
+            },
+            "carbon_offset": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "economics": {
+      "type": "object",
+      "description": "Economic and transaction layer for agent settlements and payments",
+      "properties": {
+        "pi_smart_contract": {
+          "type": "object",
+          "description": "Pi Network Smart Contract interface for automated settlements",
+          "required": [
+            "address",
+            "network"
+          ],
+          "properties": {
+            "address": {
+              "type": "string",
+              "description": "Contract address on the Pi Network"
+            },
+            "network": {
+              "type": "string",
+              "enum": [
+                "mainnet",
+                "testnet",
+                "sandbox"
+              ]
+            },
+            "escrow_enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "abi_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "pricing": {
+          "type": "object",
+          "description": "Pricing model for agent usage (Legacy Pricing included in Economics Layer)",
+          "properties": {
+            "model": {
+              "type": "string",
+              "description": "Pricing model type",
+              "enum": [
+                "pay_per_call",
+                "subscription",
+                "freemium",
+                "tiered"
+              ],
+              "default": "pay_per_call"
+            },
+            "cost_per_call": {
+              "type": "object",
+              "description": "Cost per API call",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "description": "Cost amount",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "description": "Currency code (ISO 4217)",
+                  "default": "PI",
+                  "examples": [
+                    "PI",
+                    "SOL",
+                    "USD",
+                    "EUR"
+                  ]
+                }
+              }
+            },
+            "subscription": {
+              "type": "object",
+              "description": "Subscription pricing",
+              "properties": {
+                "monthly_fee": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string",
+                      "default": "PI"
+                    }
+                  }
+                },
+                "included_calls": {
+                  "type": "integer",
+                  "description": "Number of calls included in subscription",
+                  "minimum": 0
+                },
+                "additional_call_cost": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string",
+                      "default": "PI"
+                    }
+                  }
+                }
+              }
+            },
+            "tiered_pricing": {
+              "type": "array",
+              "description": "Tiered pricing based on usage",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "min_calls": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "max_calls": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "cost_per_call": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "currency": {
+                        "type": "string",
+                        "default": "PI"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "description": "Security and integrity data",
+      "required": [
+        "checksum"
+      ],
+      "properties": {
+        "authentication": {
+          "type": "array",
+          "description": "Supported authentication schemes",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scheme": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "checksum": {
+          "type": "object",
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "sha256",
+                "sha512",
+                "blake3"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "description": "Hex-encoded hash value",
+              "pattern": "^[0-9a-f]+$"
+            },
+            "scope": {
+              "type": "string",
+              "description": "What is included in checksum",
+              "default": "content"
+            }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "description": "Digital signature",
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "RSA-SHA256",
+                "Ed25519",
+                "ECDSA-SHA256"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64-encoded signature"
+            },
+            "public_key": {
+              "type": "string",
+              "description": "PEM-encoded public key"
+            },
+            "signer": {
+              "type": "string",
+              "description": "Signer identifier"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "Signing timestamp (ISO 8601)",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$"
+            }
+          }
+        },
+        "encryption": {
+          "type": "object",
+          "description": "Encryption metadata",
+          "properties": {
+            "encrypted": {
+              "type": "boolean",
+              "default": false
+            },
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "AES-256-GCM",
+                "ChaCha20-Poly1305",
+                "none"
+              ]
+            },
+            "key_fingerprint": {
+              "type": "string"
+            }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Capability restrictions",
+          "properties": {
+            "allowed_operations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "restricted_operations": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "restricted_domains": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_api_calls_per_minute": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_memory_mb": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "sandbox": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "description": "Compliance and audit",
+          "properties": {
+            "standards": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "certifications": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "audit_log": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    },
+    "identity_layer": {
+      "type": "object",
+      "description": "AxiomID Identity block. axiomid.app is the Root Authority for all issued identities.",
+      "required": [
+        "id",
+        "authority",
+        "issuedAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Axiom identifier enforcing did:axiom or did:axiom:axiomid.app format.",
+          "pattern": "^(did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+|did:axiom:axiomid.app:[a-zA-Z0-9.\\-]+(:[a-zA-Z0-9.\\-]+)*)$"
+        },
+        "kyc_tier": {
+          "type": "integer",
+          "description": "Pi Network KYC tier (0: None, 1: Basic, 2: Full, 3: Sovereign)",
+          "minimum": 0,
+          "maximum": 3,
+          "default": 0
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Whether the identity has been verified by the authority",
+          "default": false
+        },
+        "authority": {
+          "type": "string",
+          "description": "Root authority domain. Must resolve to axiomid.app.",
+          "const": "axiomid.app"
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of identity issuance."
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional expiry timestamp for ephemeral identities."
+        },
+        "publicKey": {
+          "type": "object",
+          "description": "Public key material for cryptographic verification.",
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "Ed25519",
+                "secp256k1"
+              ],
+              "description": "Cryptographic algorithm used to generate the key pair."
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64url-encoded public key bytes."
+            },
+            "encoding": {
+              "type": "string",
+              "enum": [
+                "base64url",
+                "hex"
+              ],
+              "default": "base64url"
+            }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "description": "Cryptographic signature over the canonical payload hash.",
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "Ed25519",
+                "secp256k1"
+              ],
+              "description": "Algorithm used to produce the signature."
+            },
+            "value": {
+              "type": "string",
+              "description": "Base64url-encoded signature bytes."
+            },
+            "canonicalization": {
+              "type": "string",
+              "enum": [
+                "JCS",
+                "RFC8785"
+              ],
+              "default": "JCS",
+              "description": "JSON canonicalization scheme used before signing."
+            }
+          }
+        }
+      }
+    },
+    "live_voice": {
+      "type": "object",
+      "description": "Live Voice Models integration for human-like conversational experiences.",
+      "required": [
+        "enabled",
+        "provider"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "provider": {
+          "type": "string",
+          "enum": [
+            "openai-realtime",
+            "hume",
+            "elevenlabs",
+            "generic"
+          ],
+          "description": "The live voice model provider."
+        },
+        "voice_id": {
+          "type": "string",
+          "description": "The specific voice profile or identifier to use."
+        },
+        "latency_mode": {
+          "type": "string",
+          "enum": [
+            "ultra_low",
+            "standard",
+            "high_quality"
+          ],
+          "default": "standard"
+        }
+      }
+    },
+    "black_box": {
+      "type": "object",
+      "description": "Black Box logs and ABOM query server for AIX agents",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the black box logging is enabled"
+        },
+        "traces": {
+          "type": "array",
+          "description": "Cryptographically signed trace logs for the regulator package",
+          "items": {
+            "type": "object",
+            "required": [
+              "timestamp",
+              "action",
+              "signature"
+            ],
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "action": {
+                "type": "string",
+                "description": "The action or tool that was executed"
+              },
+              "details": {
+                "type": "object",
+                "description": "Details about the execution, parameters, output or memory state"
+              },
+              "signature": {
+                "type": "object",
+                "required": [
+                  "algorithm",
+                  "value"
+                ],
+                "properties": {
+                  "algorithm": {
+                    "type": "string",
+                    "default": "ed25519"
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "Base64 encoded Ed25519 signature of the log entry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

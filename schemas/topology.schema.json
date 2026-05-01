@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIX Topology Graph v0.1",
+  "description": "Defines the topological relationship between agents, tools, and memory nodes in the Sovereign AIX Protocol.",
+  "type": "object",
+  "required": ["version", "nodes", "edges"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "enum": ["0.1"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "did": { "type": "string", "pattern": "^did:(axiom|web):.+$" }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["ORCHESTRATOR", "WORKER", "MEMORY", "GATEWAY", "TOOL"]
+          },
+          "essence_ref": { "type": "string" },
+          "trust_level": {
+            "type": "string",
+            "enum": ["SOVEREIGN", "TRUSTED", "NEUTRAL", "UNTRUSTED"]
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "relation"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "relation": {
+            "type": "string",
+            "enum": ["ORCHESTRATES", "USES", "STORES_IN", "COMMUNICATES_VIA"]
+          }
+        }
+      }
+    }
+  }
+}

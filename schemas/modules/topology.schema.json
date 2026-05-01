@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiomid.app/schemas/modules/topology.schema.json",
+  "title": "AIX Topology Graph",
+  "description": "Defines the quantum topology of an agentic swarm (Nodes, Edges, Boundaries).",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "enum": ["0.1"]
+    },
+    "nodes": {
+      "type": "object",
+      "description": "The Essences (Capabilities) present in the agent's DNA.",
+      "additionalProperties": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "Neural paths connecting Essences (Handoffs and Data Flows).",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    },
+    "boundaries": {
+      "type": "array",
+      "description": "Security zones and trust boundaries.",
+      "items": {
+        "$ref": "#/$defs/boundary"
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "essence_ref": { "type": "string", "description": "URI or CID of the AIX Essence artifact." },
+        "role": { "type": "string", "enum": ["orchestrator", "worker", "sensor", "actuator"] },
+        "status": { "type": "string", "enum": ["active", "idle", "hibernating", "failed"] }
+      },
+      "required": ["id", "essence_ref", "role"]
+    },
+    "edge": {
+      "type": "object",
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "type": { "type": "string", "enum": ["handoff", "stream", "notification", "query"] },
+        "logic": { "type": "string", "description": "Formula or script governing the edge transition." }
+      },
+      "required": ["from", "to", "type"]
+    },
+    "boundary": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["sovereign_trust", "sandbox", "restricted_io"] },
+        "enforcement": { "type": "string", "enum": ["hard", "soft", "audit_only"] },
+        "nodes": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "type", "nodes"]
+    }
+  }
+}
