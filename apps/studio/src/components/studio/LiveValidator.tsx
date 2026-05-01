@@ -44,10 +44,10 @@ export default function LiveValidator({
 
   const statusLabel = useMemo(() => {
     if (!validation) return "Awaiting AIX DNA";
-    if (!validation.valid) return `Missing fields: ${validation.missing.join(", ")}`;
+    if (!validation.valid) return `Missing protocol fields: ${validation.missing.join(", ")}`;
     return validation.hasSignature
-      ? "Trust Chain: Signature Present"
-      : "Trust Chain: Signature Missing";
+      ? "Identity Verified: Sovereign Trust Active"
+      : "Step 6: Sign with Pi KYC to activate trust";
   }, [validation]);
 
   const processContent = async (content: string, name: string) => {

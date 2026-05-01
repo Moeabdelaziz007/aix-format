@@ -20,11 +20,56 @@ interface PiAuthResult {
   accessToken: string;
 }
 
-const navLinks = [
-  { href: "/builder", label: "Studio" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/fleet", label: "Agent Fleet" },
-  { href: "/spec", label: "Protocol" },
+const categories = [
+  { 
+    label: "Discover", 
+    links: [
+      { href: "/marketplace", label: "Marketplace" },
+      { href: "/marketplace?filter=featured", label: "Featured" }
+    ] 
+  },
+  { 
+    label: "Build", 
+    links: [
+      { href: "/builder", label: "Agent Builder" },
+      { href: "/builder?template=true", label: "Templates" }
+    ] 
+  },
+  { 
+    label: "Connect", 
+    links: [
+      { href: "/mcp", label: "MCP Registry" },
+      { href: "/playground", label: "API Explorer" },
+      { href: "/skills", label: "Skills Catalog" },
+      { href: "/plugins", label: "Plugin Directory" }
+    ] 
+  },
+  { 
+    label: "Run", 
+    links: [
+      { href: "/fleet", label: "My Fleet" },
+      { href: "/analytics", label: "Monitoring" }
+    ] 
+  },
+  { 
+    label: "Earn", 
+    links: [
+      { href: "/analytics", label: "Revenue" }
+    ] 
+  },
+  { 
+    label: "Trust", 
+    links: [
+      { href: "/settings", label: "Identity & KYC" },
+      { href: "/settings", label: "ABOM Scanner" }
+    ] 
+  },
+  { 
+    label: "Learn", 
+    links: [
+      { href: "/docs", label: "Documentation" }
+    ] 
+  }
 ];
 
 export function Navbar() {
@@ -33,6 +78,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<PiUser | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   useEffect(() => {
@@ -91,20 +137,52 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-2">
-          {navLinks.map(link => {
-            const active = pathname === link.href;
+        <div className="hidden md:flex items-center gap-1">
+          {categories.map(cat => {
+            const isActive = cat.links.some(l => pathname === l.href);
             return (
-              <Link 
-                key={link.href} 
-                href={link.href} 
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-bold uppercase italic tracking-wider transition-all duration-200",
-                  active ? "text-primary bg-primary/10" : "text-foreground/50 hover:text-white hover:bg-white/5"
-                )}
+              <div 
+                key={cat.label} 
+                className="relative group/cat"
+                onMouseEnter={() => setActiveCategory(cat.label)}
+                onMouseLeave={() => setActiveCategory(null)}
               >
-                <Typography variant="caption" weight="bold" className="inherit">{link.label}</Typography>
-              </Link>
+                <button 
+                  className={cn(
+                    "px-3 py-2 rounded-lg text-[10px] font-black uppercase italic tracking-[0.15em] transition-all duration-200 flex items-center gap-1",
+                    isActive ? "text-primary" : "text-foreground/50 hover:text-white"
+                  )}
+                >
+                  {cat.label}
+                  <ChevronDown className="w-3 h-3 opacity-20" />
+                </button>
+
+                <AnimatePresence>
+                  {activeCategory === cat.label && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute left-0 top-full pt-2 w-48 z-[60]"
+                    >
+                      <div className="bg-surface-2/95 backdrop-blur-xl border border-white/10 rounded-xl p-1.5 shadow-2xl">
+                        {cat.links.map(link => (
+                          <Link 
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                              "block px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors",
+                              pathname === link.href ? "bg-primary/10 text-primary" : "text-white/40 hover:bg-white/5 hover:text-white"
+                            )}
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             );
           })}
         </div>

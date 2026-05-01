@@ -19,6 +19,7 @@ import { MarketplaceItem } from '../../lib/marketplace-api';
 import { KYABadge } from './KYABadge';
 import { TrustScore } from './TrustScore';
 import { RatingStars } from './RatingStars';
+import { InfoTooltip } from '../../design-system/components';
 
 interface AgentDetailModalProps {
   item: MarketplaceItem | null;
@@ -121,66 +122,141 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({ item, onClos
 
           {/* Content Area */}
           <div className="flex-grow overflow-y-auto p-8 custom-scrollbar">
-            {activeTab === 'overview' && (
-              <div className="grid grid-cols-3 gap-12">
-                <div className="col-span-2 space-y-8">
-                  <section>
-                    <h3 className="text-lg font-bold mb-4">About this {item.type}</h3>
-                    <p className="text-white/60 leading-relaxed text-lg">
-                      {item.description}
-                      <br /><br />
-                      This autonomous agent is built using the latest AIX v1.3 standard, ensuring maximum interoperability and security. It leverages decentralized identity (DID) for authentication and provides a transparent Bill of Materials (ABOM) for full supply chain visibility.
-                    </p>
+            {activeTab === 'features' && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <section className="space-y-4">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <Cpu size={20} className="text-blue-500" />
+                      Technical DNA
+                    </h3>
+                    <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-white/60">Core Model</span>
+                        <Badge variant="outline">{item.type === 'agent' ? 'Mistral-Large-v2' : 'N/A'}</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-white/60">Context Window</span>
+                        <span className="text-sm font-mono">128k Tokens</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-white/60">Registry Status</span>
+                        <span className="text-xs font-bold text-emerald-400 uppercase">Anchored</span>
+                      </div>
+                    </div>
                   </section>
-                  
-                  <section>
-                    <h3 className="text-lg font-bold mb-4">Key Capabilities</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      {['Self-sovereign execution', 'End-to-end encryption', 'Real-time validation', 'Multi-chain support'].map((cap, i) => (
-                        <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5">
-                          <CheckCircle2 size={18} className="text-emerald-500" />
-                          <span className="text-sm font-medium">{cap}</span>
+
+                  <section className="space-y-4">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <Star size={20} className="text-yellow-500" />
+                      Included Skills
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {['Network Scanner', 'ZK-Verifier', 'JSON-Parser', 'Identity-Adapter'].map((skill) => (
+                        <div key={skill} className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 uppercase">
+                          {skill}
                         </div>
                       ))}
                     </div>
                   </section>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="p-6 rounded-2xl bg-blue-600/10 border border-blue-500/20">
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-blue-400 mb-4">Deployment</h4>
-                    <div className="space-y-4 mb-6">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/40">License</span>
-                        <span className="text-white">Apache-2.0</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/40">Last Updated</span>
-                        <span className="text-white">2 days ago</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-white/40">Version</span>
-                        <span className="text-white">v1.2.4</span>
-                      </div>
+                <section className="space-y-4">
+                   <div className="flex items-center justify-between">
+                     <h3 className="text-lg font-bold">Raw Manifest Preview</h3>
+                     <button className="text-[10px] font-black uppercase text-blue-500 hover:underline">Copy DNA</button>
+                   </div>
+                   <div className="p-6 rounded-2xl bg-black/60 border border-white/10 font-mono text-[11px] leading-relaxed text-zinc-400 overflow-x-auto">
+                     <pre>
+{`meta:
+  name: ${item.name}
+  version: 1.3.1
+  author: ${item.author.name}
+identity_layer:
+  provider: pi_network
+  kyc_tier: ${item.kyaTier}
+economics:
+  pricing_model: pay_per_call
+  settlement:
+    layer: pi_network
+    currency: PI`}
+                     </pre>
+                   </div>
+                </section>
+              </div>
+            )}
+
+            {activeTab === 'abom' && (
+              <div className="space-y-8">
+                <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-4">
+                  <AlertTriangle className="text-amber-500 shrink-0 mt-1" size={24} />
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-1">Supply Chain Transparency</h4>
+                    <p className="text-white/60 text-sm">
+                      This Agent Bill of Materials (ABOM) discloses all third-party models and data sources used.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-white/40">Dependencies</h4>
+                    <div className="space-y-3">
+                      {[
+                        { name: "Sovereign-SDK-v4", type: "Framework", hash: "sha256:4f8e..." },
+                        { name: "Axiom-Security-Core", type: "Security", hash: "sha256:7d2a..." },
+                        { name: "Pi-KYC-Adapter", type: "Identity", hash: "sha256:1c9b..." }
+                      ].map((dep, i) => (
+                        <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-bold text-white">{dep.name}</div>
+                            <div className="text-[10px] text-zinc-500 uppercase font-black">{dep.type}</div>
+                          </div>
+                          <code className="text-[9px] text-zinc-600">{dep.hash}</code>
+                        </div>
+                      ))}
                     </div>
-                    <button className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2">
-                      <Download size={18} /> Install to Studio
-                    </button>
                   </div>
 
-                  <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-4">Statistics</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 rounded-lg bg-black/20">
-                        <div className="text-xl font-bold text-white">{item.stats.downloads}</div>
-                        <div className="text-[10px] uppercase font-bold text-white/20">Installs</div>
-                      </div>
-                      <div className="text-center p-3 rounded-lg bg-black/20">
-                        <div className="text-xl font-bold text-white">{item.stats.usage}</div>
-                        <div className="text-[10px] uppercase font-bold text-white/20">Calls</div>
-                      </div>
+                  <div className="space-y-6">
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-white/40">Model Provenance</h4>
+                    <div className="p-6 rounded-2xl bg-black/40 border border-white/10 space-y-4">
+                       <div className="flex justify-between items-center">
+                         <span className="text-sm text-white/60">Model Provider</span>
+                         <span className="text-sm font-bold text-white">Mistral AI</span>
+                       </div>
+                       <div className="flex justify-between items-center">
+                         <span className="text-sm text-white/60">Training Data</span>
+                         <span className="text-sm font-bold text-emerald-400">Public Domain</span>
+                       </div>
+                       <div className="flex justify-between items-center">
+                         <span className="text-sm text-white/60">Alignment</span>
+                         <span className="text-sm font-bold text-white">Constitutional AI</span>
+                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'pricing' && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-6">
+                  <Star size={40} className="text-blue-500" />
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Usage-Based Settlement</h3>
+                <p className="text-white/40 max-w-sm mb-8 leading-relaxed">
+                  This component uses the AIX Economics Layer for real-time M2M payments.
+                </p>
+                <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+                   <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                     <div className="text-[10px] font-black text-zinc-500 uppercase mb-1">Per Call</div>
+                     <div className="text-2xl font-bold text-white">0.5π</div>
+                   </div>
+                   <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                     <div className="text-[10px] font-black text-zinc-500 uppercase mb-1">Subscription</div>
+                     <div className="text-2xl font-bold text-white">49π<span className="text-xs text-zinc-500">/mo</span></div>
+                   </div>
                 </div>
               </div>
             )}

@@ -115,6 +115,36 @@ export interface McpPrompt {
   description?: string;
 }
 
+// ─── Provider-Agnostic Abstraction Layers ───────────────────────────────────
+
+export interface IdentityLayer {
+  id: string;
+  provider: {
+    type: 'pi_network' | 'world_id' | 'ens' | 'custom';
+    name: string;
+    authority?: string;
+  };
+  verification: {
+    status: 'unverified' | 'verified' | 'rejected' | 'pending';
+    trust_level: number; // 0-3
+    provider_specific_tier?: string;
+  };
+  issuedAt: string;
+  expiresAt?: string;
+}
+
+export interface EconomicsLayer {
+  settlement: {
+    layer: 'pi_network' | 'ethereum' | 'solana' | 'stripe' | 'custom';
+    network: string;
+    contract_address?: string;
+    escrow_enabled: boolean;
+    currency: string;
+  };
+  pricing_model: string;
+  currency: string; // Legacy field for compatibility
+}
+
 export interface Manifest {
   meta: {
     name: string;
@@ -136,16 +166,8 @@ export interface Manifest {
       value: string;
     }
   };
-  identity_layer: {
-    id: string;
-    authority: string;
-    issuedAt: string;
-    kyc_tier?: string;
-  };
-  economics: {
-    pricing_model: string;
-    currency: string;
-  };
+  identity_layer: IdentityLayer;
+  economics: EconomicsLayer;
   abom: AbomData;
   mcp: {
     prompts: McpPrompt[];
@@ -186,18 +208,6 @@ export interface PiKycOptions {
     txid: string;
     blockHeight?: number;
     anchoredAt?: string;
-  };
-}
-
-export interface IdentityLayer {
-  id: string;
-  authority: string;
-  issuedAt: string;
-  publicKey: {
-    algorithm: string;
-    value: string;
-    encoding: string;
-    fingerprint: string;
   };
 }
 

@@ -1,15 +1,15 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
+import { LiveActivityTicker } from "@/components/layout/LiveActivityTicker";
 import { Hero } from "@/sections/Hero";
-import { Features } from "@/sections/Features";
-import { HowItWorks } from "@/sections/HowItWorks";
-import { LiveDemo } from "@/sections/LiveDemo";
-import { Pricing } from "@/sections/Pricing";
+import { QuickAccessGrid } from "@/sections/QuickAccessGrid";
+import { FeaturedAgents } from "@/sections/FeaturedAgents";
+import { TrustedBy } from "@/sections/TrustedBy";
 import { Footer } from "@/sections/Footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 selection:text-white">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 selection:text-white overflow-x-hidden">
       {/* Global Navigation */}
       <Navbar />
 
@@ -17,17 +17,17 @@ export default function Home() {
         {/* Section 1: Hero */}
         <Hero />
 
-        {/* Section 2: Features Grid */}
-        <Features />
+        {/* Live Activity Ticker */}
+        <LiveActivityTicker />
 
-        {/* Section 3: Interactive Demo */}
-        <LiveDemo />
+        {/* Section 2: Quick Access */}
+        <QuickAccessGrid />
 
-        {/* Section 4: Workflow / How it works */}
-        <HowItWorks />
+        {/* Section 3: Featured Agents */}
+        <FeaturedAgents />
 
-        {/* Section 5: Pricing */}
-        <Pricing />
+        {/* Section 4: Social Proof */}
+        <TrustedBy />
       </main>
 
       {/* Global Footer */}

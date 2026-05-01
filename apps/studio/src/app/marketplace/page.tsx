@@ -27,10 +27,28 @@ import FadeIn from '../../components/animations/FadeIn';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Items', icon: LayoutGrid },
-  { id: 'agent', label: 'Agents', icon: Globe },
-  { id: 'skill', label: 'Skills', icon: Cpu },
-  { id: 'mcp', label: 'MCP Servers', icon: Box },
-  { id: 'plugin', label: 'Plugins', icon: Plug },
+  { 
+    id: 'agent', 
+    label: 'Agents', 
+    icon: Globe, 
+    sub: [
+      { name: 'Research', capabilities: ['Market Analysis', 'Web Scraping', 'Synthesis'] },
+      { name: 'Security', capabilities: ['Audit', 'Identity', 'Monitoring'] },
+      { name: 'Finance', capabilities: ['Forecasting', 'Settlement', 'KYC'] },
+      { name: 'Code', capabilities: ['Review', 'Refactor', 'Testing'] }
+    ] 
+  },
+  { 
+    id: 'skill', 
+    label: 'Skills', 
+    icon: Cpu, 
+    sub: [
+      { name: 'Automation', capabilities: ['Workflow', 'Scheduling'] },
+      { name: 'Analysis', capabilities: ['Sentiment', 'Classification'] }
+    ] 
+  },
+  { id: 'mcp', label: 'MCP Servers', icon: Box, sub: [{ name: 'Database', capabilities: ['SQL', 'NoSQL'] }] },
+  { id: 'plugin', label: 'Plugins', icon: Plug, sub: [{ name: 'UI', capabilities: ['Theming', 'Components'] }] },
 ];
 
 export default function MarketplacePage() {
@@ -92,28 +110,47 @@ export default function MarketplacePage() {
         </div>
       </header>
 
-      <div className="flex gap-12">
-        {/* Sidebar */}
-        <FilterSidebar />
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+        {/* Sidebar - Hidden on mobile, visible on lg screens */}
+        <div className="hidden lg:block">
+          <FilterSidebar />
+        </div>
 
         {/* Main Content */}
-        <main className="flex-grow">
-          {/* Category Tabs */}
-          <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setType(cat.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${
-                  type === cat.id 
-                  ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]' 
-                  : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
-                }`}
+        <main className="flex-grow min-w-0">
+          {/* Category Tabs & Sub-categories */}
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setType(cat.id)}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${
+                    type === cat.id 
+                    ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]' 
+                    : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <cat.icon size={16} />
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {type !== 'all' && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 pl-2"
               >
-                <cat.icon size={16} />
-                {cat.label}
-              </button>
-            ))}
+                <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mr-2">Sub-categories:</div>
+                {CATEGORIES.find(c => c.id === type)?.sub?.map(s => (
+                  <button key={s} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-white/60 hover:text-white transition-all">
+                    {s}
+                  </button>
+                ))}
+              </motion.div>
+            )}
           </div>
 
           {/* Grid/List of items */}
