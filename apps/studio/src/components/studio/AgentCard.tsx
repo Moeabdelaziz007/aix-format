@@ -113,7 +113,7 @@ export const AgentCard = memo(function AgentCard({
         </div>
 
         {/* ── Info ── */}
-        <Link href={`/agents/${agent.id}`} className="block group/link">
+        <Link href={`/workspace/${agent.id}`} className="block group/link">
           <h3 className="text-base font-display font-bold text-white tracking-tight leading-tight group-hover/link:text-[var(--agent-color)] transition-colors">{agent.name}</h3>
           <p className="text-[13px] text-[var(--color-on-surface-variant)] mt-0.5">{agent.role}</p>
         </Link>
