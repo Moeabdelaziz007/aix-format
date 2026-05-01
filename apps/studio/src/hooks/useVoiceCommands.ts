@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useRef } from "react";
+import { useRouter, useParams } from "next/navigation";
 
 /**
  * Intent → Action router.
@@ -20,7 +20,7 @@ export type VoiceIntent =
   | { type: "unknown"; raw: string };
 
 // ── Intent parser ──────────────────────────────────────────────────────────
-export function parseIntent(transcript: string): VoiceIntent {
+export function parseIntent(transcript: string, agentId?: string): VoiceIntent {
   const t = transcript.toLowerCase().trim();
 
   // Navigation
@@ -41,9 +41,11 @@ export function parseIntent(transcript: string): VoiceIntent {
     "abom scan":      "/scan",
     mcp:              "/mcp",
     "mcp registry":   "/mcp",
-    skills:           "/skills",
+    skills:           agentId ? `/workspace/${agentId}/skills` : "/skills",
     playground:       "/playground",
-    pulse:            "/pulse",
+    pulse:            agentId ? `/workspace/${agentId}/pulse`  : "/pulse",
+    deploy:           agentId ? `/workspace/${agentId}/deploy` : "/deploy",
+    wikibrain:        agentId ? `/workspace/${agentId}/wikibrain` : "/my-agents",
     pricing:          "/pricing",
     space:            "/space",
     home:             "/",
@@ -53,6 +55,12 @@ export function parseIntent(transcript: string): VoiceIntent {
     if (t.includes(keyword)) {
       return { type: "navigate", path, label: keyword };
     }
+  }
+
+  // Workspace / Open Agent — "open agent x" / "workspace x"
+  const workspaceMatch = t.match(/(?:workspace|open agent|agent)\s+([a-z0-9_-]+)/i);
+  if (workspaceMatch) {
+    return { type: "navigate", path: `/workspace/${workspaceMatch[1]}`, label: `agent ${workspaceMatch[1]}` };
   }
 
   // WikiBrain — "show wikibrain for <agentId>" / "open brain <agentId>"
@@ -92,10 +100,16 @@ interface UseVoiceCommandsOptions {
 
 export function useVoiceCommands(opts: UseVoiceCommandsOptions = {}) {
   const router = useRouter();
+  const params = useParams();
+  const agentId = params?.agentId as string | undefined;
+
+  // Use ref to avoid callback thrashing on every render
+  const optsRef = useRef(opts);
+  optsRef.current = opts;
 
   const dispatch = useCallback(
     (transcript: string): { matched: boolean; feedback: string } => {
-      const intent = parseIntent(transcript);
+      const intent = parseIntent(transcript, agentId);
 
       switch (intent.type) {
         case "navigate":
@@ -103,29 +117,41 @@ export function useVoiceCommands(opts: UseVoiceCommandsOptions = {}) {
           return { matched: true, feedback: `Navigating to ${intent.label}` };
 
         case "open_wikibrain":
-          opts.onOpenWikiBrain?.(intent.agentId);
+          // If already in workspace, just go to sub-route, otherwise go to full path
+          if (agentId === intent.agentId) {
+            router.push(`/workspace/${intent.agentId}/wikibrain`);
+          } else {
+            router.push(`/workspace/${intent.agentId}/wikibrain`);
+          }
+          optsRef.current.onOpenWikiBrain?.(intent.agentId);
           return { matched: true, feedback: `Opening WikiBrain for ${intent.agentId}` };
 
         case "open_voice_wizard":
-          opts.onOpenVoiceWizard?.();
+          optsRef.current.onOpenVoiceWizard?.();
           return { matched: true, feedback: "Opening Voice Wizard" };
 
         case "open_deploy":
-          opts.onOpenDeploy?.(intent.agentId);
+          const targetId = intent.agentId || agentId;
+          if (targetId) {
+            router.push(`/workspace/${targetId}/deploy`);
+          } else {
+            router.push("/fleet");
+          }
+          optsRef.current.onOpenDeploy?.(intent.agentId);
           return { matched: true, feedback: "Opening deploy panel" };
 
         case "search":
-          opts.onSearch?.(intent.query);
+          optsRef.current.onSearch?.(intent.query);
           router.push(`/marketplace?q=${encodeURIComponent(intent.query)}`);
           return { matched: true, feedback: `Searching for ${intent.query}` };
 
         case "unknown":
         default:
-          opts.onUnknown?.(intent.raw);
+          optsRef.current.onUnknown?.(intent.raw);
           return { matched: false, feedback: "" };
       }
     },
-    [router, opts]
+    [router, agentId] // opts removed from deps
   );
 
   return { dispatch, parseIntent };

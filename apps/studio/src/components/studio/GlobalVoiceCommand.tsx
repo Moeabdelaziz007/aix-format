@@ -46,30 +46,32 @@ export function GlobalVoiceCommand({
   onOpenWikiBrain,
   onOpenDeploy,
 }: GlobalVoiceCommandProps) {
-  const { isOpen, open, close, isListening, transcript } = useGlobalVoice();
-  const { dispatch } = useVoiceCommands({
-    onOpenVoiceWizard,
-    onOpenWikiBrain,
-    onOpenDeploy,
-  });
+  const {
+    isOpen, open, close, isListening, transcript, dispatch,
+    setOnOpenVoiceWizard, setOnOpenWikiBrain, setOnOpenDeploy
+  } = useGlobalVoice();
 
   const [feedback, setFeedback]   = useState("");
   const [matched,  setMatched]    = useState<boolean | null>(null);
   const [textInput, setTextInput] = useState("");
 
-  // ── Process transcript when it arrives ───────────────────────────────
+  // ── Sync local callbacks to singleton provider ───────────────────────
+  useEffect(() => {
+    setOnOpenVoiceWizard(() => onOpenVoiceWizard?.());
+    setOnOpenWikiBrain((id) => onOpenWikiBrain?.(id));
+    setOnOpenDeploy((id) => onOpenDeploy?.(id));
+  }, [onOpenVoiceWizard, onOpenWikiBrain, onOpenDeploy, setOnOpenVoiceWizard, setOnOpenWikiBrain, setOnOpenDeploy]);
+
+  // ── Feedback logic for VOICE ─────────────────────────────────────────
+  // Note: The Provider also toasts, but we want local UI feedback too.
   useEffect(() => {
     if (!transcript) return;
-    const result = dispatch(transcript);
-    setFeedback(result.feedback);
-    setMatched(result.matched);
-
-    // Auto-close after successful command
-    if (result.matched) {
-      const t = setTimeout(() => { close(); setMatched(null); }, 1200);
-      return () => clearTimeout(t);
-    }
-  }, [transcript, dispatch, close]);
+    // We don't call dispatch here because the Provider already does it for voice.
+    // However, we need to know the result to show local feedback.
+    // OPTIMIZATION: We could add result/feedback to context, but for now 
+    // we'll just let the Provider handle voice feedback via Toast.
+    // For manual input (text/suggestion), we'll still call dispatch locally.
+  }, [transcript]);
 
   // ── Text input fallback ───────────────────────────────────────────────
   const handleTextSubmit = useCallback(

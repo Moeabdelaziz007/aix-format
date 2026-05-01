@@ -3,7 +3,8 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { parseIntent } from "@/hooks/useVoiceCommands";
+import { parseIntent, useVoiceCommands } from "@/hooks/useVoiceCommands";
+import { useParams } from "next/navigation";
 
 // ── Shared voice state ─────────────────────────────────────────────────────
 interface VoiceCommandCtx {
@@ -14,9 +15,11 @@ interface VoiceCommandCtx {
   close:        () => void;
   startListening: () => void;
   stopListening:  () => void;
+  dispatch:     (transcript: string) => { matched: boolean; feedback: string };
   // Extras for palette
-  onOpenVoiceWizard?: () => void;
   setOnOpenVoiceWizard: (fn: () => void) => void;
+  setOnOpenWikiBrain:   (fn: (agentId: string) => void) => void;
+  setOnOpenDeploy:      (fn: (agentId?: string) => void) => void;
 }
 
 const Ctx = createContext<VoiceCommandCtx | null>(null);
@@ -35,7 +38,16 @@ export function VoiceCommandProvider({ children }: { children: React.ReactNode }
   const [isListening, setIsListening] = useState(false);
   const [transcript,  setTranscript]  = useState("");
   const recognitionRef = useRef<any>(null);
+  
   const wizardCbRef    = useRef<(() => void) | undefined>(undefined);
+  const wikiCbRef      = useRef<((agentId: string) => void) | undefined>(undefined);
+  const deployCbRef    = useRef<((agentId?: string) => void) | undefined>(undefined);
+
+  const { dispatch } = useVoiceCommands({
+    onOpenVoiceWizard: () => wizardCbRef.current?.(),
+    onOpenWikiBrain:   (id) => wikiCbRef.current?.(id),
+    onOpenDeploy:      (id) => deployCbRef.current?.(id),
+  });
 
   // ── Speech Recognition init ──────────────────────────────────────────
   const initRecognition = useCallback(() => {
@@ -97,48 +109,32 @@ export function VoiceCommandProvider({ children }: { children: React.ReactNode }
     if (!transcript || transcript === prevRef.current) return;
     prevRef.current = transcript;
 
-    const intent = parseIntent(transcript);
-
-    switch (intent.type) {
-      case "navigate":
-        router.push(intent.path);
-        toast.success(`Navigating to ${intent.label}`);
-        close();
-        break;
-      case "open_voice_wizard":
-        wizardCbRef.current?.();
-        toast.success("Opening Voice Wizard");
-        close();
-        break;
-      case "open_deploy":
-        router.push(intent.agentId ? `/agents/${intent.agentId}?action=deploy` : "/my-agents");
-        toast.success("Opening deploy panel");
-        close();
-        break;
-      case "search":
-        router.push(`/marketplace?q=${encodeURIComponent(intent.query)}`);
-        toast.success(`Searching for ${intent.query}`);
-        close();
-        break;
-      case "open_wikibrain":
-        router.push(`/agents/${intent.agentId}`);
-        toast.success(`Opening WikiBrain for ${intent.agentId}`);
-        close();
-        break;
-      default:
-        toast.error(`Command not recognised: "${transcript}"`, { duration: 3000 });
+    const result = dispatch(transcript);
+    
+    if (result.matched) {
+      toast.success(result.feedback);
+      // Auto-close palette on success if it was open
+      if (isOpen) {
+        const t = setTimeout(() => close(), 800);
+        return () => clearTimeout(t);
+      }
+    } else {
+      toast.error(`Command not recognised: "${transcript}"`, { duration: 3000 });
     }
-  }, [transcript]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [transcript, dispatch, close, isOpen]);
 
-  const setOnOpenVoiceWizard = useCallback((fn: () => void) => {
-    wizardCbRef.current = fn;
-  }, []);
+  const setOnOpenVoiceWizard = useCallback((fn: () => void) => { wizardCbRef.current = fn; }, []);
+  const setOnOpenWikiBrain   = useCallback((fn: (id: string) => void) => { wikiCbRef.current = fn; }, []);
+  const setOnOpenDeploy      = useCallback((fn: (id?: string) => void) => { deployCbRef.current = fn; }, []);
 
   return (
     <Ctx.Provider value={{
       isOpen, isListening, transcript,
       open, close, startListening, stopListening,
+      dispatch,
       setOnOpenVoiceWizard,
+      setOnOpenWikiBrain,
+      setOnOpenDeploy,
     }}>
       {children}
     </Ctx.Provider>
