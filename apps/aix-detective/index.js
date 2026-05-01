@@ -9,28 +9,18 @@ import {
   auditIdentity, 
   calculateTrustTier 
 } from './src/scanner.js';
-
-// ANSI Colors
-const colors = {
-  reset: "\x1b[0m",
-  bright: "\x1b[1m",
-  red: "\x1b[31m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  blue: "\x1b[34m",
-  cyan: "\x1b[36m",
-};
+import { logger, style } from './src/logger.js';
 
 const [,, command, targetPath] = process.argv;
 
 if (command !== 'scan' || !targetPath) {
-  console.log(`${colors.bright}AIX Detective v1.0.0${colors.reset}`);
-  console.log(`Usage: npx aix-detective scan <path-to-aix-or-skill-md>`);
+  logger.header(`AIX Detective v1.0.0`);
+  logger.info(`Usage: npx aix-detective scan <path-to-aix-or-skill-md>`);
   process.exit(1);
 }
 
 async function run() {
-  console.log(`${colors.cyan}🔍 Auditing AI Agent: ${path.basename(targetPath)}...${colors.reset}\n`);
+  logger.cyan(`🔍 Auditing AI Agent: ${path.basename(targetPath)}...\n`);
 
   try {
     const content = fs.readFileSync(targetPath, 'utf8');
@@ -96,41 +86,44 @@ async function run() {
     });
 
     // Output Report
-    console.log(`${colors.bright}--- Audit Report ---${colors.reset}`);
+    logger.header(`--- Audit Report ---`);
     
     // ABOM Status
     if (abomAudit.valid) {
-      console.log(`${colors.green}✅ ABOM Integrity: PASSED${colors.reset}`);
+      logger.success(`✅ ABOM Integrity: PASSED`);
     } else {
-      console.log(`${colors.red}❌ ABOM Integrity: FAILED${colors.reset}`);
-      abomAudit.errors.forEach(err => console.log(`   - ${err}`));
+      logger.error(`❌ ABOM Integrity: FAILED`);
+      abomAudit.errors.forEach(err => logger.info(`   - ${err}`));
     }
 
     // Identity Status
-    const idColor = idAudit.verified ? colors.green : colors.yellow;
-    console.log(`${idColor}🆔 Identity Layer: ${idAudit.status.toUpperCase()} (Tier ${idAudit.tier})${colors.reset}`);
+    if (idAudit.verified) {
+      logger.success(`🆔 Identity Layer: ${idAudit.status.toUpperCase()} (Tier ${idAudit.tier})`);
+    } else {
+      logger.warn(`🆔 Identity Layer: ${idAudit.status.toUpperCase()} (Tier ${idAudit.tier})`);
+    }
 
     // Security Status
     if (injections.length === 0) {
-      console.log(`${colors.green}🛡️ Security: No malicious patterns detected.${colors.reset}`);
+      logger.success(`🛡️ Security: No malicious patterns detected.`);
     } else {
-      console.log(`${colors.red}⚠️ Security: ${injections.length} potential injection patterns found!${colors.reset}`);
-      injections.forEach(inj => console.log(`   - [${inj.severity.toUpperCase()}] ${inj.name} (Source: ${inj.source})`));
+      logger.error(`⚠️ Security: ${injections.length} potential injection patterns found!`);
+      injections.forEach(inj => logger.info(`   - [${inj.severity.toUpperCase()}] ${inj.name} (Source: ${inj.source})`));
     }
 
-    console.log(`\n${colors.bright}Trust Decision: ${getTrustBanner(trustTier)}${colors.reset}`);
+    logger.header(`\nTrust Decision: ${getTrustBanner(trustTier)}`);
 
   } catch (err) {
-    console.error(`${colors.red}Error reading or parsing file: ${err.message}${colors.reset}`);
+    logger.fatal(`Error reading or parsing file: ${err.message}`);
     process.exit(1);
   }
 }
 
 function getTrustBanner(tier) {
   switch (tier) {
-    case 'trusted': return `${colors.green}TRUSTED (Axiom Sovereign)${colors.reset}`;
-    case 'caution': return `${colors.yellow}CAUTION (Unverified/Incomplete)${colors.reset}`;
-    case 'malicious': return `${colors.red}MALICIOUS (High Risk)${colors.reset}`;
+    case 'trusted': return style.green(`TRUSTED (Axiom Sovereign)`);
+    case 'caution': return style.yellow(`CAUTION (Unverified/Incomplete)`);
+    case 'malicious': return style.red(`MALICIOUS (High Risk)`);
     default: return 'UNKNOWN';
   }
 }
