@@ -1,8 +1,16 @@
-# AGENT GOVERNANCE — AIX-Format
+# ⚖️ AGENT GOVERNANCE — AIX-Format
 
-> **Version:** 1.0 · **Owner:** Mohamed Abdelaziz · **Date:** 2026-04-29  
-> This document is the **authoritative policy** for all AI agents operating in this repository (Jules, Claude, Gemini, Copilot, or any future agent).  
+> **Version:** 1.3 · **Owner:** Mohamed Abdelaziz · **Date:** 2026-05-01  
+> This document is the **authoritative policy** for all AI agents operating in this repository (Antigravity, Jules, Claude, Gemini, Copilot, or any future agent).  
 > Agents **must** read and follow this file before taking any action. It overrides any internal default behavior.
+
+---
+
+## 🧬 0. DNA Integrity (Sovereign Identity) - v1.3 NEW
+
+1. **Manifest Integrity:** Any modification to `AXIOM.md` **MUST** be followed by a DNA re-signature using `dna-sign`. An unsigned AXIOM.md is considered invalid.
+2. **Genesis Signature:** The `genesis_hash` is the immutable root of the agent's identity. Any drift between the hash and content results in immediate state revocation.
+3. **Rust/Go Nucleus:** Crypto and safety logic are delegated to Rust. Orchestration and behavioral speed are delegated to Go.
 
 ---
 
