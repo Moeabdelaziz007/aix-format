@@ -152,4 +152,24 @@ describe('TokenBucket', () => {
     // To get 0.5 tokens at 10 tokens/sec, it takes 0.05 seconds (50ms)
     assert.strictEqual(bucket.getWaitTime(), 50);
   });
+
+  it('should calculate wait time after consuming all tokens', () => {
+    const bucket = new TokenBucket(5, 5); // 5 tokens per second, capacity 5
+    const consumed = bucket.tryConsume(5);
+    assert.strictEqual(consumed, true);
+    assert.strictEqual(bucket.tokens, 0);
+
+    // To get 1 token at 5 tokens/sec, it takes 1/5 = 0.2 seconds = 200ms
+    assert.strictEqual(bucket.getWaitTime(), 200);
+  });
+
+  it('should calculate wait time with different refill rates', () => {
+    const bucket1 = new TokenBucket(1, 1); // 1 token per second
+    bucket1.tokens = 0;
+    assert.strictEqual(bucket1.getWaitTime(), 1000);
+
+    const bucket2 = new TokenBucket(1, 0.5); // 0.5 tokens per second
+    bucket2.tokens = 0;
+    assert.strictEqual(bucket2.getWaitTime(), 2000);
+  });
 });
