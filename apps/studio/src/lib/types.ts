@@ -28,12 +28,21 @@ export interface DeploymentRecord {
   signer?: string;
 }
 
+export interface PetConfig {
+  type: 'fox' | 'octopus' | 'owl' | 'bee' | 'lion' | 'dolphin' | 'wolf' | 'butterfly' | 'elephant' | 'eagle';
+  color: string;
+  mood: 'curious' | 'busy' | 'happy' | 'tired' | 'alert' | 'creative';
+  level: number;
+  accessories?: string[];
+}
+
 /**
  * RegistryEntry: Canonical + UI Overlays
  */
 export interface RegistryEntry extends CanonicalRegistryEntry {
   deployment?: DeploymentRecord;
   risk_score?: number;
+  pet?: PetConfig;
 }
 
 /**
@@ -48,12 +57,14 @@ export interface AgentRecord {
   did?: string;
   kyc_tier?: string;
   deployment?: DeploymentRecord;
+  pet?: PetConfig;
   color?: string;
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
   manifest?: CanonicalManifest;
 }
+
 
 export type NormalizedAgent = AgentRecord & { isMock: boolean };
 

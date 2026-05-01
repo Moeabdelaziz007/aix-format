@@ -17,9 +17,13 @@ import {
   Rocket,
   ShieldCheck,
   ShieldAlert,
-  RefreshCw
+  RefreshCw,
+  MessageCircle,
+  Send,
+  Zap
 } from 'lucide-react';
 import { AgentRecord, DeploymentRecord, RegistryEntry } from '@/lib/types';
+import { AgentPet } from '@/components/shared/AgentPet';
 import DiscoveryPreview from '@/components/studio/DiscoveryPreview';
 import AgentInteraction from '@/components/studio/AgentInteraction';
 import { useLocalAgents } from '@/hooks/useLocalAgents';
@@ -36,11 +40,9 @@ export default function AgentDetailPage() {
   const { getAgent, saveAgent, loaded } = useLocalAgents();
   const [agent, setAgent] = useState<AgentRecord | null>(null);
   const [showDeploy, setShowDeploy] = useState(false);
-
-  const [isDeploying, setIsDeploying] = useState(false);
-  const [deployStep, setDeployStep] = useState(0);
-  const [deployComplete, setDeployComplete] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isSettingUpTg, setIsSettingUpTg] = useState(false);
+  const [tgConfig, setTgConfig] = useState<any>(null);
 
   useEffect(() => {
     if (loaded) {
@@ -50,69 +52,36 @@ export default function AgentDetailPage() {
         if (searchParams.get('action') === 'deploy') {
           setShowDeploy(true);
         }
+        fetchChannels(found.did || `local:${found.id}`);
       }
     }
   }, [id, getAgent, loaded, searchParams]);
 
-  const handleDeployed = (deployment: DeploymentRecord) => {
-    if (agent) {
-      setAgent({ ...agent, deployment });
-    }
-  };
-
-  const handleDownload = () => {
-    if (!agent) return;
-    const blob = new Blob([agent.yaml], { type: 'application/x-aix' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${agent.name.toLowerCase().replace(/\s+/g, '-')}.aix`;
-    a.click();
-  };
-
-  const handlePublishToMcp = async () => {
-    if (!agent) return;
-    setIsPublishing(true);
+  const fetchChannels = async (agentId: string) => {
     try {
-      const entry: RegistryEntry = {
-        did: agent.did || `did:aix:${agent.id}`,
-        name: agent.name,
-        role: agent.role,
-        capabilities: agent.abom?.capabilities || [],
-        kyc_tier: agent.kyc_tier || 'unverified',
-        specVersion: "1.0.0",
-        publishedAt: new Date().toISOString(),
-        yaml: agent.yaml
-      };
-      const res = await fetch('/api/mcp-discovery/register', {
+      const res = await fetch(`/api/channels/telegram/setup?agentId=${agentId}`, { method: 'GET' });
+      // Note: GET not implemented yet in route, but we'll simulate the state
+    } catch (e) {}
+  };
+
+  const handleSetupTelegram = async () => {
+    if (!agent) return;
+    setIsSettingUpTg(true);
+    try {
+      const res = await fetch('/api/channels/telegram/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entry)
+        body: JSON.stringify({ agentId: agent.did || `local:${agent.id}` })
       });
-      if (!res.ok) throw new Error('Failed to register agent');
       const data = await res.json();
-      setAgent({ ...agent, published: true });
-      toast.success(data.message || 'Agent published to MCP discovery');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to publish agent');
+      if (data.success) {
+        setTgConfig(data);
+        toast.success(`Telegram Bot Created: @${data.botUsername}`);
+      }
+    } catch (error) {
+      toast.error("Failed to setup Telegram channel");
     } finally {
-      setIsPublishing(false);
-    }
-  };
-
-  const handleUnpublishFromMcp = async () => {
-    if (!agent?.did) return;
-    setIsPublishing(true);
-    try {
-      const res = await fetch(`/api/mcp-discovery/register?did=${agent.did}`, {
-        method: 'DELETE'
-      });
-      if (!res.ok) throw new Error('Failed to unregister agent');
-      setAgent({ ...agent, published: false });
-      toast.success('Agent removed from MCP discovery');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to unregister agent');
-    } finally {
-      setIsPublishing(false);
+      setIsSettingUpTg(false);
     }
   };
 
@@ -130,42 +99,64 @@ export default function AgentDetailPage() {
 
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-3xl flex items-center justify-center border-2 border-indigo-500/30 bg-indigo-500/10 shadow-[0_0_40px_rgba(99,102,241,0.15)]">
-              <Cpu className="w-12 h-12 text-indigo-400" />
-            </div>
+            <AgentPet pet={agent.pet} size="xl" />
             <div>
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h1 className="text-5xl font-black tracking-tighter text-white">{agent.name}</h1>
-                <Badge variant="outline" className="text-indigo-400 border-indigo-500/20">{agent.kyc_tier}</Badge>
-                {agent.status === 'online' && <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse">LIVE</Badge>}
+                <span className="px-3 py-1 text-[10px] font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full uppercase tracking-widest">{agent.kyc_tier}</span>
               </div>
               <p className="text-xl text-zinc-400 font-medium">{agent.role}</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-            <button onClick={handleDownload} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-black rounded-2xl transition-all border border-white/5 hover:text-white"><Download className="w-4 h-4" /> Download .aix</button>
-            {agent.published ? (
-              <button onClick={handleUnpublishFromMcp} disabled={isPublishing} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-emerald-500/30 text-emerald-400 font-black rounded-2xl transition-all hover:bg-zinc-800 disabled:opacity-50">{isPublishing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} MCP Published</button>
-            ) : (
-              <button onClick={handlePublishToMcp} disabled={isPublishing} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-indigo-500/30 text-indigo-400 font-black rounded-2xl transition-all hover:bg-zinc-800 disabled:opacity-50 group">{isPublishing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4 group-hover:scale-110 transition-transform" />} Publish to MCP</button>
-            )}
+            <button onClick={handleSetupTelegram} disabled={isSettingUpTg} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 border border-sky-500/30 text-sky-400 font-black rounded-2xl transition-all hover:bg-zinc-800 disabled:opacity-50">
+              {isSettingUpTg ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} 
+              {tgConfig ? `@${tgConfig.botUsername}` : "Connect Telegram"}
+            </button>
             <button onClick={() => setShowDeploy(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-[0_20px_50px_rgba(99,102,241,0.2)] hover:scale-[1.02] active:scale-[0.98]"><Rocket className="w-4 h-4" /> Deploy Agent</button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8 space-y-10">
+            {/* Auto Channels Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-xl">
-                <div className="flex items-center gap-3 mb-6"><Fingerprint className="text-indigo-400" /><h3 className="text-lg font-bold text-white">Sovereign Identity</h3></div>
-                <div className="space-y-4">
-                  <div className="space-y-1"><p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Axiom DID</p><p className="font-mono text-sm text-indigo-300 break-all leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">{agent.did || 'did:axiom:pending'}</p></div>
-                  <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold px-3 py-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10 w-fit"><UserCheck className="w-4 h-4" /> KYC Verified • {agent.kyc_tier}</div>
+              <div className="p-8 rounded-3xl bg-gradient-to-br from-sky-500/5 to-transparent border border-sky-500/10 backdrop-blur-xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Send className="w-20 h-20 text-sky-400" />
                 </div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-sky-500/20 rounded-xl text-sky-400"><Send className="w-5 h-5" /></div>
+                  <h3 className="text-lg font-bold text-white">Telegram Channel</h3>
+                </div>
+                {tgConfig ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-zinc-400">Agent is live on Telegram. Anyone can chat with it directly.</p>
+                    <a href={tgConfig.botLink} target="_blank" className="flex items-center justify-between p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl group/link transition-all hover:bg-sky-500/20">
+                      <span className="font-mono text-sky-300">@{tgConfig.botUsername}</span>
+                      <Zap className="w-4 h-4 text-sky-400 group-hover/link:scale-125 transition-transform" />
+                    </a>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-zinc-500">Auto-provision a Telegram bot via the AIX Managed Bots infrastructure.</p>
+                    <button onClick={handleSetupTelegram} className="text-xs font-black text-sky-400 uppercase tracking-widest hover:text-sky-300 transition">Initialize Bot →</button>
+                  </div>
+                )}
               </div>
-              <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-xl">
-                <div className="flex items-center gap-3 mb-6"><Calendar className="text-amber-400" /><h3 className="text-lg font-bold text-white">Temporal Data</h3></div>
-                <div className="space-y-1"><p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Initialization Date</p><p className="text-2xl font-bold text-zinc-200">{new Date(agent.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p><p className="text-sm text-zinc-500">{new Date(agent.createdAt).toLocaleTimeString()} (Studio Local Time)</p></div>
+
+              <div className="p-8 rounded-3xl bg-gradient-to-br from-emerald-500/5 to-transparent border border-emerald-500/10 backdrop-blur-xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <MessageCircle className="w-20 h-20 text-emerald-400" />
+                </div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400"><MessageCircle className="w-5 h-5" /></div>
+                  <h3 className="text-lg font-bold text-white">WhatsApp Business</h3>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-sm text-zinc-500">Allocates a sub-number under the AIX Verified Business account.</p>
+                  <span className="inline-block px-3 py-1 bg-zinc-800 text-zinc-500 text-[10px] font-black rounded-lg uppercase tracking-widest">Enterprise Only</span>
+                </div>
               </div>
             </div>
 
@@ -178,6 +169,14 @@ export default function AgentDetailPage() {
           </div>
 
           <div className="lg:col-span-4 space-y-10">
+            <div className="p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-xl">
+              <div className="flex items-center gap-3 mb-6"><Fingerprint className="text-indigo-400" /><h3 className="text-lg font-bold text-white">Sovereign Identity</h3></div>
+              <div className="space-y-4">
+                <div className="space-y-1"><p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Axiom DID</p><p className="font-mono text-sm text-indigo-300 break-all leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">{agent.did || 'did:axiom:pending'}</p></div>
+                <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold px-3 py-2 bg-emerald-500/5 rounded-lg border border-emerald-500/10 w-fit"><UserCheck className="w-4 h-4" /> KYC Verified • {agent.kyc_tier}</div>
+              </div>
+            </div>
+            
             <div className="p-8 rounded-3xl bg-zinc-900 border border-zinc-800">
               <h3 className="text-sm font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Capabilities</h3>
               <div className="flex flex-col gap-3">
@@ -185,10 +184,6 @@ export default function AgentDetailPage() {
                   <div key={i} className="flex items-center gap-3 p-4 bg-zinc-950 rounded-2xl border border-zinc-800 group hover:border-indigo-500/30 transition-all"><div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" /><span className="font-bold text-zinc-300 group-hover:text-white transition-colors">{cap}</span></div>
                 )) || <p className="text-zinc-500 italic text-sm">No capabilities defined</p>}
               </div>
-            </div>
-            <div className="p-8 rounded-3xl bg-zinc-900 border border-zinc-800 overflow-hidden group">
-              <h3 className="text-sm font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-6"><FileCode className="text-amber-500" /> AIX Source</h3>
-              <div className="relative"><div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-zinc-900 pointer-events-none z-10" /><pre className="p-5 bg-black/50 rounded-2xl border border-zinc-800 text-[11px] font-mono text-zinc-500 overflow-x-auto max-h-[400px] leading-relaxed custom-scrollbar group-hover:text-zinc-300 transition-colors">{agent.yaml}</pre></div>
             </div>
           </div>
         </div>

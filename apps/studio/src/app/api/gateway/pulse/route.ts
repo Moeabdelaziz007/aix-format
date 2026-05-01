@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GatewayManager, GatewaySecurity, KEYS, kv } from "@aix-core/storage";
+import { 
+  GatewayManager, 
+  GatewaySecurity, 
+  KEYS, 
+  kv, 
+  evaluateAgent, 
+  executeDeadHand, 
+  sendHeartbeat 
+} from "@aix-core/storage";
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 
@@ -10,7 +18,7 @@ import { generateText } from "ai";
  */
 export async function POST(req: NextRequest) {
   try {
-    // SECURITY: Address CVE-2026-25253 (Strict Origin & Token Validation)
+    // SECURITY: Address CVE-2026-25253
     if (!GatewaySecurity.validateRequest(req)) {
       return NextResponse.json({ error: "Sovereign Shield: Unauthorized Gateway Access" }, { status: 403 });
     }
@@ -34,11 +42,35 @@ export async function POST(req: NextRequest) {
 
     if (!process) return NextResponse.json({ error: "Failed to initialize process" }, { status: 500 });
 
-    // 2. FETCH AGENT MANIFEST
-    const agentData = await kv.get<any>(KEYS.registry(process.agentId));
+    // 2. SAFETY: Dead Hand Protocol Evaluation
+    const actualAgentId = process.agentId;
+    
+    // Check if agent is already frozen or killed
+    const frozen = await kv.get(KEYS.frozen(actualAgentId));
+    if (frozen) {
+      return NextResponse.json({ 
+        error: "Sovereign Emergency: Agent memory frozen by Dead Hand Protocol",
+        status: 'QUARANTINE' 
+      }, { status: 423 });
+    }
+
+    const threat = await evaluateAgent(actualAgentId);
+    if (threat) {
+      await executeDeadHand(threat);
+      return NextResponse.json({ 
+        error: `Dead Hand Triggered: ${threat.reason}`,
+        threatLevel: threat.threatLevel 
+      }, { status: 403 });
+    }
+
+    // Send heartbeat to prevent Dead Hand timeout
+    await sendHeartbeat(actualAgentId);
+
+    // 3. FETCH AGENT MANIFEST
+    const agentData = await kv.get<any>(KEYS.registry(actualAgentId));
     if (!agentData) return NextResponse.json({ error: "Agent not found" }, { status: 404 });
 
-    // 3. EXECUTE REASONING STEP (The "Thought")
+    // 4. EXECUTE REASONING STEP (The "Thought")
     const systemPrompt = `
       ${agentData.persona?.instructions || 'You are a sovereign agent.'}
       
@@ -62,7 +94,7 @@ export async function POST(req: NextRequest) {
       messages: process.history.map(h => ({ role: h.role as any, content: h.content }))
     });
 
-    // 4. PARSE REASONING & SENTINEL TOKENS
+    // 5. PARSE REASONING & SENTINEL TOKENS
     let status: any = 'THINKING';
     let action = undefined;
     let thought = undefined;
@@ -79,7 +111,7 @@ export async function POST(req: NextRequest) {
       thought = text.replace('THOUGHT:', '').replace('NO_REPLY', '').trim();
     }
 
-    // 5. UPDATE PROCESS STATE
+    // 6. UPDATE PROCESS STATE
     const updatedProcess = await GatewayManager.pulse(process.id, {
       status,
       lastThought: thought,

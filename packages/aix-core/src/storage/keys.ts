@@ -1,5 +1,5 @@
 /**
- * AIX Storage Keys & TTL Configuration (v1.3.0)
+ * AIX Storage Keys & TTL Configuration (v1.3.3)
  * Centralized registry for all Redis namespaces and their expiry policies.
  */
 
@@ -30,6 +30,9 @@ export const NS = {
   // Gateway & Execution Loops (Persistent Agent Patterns)
   GATEWAY: 'aix:gateway',           // aix:gateway:{processId}
   
+  // Dead Hand Protocol (Autonomous Safety)
+  DEAD_HAND: 'aix:deadhand',        // Status, heartbeats, incidents
+  
   SKILLS: 'aix:skills',         
   INVOKE: 'aix:invoke'          
 } as const;
@@ -54,6 +57,13 @@ export const KEYS = {
   // Gateway Logic
   gateway: (processId: string) => `aix:gateway:${processId}`,
   
+  // Dead Hand Protocol
+  heartbeat: (agentId: string) => `agent:${agentId}:heartbeat`,
+  status: (agentId: string) => `agent:${agentId}:status`,
+  frozen: (agentId: string) => `agent:${agentId}:frozen`,
+  incident: (agentId: string) => `agent:${agentId}:incident`,
+  stats: (agentId: string) => `agent:${agentId}:stats`,
+  
   skill: (agentId: string) => `agent:${agentId}:skills`, 
   invoke: (traceId: string) => `agent:${traceId}:invoke`
 };
@@ -73,11 +83,15 @@ export const TTL = {
   MEM_CONTEXT: 60 * 60 * 12,    // 12 Hours (Task duration)
   MEM_EPISODIC: 0,              // Permanent
   
-  GATEWAY: 60 * 60 * 2,         // 2 Hours (Maximum agent thought life)
+  GATEWAY: 60 * 60 * 2,         // 2 Hours
   
-  MEMORY: 60 * 60 * 24 * 30,    // 30 Days (Standard Context)
+  // Dead Hand
+  HEARTBEAT: 90,                // 90 Seconds (Dead Hand window)
+  INCIDENT: 60 * 60 * 24 * 30,  // 30 Days (Forensic window)
+  
+  MEMORY: 60 * 60 * 24 * 30,    // 30 Days
   SKILLS: 0,                    // Permanent
-  INVOKE: 60 * 60               // 1 Hour (Request Trace)
+  INVOKE: 60 * 60               // 1 Hour
 } as const;
 
 export type Namespace = keyof typeof NS;

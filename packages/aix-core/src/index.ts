@@ -33,6 +33,8 @@ export * from './learning';
 export * from './gateway';
 export * from './security';
 export * from './memory-readable';
+export * from './dead-hand';
+export * from './channels';
 
 /** Map our generic StorageOptions → Upstash SetCommandOptions */
 import type { SetCommandOptions } from '@upstash/redis';
