@@ -1,5 +1,5 @@
 import type { 
-  AIXManifest as CanonicalManifest, 
+  AIXManifest as Manifest, 
   ABOM as CanonicalABOM, 
   IdentityLayer as CanonicalIdentityLayer, 
   SaasService as CanonicalSaasService,
@@ -8,6 +8,8 @@ import type {
   BuildProvenance as CanonicalBuildProvenance,
   RegistryEntry as CanonicalRegistryEntry
 } from '@aix-types';
+
+export type { Manifest };
 
 /**
  * AIX Studio Unified Types
@@ -82,6 +84,11 @@ export interface AgentSkill {
   name: string;
   description: string;
   parameters?: Record<string, unknown>;
+}
+
+export interface McpPrompt {
+  name: string;
+  description?: string;
 }
 
 // ─── Identity & Auth ───────────────────────────────────────────────────────

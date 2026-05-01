@@ -116,10 +116,10 @@ export const DEFAULT_PRICING: Record<string, PricingConfig> = {
 };
 
 export const RISK_PREMIUMS = [
-  { min: 90, multiplier: 0.0  },
-  { min: 70, multiplier: 0.1  },
-  { min: 40, multiplier: 0.25 },
-  { min: 0,  multiplier: 0.5  },
+  { min: 90, multiplier: 0.5   }, // 90-100 = Critical Risk
+  { min: 70, multiplier: 0.25  }, // 70-89  = High Risk
+  { min: 40, multiplier: 0.1   }, // 40-69  = Moderate Risk
+  { min: 0,  multiplier: 0.0   }, // 0-39   = Safe
 ];
 
 export interface PriceBreakdown {
@@ -168,6 +168,7 @@ export function calculatePrice(
  * Validates if a user has remaining quota.
  */
 export function isQuotaExceeded(used: number, tier: string): boolean {
+  if (!Number.isFinite(used) || used < 0) return false;
   const config = DEFAULT_PRICING[tier] ?? DEFAULT_PRICING.free;
   if (config.quota === -1) return false;
   return used >= config.quota;

@@ -57,3 +57,15 @@ export function computeManifestChecksum(manifest: any): string {
   const bytes = new TextEncoder().encode(canonical);
   return bytesToHex(sha256(bytes));
 }
+
+/**
+ * Risk Score Normalization
+ * Validator (100 = critical/risky, 0 = safe)
+ * Scanner (0 = critical/risky, 100 = safe)
+ * 
+ * Logic: We standardize on the Validator scale (100 = risky) for the Pricing engine.
+ */
+export function normalizeRiskScore(rawScore: number, source: 'validator' | 'scanner'): number {
+  if (!Number.isFinite(rawScore)) return 100; // Default to max risk on error
+  return source === 'scanner' ? 100 - rawScore : rawScore;
+}
