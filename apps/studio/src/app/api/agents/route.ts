@@ -38,24 +38,27 @@ export async function POST(req: Request) {
       await kv.set(userAgentsKey, fleet);
     }
 
-    // 4. Update global registry for marketplace
-    await updateRegistryEntry({
-      did: did,
-      name: manifest.meta.name,
-      role: manifest.persona?.role || 'Sovereign Agent',
-      capabilities: manifest.meta.tags || [],
-      kyc_tier: manifest.identity_layer.verification?.status || 'unverified',
-      specVersion: manifest.meta.format_version || LATEST_VERSION,
-      publishedAt: new Date().toISOString(),
-      yaml: JSON.stringify(manifest),
-      risk_score: validation.risk_score
-    } as any);
+    // 4. Update global registry for marketplace (Skip if DNA Shadow Clone)
+    if (!manifest.is_shadow_clone) {
+      await updateRegistryEntry({
+        did: did,
+        name: manifest.meta.name,
+        role: manifest.persona?.role || 'Sovereign Agent',
+        capabilities: manifest.meta.tags || [],
+        kyc_tier: manifest.identity_layer.verification?.status || 'unverified',
+        specVersion: manifest.meta.format_version || LATEST_VERSION,
+        publishedAt: new Date().toISOString(),
+        yaml: JSON.stringify(manifest),
+        risk_score: validation.risk_score
+      } as any);
+    }
 
     return NextResponse.json({
       success: true,
       agentId,
       did,
       risk_score: validation.risk_score,
+      is_shadow: !!manifest.is_shadow_clone,
       warnings: validation.warnings,
       manifestUrl: `/agents/${did}`
     });

@@ -50,30 +50,37 @@ export default function PulsePage() {
 
   // ── SSE connection ─────────────────────────────────────────────────────
   useEffect(() => {
-    const es = new EventSource(`/api/pulse/stream?agentId=${agentId}`);
+    let es: EventSource | null = null;
+    let demo: NodeJS.Timeout | null = null;
 
-    es.onopen = () => setConnected(true);
+    try {
+      es = new EventSource(`/api/pulse/stream?agentId=${agentId}`);
+      es.onopen = () => setConnected(true);
+      es.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.type === "PULSE" && Array.isArray(data.events)) {
+            setEvents(prev => [...data.events, ...prev].slice(0, 100));
+          }
+        } catch { /* ignore parse errors */ }
+      };
+      es.onerror = () => setConnected(false);
 
-    es.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data);
-        if (data.type === "PULSE" && Array.isArray(data.events)) {
-          setEvents(prev => [...data.events, ...prev].slice(0, 100));
-        }
-      } catch { /* ignore parse errors */ }
+      // ── Demo: inject mock events every 3s when stream is quiet ──────────
+      demo = setInterval(() => {
+        setEvents(prev => {
+          if (prev.length > 0 && Date.now() - new Date(prev[0].timestamp).getTime() < 5000) return prev;
+          return [mockEvent(agentId), ...prev].slice(0, 100);
+        });
+      }, 3000);
+    } catch (err) {
+      console.error("[Pulse] SSE init failed:", err);
+    }
+
+    return () => {
+      es?.close();
+      if (demo) clearInterval(demo);
     };
-
-    es.onerror = () => setConnected(false);
-
-    // ── Demo: inject mock events every 3s when stream is quiet ──────────
-    const demo = setInterval(() => {
-      setEvents(prev => {
-        if (prev.length > 0 && Date.now() - new Date(prev[0].timestamp).getTime() < 5000) return prev;
-        return [mockEvent(agentId), ...prev].slice(0, 100);
-      });
-    }, 3000);
-
-    return () => { es.close(); clearInterval(demo); };
   }, [agentId]);
 
   // Auto-scroll to top (newest events)
@@ -82,16 +89,20 @@ export default function PulsePage() {
   }, [events.length]);
 
   return (
-    <div className="p-6 h-full flex flex-col gap-6">
-
+    <motion.div 
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="p-4 md:p-6 h-full flex flex-col gap-6"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-black text-white tracking-tight">Live Pulse</h2>
-          <p className="text-sm text-white/30 mt-0.5">Real-time event stream for this agent</p>
+          <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">Live Pulse</h2>
+          <p className="text-xs md:text-sm text-white/30 mt-0.5">Real-time event stream for this agent</p>
         </div>
         <div className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all",
+          "flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] md:text-xs font-bold transition-all",
           connected
             ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
             : "bg-white/5 border-white/10 text-white/30"
@@ -105,15 +116,15 @@ export default function PulsePage() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {(["task","success","error","deploy"] as const).map(type => {
           const cfg   = TYPE_CONFIG[type];
           const count = events.filter(e => e.type === type).length;
           return (
-            <div key={type} className={cn("p-4 rounded-2xl border", cfg.bg, cfg.border)}>
+            <div key={type} className={cn("p-3 md:p-4 rounded-2xl border", cfg.bg, cfg.border)}>
               <cfg.icon className="w-4 h-4 mb-2" style={{ color: cfg.color }} />
-              <p className="text-2xl font-black text-white">{count}</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: cfg.color }}>
+              <p className="text-xl md:text-2xl font-black text-white">{count}</p>
+              <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: cfg.color }}>
                 {type}s
               </p>
             </div>
@@ -123,11 +134,14 @@ export default function PulsePage() {
 
       {/* Event feed */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        <AnimatePresence initial={false}>
+        <AnimatePresence initial={false} mode="popLayout">
           {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-white/20">
-              <Activity className="w-8 h-8 mb-3 animate-pulse" />
-              <p className="text-sm font-medium">Waiting for events…</p>
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <div className="w-16 h-16 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center mb-4">
+                <Activity className="w-6 h-6 text-white/20 animate-pulse" />
+              </div>
+              <p className="text-sm font-bold text-white/40">Synchronizing Pulse...</p>
+              <p className="text-xs text-white/10 mt-1">Waiting for agent event broadcast</p>
             </div>
           ) : (
             events.map((ev) => {
@@ -135,9 +149,9 @@ export default function PulsePage() {
               return (
                 <motion.div
                   key={ev.id}
-                  initial={{ opacity: 0, x: -12 }}
+                  initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, height: 0 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.2 }}
                   className={cn(
                     "flex items-start gap-3 p-3 rounded-xl border",
@@ -161,7 +175,7 @@ export default function PulsePage() {
                   </div>
                   <div className="flex items-center gap-1 text-[10px] text-white/20 font-mono flex-shrink-0">
                     <Clock className="w-3 h-3" />
-                    {new Date(ev.timestamp).toLocaleTimeString()}
+                    {new Date(ev.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </div>
                 </motion.div>
               );
@@ -170,6 +184,7 @@ export default function PulsePage() {
         </AnimatePresence>
         <div ref={bottomRef} />
       </div>
-    </div>
+    </motion.div>
   );
 }
+
