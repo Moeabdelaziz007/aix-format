@@ -18,7 +18,7 @@ test('Pricing Engine: Core Logic', async (t) => {
     // Enterprise tier (0.05 base), 0 risk score (high premium +0.5)
     const breakdown = calculatePrice('enterprise', 0, 'stdio');
     // base (0.05) * (1 + 0.5) = 0.075
-    assert.strictEqual(breakdown.totalCost, 0.075, "Enterprise high-risk should include 50% premium.");
+    assert.ok(Math.abs(breakdown.totalCost - 0.075) < 0.000001, `Enterprise high-risk should include 50% premium. Expected 0.075, got ${breakdown.totalCost}`);
   });
 
   await t.test('Scenario 3: Quota Exhausted (Pro Tier)', () => {

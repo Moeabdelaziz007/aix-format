@@ -56,9 +56,7 @@ export function scanPromptInjection(text) {
     }
   ];
 
-  return rules
-    .filter(rule => rule.pattern.test(text))
-    .map(rule => ({ name: rule.name, severity: rule.severity }));
+  return rules.filter(rule => rule.pattern.test(text)).map(rule => ({ name: rule.name, severity: rule.severity }));
 }
 
 /**
