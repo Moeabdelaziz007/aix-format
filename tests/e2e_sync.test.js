@@ -5,10 +5,10 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { scanAgent } from '../packages/core/src/abom-scanner.ts';
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
 test('E2E Sync: Schema ↔ Manifest ↔ Detective', async (t) => {
+  const ajv = new Ajv({ allErrors: true });
+  addFormats(ajv);
+
   // 1. Load Schema
   const schemaContent = await fs.readFile('schemas/aix.schema.json', 'utf8');
   const schema = JSON.parse(schemaContent);
@@ -31,7 +31,7 @@ test('E2E Sync: Schema ↔ Manifest ↔ Detective', async (t) => {
       // A. Schema Validation (Structural)
       const valid = validate(agent);
       if (!valid) {
-        console.error(`Schema Errors in ${path}:`, validate.errors);
+        console.error(`Schema Errors in ${path}:`, JSON.stringify(validate.errors, null, 2));
       }
       assert.ok(valid, `${path} should be structurally valid against the schema`);
 
@@ -43,6 +43,9 @@ test('E2E Sync: Schema ↔ Manifest ↔ Detective', async (t) => {
       if (agent.meta.type === 'infra' || agent.abom.risk_level === 'high') {
          // If it's a golden manifest for high-risk, it should have a decent grade if correct
          if (agent.abom.build_provenance) {
+            if (report.grade !== 'A' && report.grade !== 'B') {
+               console.log(`Report for ${path}:`, JSON.stringify(report, null, 2));
+            }
             assert.ok(report.grade === 'A' || report.grade === 'B', `${path} should have a good grade with provenance`);
          }
       }
@@ -51,6 +54,9 @@ test('E2E Sync: Schema ↔ Manifest ↔ Detective', async (t) => {
 });
 
 test('E2E Sync: Detecting Breaking Schema Changes', async (t) => {
+  const ajv = new Ajv({ allErrors: true });
+  addFormats(ajv);
+
   const content = await fs.readFile('tests/golden_manifests/low-risk.aix.json', 'utf8');
   const agent = JSON.parse(content);
   

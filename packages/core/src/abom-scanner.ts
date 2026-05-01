@@ -1,4 +1,4 @@
-import { AIXManifest, ABOM } from './types';
+import type { AIXManifest, ABOM } from './types.ts';
 
 export interface ScanReport {
   score: number;

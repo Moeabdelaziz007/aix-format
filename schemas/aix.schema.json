@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://axiomid.app/schemas/aix.schema.json",
   "$comment": "AIX Format v1.3 — Unified Canonical Bundled Schema. Supersedes aix-v1.schema.json, axiom-aix.schema.json, aix-enhanced.schema.json. © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions",
   "title": "AIX Format",
