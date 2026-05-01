@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
-import { useRegistry } from '@/hooks/useRegistry';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -16,50 +15,49 @@ import {
   Settings2,
   Power,
   RotateCcw,
-  Ban,
   CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  MoreVertical,
   Search,
-  ExternalLink
+  Brain,
+  Cpu,
+  Layers
 } from 'lucide-react';
 import { Badge } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
 export default function MissionControlPage() {
-  const { entries, loading, error } = useRegistry();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const [liveAgents, setLiveAgents] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAgents = async () => {
+    setIsClient(true);
+    const fetchMetrics = async () => {
       try {
-        const res = await fetch('/api/agents');
+        const res = await fetch('/api/fleet/metrics');
         const data = await res.json();
-        setLiveAgents(data);
+        setMetrics(data);
       } catch (err) {
-        console.error('Failed to fetch agents:', err);
+        console.error('Failed to fetch metrics:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchAgents();
+    fetchMetrics();
+    // Refresh every 30s
+    const interval = setInterval(fetchMetrics, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const statsCount = useMemo(() => {
+  const stats = useMemo(() => {
+    if (!metrics) return [];
     return [
-      { label: 'Online', val: liveAgents.length, icon: <CheckCircle2 className="text-emerald-400" size={16} />, color: 'emerald' },
-      { label: 'Total Fleet', val: liveAgents.length, icon: <TrendingUp className="text-primary" size={16} />, color: 'primary' },
+      { label: 'Active Agents', val: metrics.summary.activeAgents, icon: <CheckCircle2 className="text-emerald-400" size={16} />, color: 'emerald' },
+      { label: 'Total Skills Learned', val: metrics.summary.totalSkillsLearned, icon: <Brain className="text-primary" size={16} />, color: 'primary' },
+      { label: 'Total Fleet', val: metrics.summary.totalAgents, icon: <Layers className="text-zinc-400" size={16} />, color: 'zinc' },
+      { label: 'System Health', val: '99.9%', icon: <Zap className="text-amber-400" size={16} />, color: 'amber' },
     ];
-  }, [liveAgents]);
+  }, [metrics]);
 
   if (!isClient) return null;
 
@@ -71,10 +69,10 @@ export default function MissionControlPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-1">
              <h1 className="text-4xl font-extrabold text-white tracking-tight italic uppercase flex items-center gap-4">
-                Mission Control
+                Orchestra Control
                 <Badge variant="outline" className="text-[10px] font-black border-primary/20 text-primary uppercase italic tracking-widest bg-primary/5">Sovereign Fleet</Badge>
              </h1>
-             <p className="text-[var(--color-on-surface-variant)] text-sm">Real-time oversight of your deployed autonomous agents and economic output.</p>
+             <p className="text-[var(--color-on-surface-variant)] text-sm">Real-time oversight of your autonomous agents, learned skills, and orchestration traces.</p>
           </div>
           <button 
             onClick={() => router.push('/builder')}
@@ -86,84 +84,35 @@ export default function MissionControlPage() {
 
         {/* Status Boxes */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-           {stats.map((s, i) => (
-             <div key={i} className="glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                   <div className={cn("p-2 rounded-xl bg-white/5", `text-${s.color}-400`)}>
-                      {s.icon}
-                   </div>
-                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{s.label}</span>
-                </div>
-                <div className="text-4xl font-black text-white italic tracking-tighter">{s.val}</div>
-             </div>
-           ))}
-        </div>
-
-        {/* Heatmap & Alerts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-           {/* Heatmap */}
-           <div className="lg:col-span-8 glass-panel-heavy p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-6">
-              <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                    <Activity className="text-primary" size={18} />
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Agent Activity — 24h Heatmap</h3>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded bg-zinc-800" />
-                    <div className="w-2 h-2 rounded bg-primary/20" />
-                    <div className="w-2 h-2 rounded bg-primary/60" />
-                    <div className="w-2 h-2 rounded bg-primary" />
-                 </div>
-              </div>
-              <div className="grid grid-cols-24 gap-1.5 h-20">
-                 {Array.from({ length: 48 }).map((_, i) => (
-                   <div 
-                     key={i} 
-                     className="rounded-[4px] transition-all hover:scale-125 cursor-help"
-                     style={{ 
-                       backgroundColor: i % 7 === 0 ? '#00dbe9' : i % 3 === 0 ? '#00dbe960' : i % 2 === 0 ? '#00dbe920' : '#ffffff05',
-                     }}
-                   />
-                 ))}
-              </div>
-              <div className="flex justify-between text-[8px] font-black text-zinc-600 uppercase tracking-widest">
-                 <span>00:00</span>
-                 <span>06:00</span>
-                 <span>12:00</span>
-                 <span>18:00</span>
-                 <span>23:59</span>
-              </div>
-           </div>
-
-           {/* Recent Alerts */}
-           <div className="lg:col-span-4 glass-panel-heavy p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-6">
-              <div className="flex items-center gap-3 text-amber-400">
-                 <ShieldAlert size={18} />
-                 <h3 className="text-xs font-black uppercase tracking-[0.2em]">Recent Alerts</h3>
-              </div>
-              <div className="space-y-4">
-                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2 group cursor-pointer hover:bg-amber-500/15 transition-all">
-                    <div className="flex items-center justify-between">
-                       <span className="text-[10px] font-black text-amber-500 uppercase">Warning</span>
-                       <span className="text-[9px] font-bold text-zinc-600">3m ago</span>
-                    </div>
-                    <p className="text-[11px] font-bold text-white leading-tight">'FinanceBot' failed 3 calls in 5 min</p>
-                 </div>
-                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2 group cursor-pointer hover:bg-amber-500/15 transition-all">
-                    <div className="flex items-center justify-between">
-                       <span className="text-[10px] font-black text-amber-500 uppercase">Warning</span>
-                       <span className="text-[9px] font-bold text-zinc-600">12m ago</span>
-                    </div>
-                    <p className="text-[11px] font-bold text-white leading-tight">'SupportBot' approaching rate limit</p>
-                 </div>
-              </div>
-           </div>
+           {loading ? (
+             Array.from({ length: 4 }).map((_, i) => (
+               <div key={i} className="glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 bg-white/[0.01] animate-pulse h-32" />
+             ))
+           ) : (
+             stats.map((s, i) => (
+               <motion.div 
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: i * 0.1 }}
+                 key={i} 
+                 className="glass-panel-heavy p-6 rounded-[2.5rem] border-white/5 bg-white/[0.01] flex flex-col gap-4"
+               >
+                  <div className="flex items-center gap-3">
+                     <div className={cn("p-2 rounded-xl bg-white/5")}>
+                        {s.icon}
+                     </div>
+                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{s.label}</span>
+                  </div>
+                  <div className="text-4xl font-black text-white italic tracking-tighter">{s.val}</div>
+               </motion.div>
+             ))
+           )}
         </div>
 
         {/* Agent List Table */}
         <div className="glass-panel-heavy rounded-[3rem] border-white/5 bg-black/40 overflow-hidden">
            <div className="p-8 border-b border-white/5 flex items-center justify-between">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Agent Fleet — Active Deployments</h3>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Agent Fleet — Active Intelligence</h3>
               <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
                  <input 
@@ -177,46 +126,55 @@ export default function MissionControlPage() {
               <table className="w-full text-left">
                  <thead>
                     <tr className="border-b border-white/5">
-                       <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Name</th>
+                       <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Agent</th>
                        <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Status</th>
-                       <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Tasks</th>
-                       <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Earnings</th>
+                       <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Learned Skills</th>
+                       <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Tier</th>
                        <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-widest">Actions</th>
                     </tr>
                  </thead>
                  <tbody>
-                    {mockAgents.map((agent) => (
-                      <tr key={agent.id} className="border-b border-white/[0.02] hover:bg-white/[0.02] transition-all group">
+                    {loading ? (
+                      <tr><td colSpan={5} className="p-10 text-center text-xs text-zinc-500">Scanning fleet connections...</td></tr>
+                    ) : metrics?.agents.map((agent: any) => (
+                      <tr key={agent.did} className="border-b border-white/[0.02] hover:bg-white/[0.02] transition-all group">
                          <td className="px-8 py-5">
-                            <div className="flex items-center gap-3">
-                               <div className={cn("w-2 h-2 rounded-full", agent.status === 'Online' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : agent.status === 'Warning' ? 'bg-amber-500 shadow-[0_0_10px_#f59e0b]' : 'bg-zinc-600')} />
-                               <span className="text-sm font-black text-white italic">{agent.name}</span>
+                            <div className="flex flex-col">
+                               <div className="flex items-center gap-3">
+                                  <div className={cn("w-2 h-2 rounded-full", agent.status === 'active' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-zinc-600')} />
+                                  <span className="text-sm font-black text-white italic">{agent.name}</span>
+                               </div>
+                               <span className="text-[10px] text-zinc-500 font-mono mt-1">{agent.did}</span>
                             </div>
                          </td>
                          <td className="px-8 py-5">
                             <Badge variant="outline" className={cn(
                                "text-[9px] font-black uppercase tracking-tighter",
-                               agent.status === 'Online' ? 'border-emerald-500/20 text-emerald-500' : agent.status === 'Warning' ? 'border-amber-500/20 text-amber-500' : 'border-zinc-800 text-zinc-500'
+                               agent.status === 'active' ? 'border-emerald-500/20 text-emerald-500' : 'border-zinc-800 text-zinc-500'
                             )}>
                                {agent.status}
                             </Badge>
                          </td>
                          <td className="px-8 py-5">
-                            <span className="text-xs font-bold text-white font-mono">{agent.tasks}</span>
+                            <div className="flex items-center gap-2">
+                               <Brain size={12} className="text-primary/60" />
+                               <span className="text-xs font-bold text-white font-mono">{agent.learnedSkillsCount}</span>
+                            </div>
                          </td>
                          <td className="px-8 py-5">
-                            <span className="text-xs font-bold text-primary font-mono">{agent.earnings}</span>
+                            <span className="text-[10px] font-black uppercase text-zinc-400">{agent.kyc_tier}</span>
                          </td>
                          <td className="px-8 py-5">
                             <div className="flex items-center gap-2">
-                               <button className="p-2 rounded-xl bg-white/5 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 transition-all">
-                                  {agent.status === 'Warning' ? <RotateCcw size={14} /> : <Power size={14} />}
+                               <button 
+                                 onClick={() => router.push(`/playground?id=${agent.did}`)}
+                                 className="p-2 rounded-xl bg-white/5 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 transition-all"
+                                 title="Open Playground"
+                               >
+                                  <Zap size={14} />
                                </button>
                                <button className="p-2 rounded-xl bg-white/5 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 transition-all">
                                   <Settings2 size={14} />
-                               </button>
-                               <button className="px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase text-zinc-500 hover:text-white transition-all">
-                                  {agent.status === 'Warning' ? 'Check' : 'Stop'}
                                </button>
                             </div>
                          </td>
@@ -226,7 +184,7 @@ export default function MissionControlPage() {
               </table>
            </div>
            <div className="p-6 bg-white/[0.01] flex items-center justify-center">
-              <button className="text-[10px] font-black text-zinc-700 hover:text-zinc-500 uppercase tracking-[0.2em] transition-colors">Load More History</button>
+              <button className="text-[10px] font-black text-zinc-700 hover:text-zinc-500 uppercase tracking-[0.2em] transition-colors">Orchestra Diagnostics v1.3.0</button>
            </div>
         </div>
       </main>

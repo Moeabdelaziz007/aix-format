@@ -30,6 +30,9 @@ import { NS, TTL, KEYS } from './storage/keys';
 export { NS, TTL, KEYS };
 export * from './registry';
 export * from './learning';
+export * from './gateway';
+export * from './security';
+export * from './memory-readable';
 
 /** Map our generic StorageOptions → Upstash SetCommandOptions */
 import type { SetCommandOptions } from '@upstash/redis';
@@ -56,7 +59,6 @@ class UpstashRedisAdapter implements StorageAdapter {
 
     if (!url || !token) {
       console.warn('[Storage] Missing Upstash Redis credentials. All storage operations will be bypassed.');
-      // Initialize with empty strings to avoid crashes, but logic will check isConnected
       this.client = new Redis({ url: 'http://localhost', token: 'mock' });
       this.isConnected = false;
     } else {
@@ -83,7 +85,6 @@ class UpstashRedisAdapter implements StorageAdapter {
           console.error(`[Storage] ${label} failed permanently for key: ${key.split(':')[0]}:*** | Attempts: ${attempt} | Error:`, (error as Error).message);
           return null;
         }
-        // Small delay before retry
         await new Promise(resolve => setTimeout(resolve, 100 * attempt));
       }
     }
@@ -184,6 +185,5 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 }
 
-// Singleton instance
 export const kv = new UpstashRedisAdapter();
 export default kv;

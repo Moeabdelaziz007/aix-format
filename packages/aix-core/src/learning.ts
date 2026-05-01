@@ -1,4 +1,5 @@
 import { kv, KEYS } from './index';
+import { createHash } from 'crypto';
 
 /**
  * AIX Hermes Learning Engine
@@ -18,6 +19,13 @@ export interface LearnedProcedure {
   timestamp: number;
 }
 
+export interface FeedbackSkill {
+  prompt: string;
+  response: string;
+  usedAt: number;
+  successCount: number;
+}
+
 /**
  * Records a successful run as a 'Learned Skill'.
  * In the Hermes model, we don't save what happened, we save what worked.
@@ -35,14 +43,53 @@ export async function recordSuccessfulProcedure(
     timestamp: Date.now()
   };
 
-  // Push to a set of learned skills or a list of procedures
-  // For now, we'll use a list to maintain history of improvements
   await kv.lpush(key, JSON.stringify(procedure));
-  
-  // Keep only the top 20 most recent successful procedures to avoid bloat
   await kv.ltrim(key, 0, 19);
   
   console.log(`[Hermes] Learned new procedure for ${agentId}: "${goal}"`);
+}
+
+/**
+ * Skill Extraction (Hermes Pattern)
+ * Triggered by positive user feedback (thumbs up).
+ * Saves the successful interaction as a reusable skill.
+ */
+export async function extractSkillFromFeedback(
+  agentId: string,
+  prompt: string,
+  response: string
+): Promise<string> {
+  // 1. Generate unique hash for the skill (prompt + first 50 chars of response)
+  const hash = createHash('sha256')
+    .update(`${prompt}:${response.slice(0, 50)}`)
+    .digest('hex')
+    .slice(0, 16);
+
+  const skillsListKey = `agent:${agentId}:skills`;
+  const skillDetailKey = `agent:${agentId}:skill:${hash}`;
+
+  // 2. Check if skill already exists
+  const existing = await kv.get<FeedbackSkill>(skillDetailKey);
+  
+  if (existing) {
+    // Increment success count
+    existing.successCount += 1;
+    existing.usedAt = Date.now();
+    await kv.set(skillDetailKey, existing);
+  } else {
+    // Create new skill entry
+    const newSkill: FeedbackSkill = {
+      prompt,
+      response,
+      usedAt: Date.now(),
+      successCount: 1
+    };
+    await kv.set(skillDetailKey, newSkill);
+    await kv.sadd(skillsListKey, hash);
+  }
+
+  console.log(`[Hermes] Extracted new skill (${hash}) for agent ${agentId}`);
+  return hash;
 }
 
 /**
@@ -52,6 +99,22 @@ export async function getLearnedProcedures(agentId: string): Promise<LearnedProc
   const key = KEYS.memSkill(agentId);
   const data = await kv.lrange<string>(key, 0, -1);
   return data.map(d => JSON.parse(d));
+}
+
+/**
+ * Retrieves all feedback-driven skills for an agent.
+ */
+export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[]> {
+  const skillsListKey = `agent:${agentId}:skills`;
+  const hashes = await kv.smembers<string>(skillsListKey);
+  
+  if (!hashes.length) return [];
+
+  const skills = await Promise.all(
+    hashes.map(hash => kv.get<FeedbackSkill>(`agent:${agentId}:skill:${hash}`))
+  );
+
+  return skills.filter((s): s is FeedbackSkill => s !== null);
 }
 
 /**

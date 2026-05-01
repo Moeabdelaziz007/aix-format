@@ -5,8 +5,18 @@ import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 
 /**
- * AIX Sovereign Invocation Engine (AgenticKit + Hermes + Critic)
+ * AIX Sovereign Invocation Engine (AgenticKit + Hermes + Symphony A2A)
  */
+
+async function internalInvoke(agentId: string, message: string, context: any, sessionId: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/agents/${agentId}/invoke`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, context, sessionId, skipCritic: true })
+  });
+  return res.json();
+}
 
 export async function POST(
   req: Request,
@@ -46,6 +56,8 @@ export async function POST(
     }
 
     // 4. EXECUTION (Executor Agent)
+    const canCallAgents = agentData.skills?.includes('agent-call') || agentData.meta?.tags?.includes('orchestrator');
+    
     const systemPrompt = `
       ${agentData.persona?.instructions || 'You are a sovereign AI agent.'}
       
@@ -53,33 +65,57 @@ export async function POST(
       ${skillContext}
       
       User Context: ${JSON.stringify(context || {})}
+      
+      ${canCallAgents ? `
+      SYMPHONY ORCHESTRATION ENABLED:
+      You can invoke other agents if needed. To call another agent, use the following format in your response:
+      [CALL:did:axiom:agent_id] YOUR_MESSAGE_TO_SUB_AGENT [/CALL]
+      ` : ''}
     `;
 
-    const { text, finishReason, toolCalls } = await generateText({
+    let { text, finishReason, toolCalls } = await generateText({
       model: google('gemini-2.0-flash'),
       system: systemPrompt,
       prompt: message,
     });
 
-    // 5. CRITIC PATTERN (Pattern 8: Agent reviews output)
-    let isSuccess = finishReason === 'stop' || finishReason === 'tool-calls';
+    // 5. SYMPHONY: Agent-to-Agent (A2A) Execution
+    let subAgentResponse = null;
+    if (canCallAgents && text.includes('[CALL:')) {
+      const match = text.match(/\[CALL:(did:[a-z0-9:_]+)\]([\s\S]*?)\[\/CALL\]/i);
+      if (match) {
+        const subAgentId = match[1];
+        const subMessage = match[2].trim();
+        
+        console.log(`[Symphony] ${agentId} calling sub-agent ${subAgentId}`);
+        const subResult = await internalInvoke(subAgentId, subMessage, context, sessionId);
+        
+        if (subResult.success) {
+          subAgentResponse = subResult.response;
+          // Merge responses
+          text = text.replace(match[0], `\n--- SUB-AGENT RESPONSE (${subAgentId}) ---\n${subAgentResponse}\n--- END SUB-AGENT ---\n`);
+        }
+      }
+    }
+
+    // 6. CRITIC PATTERN (Pattern 8: Agent reviews output)
+    let isSuccess = (finishReason === 'stop' || finishReason === 'tool-calls') && !text.includes('FAILED');
     let criticFeedback = null;
 
     if (isSuccess && !skipCritic) {
       const { text: feedback } = await generateText({
-        model: google('gemini-2.0-flash-lite-preview'), // Lightweight critic
-        system: "You are the AIX Protocol Critic. Review the agent's response for accuracy, safety, and goal achievement. Output only 'VALID' or 'INVALID' followed by a brief reason.",
+        model: google('gemini-2.0-flash-lite-preview'),
+        system: "You are the AIX Protocol Critic. Review the agent's response for accuracy and goal achievement. Output only 'VALID' or 'INVALID' followed by a reason.",
         prompt: `User Goal: ${message}\nAgent Response: ${text}`
       });
       
       criticFeedback = feedback;
       if (feedback.includes('INVALID')) {
         isSuccess = false;
-        console.warn(`[Critic] Run invalidated for ${agentId}: ${feedback}`);
       }
     }
 
-    // 6. HERMES LEARNING: Save what worked (Validated by Critic)
+    // 7. HERMES LEARNING: Save validated skills
     if (isSuccess) {
       void recordSuccessfulProcedure(agentId, message, [
         { 
@@ -91,7 +127,7 @@ export async function POST(
       ]);
     }
 
-    // 7. Update Layer 1 Memory (Session)
+    // 8. Update Session Memory
     const memoryKey = KEYS.memory(agentId);
     void kv.lpush(memoryKey, JSON.stringify({ 
       role: 'user', 
@@ -102,7 +138,8 @@ export async function POST(
         role: 'assistant', 
         content: text, 
         timestamp: Date.now(),
-        critic: criticFeedback
+        critic: criticFeedback,
+        subCall: subAgentResponse ? true : false
       }));
       kv.ltrim(memoryKey, 0, 49);
     });
@@ -112,7 +149,8 @@ export async function POST(
       response: text,
       critic: criticFeedback,
       billing: routerResult,
-      learned: isSuccess
+      learned: isSuccess,
+      subAgentCalled: subAgentResponse ? true : false
     });
   } catch (err: any) {
     console.error("[Invoke Error]:", err);

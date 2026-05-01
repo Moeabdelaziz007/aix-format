@@ -27,6 +27,9 @@ export const NS = {
   MEMORY_CONTEXT: 'aix:mem:ctx',     // Layer 3: Task Context (Per task)
   MEMORY_EPISODIC: 'aix:mem:epi',    // Layer 4: Long-term Patterns (Permanent)
   
+  // Gateway & Execution Loops (Persistent Agent Patterns)
+  GATEWAY: 'aix:gateway',           // aix:gateway:{processId}
+  
   SKILLS: 'aix:skills',         
   INVOKE: 'aix:invoke'          
 } as const;
@@ -42,13 +45,16 @@ export const KEYS = {
   wizardSession: (sessionId: string) => `wizard:session:${sessionId}`,
   
   // Intelligence Layers
-  memory: (agentId: string) => `agent:${agentId}:memory`, // Legacy/Standard
+  memory: (agentId: string) => `agent:${agentId}:memory`,
   memSession: (agentId: string, sid: string) => `agent:${agentId}:mem:sess:${sid}`,
   memSkill: (agentId: string) => `agent:${agentId}:mem:skill`,
   memContext: (agentId: string, taskId: string) => `agent:${agentId}:mem:ctx:${taskId}`,
   memEpisodic: (agentId: string) => `agent:${agentId}:mem:epi`,
   
-  skill: (skillId: string) => `agent:${agentId}:skills`, // Existing
+  // Gateway Logic
+  gateway: (processId: string) => `aix:gateway:${processId}`,
+  
+  skill: (agentId: string) => `agent:${agentId}:skills`, 
   invoke: (traceId: string) => `agent:${traceId}:invoke`
 };
 
@@ -66,6 +72,8 @@ export const TTL = {
   MEM_SKILL: 0,                 // Permanent
   MEM_CONTEXT: 60 * 60 * 12,    // 12 Hours (Task duration)
   MEM_EPISODIC: 0,              // Permanent
+  
+  GATEWAY: 60 * 60 * 2,         // 2 Hours (Maximum agent thought life)
   
   MEMORY: 60 * 60 * 24 * 30,    // 30 Days (Standard Context)
   SKILLS: 0,                    // Permanent
