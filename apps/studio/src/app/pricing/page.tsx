@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { Check, Zap, Shield, Crown } from "lucide-react";
-import { PLANS } from "@/lib/pricing";
+import { PLANS } from "@/lib/plans";
 
 export default function PricingPage() {
   return (

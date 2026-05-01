@@ -18,6 +18,7 @@ export * from './channels';
 export * from './pets';
 export * from './pulse';
 export * from './economics';
+export * from './economics/BondingCurve';
 export * from './patterns';
 export * from './swarm/handlers';
 export * from './swarm/orchestrator';

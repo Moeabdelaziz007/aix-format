@@ -38,7 +38,7 @@ export function VoiceWizard({
       exit={{ opacity: 0, scale: 0.95 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 "
     >
-      <Card className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 ">
+      <div className="card" className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/50">
           <div className="flex items-center gap-3">
@@ -50,9 +50,9 @@ export function VoiceWizard({
               <p className="text-sm text-zinc-400">Describe your agent to get started</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
+          <button className="button" variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
             <X className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
 
         {/* Content Area */}
@@ -108,7 +108,7 @@ export function VoiceWizard({
 
                 {/* Status & Last Message */}
                 <div className="space-y-4 max-w-md mx-auto">
-                  <Badge variant="outline" className={`${
+                  <span className="badge" variant="outline" className={`${
                     isListening ? "border-red-500 text-red-500 bg-red-500/5" :
                     isProcessing ? "border-purple-500 text-purple-500 bg-purple-500/5" :
                     isSpeaking ? "border-blue-500 text-blue-500 bg-blue-500/5" :
@@ -118,7 +118,7 @@ export function VoiceWizard({
                      isProcessing ? "THINKING..." :
                      isSpeaking ? "WIZARD SPEAKING..." : 
                      "HOLD TO TALK"}
-                  </Badge>
+                  </span>
                   
                   <p className="text-lg text-white font-medium leading-relaxed">
                     {lastMessage?.role === 'assistant' 
@@ -154,19 +154,19 @@ export function VoiceWizard({
                 </div>
 
                 <div className="flex gap-4">
-                  <Button 
+                  <button className="button"
                     variant="outline" 
                     className="flex-1 border-zinc-800 hover:bg-zinc-900"
                     onClick={() => onComplete(manifest)}
                   >
                     Edit Details
-                  </Button>
-                  <Button 
+                  </button>
+                  <button className="button"
                     className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => onDeploy(manifest)}
                   >
                     Deploy Agent
-                  </Button>
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -179,7 +179,7 @@ export function VoiceWizard({
             Powered by Groq Whisper & Gemini 2.0 Flash
           </p>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 }

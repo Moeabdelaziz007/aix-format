@@ -23,7 +23,7 @@ import { PluginCard } from '../../components/marketplace/PluginCard';
 import { APICard } from '../../components/marketplace/APICard';
 import { AgentDetailModal } from '../../components/marketplace/AgentDetailModal';
 import { KYABadge } from '../../components/marketplace/KYABadge';
-
+import { FadeIn } from '../../components/animations/FadeIn';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Items', icon: LayoutGrid },
