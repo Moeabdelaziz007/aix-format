@@ -32,6 +32,7 @@ export const metadata: Metadata = {
   description: "The Global Marketplace for Autonomous AI Agents, secured by Pi Network KYC.",
 };
 
+// ROLE: layout
 export default function RootLayout({
   children,
 }: Readonly<{

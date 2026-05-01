@@ -41,6 +41,8 @@ import LiveValidator from "@/components/studio/LiveValidator";
 import BOMVisualizer from "@/components/studio/BOMVisualizer";
 import { VoiceWizard } from "@/components/studio/VoiceWizard";
 import { validateBuilderField, FieldError } from "@/lib/builder-validation";
+import { useBuilderState } from "@/hooks/useBuilderState";
+import { logger } from "@/lib/logger";
 
 const STEPS = [
   { id: 1, name: "Context", icon: <Database className="w-4 h-4" /> },
@@ -51,97 +53,44 @@ const STEPS = [
   { id: 6, name: "Finalize", icon: <Rocket className="w-4 h-4" /> }
 ];
 
+// ROLE: screen
+// ROLE: screen
 export default function AgentBuilderPage() {
   const router = useRouter();
   const { scanYaml, report: abomReport } = useAbom();
-  const [currentStep, setCurrentStep] = useState(1);
+  
+  const {
+    currentStep,
+    setCurrentStep,
+    formData,
+    setFormData,
+    errors,
+    touchedFields,
+    liveChecksum,
+    handleFieldChange,
+    handleBlur,
+    isStepValid,
+  } = useBuilderState();
+
   const [onboardingStep, setOnboardingStep] = useState<'intent' | 'wizard'>('intent');
   const [userIntent, setUserIntent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewFormat, setPreviewFormat] = useState<"yaml" | "json" | "discovery" | "visualizer" | "narrative">("narrative");
   const [copied, setCopied] = useState(false);
   const [manifestContent, setManifestContent] = useState("");
-  const [errors, setErrors] = useState<Record<string, FieldError | null>>({});
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployResult, setDeployResult] = useState<{ agentId: string; manifestUrl: string } | null>(null);
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [showUndo, setShowUndo] = useState(false);
   const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isVoiceWizardOpen, setIsVoiceWizardOpen] = useState(false);
-
-  // Form State
-  const [formData, setFormData] = useState<Manifest>({
-    meta: {
-      name: "my-first-agent",
-      version: "1.0.0",
-      format_version: "1.3",
-      author: "Axiom Developer",
-      description: "A sovereign AI agent built to assist with general tasks.",
-    },
-    persona: {
-      role: "General Assistant",
-      instructions: "Your goal is to provide accurate, helpful, and sovereign assistance to the user while maintaining strict privacy and protocol alignment.",
-      tone: "formal",
-    },
-    skills: [] as AgentSkill[],
-    security: {
-      checksum: {
-        algorithm: "sha256",
-        value: "pending"
-      }
-    },
-    identity_layer: {
-      id: `did:axiom:axiomid.app:agent-temp`,
-      provider: {
-        type: 'pi_network',
-        name: 'Pi Network',
-        authority: 'axiomid.app'
-      },
-      verification: {
-        status: 'unverified',
-        trust_level: 0
-      },
-      issuedAt: new Date().toISOString()
-    },
-    economics: {
-      settlement: {
-        layer: 'pi_network',
-        network: 'testnet',
-        escrow_enabled: false,
-        currency: 'PI'
-      },
-      pricing_model: "free",
-      currency: "PI"
-    },
-    abom: {
-      bom_format: "CycloneDX",
-      spec_version: "1.6",
-      risk_level: "low",
-      integrity_hash: "pending",
-      capabilities: [] as string[],
-      generated_by: "AIX-Studio",
-      timestamp: new Date().toISOString(),
-      dependencies: [] as string[],
-      saas_services: [] as Array<{
-        name: string;
-        endpoint?: string;
-        usage_policy?: string;
-        tier?: string;
-      }>
-    },
-    mcp: {
-      prompts: [] as McpPrompt[]
-    }
-  });
-
-  // Real-time Checksum Computation
-  const liveChecksum = useMemo(() => {
-    return computeManifestChecksum(formData);
-  }, [formData]);
-
-  const prevChecksumRef = useRef(liveChecksum);
   const [checksumAnimating, setChecksumAnimating] = useState(false);
   const [saasBomEnabled, setSaasBomEnabled] = useState(false);
+
+  const prevChecksumRef = useRef(liveChecksum);
+
+  useEffect(() => {
+    logger.debug("Builder State Updated", { step: currentStep, name: formData.meta.name });
+  }, [currentStep, formData.meta.name]);
 
   useEffect(() => {
     if (prevChecksumRef.current !== liveChecksum) {
