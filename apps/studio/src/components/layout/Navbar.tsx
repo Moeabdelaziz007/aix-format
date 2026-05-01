@@ -221,7 +221,7 @@ export function Navbar() {
                     <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-foreground/60 hover:bg-white/5 hover:text-white transition-colors">
                       <Shield className="w-4 h-4" /> Account Security
                     </button>
-                    <div className="h-px bg-white/5 my-1" />
+                    <div className="divider my-1" />
                     <button 
                       onClick={handleDisconnect}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-danger hover:bg-danger/10 transition-colors"

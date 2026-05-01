@@ -12,6 +12,7 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-purple-mcp: #8b5cf6;
+  --color-glass-border: rgba(255, 255, 255, 0.05);
 
   /* Surface Elevations */
   --color-surface-1: #0f0f1a;
