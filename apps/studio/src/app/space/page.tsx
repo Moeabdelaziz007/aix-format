@@ -16,7 +16,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
-import FadeIn from '@/components/animations/FadeIn';
+import { FadeIn } from '@/components/animations/FadeIn';
 
 // Dynamically import the 3D/2D Graphs to avoid SSR issues with ThreeJS
 const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });

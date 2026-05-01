@@ -14,7 +14,7 @@ import {
   Activity
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
-import FadeIn from '@/components/animations/FadeIn';
+import { FadeIn } from '@/components/animations/FadeIn';
 
 interface PulseEvent {
   id: string;
