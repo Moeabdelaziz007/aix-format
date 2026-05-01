@@ -17,7 +17,7 @@ export class SwarmProcessor {
 
   static async executeTurn(processId: string, actionResult?: any) {
     // 1. Resolve Process & Manifest
-    let process = await GatewayManager.getProcess(processId);
+    const process = await GatewayManager.getProcess(processId);
     if (!process) throw new Error("Process not found");
 
     const agentData = await kv.get<AIXManifest>(KEYS.registry(process.agentId));

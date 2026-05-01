@@ -17,7 +17,7 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isInvoking, setIsInvoking] = useState(false);
-  const [sessionId] = useState(`session_${Math.random().toString(36).slice(2, 11)}`);
+  const [sessionId] = useState(() => 'session_' + Math.random().toString(36).slice(2, 11));
   const [hasFeedback, setHasFeedback] = useState<Record<number, boolean>>({});
 
   const handleInvoke = async () => {

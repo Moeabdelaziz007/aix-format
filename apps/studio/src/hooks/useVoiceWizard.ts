@@ -46,33 +46,6 @@ export function useVoiceWizard() {
     }
   }, [state]);
 
-  const processAudio = async (audioBlob: Blob) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.webm');
-
-      // استدعاء مسار الـ API الحقيقي
-      const res = await fetch('/api/voice-wizard/transcribe', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error('فشل الاتصال بالخادم');
-      }
-
-      const data = await res.json();
-      setTranscript(data.transcript);
-
-      setState('done');
-
-    } catch (err) {
-      console.error('Error processing audio:', err);
-      setError('حدث خطأ أثناء معالجة الصوت.');
-      setState('idle');
-    }
-  };
-
   // دالة للتبديل بين التسجيل والإيقاف (تُربط بضغطة الكرة)
   const toggleRecording = useCallback(() => {
     if (state === 'idle' || state === 'done') {

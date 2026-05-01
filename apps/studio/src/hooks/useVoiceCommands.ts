@@ -133,7 +133,7 @@ export function useVoiceCommands(opts: UseVoiceCommandsOptions = {}) {
 
   // Use ref to avoid callback thrashing on every render
   const optsRef = useRef(opts);
-  optsRef.current = opts;
+  useEffect(() => { optsRef.current = opts; }, [opts]);
 
   const dispatch = useCallback(
     (transcript: string): { matched: boolean; feedback: string } => {

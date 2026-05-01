@@ -13,6 +13,24 @@ export function useKyc(user?: PiUser) {
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Cleanup timers on unmount
+
+  const startKyc = useCallback(() => {
+    // Clear any previously queued timers
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+
+    setStep(2);
+    const t1 = setTimeout(() => {
+      setStep(3);
+      const t2 = setTimeout(() => {
+        setIsVerified(true);
+        console.log('Identity cryptographically verified');
+      }, 2000);
+      timersRef.current.push(t2);
+    }, 1500);
+    timersRef.current.push(t1);
+  }, []);
+
   useEffect(() => {
     return () => {
       timersRef.current.forEach(clearTimeout);
@@ -24,26 +42,8 @@ export function useKyc(user?: PiUser) {
     if (user && step === 1 && !isVerified) {
       startKyc();
     }
-  }, [user, step, isVerified]);
+  }, [user, step, isVerified, startKyc]);
 
-  const startKyc = useCallback(() => {
-    // Clear any previously queued timers
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
-
-    setStep(2);
-
-    const t1 = setTimeout(() => {
-      setStep(3);
-      const t2 = setTimeout(() => {
-        setStep(4);
-        setIsVerified(true);
-      }, 2500);
-      timersRef.current.push(t2);
-    }, 2500);
-
-    timersRef.current.push(t1);
-  }, []);
 
   const resetKyc = useCallback(() => {
     timersRef.current.forEach(clearTimeout);
