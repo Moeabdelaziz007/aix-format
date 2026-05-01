@@ -10,6 +10,9 @@ export function useVoiceWizard() {
   const [isListening, setIsListening] = useState(false);
   const [manifest, setManifest] = useState<any>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // ... (recordAudio, transcribe, chat, speak remain the same but use isProcessing)
 
   // 1. Record Audio from Microphone
   const recordAudio = async (): Promise<Blob> => {
@@ -128,12 +131,20 @@ export function useVoiceWizard() {
   const handleVoiceTurn = async () => {
     try {
       const audio = await recordAudio();
+      setIsProcessing(true);
+      
       const userText = await transcribe(audio);
-      if (!userText) return;
+      if (!userText) {
+        setIsProcessing(false);
+        return;
+      }
       
       const wizardReply = await chat(userText);
+      setIsProcessing(false);
+      
       await speak(wizardReply);
     } catch (err: any) {
+      setIsProcessing(false);
       toast.error(`Wizard Error: ${err.message}`);
     }
   };
@@ -142,6 +153,7 @@ export function useVoiceWizard() {
     handleVoiceTurn, 
     isListening, 
     isSpeaking, 
+    isProcessing,
     manifest, 
     messages,
     setManifest 

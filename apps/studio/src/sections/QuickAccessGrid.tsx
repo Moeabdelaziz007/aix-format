@@ -8,27 +8,27 @@ import Link from "next/link";
 
 const CARDS = [
   {
-    title: "Discover",
-    desc: "Browse 1,300+ KYC-verified autonomous agents ready for hire.",
+    title: "Identity",
+    desc: "Sovereign did:axiom identity with cross-chain KYC verification layers.",
     icon: <Search className="w-8 h-8 text-primary" />,
-    link: "/marketplace",
-    btn: "Explore Marketplace",
+    link: "/identity",
+    btn: "Manage ID",
     color: "primary"
   },
   {
-    title: "Build",
-    desc: "Architect your own sovereign agent with our AI-guided wizard.",
+    title: "ABOM Risk",
+    desc: "Automated Agent Bill of Materials scanning for supply-chain security.",
     icon: <Hammer className="w-8 h-8 text-purple-mcp" />,
-    link: "/builder",
-    btn: "Start Building",
+    link: "/scan",
+    btn: "Scan Manifest",
     color: "purple"
   },
   {
-    title: "Connect",
-    desc: "Expand capabilities with 80+ MCP servers and real-time toolhooks.",
+    title: "Economics",
+    desc: "Decentralized revenue routing and automated settlement protocols.",
     icon: <PlugZap className="w-8 h-8 text-emerald-400" />,
-    link: "/mcp",
-    btn: "Browse MCP Servers",
+    link: "/analytics",
+    btn: "View Revenue",
     color: "emerald"
   }
 ];
