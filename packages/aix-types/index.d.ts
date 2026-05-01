@@ -60,14 +60,50 @@ export interface Security {
   };
 }
 
+export interface IdentityProvider {
+  type: 'pi_network' | 'world_id' | 'ens' | 'did_web' | 'axiom_id' | 'custom';
+  name: string;
+  authority?: string;
+  chain_id?: string;
+}
+
+export interface Verification {
+  status: 'unverified' | 'basic' | 'verified' | 'institutional' | 'sovereign';
+  trust_level: 0 | 1 | 2 | 3;
+  provider_specific_tier?: string;
+  proof_url?: string;
+}
+
 export interface IdentityLayer {
   id: AxiomDID;
-  authority: "axiomid.app";
+  provider: IdentityProvider;
+  verification: Verification;
   issuedAt: ISODateTime;
-  kyc_tier: 0 | 1 | 2 | 3 | 'unverified' | 'basic' | 'verified' | 'institutional';
-  verified: boolean;
+  expiresAt?: ISODateTime;
   publicKey?: PublicKey;
   signature?: Signature;
+}
+
+export interface Economics {
+  settlement: {
+    layer: 'pi_network' | 'ethereum' | 'solana' | 'stripe' | 'mcp_internal' | 'custom';
+    network: string;
+    escrow_enabled?: boolean;
+    currency?: string;
+    address?: string;
+  };
+  pricing_model: 'free' | 'pay_per_call' | 'subscription' | 'builder' | 'pro';
+  revenue_routing?: {
+    base_price?: number;
+    risk_multiplier_enabled?: boolean;
+    quota_limit?: number;
+    platform_fee_percent?: number;
+  };
+  tiers?: Array<{
+    name: string;
+    features: string[];
+    monthly_price?: number;
+  }>;
 }
 
 export interface SaasService {
@@ -113,5 +149,5 @@ export interface AIXManifest {
   };
   abom: ABOM;
   build_provenance?: BuildProvenance;
-  monetization?: any;
+  economics: Economics;
 }

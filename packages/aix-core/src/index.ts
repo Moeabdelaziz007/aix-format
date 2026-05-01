@@ -20,31 +20,8 @@ export interface StorageAdapter {
   exists(key: string): Promise<boolean>;
 }
 
-/**
- * Key Namespaces to prevent collisions in shared Redis instance.
- */
-export const NS = {
-  SESSIONS: 'aix:sessions',
-  REGISTRY: 'aix:registry',
-  ABOM: 'aix:abom',
-  MCP: 'aix:mcp:quota',
-  METRICS: 'aix:metrics',
-  SCAN: 'aix:scan',
-  AGENTS: 'agent',
-  HEALTH: 'aix:health'
-} as const;
-
-/**
- * TTL Strategies (seconds)
- */
-export const TTL = {
-  SESSIONS: 60 * 60 * 24 * 7,  // 7 Days
-  REGISTRY: 0,                // Permanent
-  ABOM: 60 * 60 * 24 * 30,    // 30 Days (Cache)
-  MCP: 60,                    // 60 Seconds (Rate limiting window)
-  METRICS: 60 * 60 * 24 * 90, // 90 Days
-  SCAN: 60 * 60 * 24 * 7      // 7 Days
-} as const;
+import { NS, TTL, KEYS } from './storage/keys';
+export { NS, TTL, KEYS };
 
 /** Map our generic StorageOptions → Upstash SetCommandOptions */
 import type { SetCommandOptions } from '@upstash/redis';
@@ -86,29 +63,42 @@ class UpstashRedisAdapter implements StorageAdapter {
     }
   }
 
-  async get<T>(key: string): Promise<T | null> {
-    try {
-      this.checkConnection();
-      return await this.client.get<T>(key);
-    } catch (error) {
-      console.error(`[Storage] GET failed for ${key}:`, error);
-      return null; // Graceful degradation
+  private async withRetry<T>(operation: () => Promise<T>, label: string, key: string, retries: number = 2): Promise<T | null> {
+    let attempt = 0;
+    while (attempt <= retries) {
+      try {
+        this.checkConnection();
+        return await operation();
+      } catch (error) {
+        attempt++;
+        if (attempt > retries) {
+          console.error(`[Storage] ${label} failed permanently for key: ${key.split(':')[0]}:*** | Attempts: ${attempt} | Error:`, (error as Error).message);
+          return null;
+        }
+        // Small delay before retry
+        await new Promise(resolve => setTimeout(resolve, 100 * attempt));
+      }
     }
+    return null;
+  }
+
+  async get<T>(key: string): Promise<T | null> {
+    return this.withRetry(() => this.client.get<T>(key), 'GET', key);
   }
 
   async set(key: string, value: unknown, options?: StorageOptions): Promise<void> {
-    try {
-      this.checkConnection();
-      const upstashOpts = toSetOptions(options);
+    const upstashOpts = toSetOptions(options);
+    const success = await this.withRetry(async () => {
       if (upstashOpts) {
         await this.client.set(key, value, upstashOpts);
       } else {
         await this.client.set(key, value);
       }
-    } catch (error) {
-      console.error(`[Storage] SET failed for ${key}:`, error);
-      // We throw here because failing to save state (like a manifest) is critical
-      throw new Error(`[Storage] Persistent write failed for ${key}`);
+      return true;
+    }, 'SET', key);
+
+    if (!success) {
+      throw new Error(`[Storage] Persistent write failed for ${key.split(':')[0]}:***`);
     }
   }
 

@@ -31,14 +31,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Quota check (Redis-backed)
-    const quotaKey = `${NS.MCP}:${userId}`; // Corrected namespace usage
+    const quotaKey = KEYS.mcpQuota(userId);
     const usedQuota = (await kv.get<number>(quotaKey)) ?? 0;
     
     if (isQuotaExceeded(usedQuota, tier)) {
       const config = DEFAULT_PRICING[tier] ?? DEFAULT_PRICING.free;
       if (config.cutoff === "hard") {
         return NextResponse.json(
-          { error: "Quota exceeded", code: "QUOTA_EXHAUSTED" }, 
+          { error: "Quota exceeded", code: "QUOTA_EXHAUSTED", limit: config.quota }, 
           { status: 429 }
         );
       }
@@ -72,9 +72,10 @@ export async function POST(req: NextRequest) {
     // 5. Metric tracking (fire-and-forget)
     const spendKey   = `${NS.METRICS}:spend:${userId}`;
     const earningKey = `${NS.METRICS}:earnings:${agentDid}`;
+    const globalCallsKey = `${NS.METRICS}:global:calls`;
 
     void Promise.all([
-      kv.incr(`${NS.METRICS}:global:calls`),
+      kv.incr(globalCallsKey),
       kv.get<number>(spendKey).then((cur) =>
         kv.set(spendKey, ((cur ?? 0) + totalCost * PI_SCALE))
       ),

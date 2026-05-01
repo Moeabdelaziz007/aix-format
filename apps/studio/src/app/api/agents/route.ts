@@ -17,15 +17,18 @@ export async function POST(req: Request) {
     }
 
     const agentId = `aix_${nanoid(10)}`;
-    const userAgentsKey = `${NS.REGISTRY}:user_default:agents`; // Mocking user ID as 'user_default'
+    const did = manifest.identity_layer?.id || `did:axiom:temp:${agentId}`;
+    const userAgentsKey = KEYS.session('user_default:agents');
 
-    // Store manifest
-    await kv.set(`agent:${agentId}`, manifest);
+    // Store manifest using standardized registry key
+    await kv.set(KEYS.registry(did), manifest);
     
     // Add to user's fleet list
     const fleet = await kv.get<string[]>(userAgentsKey) || [];
-    fleet.push(agentId);
-    await kv.set(userAgentsKey, fleet);
+    if (!fleet.includes(did)) {
+      fleet.push(did);
+      await kv.set(userAgentsKey, fleet);
+    }
 
     // Update global registry for marketplace
     await updateRegistryEntry({
@@ -60,19 +63,19 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get('id');
 
     if (id) {
-      const manifest = await kv.get(`agent:${id}`);
+      const manifest = await kv.get(KEYS.registry(id));
       if (!manifest) return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
       return NextResponse.json(manifest);
     }
 
     // List all
-    const userAgentsKey = `${NS.REGISTRY}:user_default:agents`;
+    const userAgentsKey = KEYS.session('user_default:agents');
     const agentIds = await kv.get<string[]>(userAgentsKey) || [];
     
     // Fetch manifests for each ID (batch)
     const manifests = await Promise.all(
       agentIds.map(async (aid) => {
-        const m = await kv.get<any>(`agent:${aid}`);
+        const m = await kv.get<any>(KEYS.registry(aid));
         return m ? { id: aid, ...m } : null;
       })
     );

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv } from "@/lib/redis";
+import { kv, NS, TTL, KEYS } from "@/lib/storage/redis";
 import { AuthResult, PiUser } from "@/lib/types";
 
-const SESSION_TTL = TTL.SESSION;
+const SESSION_TTL = TTL.SESSIONS;
 
 /**
  * POST /api/auth
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
 
     const userData = (await piRes.json()) as PiUser;
 
-    // 2. Store session in KV — Pattern: aix:session:{uid}
-    const sessionKey = `${NS.SESSION}:${userData.uid}`;
+    // 2. Store session in KV
+    const sessionKey = KEYS.session(userData.uid);
     await kv.set(sessionKey, { user: userData, accessToken }, { ex: SESSION_TTL });
 
     const result: AuthResult = { user: userData, accessToken };
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Missing uid" }, { status: 400 });
     }
 
-    const session = await kv.get<AuthResult>(`${NS.SESSION}:${uid}`);
+    const session = await kv.get<AuthResult>(KEYS.session(uid));
     if (!session) {
       return NextResponse.json({ authenticated: false }, { status: 404 });
     }
@@ -81,7 +81,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Missing uid" }, { status: 400 });
     }
 
-    await kv.del(`${NS.SESSION}:${uid}`);
+    await kv.del(KEYS.session(uid));
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete session" }, { status: 500 });

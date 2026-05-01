@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv, NS } from '@/lib/storage/redis';
+import { kv, NS, KEYS } from '@/lib/storage/redis';
 
 /**
  * GET /api/analytics
@@ -12,7 +12,8 @@ export async function GET(req: NextRequest) {
     const today = new Date().toISOString().split('T')[0];
 
     if (agentId) {
-      const dailyKey = `${NS.METRICS}:${agentId}:${today}`;
+      const baseKey = KEYS.analytics(agentId);
+      const dailyKey = `${baseKey}:${today}`;
       const [calls, latency] = await Promise.all([
         kv.get<number>(`${dailyKey}:calls`),
         kv.get<number>(`${dailyKey}:latency`)

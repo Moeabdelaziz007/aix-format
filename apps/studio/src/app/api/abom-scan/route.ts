@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { scanAgent } from "../../../../../../core/abom-scanner";
+import { scanAgent } from "@/lib/scanner"; // Assuming scanner is available via alias
 import { Manifest } from "@/lib/types";
-import { kv, NS, TTL } from "../../../../../../core/storage/redis";
+import { kv, NS, TTL } from "@/lib/storage/redis";
 import { sha256Hex, parseYamlLight } from "@/lib/utils";
 
 /**
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     // 5. Store in Cache (24 hour TTL)
     try {
-      await kv.set(cacheKey, report, { ex: TTL.ABOM_CACHE });
+      await kv.set(cacheKey, report, { ex: TTL.ABOM });
     } catch (cacheError) {
       console.warn("[ABOM Scan] Cache store failed:", cacheError);
     }
