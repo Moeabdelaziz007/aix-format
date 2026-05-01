@@ -26,19 +26,23 @@ export interface StorageAdapter {
 export const NS = {
   SESSIONS: 'aix:sessions',
   REGISTRY: 'aix:registry',
-  SCAN: 'aix:scan',
-  MCP: 'aix:mcp',
+  ABOM: 'aix:abom',
+  MCP: 'aix:mcp:quota',
   METRICS: 'aix:metrics',
+  SCAN: 'aix:scan',
+  AGENTS: 'agent'
 } as const;
 
 /**
  * TTL Strategies (seconds)
  */
 export const TTL = {
-  SESSION: 3600 * 24,  // 24 hours
-  ABOM_CACHE: 3600 * 48, // 48 hours
-  QUOTA_WINDOW: 60,     // 1 minute
-  LONG_LIVED: 3600 * 24 * 30, // 30 days
+  SESSIONS: 60 * 60 * 24 * 7,  // 7 Days
+  REGISTRY: 0,                // Permanent
+  ABOM: 60 * 60 * 24 * 30,    // 30 Days (Cache)
+  MCP: 60,                    // 60 Seconds (Rate limiting window)
+  METRICS: 60 * 60 * 24 * 90, // 90 Days
+  SCAN: 60 * 60 * 24 * 7      // 7 Days
 } as const;
 
 /** Map our generic StorageOptions → Upstash SetCommandOptions */

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '../../../../../packages/aix-core/src/index';
+import { kv, NS } from '@/lib/storage/redis';
 
 /**
  * GET /api/analytics

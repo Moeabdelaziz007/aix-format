@@ -6,7 +6,7 @@ import type {
   Meta as CanonicalMeta,
   Persona as CanonicalPersona,
   BuildProvenance as CanonicalBuildProvenance
-} from '../../../../packages/core/src/types';
+} from '../../../../packages/aix-types/index.d.ts';
 
 // ⚠️ NO `any` POLICY — all types must be explicit.
 // Run: cd apps/studio && npx tsc --noEmit before every commit.

@@ -48,7 +48,7 @@ export function scanAgent(agent: any): ScanReport {
   // 11. Rule 11: build_provenance enforcement based on type
   const requiresProvenance = SecurityInvariants.REQUIRED_PROVENANCE_TYPES.includes(agent.meta?.type);
   if (requiresProvenance) {
-    if (agent.abom?.build_provenance?.verified) {
+    if (agent.build_provenance?.verified) {
       score += 15;
     } else {
       risks.push({ category: 'Security', severity: 'critical', message: `Agent type '${agent.meta?.type}' requires verified build_provenance` });
@@ -75,7 +75,16 @@ export function scanAgent(agent: any): ScanReport {
     recommendations.push('Enable security.sandboxed: true to authorize MCP operations');
   }
 
-  // 14. Protocol Version
+  // 14. Identity Layer Points
+  const kycMap: Record<string, number> = { 'unverified': 0, 'basic': 1, 'verified': 2, 'institutional': 3 };
+  const kycLevel = typeof agent.identity_layer?.kyc_tier === 'number' ? agent.identity_layer.kyc_tier : (kycMap[agent.identity_layer?.kyc_tier] || 0);
+  if (kycLevel >= 2) score += 20;
+  else if (kycLevel === 1) score += 10;
+
+  // 15. Signature Points
+  if (agent.security?.signature || agent.identity_layer?.signature) score += 20;
+
+  // 16. Protocol Version
   if (agent.meta?.format_version === "1.3.0") score += 5;
 
   // Cap score at 100
@@ -83,10 +92,10 @@ export function scanAgent(agent: any): ScanReport {
 
   // Determine Grade
   let grade: ScanReport['grade'] = 'F';
-  if (score >= 90) grade = 'A';
-  else if (score >= 80) grade = 'B';
-  else if (score >= 70) grade = 'C';
-  else if (score >= 60) grade = 'D';
+  if (score >= 85) grade = 'A';
+  else if (score >= 70) grade = 'B';
+  else if (score >= 50) grade = 'C';
+  else if (score >= 30) grade = 'D';
 
   return {
     score,
@@ -94,9 +103,9 @@ export function scanAgent(agent: any): ScanReport {
     risks,
     recommendations,
     compliance: {
-      eu_cra: score >= 80,
-      nist_ai_rmf: score >= 70,
-      kyc_complete: agent.kyc_tier === 'verified' || agent.identity_layer?.kyc_tier === 'verified'
+      eu_cra: score >= 75,
+      nist_ai_rmf: score >= 65,
+      kyc_complete: kycLevel >= 2
     }
   };
 }

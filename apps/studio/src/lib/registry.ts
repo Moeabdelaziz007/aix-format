@@ -1,4 +1,4 @@
-import { kv, NS } from '../../../../../packages/aix-core/src/index';
+import { kv, NS } from '@/lib/storage/redis';
 import { RegistryEntry } from "./types";
 
 const KV_KEY = `${NS.REGISTRY}:global`;

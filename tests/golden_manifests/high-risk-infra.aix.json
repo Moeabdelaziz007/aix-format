@@ -36,5 +36,16 @@
     "governance": {
       "human_oversight": true
     }
+  },
+  "build_provenance": {
+    "builder_id": "axiom-build-service",
+    "build_type": "https://slsa.dev/provenance/v1",
+    "verified": true,
+    "materials": [
+      {
+        "uri": "git+https://github.com/aix-format/core",
+        "digest": { "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+      }
+    ]
   }
 }

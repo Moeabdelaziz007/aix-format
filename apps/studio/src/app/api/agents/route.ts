@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
-import { kv, NS } from '../../../../../packages/aix-core/src/index';
+import { kv, NS } from '@/lib/storage/redis';
 
 import { updateRegistryEntry } from '@/lib/registry';
 

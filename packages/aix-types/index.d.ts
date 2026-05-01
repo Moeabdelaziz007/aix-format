@@ -1,6 +1,6 @@
 /**
- * AIX Format v1.3.0 Canonical TypeScript Types
- * Single Source of Truth derived from JSON Schema.
+ * AIX v1.3.0 Canonical TypeScript Definitions
+ * Frozen Release Baseline
  */
 
 export type SemVer = string;
@@ -9,7 +9,7 @@ export type AxiomDID = string;
 
 export interface PublicKey {
   algorithm: 'Ed25519' | 'secp256k1';
-  value: string; // Base64url encoded
+  value: string;
   encoding?: 'base64url' | 'hex';
 }
 

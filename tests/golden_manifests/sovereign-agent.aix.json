@@ -31,14 +31,20 @@
   "abom": {
     "integrity_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "risk_level": "low",
-    "build_provenance": {
-      "builder_id": "axiom-secure-enclave",
-      "build_type": "slsa-l3",
-      "verified": true
-    },
     "governance": {
       "human_oversight": true,
       "policy_url": "https://axiomid.app/policies/sovereign-alpha"
     }
+  },
+  "build_provenance": {
+    "builder_id": "axiom-secure-enclave",
+    "build_type": "https://slsa.dev/provenance/v1",
+    "verified": true,
+    "materials": [
+      {
+        "uri": "git+https://github.com/aix-format/sovereign",
+        "digest": { "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+      }
+    ]
   }
 }
