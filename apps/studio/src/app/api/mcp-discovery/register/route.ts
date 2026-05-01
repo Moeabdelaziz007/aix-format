@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRegistry, saveRegistry } from "@/lib/registry";
+import { getRegistry, updateRegistryEntry } from "../../../../../../../packages/aix-core/src/registry";
+import { type RegistryEntry } from "@/lib/types";
 import { RegistryEntry } from "@/lib/types";
 
 /**
@@ -35,7 +36,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    await saveRegistry(registry);
+    await updateRegistryEntry({
+        ...entry,
+        publishedAt: new Date().toISOString()
+      });
 
     return NextResponse.json({ success: true, message: `Agent ${entry.name} registered successfully` });
   } catch (error) {

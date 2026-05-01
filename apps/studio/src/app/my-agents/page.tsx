@@ -1,27 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import { Navbar } from '@/components/layout/Navbar';
-import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
-import { AgentCard } from '@/components/studio/AgentCard';
-import { useLocalAgents } from '@/hooks/useLocalAgents';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Plus, LayoutGrid, List } from 'lucide-react';
-import { useState } from 'react';
-
-export default function MyAgentsPage() {
-  const { agents, loaded } = useLocalAgents();
-  const router = useRouter();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  if (!loaded) return (
-    <div className="flex items-center justify-center min-h-screen bg-[var(--color-background)]">
-      <div className="w-8 h-8 border-4 border-[var(--color-primary)] 
-                      border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-=======
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
@@ -40,7 +18,6 @@ export default function MyAgentsPage() {
 
   const totalEarnings = agents.reduce((sum, a) => sum + parseFloat(a.earnings), 0).toFixed(1);
   const onlineCount = agents.filter(a => a.status === 'online').length;
->>>>>>> 3f7c412 (feat(studio): complete marketplace, my-agents, network-status, spec pages)
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
@@ -54,30 +31,11 @@ export default function MyAgentsPage() {
               {agents.length} sovereign AIX agent{agents.length !== 1 ? 's' : ''} under your control.
             </p>
           </div>
-<<<<<<< HEAD
-          
-          <div className="flex items-center gap-4">
-             <div className="flex bg-white/[0.03] border border-white/[0.08] p-1 rounded-xl">
-               <button 
-                 onClick={() => setViewMode('grid')}
-                 className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-               >
-                 <LayoutGrid className="w-4 h-4" />
-               </button>
-               <button 
-                 onClick={() => setViewMode('list')}
-                 className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-               >
-                 <List className="w-4 h-4" />
-               </button>
-             </div>
-=======
           <Link href="/builder"
             className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--color-primary)] text-black text-sm font-bold hover:brightness-110 transition shadow-[0_0_22px_rgba(57,255,20,0.3)]">
             <Plus className="w-4 h-4" /> Create New Agent
           </Link>
         </motion.div>
->>>>>>> 3f7c412 (feat(studio): complete marketplace, my-agents, network-status, spec pages)
 
             <button onClick={() => router.push('/builder')}
               className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:brightness-110 
@@ -88,42 +46,6 @@ export default function MyAgentsPage() {
           </div>
         </div>
 
-<<<<<<< HEAD
-        {agents.length === 0 ? (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center 
-                      py-32 gap-6 text-center px-4 glass-panel rounded-[2.5rem] border-dashed"
-          >
-            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-4xl mb-2">
-              🤖
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-white">Your fleet is empty</h2>
-              <p className="text-zinc-500 max-w-sm mx-auto">
-                The future of decentralized intelligence starts with your first manifest.
-              </p>
-            </div>
-            <button onClick={() => router.push('/builder')}
-              className="mt-4 px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10
-                         rounded-xl text-white font-bold transition">
-              Launch Builder
-            </button>
-          </motion.div>
-        ) : (
-          <div className={viewMode === 'grid' 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" 
-            : "flex flex-col gap-4"
-          }>
-            {agents.map(agent => (
-              <AgentCard key={agent.id} agent={agent} />
-            ))}
-          </div>
-        )}
-      </main>
-
-=======
         {/* Agents List */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AnimatePresence>
@@ -158,7 +80,6 @@ export default function MyAgentsPage() {
         )}
 
       </div>
->>>>>>> 3f7c412 (feat(studio): complete marketplace, my-agents, network-status, spec pages)
       <SovereignStatusBar />
     </div>
   );

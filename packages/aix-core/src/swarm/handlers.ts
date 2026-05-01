@@ -2,7 +2,7 @@ import { PulseHandler, RedisEventBus } from "../patterns";
 import { GatewayProcess, AIXManifest } from "@aix-types";
 import { kv } from "../storage/adapter";
 import { KEYS } from "../storage/keys";
-import { evaluateAgent } from "../security";
+import { GatewaySecurity } from "../security";
 import { executeDeadHand } from "../dead-hand";
 import { RevenueRouter } from "../economics";
 

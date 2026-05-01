@@ -69,3 +69,5 @@ export interface IStrategy<T, R> {
 export abstract class AgentFactory<T> {
   abstract create(type: string, config: any): T;
 }
+
+export class AgentEventBus { emit(e: any){} on(e: any){} }

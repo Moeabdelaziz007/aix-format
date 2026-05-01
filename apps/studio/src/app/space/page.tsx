@@ -16,11 +16,11 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
-import FadeIn from '@/components/animations/FadeIn';
+import { FadeIn } from '@/components/animations/FadeIn';
 
 // Dynamically import the 3D/2D Graphs to avoid SSR issues with ThreeJS
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
+// const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
+// const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
 interface Node {
   id: string;
@@ -147,7 +147,7 @@ export default function SpacePage() {
           mode === '3d' ? (
             <ForceGraph3D
               ref={fgRef}
-              graphData={graphData}
+              graphData={graphData}*/}
               backgroundColor="#0A0A0F"
               showNavInfo={false}
               nodeThreeObject={nodeThreeObject}
@@ -170,7 +170,7 @@ export default function SpacePage() {
               }}
             />
           ) : (
-            <ForceGraph2D
+            {/*<ForceGraph2D
               ref={fgRef}
               graphData={graphData}
               backgroundColor="#0A0A0F"

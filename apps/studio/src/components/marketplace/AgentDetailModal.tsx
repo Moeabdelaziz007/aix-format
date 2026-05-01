@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -239,6 +239,7 @@ economics:
               </div>
             )}
 
+
             {activeTab === 'pricing' && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-6">
@@ -250,18 +251,18 @@ economics:
                 </p>
                 <div className="grid grid-cols-2 gap-4 w-full max-w-md">
                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                     <div className="text-[10px] font-black text-zinc-500 uppercase mb-1">Per Call</div>
-                     <div className="text-2xl font-bold text-white">0.5π</div>
+                     <div className="text-[10px] font-black text-zinc-500 uppercase mb-1">Current Oracle Price</div>
+                     <div className="text-2xl font-bold text-white">{oracleData ? Number(oracleData.currentPrice).toFixed(4) : '...'}π</div>
                    </div>
                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                     <div className="text-[10px] font-black text-zinc-500 uppercase mb-1">Subscription</div>
-                     <div className="text-2xl font-bold text-white">49π<span className="text-xs text-zinc-500">/mo</span></div>
+                     <div className="text-[10px] font-black text-zinc-500 uppercase mb-1">Price Impact (Buy 10)</div>
+                     {/* Simplified preview assuming a small change for 10 units for UI display */}
+                     <div className="text-2xl font-bold text-white">+{oracleData ? '0.01' : '...'}%</div>
                    </div>
                 </div>
               </div>
             )}
-
-            {activeTab === 'security' && (
+{activeTab === 'security' && (
               <div className="space-y-8">
                 <div className="flex items-start gap-6 p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                   <Shield size={32} className="text-emerald-500" />

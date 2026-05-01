@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@noble/hashes": "^2.2.0",
-    "@rainbow-me/rainbowkit": "^2.2.10",
     "@tailwindcss/postcss": "^4.2.4",
     "@tanstack/react-query": "^5.100.6",
     "@vercel/analytics": "^2.0.1",
@@ -24,7 +23,6 @@
     "framer-motion": "^12.38.0",
     "js-yaml": "^4.1.1",
     "lucide-react": "^0.484.0",
-    "@aix-core/storage": "*",
     "nanoid": "^5.1.9",
     "next": "^15.3.2",
     "react": "^19.2.4",
@@ -33,11 +31,13 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.0.0",
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1",
-    "viem": "^2.48.4",
-    "wagmi": "^2.19.5"
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
+    "@ai-sdk/google": "^3.0.67",
+    "@playwright/test": "^1.59.1",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@rainbow-me/rainbowkit": "^2.2.10",
     "@tailwindcss/postcss": "^4.2.4",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -46,14 +46,19 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "ai": "^6.0.173",
     "autoprefixer": "^10.5.0",
+    "edge-tts": "^1.0.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "playwright": "^1.59.1",
     "postcss": "^8.5.12",
     "tailwindcss": "^4.2.4",
     "ts-jest": "^29.2.6",
     "typescript": "^5",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.4"
+    "viem": "^2.48.7",
+    "wagmi": "^2.19.5"
   }
 }

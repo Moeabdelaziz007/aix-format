@@ -1,4 +1,5 @@
-import { EdgeTTS } from 'edge-tts';
+// import { EdgeTTS } from 'edge-tts';
+const EdgeTTS = null;
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
