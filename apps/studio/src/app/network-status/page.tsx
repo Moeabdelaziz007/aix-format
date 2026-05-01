@@ -62,7 +62,7 @@ export default function NetworkStatusPage() {
   const degraded = services.some(s => s.status === "degraded");
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
+    <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-manrope)]">
       <Navbar />
       <div className="pt-28 pb-20 px-6 md:px-12 max-w-5xl mx-auto">
         {/* Header */}

@@ -57,6 +57,7 @@ export default function MarketplacePage() {
             <span className="w-8 h-[1px] bg-blue-500" />
             Discover the Ecosystem
           </div>
+          </div>
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
             AIX Marketplace
           </h1>
