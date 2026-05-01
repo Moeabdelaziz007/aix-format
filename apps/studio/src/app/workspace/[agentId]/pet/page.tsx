@@ -31,7 +31,23 @@ export default function PetPage() {
     agent?.pet ?? { type: "fox", color: "#3b82f6", mood: "happy", level: 1 }
   );
 
-  if (!agent) return null;
+  if (!agent) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center"
+      >
+        <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+          <AlertTriangle className="w-8 h-8 text-white/20" />
+        </div>
+        <h2 className="text-xl font-black text-white tracking-tight mb-2">Agent Not Found</h2>
+        <p className="text-sm text-white/40 max-w-sm">
+          We couldn't locate the agent profile for this pet workspace.
+        </p>
+      </motion.div>
+    );
+  }
 
   const update = (patch: Partial<PetConfig>) => {
     const next = { ...pet, ...patch };
@@ -40,7 +56,12 @@ export default function PetPage() {
   };
 
   return (
-    <div className="p-6 space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="p-6 space-y-8"
+    >
       <div>
         <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-pink-400" />
@@ -151,6 +172,6 @@ export default function PetPage() {
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
