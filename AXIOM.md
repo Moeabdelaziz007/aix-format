@@ -57,7 +57,7 @@ hooks:
 dna:
   id: "axiom-grand-agent"
   version: "1.3.0"
-  genesis_hash: ""                    # filled by `axiom dna sign`
+  genesis_hash: "c36be25139ef7407e3bf5d3d888ecbfd598492b32f70de4230bd646f92bb334c"                    # filled by `axiom dna sign`
   stack:
     - rust                            # core engine, DNA, workspace safety
     - go                              # orchestrator, agency runtime
