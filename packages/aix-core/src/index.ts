@@ -30,7 +30,8 @@ export const NS = {
   MCP: 'aix:mcp:quota',
   METRICS: 'aix:metrics',
   SCAN: 'aix:scan',
-  AGENTS: 'agent'
+  AGENTS: 'agent',
+  HEALTH: 'aix:health'
 } as const;
 
 /**

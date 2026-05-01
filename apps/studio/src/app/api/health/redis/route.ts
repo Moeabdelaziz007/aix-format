@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const startTime = Date.now();
     
     // Ping/Basic operation to measure latency
-    await kv.exists('aix:health:ping');
+    await kv.exists(`${NS.HEALTH}:ping`);
     const latency = Date.now() - startTime;
 
     // Fetch key counts (approximate using common prefixes if possible, 

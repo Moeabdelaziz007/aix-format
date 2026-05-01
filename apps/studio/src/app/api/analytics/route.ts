@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const today = new Date().toISOString().split('T')[0];
 
     if (agentId) {
-      const dailyKey = `aix:metrics:${agentId}:${today}`;
+      const dailyKey = `${NS.METRICS}:${agentId}:${today}`;
       const [calls, latency] = await Promise.all([
         kv.get<number>(`${dailyKey}:calls`),
         kv.get<number>(`${dailyKey}:latency`)

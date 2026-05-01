@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { kv } from "@/lib/redis";
+import { kv, NS } from "@/lib/storage/redis";
 import { getRegistry } from '@/lib/registry';
 
 /**
@@ -14,8 +14,8 @@ export async function GET() {
   // 1. Redis check
   const redisStart = Date.now();
   try {
-    const heartbeatKey = "aix:health:heartbeat";
-    await kv.set(heartbeatKey, Date.now(), { ex: 30 });
+    const heartbeatKey = `${NS.HEALTH}:heartbeat`;
+    await kv.set(heartbeatKey, Date.now(), { ex: 60 });
     const pong = await kv.get<number>(heartbeatKey);
     checks.redis = {
       status: pong !== null ? "ok" : "error",
