@@ -6,7 +6,7 @@
  */
 
 export interface AbomScanResult {
-  score: number; // 0-100 (100 = safest)
+  risk_score: number; // 0-100 (100 = critical risk, 0 = safe)
   risks: string[];
   tier: "safe" | "moderate" | "high" | "critical";
 }
@@ -21,28 +21,28 @@ const PENALISED_PERMISSIONS = [
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function scanAgent(manifest: Record<string, any>): AbomScanResult {
-  let score = 100;
+  let risk_score = 0;
   const risks: string[] = [];
 
   // 1. Check ABOM block exists
   if (!manifest?.abom) {
-    score -= 20;
+    risk_score += 20;
     risks.push("Missing ABOM block");
   }
 
-  // 2. Penalise dangerous permissions
+  // 2. Accumulate risk from dangerous permissions
   const permissions: string[] =
     manifest?.abom?.permissions ?? manifest?.permissions ?? [];
   for (const perm of PENALISED_PERMISSIONS) {
     if (permissions.includes(perm)) {
-      score -= 10;
+      risk_score += 10;
       risks.push(`High-risk permission: ${perm}`);
     }
   }
 
   // 3. Check build provenance
   if (!manifest?.abom?.build_provenance && !manifest?.build_provenance) {
-    score -= 10;
+    risk_score += 10;
     risks.push("Missing build_provenance");
   }
 
@@ -51,29 +51,29 @@ export function scanAgent(manifest: Record<string, any>): AbomScanResult {
     manifest?.abom?.saas_services ?? [];
   for (const svc of saasServices) {
     if (svc.trusted === false) {
-      score -= 5;
+      risk_score += 5;
       risks.push(`Untrusted SaaS service: ${svc.provider ?? "unknown"}`);
     }
   }
 
   // 5. Check required identity fields
   if (!manifest?.agent?.did && !manifest?.did) {
-    score -= 10;
+    risk_score += 10;
     risks.push("Missing agent DID");
   }
   if (!manifest?.agent?.name && !manifest?.name) {
-    score -= 5;
+    risk_score += 5;
     risks.push("Missing agent name");
   }
 
-  score = Math.max(0, Math.min(100, score));
+  risk_score = Math.max(0, Math.min(100, risk_score));
 
   let tier: AbomScanResult["tier"] = "safe";
-  if (score < 40) tier = "critical";
-  else if (score < 60) tier = "high";
-  else if (score < 80) tier = "moderate";
+  if (risk_score >= 90) tier = "critical";
+  else if (risk_score >= 70) tier = "high";
+  else if (risk_score >= 40) tier = "moderate";
 
-  return { score, risks, tier };
+  return { risk_score, risks, tier };
 }
 
 export default scanAgent;
