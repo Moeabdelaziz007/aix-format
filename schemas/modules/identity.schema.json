@@ -1,105 +1,80 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://amrikyy.ai/schemas/modules/identity.schema.json",
-  "title": "AIX Identity Module",
+  "title": "AIX Identity Module (Provider Agnostic)",
   "type": "object",
   "required": [
     "id",
-    "authority",
+    "provider",
     "issuedAt"
   ],
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique Axiom identifier enforcing did:axiom or did:axiom:axiomid.app format.",
-      "pattern": "^(did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+|did:axiom:axiomid.app:[a-zA-Z0-9.\\-]+(:[a-zA-Z0-9.\\-]+)*)$"
+      "description": "Unique decentralized identifier (DID) for the agent."
     },
-    "kyc_tier": {
-      "type": "integer",
-      "description": "Pi Network KYC tier (0: None, 1: Basic, 2: Full, 3: Sovereign)",
-      "minimum": 0,
-      "maximum": 3,
-      "default": 0
+    "provider": {
+      "type": "object",
+      "required": ["type", "name"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["pi_network", "world_id", "ens", "custom"],
+          "description": "The identity provider type."
+        },
+        "name": {
+          "type": "string",
+          "description": "Friendly name of the provider."
+        },
+        "authority": {
+          "type": "string",
+          "description": "The root authority domain or address (e.g., axiomid.app)."
+        }
+      }
     },
-    "verified": {
-      "type": "boolean",
-      "description": "Whether the identity has been verified by the authority",
-      "default": false
-    },
-    "authority": {
-      "type": "string",
-      "description": "Root authority domain. Must resolve to axiomid.app.",
-      "const": "axiomid.app"
+    "verification": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["unverified", "verified", "rejected", "pending"],
+          "default": "unverified"
+        },
+        "trust_level": {
+          "type": "integer",
+          "description": "Normalized trust score or tier (0-3).",
+          "minimum": 0,
+          "maximum": 3,
+          "default": 0
+        },
+        "provider_specific_tier": {
+          "type": "string",
+          "description": "Original tier/status from the provider (e.g., Pi KYC Tier 2)."
+        }
+      }
     },
     "issuedAt": {
       "type": "string",
-      "format": "date-time",
-      "description": "ISO 8601 timestamp of identity issuance."
+      "format": "date-time"
     },
     "expiresAt": {
       "type": "string",
-      "format": "date-time",
-      "description": "Optional expiry timestamp for ephemeral identities."
+      "format": "date-time"
     },
     "publicKey": {
       "type": "object",
-      "description": "Public key material for cryptographic verification.",
-      "required": [
-        "algorithm",
-        "value"
-      ],
+      "required": ["algorithm", "value"],
       "properties": {
-        "algorithm": {
-          "type": "string",
-          "enum": [
-            "Ed25519",
-            "secp256k1"
-          ],
-          "description": "Cryptographic algorithm used to generate the key pair."
-        },
-        "value": {
-          "type": "string",
-          "description": "Base64url-encoded public key bytes."
-        },
-        "encoding": {
-          "type": "string",
-          "enum": [
-            "base64url",
-            "hex"
-          ],
-          "default": "base64url"
-        }
+        "algorithm": { "type": "string" },
+        "value": { "type": "string" }
       }
     },
     "signature": {
       "type": "object",
-      "description": "Cryptographic signature over the canonical payload hash.",
-      "required": [
-        "algorithm",
-        "value"
-      ],
+      "required": ["algorithm", "value"],
       "properties": {
-        "algorithm": {
-          "type": "string",
-          "enum": [
-            "Ed25519",
-            "secp256k1"
-          ],
-          "description": "Algorithm used to produce the signature."
-        },
-        "value": {
-          "type": "string",
-          "description": "Base64url-encoded signature bytes."
-        },
-        "canonicalization": {
-          "type": "string",
-          "enum": [
-            "JCS",
-            "RFC8785"
-          ],
-          "default": "JCS",
-          "description": "JSON canonicalization scheme used before signing."
-        }
+        "algorithm": { "type": "string" },
+        "value": { "type": "string" }
       }
     }
   },

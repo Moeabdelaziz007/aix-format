@@ -90,6 +90,62 @@ Any deviation from this baseline requires a PR with explicit documentation of wh
 
 ---
 
+---
+
+## ADR-004 — Modular Schema Architecture ($ref)
+
+| Field | Value |
+|-------|-------|
+| **Status** | ✅ Accepted |
+| **Date** | 2026-05-01 |
+| **Applies to** | `schemas/aix-enhanced.schema.json`, `schemas/modules/*.json` |
+
+### Decision
+
+To resolve the "Accumulation Pattern" (Snowball Schema), `aix-enhanced.schema.json` is refactored into a **Modular Architecture**. 
+
+Core namespaces (Meta, Persona, Security, Identity, Economics, ABOM, MCP, Memory, LiveVoice, BlackBox) must be maintained in standalone files under `schemas/modules/`. The root schema must reference these via `$ref`.
+
+### Consequences
+
+- **Scalability**: New protocol features must be added as separate modules.
+- **Versioning**: Individual modules can be versioned independently (e.g., `identity.v2.schema.json`).
+- **Validation**: Core parser logic should ideally validate against the root schema, which resolves all `$ref` pointers.
+- **Maintenance**: Developers can work on specific protocol layers without touching the monolithic root file.
+
+### Alternatives Considered
+
+- **Keep Monolithic**: Rejected — the file exceeded 1,400 lines and became unreadable during the v1.3 PR integration.
+- **External Hosting**: Considered hosting modules on `axiomid.app/schemas`, but kept local for CI/CD offline validation.
+
+---
+
+## ADR-005 — Registry-First Frontend (Zero-Mock Policy)
+
+| Field | Value |
+|-------|-------|
+| **Status** | ✅ Accepted |
+| **Date** | 2026-05-01 |
+| **Applies to** | `apps/studio/src/app/marketplace`, `apps/studio/src/hooks/useRegistry.ts` |
+
+### Decision
+
+AIX Studio adopts a **Zero-Mock Policy** for production-readiness. The Frontend must always prioritize data from the **Sovereign Registry** (Vercel KV/Redis) over static `SAMPLE_DATA`.
+
+Marketplace and User Agent views must be unified behind the `useRegistry` and `useMarketplace` hooks, both of which now fetch from live API endpoints (`/api/registry`, `/api/marketplace`).
+
+### Consequences
+
+- **Authenticity**: Users see real, deployed agents, not hardcoded examples.
+- **E2E Integrity**: Testing the UI now inherently tests the Registry and Redis connection.
+- **State Consistency**: Deleting an agent in "My Agents" correctly reflects in the "Marketplace" (if public).
+
+### Alternatives Considered
+
+- **Local Storage Fallback**: Rejected — Sovereign agents must be registry-backed for machine-to-machine (M2M) discovery.
+
+---
+
 ## How to Add a New ADR
 
 1. Copy the template below.
