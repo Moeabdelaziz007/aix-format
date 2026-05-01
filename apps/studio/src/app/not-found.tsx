@@ -1,5 +1,4 @@
 import Link from 'next/link';
-<<<<<<< HEAD
 import * as motion from 'framer-motion/client';
 import { SovereignAetherClient } from '@/components/studio/SovereignAetherClient';
 

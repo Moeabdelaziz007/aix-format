@@ -2,22 +2,23 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import ReactFlow, { 
+import { 
+  ReactFlow,
   Background, 
   Controls, 
   MiniMap, 
   Handle, 
   Position,
-  NodeProps,
-  Edge,
-  Node,
+  type NodeProps,
+  type Edge,
+  type Node,
   applyEdgeChanges,
   applyNodeChanges,
-  OnNodesChange,
-  OnEdgesChange,
+  type OnNodesChange,
+  type OnEdgesChange,
   Panel
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 

@@ -28,7 +28,8 @@ import {
   UserCheck,
   Database,
   Lock,
-  Mic
+  Mic,
+  Activity
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAbom } from '@/hooks/useAbom';
@@ -1695,12 +1696,14 @@ The agent is anchored via **AxiomID** at **${formData.identity_layer.id}**.`;
                 <h2 className="text-4xl font-display font-black text-white uppercase italic tracking-tight">Agent Live</h2>
                 <p className="text-[#8888a0] uppercase tracking-[0.2em] text-[10px] font-black">Identity Anchored Successfully</p>
               </div>
-
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black text-[#8888a0] uppercase">Integrity</p>
-                    <p className="text-[10px] font-bold text-emerald-400 uppercase italic">Verified SHA-256</p>
-                  </div>
+              <div className="flex justify-between items-center p-6 bg-white/5 rounded-3xl border border-white/10">
+                <div className="text-left">
+                  <p className="text-[10px] font-black text-[#8888a0] uppercase">Agent ID</p>
+                  <p className="text-white font-mono text-xs">{deployResult.agentId}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-black text-[#8888a0] uppercase">Integrity</p>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase italic">Verified SHA-256</p>
                 </div>
               </div>
 

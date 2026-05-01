@@ -1,9 +1,21 @@
-# OpenMemory & Sovereign AI Integration
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║          CLAUDE MANIFEST — AIX v1.3 — TRIPLE THREAT STACK       ║
+# ╚══════════════════════════════════════════════════════════════════╝
 
-**CRITICAL**: All engineering work must align with the [AXIOM_AGENTS.md](file:///Users/cryptojoker710/Desktop/aix-format/AXIOM_AGENTS.md) manifest.
+## 🏗️ Architecture: The Triple Threat Stack
+1. **RUST (Core/DNA)**: Memory safety, DNA signing, and workspace isolation (`packages/aix-dna`).
+2. **GO (Orchestrator)**: High-concurrency agency runtime and pulse dispatching (`packages/aix-agency`).
+3. **TYPESCRIPT (UI/API)**: Next.js Studio and MCP Tooling layer (`apps/studio`).
 
-This document establishes principles for intelligent memory management during development.
- The memory layer enhances your coding context by retrieving relevant past knowledge and storing significant discoveries.
+## 🛠️ Build & Runtime Commands
+- **Agency (Go)**: `cd packages/aix-agency && go run ./cmd/agency/main.go`
+- **DNA (Rust)**: `cd packages/aix-dna && cargo build` (Requires `sudo chown` on `~/.rustup`)
+- **Studio (Next.js)**: `npm run dev`
+- **DNA Sign (Go)**: `go run packages/aix-agency/cmd/dna-sign/main.go AXIOM.md`
+
+## 🧩 Sovereign Identity
+- **Pi Network**: Domain verification token located in `apps/studio/public/validation-key.txt`.
+- **SSOT**: `AXIOM.md` is the Single Source of Truth for all agent configurations.
 
 ## User Identification
 

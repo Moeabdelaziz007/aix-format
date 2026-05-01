@@ -16,13 +16,34 @@ import {
   History,
   FileCode,
   QrCode,
-  Zap
+  Zap,
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function IdentityManagerPage() {
-  const [kycStatus, setKycStatus] = useState('Tier 2 (Verified)');
+   const [kycStatus, setKycStatus] = useState('Tier 2 (Verified)');
+   const [isClaiming, setIsClaiming] = useState(false);
+   const [domainStatus, setDomainStatus] = useState<'pending' | 'active'>('pending');
+
+   const handleClaimDomain = async () => {
+      setIsClaiming(true);
+      toast.info("Connecting to Pi Network...", {
+         description: "Initiating domain ownership claim for aix-format.app"
+      });
+
+      // Simulate Pi SDK interaction
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setDomainStatus('active');
+      setIsClaiming(false);
+      toast.success("Domain Claimed!", {
+         description: "AXIOM DNA has successfully verified domain ownership."
+      });
+   };
 
   const kycTiers = [
     { level: 'Tier 0', label: 'Unverified', status: 'Incomplete', color: 'zinc' },
@@ -128,50 +149,75 @@ export default function IdentityManagerPage() {
            </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-           {/* Signing Keys */}
-           <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
-              <div className="flex items-center gap-3 text-primary">
-                 <Key size={18} />
-                 <h3 className="text-xs font-black uppercase tracking-[0.2em]">Signing Keys</h3>
-              </div>
-              <div className="space-y-4">
-                 <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase">Ed25519 Active</span>
-                    <Badge className="bg-emerald-500/10 text-emerald-400 text-[8px] border-emerald-500/20">Secure</Badge>
-                 </div>
-                 <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[9px] uppercase tracking-widest hover:bg-white/10 transition-all">Rotate Keys</button>
-              </div>
-           </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+             {/* Pi Network Integration */}
+             <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-[#8A2BE2]/20 bg-black/40 space-y-6">
+                <div className="flex items-center gap-3 text-[#8A2BE2]">
+                   <Globe size={18} />
+                   <h3 className="text-xs font-black uppercase tracking-[0.2em]">Pi Network</h3>
+                </div>
+                <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase">Domain Validation</span>
+                      <Badge className={domainStatus === 'active' ? "bg-emerald-500/10 text-emerald-400 text-[8px] border-emerald-500/20" : "bg-[#8A2BE2]/10 text-[#8A2BE2] text-[8px] border-[#8A2BE2]/20"}>
+                         {domainStatus === 'active' ? 'Verified' : 'Pending'}
+                      </Badge>
+                   </div>
+                   <p className="text-[9px] text-zinc-600 leading-tight">Verification key: <code>33394e...1af</code></p>
+                   <button 
+                      onClick={handleClaimDomain}
+                      disabled={isClaiming || domainStatus === 'active'}
+                      className="w-full py-3 rounded-xl bg-[#8A2BE2]/10 border border-[#8A2BE2]/20 text-[#8A2BE2] font-black text-[9px] uppercase tracking-widest hover:bg-[#8A2BE2]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                   >
+                      {isClaiming ? <Loader2 className="animate-spin" size={10} /> : domainStatus === 'active' ? <CheckCircle2 size={10} /> : null}
+                      {isClaiming ? 'Claiming...' : domainStatus === 'active' ? 'Domain Verified' : 'Claim Domain'}
+                   </button>
+                </div>
+             </div>
 
-           {/* ABOM scanner */}
-           <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
-              <div className="flex items-center gap-3 text-purple-mcp">
-                 <ShieldAlert size={18} />
-                 <h3 className="text-xs font-black uppercase tracking-[0.2em]">ABOM Scanner</h3>
-              </div>
-              <p className="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-widest">Audit your agent manifests for supply chain vulnerabilities.</p>
-              <button className="w-full py-3 rounded-xl bg-purple-mcp/10 border border-purple-mcp/20 text-purple-mcp font-black text-[9px] uppercase tracking-widest hover:bg-purple-mcp/20 transition-all">Run Security Scan</button>
-           </div>
+            {/* Signing Keys */}
+            <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+               <div className="flex items-center gap-3 text-primary">
+                  <Key size={18} />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em]">Signing Keys</h3>
+               </div>
+               <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                     <span className="text-[10px] font-bold text-zinc-500 uppercase">Ed25519 Active</span>
+                     <Badge className="bg-emerald-500/10 text-emerald-400 text-[8px] border-emerald-500/20">Secure</Badge>
+                  </div>
+                  <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[9px] uppercase tracking-widest hover:bg-white/10 transition-all">Rotate Keys</button>
+               </div>
+            </div>
 
-           {/* History */}
-           <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
-              <div className="flex items-center gap-3 text-zinc-400">
-                 <History size={18} />
-                 <h3 className="text-xs font-black uppercase tracking-[0.2em]">Trust History</h3>
-              </div>
-              <div className="space-y-3">
-                 <div className="flex justify-between items-center text-[9px]">
-                    <span className="text-zinc-600">KYC Verified</span>
-                    <span className="text-white font-bold">2 days ago</span>
-                 </div>
-                 <div className="flex justify-between items-center text-[9px]">
-                    <span className="text-zinc-600">DID Registered</span>
-                    <span className="text-white font-bold">14 days ago</span>
-                 </div>
-              </div>
-           </div>
-        </div>
+            {/* ABOM scanner */}
+            <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+               <div className="flex items-center gap-3 text-purple-mcp">
+                  <ShieldAlert size={18} />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em]">ABOM Scanner</h3>
+               </div>
+               <p className="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-widest">Audit your agent manifests for supply chain vulnerabilities.</p>
+               <button className="w-full py-3 rounded-xl bg-purple-mcp/10 border border-purple-mcp/20 text-purple-mcp font-black text-[9px] uppercase tracking-widest hover:bg-purple-mcp/20 transition-all">Run Security Scan</button>
+            </div>
+
+            {/* History */}
+            <div className="glass-panel-heavy p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+               <div className="flex items-center gap-3 text-zinc-400">
+                  <History size={18} />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em]">Trust History</h3>
+               </div>
+               <div className="space-y-3">
+                  <div className="flex justify-between items-center text-[9px]">
+                     <span className="text-zinc-600">KYC Verified</span>
+                     <span className="text-white font-bold">2 days ago</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[9px]">
+                     <span className="text-zinc-600">DID Registered</span>
+                     <span className="text-white font-bold">14 days ago</span>
+                  </div>
+               </div>
+            </div>
+         </div>
       </main>
 
       <SovereignStatusBar />

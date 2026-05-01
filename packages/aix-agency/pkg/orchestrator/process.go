@@ -11,8 +11,9 @@ const (
 	StatusThinking  Status = "THINKING"
 	StatusActing    Status = "ACTING"
 	StatusWaiting   Status = "WAITING"
-	StatusCompleted Status = "COMPLETED"
-	StatusFailed    Status = "FAILED"
+	StatusCompleted  Status = "COMPLETED"
+	StatusFailed     Status = "FAILED"
+	StatusRecovering Status = "RECOVERING"
 )
 
 type HistoryEntry struct {
@@ -32,6 +33,8 @@ type GatewayProcess struct {
 	LastActivityAt time.Time              `json:"lastActivityAt"`
 	CreatedAt      time.Time              `json:"createdAt"`
 	UpdatedAt      time.Time              `json:"updatedAt"`
+	CurrentNode    string                 `json:"currentNode"`
+	NodeContext    map[string]interface{} `json:"nodeContext"`  // Node-specific data (e.g., plans, summaries)
 	ReportedTokens int                    `json:"reportedTokens"` // Gem #5: Last reported cumulative tokens
 }
 

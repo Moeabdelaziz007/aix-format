@@ -51,3 +51,22 @@ pub fn verify_dna(file_path: &Path) -> Result<bool> {
 
     Ok(existing_hash == calculated_hash)
 }
+
+pub fn sanitize_identifier(id: &str) -> String {
+    let re = regex::Regex::new(r#"[^a-zA-Z0-9\.\-_]"#).unwrap();
+    re.replace_all(id, "_").to_string()
+}
+
+pub fn validate_workspace(root: &Path, target: &Path) -> Result<bool> {
+    let canonical_root = root.canonicalize()
+        .with_context(|| format!("Failed to canonicalize root: {:?}", root))?;
+    let canonical_target = target.canonicalize()
+        .with_context(|| format!("Failed to canonicalize target: {:?}", target))?;
+
+    Ok(canonical_target.starts_with(canonical_root))
+}
+
+pub fn is_safe_path(path_str: &str) -> bool {
+    // Rule: no \n, \r, \0 in path
+    !path_str.contains('\n') && !path_str.contains('\r') && !path_str.contains('\0')
+}

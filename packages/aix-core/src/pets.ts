@@ -7,8 +7,12 @@ import { PetConfig } from '@studio-types'; // Assuming we can reach types
  */
 
 export class PetOrchestrator {
+  /**
+   * Syncs pet state and mood based on activity.
+   */
+  static async sync(agentId: string, pet: any, manifest: any): Promise<void> {
     // 1. Update Mood based on frequency
-    const recentInvocations = await kv.incr(`agent:${agentId}:freq`) || 1;
+    const recentInvocations = (await kv.incr(`agent:${agentId}:freq`)) || 1;
     await kv.expire(`agent:${agentId}:freq`, 60); // Reset frequency window every minute
     
     if (recentInvocations > 5) {
@@ -18,7 +22,7 @@ export class PetOrchestrator {
     }
     
     // 2. Progression (Simple Leveling)
-    const currentExp = await kv.incr(`agent:${agentId}:exp`) || 1;
+    const currentExp = (await kv.incr(`agent:${agentId}:exp`)) || 1;
     const levelThreshold = pet.level * 10;
     
     if (currentExp >= levelThreshold) {

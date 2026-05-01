@@ -24,6 +24,14 @@ export function SovereignStatusBar() {
           <span className="font-mono tabular-nums">{verifiedAgents.toLocaleString()}</span>
           Verified Agents
         </span>
+        <span className="flex items-center gap-4 text-emerald-400">
+          <span className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Domain Verified
+          </span>
+        </span>
       </div>
     </div>
   );
