@@ -29,16 +29,16 @@ export const NS = {
 
 /** Helper functions for key generation to ensure consistency */
 export const KEYS = {
-  registry: (agentId: string) => `${NS.REGISTRY}:${agentId}`,
-  analytics: (agentId: string) => `${NS.ANALYTICS}:${agentId}`,
-  identity: (userId: string) => `${NS.IDENTITY}:${userId}`,
-  economics: (agentId: string) => `${NS.ECONOMICS}:${agentId}`,
-  session: (uid: string) => `${NS.SESSIONS}:${uid}`,
-  mcpQuota: (tenantId: string) => `${NS.MCP}:${tenantId}`,
-  wizardSession: (sessionId: string) => `${NS.WIZARD_SESSION}:${sessionId}`,
-  memory: (agentId: string, userId: string = 'global') => `${NS.MEMORY}:${agentId}:${userId}`,
-  skill: (skillId: string) => `${NS.SKILLS}:${skillId}`,
-  invoke: (traceId: string) => `${NS.INVOKE}:${traceId}`
+  registry: (agentId: string) => `agent:${agentId}`,
+  analytics: (agentId: string) => `agent:${agentId}:analytics`,
+  identity: (userId: string) => `user:${userId}:identity`,
+  economics: (agentId: string) => `agent:${agentId}:economics`,
+  session: (uid: string) => `aix:sessions:${uid}`,
+  mcpQuota: (tenantId: string) => `aix:mcp:quota:${tenantId}`,
+  wizardSession: (sessionId: string) => `wizard:session:${sessionId}`,
+  memory: (agentId: string) => `agent:${agentId}:memory`,
+  skill: (skillId: string) => `agent:${agentId}:skills`,
+  invoke: (traceId: string) => `agent:${traceId}:invoke`
 };
 
 export const TTL = {
