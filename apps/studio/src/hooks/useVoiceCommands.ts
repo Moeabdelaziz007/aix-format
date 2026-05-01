@@ -17,6 +17,10 @@ export type VoiceIntent =
   | { type: "open_builder" }
   | { type: "open_deploy"; agentId?: string }
   | { type: "search"; query: string }
+  | { type: "run_agent"; agentId: string }
+  | { type: "scan_agent"; agentId: string }
+  | { type: "show_pulse"; agentId: string }
+  | { type: "query_risk"; agentId: string }
   | { type: "unknown"; raw: string };
 
 // ── Intent parser ──────────────────────────────────────────────────────────
@@ -78,6 +82,30 @@ export function parseIntent(transcript: string, agentId?: string): VoiceIntent {
   const deployMatch = t.match(/deploy\s+(?:agent\s+)?([a-z0-9_-]+)?/i);
   if (deployMatch) {
     return { type: "open_deploy", agentId: deployMatch[1] };
+  }
+
+  // Run Agent — "run agent x"
+  const runMatch = t.match(/(?:run|execute|start)\s+(?:agent\s+)?([a-z0-9_-]+)/i);
+  if (runMatch) {
+    return { type: "run_agent", agentId: runMatch[1] };
+  }
+
+  // Scan Agent — "scan agent x"
+  const scanMatch = t.match(/(?:scan|check|validate)\s+(?:agent\s+)?([a-z0-9_-]+)/i);
+  if (scanMatch) {
+    return { type: "scan_agent", agentId: scanMatch[1] };
+  }
+
+  // Pulse — "show pulse for x"
+  const pulseMatch = t.match(/(?:pulse|activity|logs)\s+(?:for\s+)?([a-z0-9_-]+)/i);
+  if (pulseMatch) {
+    return { type: "show_pulse", agentId: pulseMatch[1] };
+  }
+
+  // Risk Score — "what is the risk score of x"
+  const riskMatch = t.match(/(?:risk|security|score)\s+(?:of|for\s+)?([a-z0-9_-]+)/i);
+  if (riskMatch) {
+    return { type: "query_risk", agentId: riskMatch[1] };
   }
 
   // Search
@@ -144,6 +172,22 @@ export function useVoiceCommands(opts: UseVoiceCommandsOptions = {}) {
           optsRef.current.onSearch?.(intent.query);
           router.push(`/marketplace?q=${encodeURIComponent(intent.query)}`);
           return { matched: true, feedback: `Searching for ${intent.query}` };
+
+        case "run_agent":
+          router.push(`/workspace/${intent.agentId}?action=run`);
+          return { matched: true, feedback: `Executing agent ${intent.agentId}` };
+
+        case "scan_agent":
+          router.push(`/workspace/${intent.agentId}/scan`);
+          return { matched: true, feedback: `Scanning agent ${intent.agentId}` };
+
+        case "show_pulse":
+          router.push(`/workspace/${intent.agentId}/pulse`);
+          return { matched: true, feedback: `Showing pulse for ${intent.agentId}` };
+
+        case "query_risk":
+          router.push(`/workspace/${intent.agentId}/scan?view=summary`);
+          return { matched: true, feedback: `Retrieving risk score for ${intent.agentId}` };
 
         case "unknown":
         default:

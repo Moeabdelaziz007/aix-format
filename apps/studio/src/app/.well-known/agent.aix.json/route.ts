@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 // @ts-ignore
 import packageJson from '../../../../package.json';
+import { checkRateLimit } from '@/lib/rate-limit';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown';
+  const rateLimitKey = `well-known:${ip}`;
+  
+  // Max 10 requests/minute per IP
+  const allowed = await checkRateLimit(rateLimitKey, 10, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limited' }, { status: 429 });
+  }
+
   const version = packageJson.version;
   const payload = {
     schemaVersion: "aix/v0.1",

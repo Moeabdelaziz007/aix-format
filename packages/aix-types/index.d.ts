@@ -6,6 +6,7 @@
 export type SemVer = string;
 export type ISODateTime = string;
 export type AxiomDID = string;
+export type KycTier = 'anonymous' | 'basic' | 'verified' | 'sovereign' | 'institutional';
 
 export interface PublicKey {
   algorithm: 'Ed25519' | 'secp256k1';
@@ -70,8 +71,15 @@ export interface IdentityProvider {
 export interface Verification {
   status: 'unverified' | 'basic' | 'verified' | 'institutional' | 'sovereign';
   trust_level: 0 | 1 | 2 | 3;
-  provider_specific_tier?: string;
+  kyc_tier?: KycTier;
   proof_url?: string;
+  is_perpetual?: boolean; // pKYC: Continuous monitoring enabled
+  zk_proof?: {
+    circuit_id: string;
+    nullifier?: string;
+    verified: boolean;
+  };
+  delegated_to?: AxiomDID[]; // Delegated Credentials for AI agents
 }
 
 export interface IdentityLayer {
@@ -137,6 +145,18 @@ export interface ABOM {
   };
 }
 
+export interface AgentSkill {
+  name: string;
+  description: string;
+  parameters?: Record<string, any>;
+}
+
+export interface McpPrompt {
+  name: string;
+  description?: string;
+  arguments?: Array<{ name: string; description?: string; required?: boolean }>;
+}
+
 export interface AIXManifest {
   meta: Meta;
   persona: Persona;
@@ -157,7 +177,8 @@ export interface RegistryEntry {
   name: string;
   role: string;
   capabilities: string[];
-  kyc_tier: string;
+  kyc_tier: KycTier;
+  risk_score: number;
   specVersion: string;
   publishedAt: string;
   yaml: string;

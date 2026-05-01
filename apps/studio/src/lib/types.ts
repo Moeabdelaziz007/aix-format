@@ -1,15 +1,17 @@
 import type { 
-  AIXManifest as Manifest, 
-  ABOM as CanonicalABOM, 
-  IdentityLayer as CanonicalIdentityLayer, 
-  SaasService as CanonicalSaasService,
-  Meta as CanonicalMeta,
-  Persona as CanonicalPersona,
-  BuildProvenance as CanonicalBuildProvenance,
+  AIXManifest, 
+  ABOM, 
+  IdentityLayer, 
+  Meta,
+  Persona,
+  AgentSkill,
+  McpPrompt,
+  KycTier,
   RegistryEntry as CanonicalRegistryEntry
 } from '@aix-types';
 
-export type { Manifest };
+export type Manifest = AIXManifest;
+export type { ABOM, IdentityLayer, Meta, Persona, AgentSkill, McpPrompt, KycTier };
 
 /**
  * AIX Studio Unified Types
@@ -65,7 +67,7 @@ export interface AgentRecord {
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
-  manifest?: CanonicalManifest;
+  manifest?: Manifest;
 }
 
 
