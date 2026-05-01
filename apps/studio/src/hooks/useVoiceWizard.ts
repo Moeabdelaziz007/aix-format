@@ -170,14 +170,17 @@ export function useVoiceWizard() {
       
       if (!res.ok) throw new Error("TTS failed");
       
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+      const blob  = await res.blob();
+      const url   = URL.createObjectURL(blob);
       const audio = new Audio(url);
-      
-      audio.onended = () => {
+
+      const cleanup = () => {
         setIsSpeaking(false);
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url); // ✅ always release — onended OR onerror
       };
+
+      audio.onended = cleanup;
+      audio.onerror = cleanup;
       
       await audio.play();
     } catch (err) {

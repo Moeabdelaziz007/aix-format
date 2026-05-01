@@ -52,9 +52,12 @@ export function useLocalAgents() {
     });
   }, []);
 
-  const getAgent = useCallback((id: string) => {
-    return agents.find(a => a.id === id);
-  }, [agents]);
+  const getAgent = useCallback((id: string): AgentRecord | null => {
+    // Read directly from storage to avoid stale closure + infinite re-render
+    // when used inside useEffect with [getAgent] as dependency
+    const fresh = readStorage();
+    return fresh.find(a => a.id === id) ?? null;
+  }, []); // ← stable: no deps, always reads fresh from localStorage
 
   return { agents, saveAgent, deleteAgent, getAgent, loaded };
 }

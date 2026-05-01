@@ -59,10 +59,14 @@ export default function AgentDetailClient({ id }: { id: string }) {
   const handleDownload = () => {
     if (!agent) return;
     const blob = new Blob([agent.yaml], { type: 'application/x-aix' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
     a.download = `${agent.name.toLowerCase().replace(/\s+/g, '-')}.aix`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // ✅ prevent memory leak
   };
 
   const handlePublishToMcp = async () => {
@@ -391,22 +395,6 @@ export default function AgentDetailClient({ id }: { id: string }) {
       </main>
 
       <SovereignStatusBar />
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
-      `}</style>
     </div>
   );
 }
