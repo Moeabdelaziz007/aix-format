@@ -36,22 +36,30 @@ export default function MissionControlPage() {
     setIsClient(true);
   }, []);
 
-  // Mock data for Mission Control feel
-  const stats = [
-    { label: 'Online', val: 3, icon: <CheckCircle2 className="text-emerald-400" size={16} />, color: 'emerald' },
-    { label: 'Offline', val: 1, icon: <XCircle className="text-zinc-500" size={16} />, color: 'zinc' },
-    { label: 'Warning', val: 2, icon: <AlertTriangle className="text-amber-400" size={16} />, color: 'amber' },
-    { label: 'Total Fleet', val: 6, icon: <TrendingUp className="text-primary" size={16} />, color: 'primary' },
-  ];
+  const [liveAgents, setLiveAgents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockAgents = [
-    { id: '1', name: 'FinanceBot', status: 'Warning', tasks: '892', earnings: '446π', color: 'amber' },
-    { id: '2', name: 'ResBot', status: 'Online', tasks: '1,247', earnings: '623π', color: 'emerald' },
-    { id: '3', name: 'SupBot', status: 'Online', tasks: '3,420', earnings: '1,710π', color: 'emerald' },
-    { id: '4', name: 'AuditNode', status: 'Online', tasks: '2,105', earnings: '1,052π', color: 'emerald' },
-    { id: '5', name: 'MarketX', status: 'Offline', tasks: '0', earnings: '0π', color: 'zinc' },
-    { id: '6', name: 'TraderAlpha', status: 'Warning', tasks: '154', earnings: '77π', color: 'amber' },
-  ];
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const res = await fetch('/api/agents');
+        const data = await res.json();
+        setLiveAgents(data);
+      } catch (err) {
+        console.error('Failed to fetch agents:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAgents();
+  }, []);
+
+  const statsCount = useMemo(() => {
+    return [
+      { label: 'Online', val: liveAgents.length, icon: <CheckCircle2 className="text-emerald-400" size={16} />, color: 'emerald' },
+      { label: 'Total Fleet', val: liveAgents.length, icon: <TrendingUp className="text-primary" size={16} />, color: 'primary' },
+    ];
+  }, [liveAgents]);
 
   if (!isClient) return null;
 

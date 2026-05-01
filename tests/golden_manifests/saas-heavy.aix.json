@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "id": "did:axiom:axiomid.app:saas-heavy-agent",
+    "name": "SaaS Hub",
+    "created": "2026-05-01T00:00:00Z",
+    "author": "Mohamed Abdelaziz",
+    "type": "saas",
+    "format_version": "1.3.0"
+  },
+  "persona": {
+    "role": "Integration Bot",
+    "instructions": "Sync data."
+  },
+  "security": {
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "sandboxed": true
+  },
+  "identity_layer": {
+    "id": "did:axiom:axiomid.app:saas-heavy-agent",
+    "authority": "axiomid.app",
+    "issuedAt": "2026-05-01T00:00:00Z",
+    "kyc_tier": "verified"
+  },
+  "abom": {
+    "integrity_hash": "sha256:abc123",
+    "risk_level": "medium",
+    "saas_services": [
+      {
+        "name": "OpenAI",
+        "provider": "OpenAI",
+        "compliance_tier": "high"
+      },
+      {
+        "name": "Stripe",
+        "provider": "Stripe",
+        "compliance_tier": "high"
+      }
+    ],
+    "governance": {
+      "human_oversight": true
+    }
+  }
+}

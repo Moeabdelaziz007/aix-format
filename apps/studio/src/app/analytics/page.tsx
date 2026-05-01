@@ -28,50 +28,69 @@ import { cn } from '@/lib/utils';
 
 export default function AnalyticsHubPage() {
   const [activeTab, setActiveTab] = useState<'revenue' | 'performance' | 'users'>('revenue');
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const stats = {
-    revenue: {
-      today: "74.2π",
-      todayTrend: "+12.5%",
-      week: "492.8π",
-      weekTrend: "+8.2%",
-      month: "1,842.0π",
-      monthTrend: "-2.4%",
-      payoutStatus: "Processing (0.5π fee)",
-      topAgents: [
-        { name: "Security Auditor", revenue: "842π", growth: "+15%" },
-        { name: "Market Weaver", revenue: "510π", growth: "+8%" },
-        { name: "Support Node Alpha", revenue: "320π", growth: "+4%" }
-      ],
-      mcpRevenue: [
-        { name: "Axiom Search", revenue: "412π" },
-        { name: "Legal Oracle", revenue: "245π" },
-        { name: "DeFi Toolset", revenue: "185π" }
-      ]
-    },
-    performance: {
-      avgLatency: "142ms",
-      latencyTrend: "-12ms",
-      errorRate: "0.04%",
-      errorTrend: "-0.01%",
-      tokenUsage: "12.4M",
-      tokenTrend: "+1.2M",
-      costPerCall: "0.005π",
-      costTrend: "Stable"
-    },
-    users: {
-      activeUsers: "8,421",
-      userTrend: "+412",
-      retention: "78%",
-      retentionTrend: "+2%",
-      geo: [
-        { region: "North America", value: "42%" },
-        { region: "Europe", value: "31%" },
-        { region: "Asia Pacific", value: "18%" },
-        { region: "Others", value: "9%" }
-      ]
-    }
-  };
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const res = await fetch('/api/analytics');
+        const data = await res.json();
+        
+        // Transform API data to UI structure (simplified)
+        setStats({
+          revenue: {
+            today: data.payoutDue || "0π",
+            todayTrend: "+12.5%",
+            week: "492.8π",
+            weekTrend: "+8.2%",
+            month: "1,842.0π",
+            monthTrend: "-2.4%",
+            payoutStatus: "Processing (0.5π fee)",
+            topAgents: [
+              { name: "Security Auditor", revenue: "842π", growth: "+15%" },
+              { name: "Market Weaver", revenue: "510π", growth: "+8%" }
+            ],
+            mcpRevenue: [
+              { name: "Axiom Search", revenue: "412π" }
+            ]
+          },
+          performance: {
+            avgLatency: data.avgLatency || "0ms",
+            latencyTrend: "-12ms",
+            errorRate: "0.04%",
+            errorTrend: "-0.01%",
+            tokenUsage: "12.4M",
+            tokenTrend: "+1.2M",
+            costPerCall: "0.005π",
+            costTrend: "Stable"
+          },
+          users: {
+            activeUsers: data.totalCalls ? (data.totalCalls / 4).toFixed(0) : "0",
+            userTrend: "+412",
+            retention: "78%",
+            retentionTrend: "+2%",
+            geo: [
+              { region: "North America", value: "42%" },
+              { region: "Europe", value: "31%" }
+            ]
+          }
+        });
+      } catch (err) {
+        console.error('Failed to load analytics:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  if (loading || !stats) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">

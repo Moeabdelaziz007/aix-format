@@ -1,3 +1,13 @@
+import type { 
+  AIXManifest as CanonicalManifest, 
+  ABOM as CanonicalABOM, 
+  IdentityLayer as CanonicalIdentityLayer, 
+  SaasService as CanonicalSaasService,
+  Meta as CanonicalMeta,
+  Persona as CanonicalPersona,
+  BuildProvenance as CanonicalBuildProvenance
+} from '../../../../packages/core/src/types';
+
 // ⚠️ NO `any` POLICY — all types must be explicit.
 // Run: cd apps/studio && npx tsc --noEmit before every commit.
 
@@ -38,54 +48,18 @@ export interface AgentRecord {
   status?: 'online' | 'offline' | 'busy';
   successRate?: number;
   tasksCompleted?: number;
-  manifest?: Manifest;
+  manifest?: CanonicalManifest;
   published?: boolean;
 }
 
 export type NormalizedAgent = AgentRecord & { isMock: boolean };
 
 // ─── Unified ABOM Data ─────────────────────────────────────────────────────
-export interface AbomData {
+export interface AbomData extends CanonicalABOM {
   bom_format: 'CycloneDX' | 'SPDX' | 'AIX-NATIVE';
   spec_version: string;
-  risk_level: 'low' | 'medium' | 'high';
-  integrity_hash: string;
-  capabilities: string[];
-  dependencies: string[]; // constituents
-  saas_services?: Array<{
-    name: string;
-    endpoint?: string;
-    usage_policy?: string;
-    tier?: string;
-  }>;
   generated_by: string;
   timestamp: string;
-  model?: {
-    provider: string;
-    name: string;
-    version?: string;
-  };
-  dataset?: {
-    sources: string[];
-    cutoff_date?: string;
-  };
-  governance?: {
-    license: string;
-    contact?: string;
-    txHash?: string; // Anchored on-chain (Sprint 4)
-  };
-  unified_bom?: {
-    saas?: any[];
-    ai_models?: any[];
-    aboms?: any[];
-    infrastructure?: any[];
-  };
-  build_provenance?: {
-    builder_id: string;
-    build_type: string;
-    metadata?: Record<string, any>;
-    verified: boolean;
-  };
 }
 
 export interface McpAgent {
@@ -117,8 +91,7 @@ export interface McpPrompt {
 
 // ─── Provider-Agnostic Abstraction Layers ───────────────────────────────────
 
-export interface IdentityLayer {
-  id: string;
+export interface IdentityLayer extends CanonicalIdentityLayer {
   provider: {
     type: 'pi_network' | 'world_id' | 'ens' | 'custom';
     name: string;
@@ -129,8 +102,6 @@ export interface IdentityLayer {
     trust_level: number; // 0-3
     provider_specific_tier?: string;
   };
-  issuedAt: string;
-  expiresAt?: string;
 }
 
 export interface EconomicsLayer {
@@ -145,32 +116,11 @@ export interface EconomicsLayer {
   currency: string; // Legacy field for compatibility
 }
 
-export interface Manifest {
-  meta: {
-    name: string;
-    version: string;
-    format_version: string;
-    author: string;
-    description: string;
-    type?: 'persona' | 'utility' | 'saas' | 'hybrid';
-  };
-  persona: {
-    role: string;
-    instructions: string;
-    tone: string;
-  };
-  skills: AgentSkill[];
-  security: {
-    checksum: {
-      algorithm: string;
-      value: string;
-    }
-  };
-  identity_layer: IdentityLayer;
+export interface Manifest extends CanonicalManifest {
   economics: EconomicsLayer;
-  abom: AbomData;
   mcp: {
     prompts: McpPrompt[];
+    endpoints: Array<{ uri: string; name?: string }>;
   }
 }
 

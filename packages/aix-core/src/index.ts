@@ -24,20 +24,21 @@ export interface StorageAdapter {
  * Key Namespaces to prevent collisions in shared Redis instance.
  */
 export const NS = {
-  SESSION: 'aix:session',
+  SESSIONS: 'aix:sessions',
   REGISTRY: 'aix:registry',
-  ABOM: 'aix:abom:cache',
-  RATE: 'aix:rate:limit',
-  REVENUE: 'aix:revenue:quota',
+  SCAN: 'aix:scan',
+  MCP: 'aix:mcp',
+  METRICS: 'aix:metrics',
 } as const;
 
 /**
  * TTL Strategies (seconds)
  */
 export const TTL = {
-  SESSION: 3600,       // 1 hour
-  ABOM_CACHE: 86400,   // 24 hours
-  RATE_WINDOW: 60,     // 1 minute default
+  SESSION: 3600 * 24,  // 24 hours
+  ABOM_CACHE: 3600 * 48, // 48 hours
+  QUOTA_WINDOW: 60,     // 1 minute
+  LONG_LIVED: 3600 * 24 * 30, // 30 days
 } as const;
 
 /** Map our generic StorageOptions → Upstash SetCommandOptions */

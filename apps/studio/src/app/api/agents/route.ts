@@ -1,27 +1,29 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
-import { kv } from '@/lib/storage/redis';
+import { kv, NS } from '../../../../../packages/aix-core/src/index';
 
-// In-memory mock storage for dev environment if KV is missing
-const mockKv = new Map<string, string>();
-
+/**
+ * POST /api/agents
+ * Registers a new agent manifest.
+ */
 export async function POST(req: Request) {
   try {
     const manifest = await req.json();
 
-    // Basic validation
     if (!manifest.meta?.name) {
       return NextResponse.json({ success: false, error: 'Manifest validation failed: Agent name is required' }, { status: 400 });
     }
 
     const agentId = `aix_${nanoid(10)}`;
+    const userAgentsKey = `${NS.REGISTRY}:user_default:agents`; // Mocking user ID as 'user_default'
 
-    try {
-      await kv.set(`agent:${agentId}`, JSON.stringify(manifest));
-    } catch (kvError) {
-      console.warn('Storage not configured, using mock storage');
-      mockKv.set(`agent:${agentId}`, JSON.stringify(manifest));
-    }
+    // Store manifest
+    await kv.set(`agent:${agentId}`, manifest);
+    
+    // Add to user's fleet list
+    const fleet = await kv.get<string[]>(userAgentsKey) || [];
+    fleet.push(agentId);
+    await kv.set(userAgentsKey, fleet);
 
     return NextResponse.json({
       success: true,
@@ -31,5 +33,39 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Deploy API Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * GET /api/agents
+ * Lists all agents for the current user or fetches a specific one.
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (id) {
+      const manifest = await kv.get(`agent:${id}`);
+      if (!manifest) return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+      return NextResponse.json(manifest);
+    }
+
+    // List all
+    const userAgentsKey = `${NS.REGISTRY}:user_default:agents`;
+    const agentIds = await kv.get<string[]>(userAgentsKey) || [];
+    
+    // Fetch manifests for each ID (batch)
+    const manifests = await Promise.all(
+      agentIds.map(async (aid) => {
+        const m = await kv.get<any>(`agent:${aid}`);
+        return m ? { id: aid, ...m } : null;
+      })
+    );
+
+    return NextResponse.json(manifests.filter(Boolean));
+  } catch (error: any) {
+    console.error('Agents List API Error:', error);
+    return NextResponse.json({ error: 'Failed to list agents' }, { status: 500 });
   }
 }

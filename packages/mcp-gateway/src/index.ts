@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { kv, NS, TTL } from '../../aix-core/src/index';
 
 /**
  * AIX MCP Gateway - Secure intelligent proxy for MCP servers.
@@ -29,16 +30,15 @@ export interface MCPGatewayOptions {
 
 export class MCPGateway {
   private options: MCPGatewayOptions;
-  private callLogs: Map<string, { count: number; lastReset: number }> = new Map();
 
   constructor(options: MCPGatewayOptions) {
     this.options = options;
   }
 
-  /**
    * Execute a tool call through the gateway with security checks.
    */
-  async executeToolCall(agentId: string, agentTier: string, serverUrl: string, toolName: string, params: any) {
+  async executeToolCall(tenantId: string, agentId: string, agentTier: string, serverUrl: string, toolName: string, params: any) {
+    const cost = 0.05; // Mock cost per call in π
     // 1. Check Allowlist
     if (!this.options.allowlist.includes(serverUrl)) {
       throw new Error(`Security Violation: Server ${serverUrl} is not in the AIX verified allowlist.`);
@@ -50,7 +50,7 @@ export class MCPGateway {
     }
 
     // 3. Rate Limiting
-    this.enforceQuotas(agentId);
+    const quotaState = await this.enforceQuotas(agentId);
 
     // 4. Parameter Sanitization
     const sanitization = this.options.policies.parameterSanitization(params);
@@ -59,41 +59,60 @@ export class MCPGateway {
     }
 
     // 5. Audit Logging
-    if (this.options.auditLog.logEveryCall) {
-      this.logToSIEM(agentId, toolName, sanitization.sanitizedParams);
-    }
-
+    const startTime = Date.now();
+    
     // 6. Forward to Actual MCP Server (Simulation)
     console.log(`[MCP-GATEWAY] Routing safe call to ${serverUrl}/${toolName}`);
-    return { success: true, data: `Result from ${toolName}`, sanitized: true };
-  }
+    const result = { success: true, data: `Result from ${toolName}`, sanitized: true };
+    
+    const duration = Date.now() - startTime;
 
-  private enforceQuotas(agentId: string) {
-    const now = Date.now();
-    const stats = this.callLogs.get(agentId) || { count: 0, lastReset: now };
-
-    if (now - stats.lastReset > 60000) {
-      stats.count = 0;
-      stats.lastReset = now;
+    if (this.options.auditLog.logEveryCall) {
+      this.logToSIEM(tenantId, agentId, toolName, cost, quotaState, sanitization.sanitizedParams);
     }
 
-    if (stats.count >= this.options.quotas.perAgent.maxCallsPerMinute) {
+    // 7. Record Metrics in Redis
+    await this.recordMetrics(agentId, toolName, duration);
+
+    return result;
+  }
+
+  private async enforceQuotas(agentId: string) {
+    const key = `${NS.MCP}:quota:${agentId}`;
+    const count = await kv.incr(key);
+    
+    if (count === 1) {
+      await kv.expire(key, this.options.quotas.perAgent.maxCallsPerMinute === 0 ? 60 : TTL.QUOTA_WINDOW);
+    }
+
+    if (count > this.options.quotas.perAgent.maxCallsPerMinute) {
       throw new Error(`Quota Exceeded: Agent ${agentId} has exceeded the max calls per minute.`);
     }
 
-    stats.count++;
-    this.callLogs.set(agentId, stats);
+    return { used: count, limit: this.options.quotas.perAgent.maxCallsPerMinute };
   }
 
-  private logToSIEM(agentId: string, toolName: string, params: any) {
+  private async recordMetrics(agentId: string, toolName: string, duration: number) {
+    const dailyKey = `${NS.METRICS}:${agentId}:${new Date().toISOString().split('T')[0]}`;
+    
+    await Promise.all([
+      kv.incr(`${dailyKey}:calls`),
+      kv.incr(`${dailyKey}:tool:${toolName}`),
+      kv.set(`${dailyKey}:latency`, duration) 
+    ]);
+  }
+
+  private logToSIEM(tenantId: string, agentId: string, toolName: string, cost: number, quotaState: any, params: any) {
     const logEntry = {
       timestamp: new Date().toISOString(),
+      tenantId,
       agentId,
       toolName,
+      cost,
+      quotaState,
       params,
       integration: this.options.auditLog.siemIntegration
     };
-    // In a real implementation, this would send to a SIEM endpoint
     console.log(`[AUDIT-LOG] ${JSON.stringify(logEntry)}`);
   }
 }
