@@ -48,15 +48,22 @@ export function useVoiceWizard() {
 
   const processAudio = async (audioBlob: Blob) => {
     try {
-      // في الوقت الحالي نقوم بمحاكاة (Simulation) للوقت المستغرق في إرسال الصوت للـ API
-      // في الخطوة القادمة سنربط هذا بـ Groq Whisper API الحقيقي
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'audio.webm');
 
-      setTranscript('محاكاة: "أريد بناء وكيل ذكي لتحليل بيانات الكريبتو."');
-      setState('speaking');
+      // استدعاء مسار الـ API الحقيقي
+      const res = await fetch('/api/voice-wizard/transcribe', {
+        method: 'POST',
+        body: formData,
+      });
 
-      // محاكاة وقت رد الوكيل (TTS)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      if (!res.ok) {
+        throw new Error('فشل الاتصال بالخادم');
+      }
+
+      const data = await res.json();
+      setTranscript(data.transcript);
+
       setState('done');
 
     } catch (err) {

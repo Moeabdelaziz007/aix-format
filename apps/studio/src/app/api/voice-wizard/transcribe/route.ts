@@ -1,37 +1,42 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import { NextResponse } from 'next/server';
 
-const groq = new Groq({ 
-  apiKey: process.env.GROQ_API_KEY 
-});
-
-/**
- * AIX Voice Wizard - Transcribe Route
- * Proxies microphone audio to Groq Whisper for high-speed, zero-cost STT.
- */
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
+    const formData = await request.formData();
+    const file = formData.get('file') as Blob;
+
+    if (!file) {
+      return NextResponse.json({ error: 'لم يتم العثور على ملف صوتي' }, { status: 400 });
     }
 
-    const formData = await req.formData();
-    const audioFile = formData.get('audio') as File;
-
-    if (!audioFile) {
-      return NextResponse.json({ error: "Missing audio file" }, { status: 400 });
+    const groqApiKey = process.env.GROQ_API_KEY;
+    if (!groqApiKey) {
+      console.warn('تنبيه: GROQ_API_KEY غير موجود في ملف .env');
+      return NextResponse.json({ error: 'مفتاح API مفقود' }, { status: 500 });
     }
-    
-    const transcription = await groq.audio.transcriptions.create({
-      file: audioFile,
-      model: 'whisper-large-v3',
-      response_format: 'json',
-      // Optional: language: 'en' or 'ar'
+
+    const groqFormData = new FormData();
+    groqFormData.append('file', file, 'audio.webm');
+    groqFormData.append('model', 'whisper-large-v3');
+    groqFormData.append('language', 'ar'); // يمكن تغييره لدعم لغات متعددة
+
+    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+      },
+      body: groqFormData,
     });
-    
-    return NextResponse.json({ text: transcription.text });
-  } catch (error: any) {
-    console.error("[Voice STT] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`خطأ من Groq API: ${errorData}`);
+    }
+
+    const data = await response.json();
+    return NextResponse.json({ transcript: data.text });
+  } catch (error) {
+    console.error('خطأ أثناء تحويل الصوت:', error);
+    return NextResponse.json({ error: 'فشلت عملية تحويل الصوت إلى نص' }, { status: 500 });
   }
 }
