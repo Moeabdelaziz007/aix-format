@@ -6,7 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { ShoppingCart, Star, Shield, Zap, Search, Filter } from "lucide-react";
 import { mockAgents } from "@/lib/mock-agents";
-import { AgentCard } from "@/components/studio/AgentCard";
+import { AgentCard } from "@/components/agents/AgentCard";
 
 const tags = ["All", "research", "support", "coding", "robotics", "finance", "content"];
 

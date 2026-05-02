@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { SetupWizard } from "@/components/studio/SetupWizard";
-import { AgentCard } from "@/components/studio/AgentCard";
+import { AgentCard } from "@/components/agents/AgentCard";
 import { VoiceOrb } from "@/components/studio/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 import LiveValidator from "@/components/studio/LiveValidator";

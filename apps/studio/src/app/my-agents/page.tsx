@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { Plus, Shield, Activity, Trash2, Settings, Play, Pause, ExternalLink, FileCode } from "lucide-react";
-import { AgentCard } from "@/components/studio/AgentCard";
+import { AgentCard } from "@/components/agents/AgentCard";
 import Link from "next/link";
 
 const initialAgents = [
