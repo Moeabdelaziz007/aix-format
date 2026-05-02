@@ -14,6 +14,8 @@
     "check:all": "npx tsc --noEmit && npm run lint && npm run build"
   },
   "dependencies": {
+    "@aix/core": "workspace:*",
+    "@aix/pi-kyc": "workspace:*",
     "@noble/hashes": "^2.2.0",
     "@tailwindcss/postcss": "^4.2.4",
     "@tanstack/react-query": "^5.100.6",
