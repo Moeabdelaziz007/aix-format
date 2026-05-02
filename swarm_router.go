@@ -57,6 +57,16 @@ type SwarmRouter struct {
 	agents          map[string]AgentNode
 	deadLetterQueue []TaskDescriptor
 	breaker         *CircuitBreaker
+	metrics         *RouterMetrics
+}
+
+type RouterMetrics struct {
+	mu             sync.RWMutex
+	TasksRouted    int64 `json:"tasks_routed"`
+	TasksFailed    int64 `json:"tasks_failed"`
+	BreakerTrips   int64 `json:"breaker_trips"`
+	Recoveries     int64 `json:"recoveries"`
+	ActiveAgents   int   `json:"active_agents"`
 }
 
 type CircuitState string
@@ -87,22 +97,44 @@ func NewCircuitBreaker(failureThreshold int, successThreshold int, duration time
 	}
 }
 
-func (cb *CircuitBreaker) RecordFailure() {
+func (cb *CircuitBreaker) RecordFailure(metrics *RouterMetrics) {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
 
 	cb.FailureCount++
 	cb.SuccessCount = 0
+	
+	if metrics != nil {
+		metrics.mu.Lock()
+		metrics.TasksFailed++
+		metrics.mu.Unlock()
+	}
+
 	if cb.State == StateHalfOpen || cb.FailureCount >= cb.FailureThreshold {
+		prevState := cb.State
 		cb.State = StateOpen
 		cb.LastFailure = time.Now()
-		log.Printf("[CircuitBreaker] State changed to OPEN (Failures: %d)\n", cb.FailureCount)
+		
+		if metrics != nil {
+			metrics.mu.Lock()
+			metrics.BreakerTrips++
+			metrics.mu.Unlock()
+		}
+		
+		log.Printf("[CircuitBreaker] %s -> OPEN (Failures: %d, Total Trips: %d)\n", 
+			prevState, cb.FailureCount, metrics.BreakerTrips)
 	}
 }
 
-func (cb *CircuitBreaker) RecordSuccess() {
+func (cb *CircuitBreaker) RecordSuccess(metrics *RouterMetrics) {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
+
+	if metrics != nil {
+		metrics.mu.Lock()
+		metrics.TasksRouted++
+		metrics.mu.Unlock()
+	}
 
 	if cb.State == StateHalfOpen {
 		cb.SuccessCount++
@@ -110,7 +142,14 @@ func (cb *CircuitBreaker) RecordSuccess() {
 			cb.State = StateClosed
 			cb.FailureCount = 0
 			cb.SuccessCount = 0
-			log.Println("[CircuitBreaker] State changed to CLOSED (Recovered)")
+			
+			if metrics != nil {
+				metrics.mu.Lock()
+				metrics.Recoveries++
+				metrics.mu.Unlock()
+			}
+			
+			log.Println("[CircuitBreaker] HALF-OPEN -> CLOSED (System Recovered)")
 		}
 	} else if cb.State == StateClosed {
 		cb.FailureCount = 0
@@ -173,8 +212,9 @@ func NewSwarmRouter() *SwarmRouter {
 		agents:          make(map[string]AgentNode),
 		deadLetterQueue: make([]TaskDescriptor, 0),
 		breaker:         NewCircuitBreaker(5, 3, 30*time.Second),
+		metrics:         &RouterMetrics{},
 	}
-	log.Println("[SwarmRouter] Initialized successfully with Adaptive Circuit Breaker")
+	log.Println("[SwarmRouter] Initialized successfully with Adaptive Circuit Breaker and Metrics")
 	return r
 }
 
@@ -201,6 +241,11 @@ func (r *SwarmRouter) RegisterAgent(agent AgentNode) error {
 	}
 
 	r.agents[agent.ID] = agent
+	
+	r.metrics.mu.Lock()
+	r.metrics.ActiveAgents = len(r.agents)
+	r.metrics.mu.Unlock()
+	
 	log.Printf("[SwarmRouter] Registered agent: %s (role: %s, trust: %d)\n", agent.ID, agent.Role, agent.TrustLevel)
 	return nil
 }
@@ -217,6 +262,7 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 	
 	// Check and Probe Circuit Breaker
 	if !r.breaker.CheckAndProbe() {
+		r.breaker.RecordFailure(r.metrics)
 		return nil, fmt.Errorf("routing service is currently unavailable: circuit breaker is in %s state", r.breaker.State)
 	}
 
@@ -261,7 +307,7 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 		// Error Discrimination: Missing capabilities is a "Permanent" error for this task,
 		// but if the whole agent pool is empty, it might be a "Transient" infrastructure issue.
 		if len(r.agents) == 0 {
-			r.breaker.RecordFailure()
+			r.breaker.RecordFailure(r.metrics)
 			return nil, fmt.Errorf("infrastructure failure: no agents registered in the swarm")
 		}
 
@@ -288,7 +334,7 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 	}
 
 	// Record success in circuit breaker
-	r.breaker.RecordSuccess()
+	r.breaker.RecordSuccess(r.metrics)
 
 	log.Printf("[SwarmRouter] Routed task %s to agent %s (score: %.2f, fallbacks: %d)\n",
 		task.ID, plan.PrimaryAgentID, plan.Score, len(fallback))
@@ -457,6 +503,22 @@ func (r *SwarmRouter) RouteTaskHandler(w http.ResponseWriter, req *http.Request)
 	})
 }
 
+// MetricsHandler exposes router performance metrics
+func (r *SwarmRouter) MetricsHandler(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET method is allowed")
+		return
+	}
+
+	r.metrics.mu.RLock()
+	defer r.metrics.mu.RUnlock()
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"metrics": r.metrics,
+	})
+}
+
 // Get dead letter queue endpoint
 func (r *SwarmRouter) GetDLQHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
@@ -505,6 +567,7 @@ func main() {
 	http.HandleFunc("/api/tasks/route", recoverMiddleware(router.RouteTaskHandler))
 	http.HandleFunc("/api/dlq", recoverMiddleware(router.GetDLQHandler))
 	http.HandleFunc("/api/agents", recoverMiddleware(router.ListAgentsHandler))
+	http.HandleFunc("/api/metrics", recoverMiddleware(router.MetricsHandler))
 
 	port := ":8080"
 	log.Printf("[SwarmRouter] Starting HTTP server on %s", port)
