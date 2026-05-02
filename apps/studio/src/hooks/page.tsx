@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import VoiceOrb from '../../components/VoiceOrb';
-import { useVoiceWizard } from '../../hooks/useVoiceWizard';
+import VoiceOrb from '../components/studio/VoiceOrb';
+import { useVoiceWizard } from '../hooks/useVoiceWizard';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VoiceSetupPage() {
@@ -19,7 +19,7 @@ export default function VoiceSetupPage() {
                 </p>
             </div>
 
-            <VoiceOrb state={state} onClick={toggleRecording} />
+            <VoiceOrb variant="simple" state={state} onClick={toggleRecording} />
 
             <div className="mt-12 h-24 flex flex-col items-center justify-center">
                 <AnimatePresence mode="wait">

@@ -1,16 +1,39 @@
 "use client";
 import { APP_VERSION } from "@/lib/version";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Mic, Volume2, Activity, Settings2, Cpu, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface VoiceOrbProps {
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*                              TYPE DEFINITIONS                                */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+export type VoiceState = 'idle' | 'listening' | 'processing' | 'speaking' | 'done';
+
+interface BaseVoiceOrbProps {
+  variant?: 'simple' | 'full';
+  className?: string;
+}
+
+interface SimpleVoiceOrbProps extends BaseVoiceOrbProps {
+  variant: 'simple';
+  state: VoiceState;
+  onClick?: () => void;
+}
+
+interface FullVoiceOrbProps extends BaseVoiceOrbProps {
+  variant?: 'full';
   onTranscript: (text: string) => void;
   isProcessing: boolean;
 }
 
-/* ─── Canvas waveform ─── */
+export type VoiceOrbProps = SimpleVoiceOrbProps | FullVoiceOrbProps;
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*                            CANVAS WAVEFORM                                   */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 function WaveCanvas({ active, color }: { active: boolean; color: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef  = useRef<number>(0);
@@ -27,7 +50,6 @@ function WaveCanvas({ active, color }: { active: boolean; color: string }) {
       ctx.clearRect(0, 0, width, height);
 
       if (!active) {
-        /* idle flat line */
         ctx.beginPath();
         ctx.moveTo(0, height / 2);
         ctx.lineTo(width, height / 2);
@@ -79,6 +101,10 @@ function WaveCanvas({ active, color }: { active: boolean; color: string }) {
   );
 }
 
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*                         SPEECH RECOGNITION TYPES                             */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 interface SpeechRecognitionEvent extends Event {
   results: {
     [key: number]: {
@@ -101,7 +127,90 @@ interface SpeechRecognition extends EventTarget {
   onend: () => void;
 }
 
-export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: VoiceOrbProps) {
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*                            SIMPLE VARIANT                                    */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+function SimpleVoiceOrb({ state, onClick, className }: SimpleVoiceOrbProps) {
+  const orbVariants: Variants = {
+    idle: {
+      scale: [1, 1.05, 1],
+      opacity: 0.8,
+      boxShadow: "0px 0px 20px rgba(99, 102, 241, 0.2)",
+      transition: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+    },
+    listening: {
+      scale: [1, 1.2, 1.1, 1.3, 1],
+      opacity: 1,
+      boxShadow: "0px 0px 40px rgba(236, 72, 153, 0.6)",
+      transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+    },
+    processing: {
+      scale: 1,
+      rotate: [0, 180, 360],
+      borderRadius: ["50%", "30%", "50%"],
+      boxShadow: "0px 0px 30px rgba(139, 92, 246, 0.5)",
+      transition: { duration: 2, repeat: Infinity, ease: "linear" }
+    },
+    speaking: {
+      scale: [1, 1.15, 1],
+      opacity: [0.9, 1, 0.9],
+      boxShadow: "0px 0px 50px rgba(14, 165, 233, 0.7)",
+      transition: { duration: 0.5, repeat: Infinity, ease: "circOut" }
+    },
+    done: {
+      scale: 1,
+      opacity: 0.5,
+      boxShadow: "0px 0px 10px rgba(16, 185, 129, 0.3)",
+      transition: { duration: 0.5 }
+    }
+  };
+
+  const showRipples = state === 'listening' || state === 'speaking';
+
+  return (
+    <div className={cn("relative flex items-center justify-center w-64 h-64 cursor-pointer", className)} onClick={onClick}>
+      {showRipples && (
+        <>
+          <motion.div
+            className="absolute inset-0 rounded-full border border-indigo-500/30 bg-indigo-500/10"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 2, opacity: 0 }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0 }}
+          />
+          <motion.div
+            className="absolute inset-0 rounded-full border border-pink-500/30 bg-pink-500/10"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 2.5, opacity: 0 }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+          />
+        </>
+      )}
+
+      <motion.div
+        variants={orbVariants}
+        initial="idle"
+        animate={state}
+        className="relative z-10 w-24 h-24 rounded-full bg-gradient-to-br from-indigo-900/80 to-slate-900/80 backdrop-blur-xl border border-white/10 flex items-center justify-center overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent rounded-full" />
+        <div className="text-white/70 text-sm font-medium tracking-widest uppercase">
+          {state === 'idle' && 'START'}
+          {state === 'listening' && 'REC'}
+          {state === 'processing' && 'AI'}
+          {state === 'speaking' && 'VOICE'}
+          {state === 'done' && 'OK'}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*                             FULL VARIANT                                     */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+function FullVoiceOrb({ onTranscript, isProcessing: extProcessing = false, className }: FullVoiceOrbProps) {
   const [isListening,  setIsListening]  = useState(false);
   const [isSpeaking,   setIsSpeaking]   = useState(false);
   const [micLevel,     setMicLevel]     = useState(0);
@@ -110,7 +219,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
   const isProcessing   = extProcessing;
   const prevProcessing = useRef(isProcessing);
 
-  /* — state label — */
   const stateLabel = isSpeaking
     ? "Agent Speaking"
     : isProcessing
@@ -127,7 +235,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
 
   const orbActive = isListening || isSpeaking || isProcessing;
 
-  /* — TTS — */
   const speakText = useCallback((text: string) => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
@@ -139,7 +246,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
     window.speechSynthesis.speak(u);
   }, []);
 
-  /* — Speech Recognition — */
   const initRecognition = useCallback(() => {
     if (typeof window === "undefined") return;
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -195,13 +301,10 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
     }
   };
 
-  /* orb scale based on mic level */
   const orbScale = 1 + micLevel * 0.06;
 
   return (
-    <div className="glass-heavy rounded-sm p-8 flex flex-col items-center gap-6 w-full border border-[rgba(0,212,255,0.1)] relative overflow-hidden">
-
-      {/* Background ambient glow */}
+    <div className={cn("glass-heavy rounded-sm p-8 flex flex-col items-center gap-6 w-full border border-[rgba(0,212,255,0.1)] relative overflow-hidden", className)}>
       <div
         className="absolute inset-0 pointer-events-none transition-all duration-1000"
         style={{
@@ -211,7 +314,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
         }}
       />
 
-      {/* Header */}
       <div className="w-full flex items-center justify-between">
         <div>
           <h3 className="text-base font-display font-bold text-white tracking-tight">Sovereign Voice Engine</h3>
@@ -225,10 +327,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
         </button>
       </div>
 
-      {/* ─── ORB ─── */}
       <div className="relative flex items-center justify-center w-36 h-36">
-
-        {/* Ambient rings — always visible, just dim */}
         {[1, 2, 3].map((i) => (
           <motion.div
             key={i}
@@ -242,7 +341,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
           />
         ))}
 
-        {/* Outer plasma ring */}
         <motion.div
           className="absolute inset-1 rounded-full"
           animate={{ rotate: 360 }}
@@ -254,7 +352,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
           }}
         />
 
-        {/* Core orb button */}
         <motion.button
           onClick={toggleListening}
           whileHover={{ scale: 1.06 }}
@@ -271,7 +368,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
             transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          {/* Inner icon */}
           <AnimatePresence mode="wait">
             {isProcessing ? (
               <motion.div key="proc" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
@@ -304,7 +400,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
         </motion.button>
       </div>
 
-      {/* State label */}
       <div className="text-center">
         <motion.p
           key={stateLabel}
@@ -326,12 +421,10 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
         </p>
       </div>
 
-      {/* Waveform visualizer */}
       <div className="w-full px-2">
         <WaveCanvas active={orbActive} color={stateColor} />
       </div>
 
-      {/* Transcript */}
       <AnimatePresence>
         {transcript && (
           <motion.div
@@ -346,7 +439,6 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
         )}
       </AnimatePresence>
 
-      {/* Status strip */}
       <div className="w-full flex items-center justify-between text-[11px] text-[var(--color-on-surface-faint)] pt-2 border-t border-white/[0.04]">
         <span className="flex items-center gap-1.5">
           <Cpu className="w-3 h-3" /> AIX Quantum Mode
@@ -358,3 +450,18 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
     </div>
   );
 }
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*                          MAIN COMPONENT EXPORT                               */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+export function VoiceOrb(props: VoiceOrbProps) {
+  if (props.variant === 'simple') {
+    return <SimpleVoiceOrb {...props} />;
+  }
+  return <FullVoiceOrb {...props} />;
+}
+
+export default VoiceOrb;
+
+// Made with Bob

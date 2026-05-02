@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { VoiceState } from '../components/VoiceOrb';
+import { VoiceState } from '../components/studio/VoiceOrb';
 
 export function useVoiceWizard() {
   const [state, setState] = useState<VoiceState>('idle');
