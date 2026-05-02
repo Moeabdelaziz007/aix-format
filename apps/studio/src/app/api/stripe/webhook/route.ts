@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text();
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (error: unknown) {
+    const err = error as Error;
     console.error('[Stripe Webhook] Signature verification failed:', err.message);
     return errorResponse('INVALID_SIGNATURE', 'Webhook signature verification failed', 400);
   }
@@ -253,6 +254,7 @@ export async function POST(req: NextRequest) {
     return successResponse({ received: true, eventType: event.type });
     
   } catch (error: unknown) {
+    const err = error as Error;
     console.error('[Stripe Webhook] Processing error:', err.message);
     
     // Log error to monitoring

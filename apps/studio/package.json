@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
+    "analyze": "ANALYZE=true next build",
     "postbuild": "node --loader ts-node/esm ../../scripts/validate-routes.ts",
     "check:all": "npx tsc --noEmit && npm run lint && npm run build"
   },
@@ -38,6 +39,7 @@
     "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.2",
     "@ai-sdk/google": "^3.0.67",
     "@playwright/test": "^1.59.1",
     "@radix-ui/react-tooltip": "^1.2.8",
