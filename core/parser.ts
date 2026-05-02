@@ -809,10 +809,12 @@ export class AIXParser {
 export class AIXAgent {
   readonly data: AIXDocument;
   readonly warnings: AIXValidationWarning[];
+  public errors: AIXValidationError[] = [];
 
   constructor(data: AIXDocument, warnings: AIXValidationWarning[] = []) {
     this.data = data;
     this.warnings = warnings;
+    this.errors = [];
   }
 
   get meta(): Meta                              { return this.data.meta; }
