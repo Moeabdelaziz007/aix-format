@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
-import { Plus, FileCode } from "lucide-react";
+import { Plus, Shield, Activity, FileCode } from "lucide-react";
 import { AgentCard } from "@/components/studio/AgentCard";
 import Link from "next/link";
 
@@ -15,6 +15,9 @@ const initialAgents = [
 
 export default function MyAgentsPage() {
   const [agents] = useState(initialAgents);
+
+  const totalEarnings = agents.reduce((sum, a) => sum + parseFloat(a.earnings), 0).toFixed(1);
+  const onlineCount = agents.filter(a => a.status === 'online').length;
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
@@ -32,6 +35,15 @@ export default function MyAgentsPage() {
             className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--color-primary)] text-black text-sm font-bold hover:brightness-110 transition shadow-[0_0_22px_rgba(57,255,20,0.3)]">
             <Plus className="w-4 h-4" /> Create New Agent
           </Link>
+        </motion.div>
+
+            <button onClick={() => router.push('/builder')}
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:brightness-110
+                         rounded-xl text-black font-bold transition shadow-[0_10px_20px_rgba(0,219,233,0.2)]">
+              <Plus className="w-4 h-4" />
+              Build Agent
+            </button>
+          </div>
         </div>
 
         {/* Agents List */}
@@ -39,9 +51,7 @@ export default function MyAgentsPage() {
           <AnimatePresence>
             {agents.map(agent => (
               <motion.div key={agent.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               >
                 <AgentCard
                   name={agent.name}
@@ -68,7 +78,8 @@ export default function MyAgentsPage() {
             </Link>
           </div>
         )}
-      </main>
+
+      </div>
       <SovereignStatusBar />
     </div>
   );

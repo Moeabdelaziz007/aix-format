@@ -147,7 +147,7 @@ export default function SpacePage() {
           mode === '3d' ? (
             <ForceGraph3D
               ref={fgRef}
-              graphData={graphData}
+              graphData={graphData}*/}
               backgroundColor="#0A0A0F"
               showNavInfo={false}
               nodeThreeObject={nodeThreeObject}
@@ -170,7 +170,7 @@ export default function SpacePage() {
               }}
             />
           ) : (
-            <ForceGraph2D
+            {/*<ForceGraph2D
               ref={fgRef}
               graphData={graphData}
               backgroundColor="#0A0A0F"
