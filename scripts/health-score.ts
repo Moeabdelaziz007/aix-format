@@ -248,22 +248,72 @@ async function updateOpenMemory(score: number, metrics: HealthMetrics, previousS
 }
 
 /**
- * Main execution
+ * Initialize baseline health score
  */
-async function main() {
+async function initBaseline() {
+  const baselinePath = join(PROJECT_ROOT, '.health-score-baseline.json');
+  
   try {
     const result = await calculateHealthScore();
     console.log(result.details);
     
+    // Write baseline file
+    writeFileSync(baselinePath, JSON.stringify({
+      timestamp: new Date().toISOString(),
+      score: result.score,
+      metrics: result.metrics
+    }, null, 2));
+    
+    console.log(`\n✅ Baseline created: ${baselinePath}`);
+    console.log(`📊 Baseline Score: ${result.score.toFixed(2)}/100`);
+    console.log('\n⚠️  Add this file to git: git add .health-score-baseline.json');
+    
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Baseline initialization failed:', error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Main execution
+ */
+async function main() {
+  try {
+    // Check for --init flag
+    if (process.argv.includes('--init')) {
+      return await initBaseline();
+    }
+    
+    const result = await calculateHealthScore();
+    console.log(result.details);
+    
+    // Check for baseline and compare
+    const baselinePath = join(PROJECT_ROOT, '.health-score-baseline.json');
+    let previousScore: number | undefined;
+    
+    try {
+      const baseline = JSON.parse(readFileSync(baselinePath, 'utf-8'));
+      previousScore = baseline.score;
+      
+      const delta = result.score - previousScore;
+      if (delta < -5) {
+        console.log(`\n⚠️  Score dropped by ${Math.abs(delta).toFixed(2)} points from baseline`);
+      }
+    } catch {
+      console.log('\n⚠️  No baseline found. Run with --init to create one.');
+    }
+    
     // Update openmemory
-    await updateOpenMemory(result.score, result.metrics);
+    await updateOpenMemory(result.score, result.metrics, previousScore);
     
     // Write JSON report for CI
     const reportPath = join(PROJECT_ROOT, '.generated/health-score.json');
     writeFileSync(reportPath, JSON.stringify({
       timestamp: new Date().toISOString(),
       score: result.score,
-      metrics: result.metrics
+      metrics: result.metrics,
+      baseline: previousScore
     }, null, 2));
     
     console.log(`\n📄 Report saved to: ${reportPath}`);
