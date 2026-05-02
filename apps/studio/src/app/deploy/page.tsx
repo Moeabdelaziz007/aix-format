@@ -3,8 +3,8 @@ import { APP_VERSION } from "@/lib/version";
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Cpu, Shield, Zap, Globe, ArrowRight, ArrowLeft, 
+import {
+  Cpu, Shield, Zap, Globe, ArrowRight, ArrowLeft,
   CheckCircle2, AlertCircle, Loader2, Copy, ExternalLink,
   ChevronRight, Search, Server, Cloud
 } from "lucide-react";
@@ -13,6 +13,7 @@ import { useLocalAgents } from "@/hooks/useLocalAgents";
 import { useRegistry } from "@/hooks/useRegistry";
 import { useDeployment } from "@/hooks/useDeployment";
 import { RegistryEntry, AgentRecord, DeployRequest } from "@/lib/types";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { cn } from "@/lib/utils";
 
 type WizardStep = 1 | 2 | 3 | 4;
@@ -91,6 +92,7 @@ export default function DeployPage() {
   ];
 
   return (
+    <ErrorBoundary>
     <main className="min-h-screen pt-24 pb-16 px-6 max-w-5xl mx-auto">
       {/* Header & Stepper */}
       <div className="mb-12 text-center">
@@ -451,6 +453,7 @@ export default function DeployPage() {
         </AnimatePresence>
       </div>
     </main>
+    </ErrorBoundary>
   );
 }
 

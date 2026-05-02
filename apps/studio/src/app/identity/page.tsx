@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  ShieldCheck, 
-  Key, 
-  History, 
-  Cpu, 
+import {
+  ShieldCheck,
+  Key,
+  History,
+  Cpu,
   ShieldAlert,
   ArrowRight,
   ExternalLink,
@@ -17,6 +17,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { DIDCard } from "@/components/studio/DIDCard";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { cn } from "@/lib/utils";
 
 const IDENTITY_FEATURES = [
@@ -87,6 +88,7 @@ export default function IdentityPage() {
   };
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-[#050507] text-[#e4e4e8] font-body selection:bg-[#00dbe9]/30 overflow-x-hidden">
       <Navbar />
       <SovereignStatusBar />
@@ -270,5 +272,6 @@ export default function IdentityPage() {
         }
       `}</style>
     </div>
+    </ErrorBoundary>
   );
 }

@@ -4,10 +4,10 @@ import { useState, useMemo } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { Badge, Typography } from '@/components/shared';
-import { 
-  Play, 
-  Send, 
-  Code2, 
+import {
+  Play,
+  Send,
+  Code2,
   Terminal as TerminalIcon,
   Cpu,
   History,
@@ -24,6 +24,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { cn } from '@/lib/utils';
 
 const API_ENDPOINTS = [
@@ -150,6 +151,7 @@ func main() {
   }, [selectedEndpoint, requestPayload]);
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -325,5 +327,6 @@ func main() {
 
       <SovereignStatusBar />
     </div>
+    </ErrorBoundary>
   );
 }

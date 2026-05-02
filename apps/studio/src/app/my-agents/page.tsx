@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { Plus, Shield, Activity, Trash2, Settings, Play, Pause, ExternalLink, FileCode } from "lucide-react";
 import { AgentCard } from "@/components/agents/AgentCard";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import Link from "next/link";
 
 const initialAgents = [
@@ -28,6 +29,7 @@ export default function MyAgentsPage() {
   const onlineCount = agents.filter(a => a.status === 'online').length;
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-geist-sans)]">
       <Navbar />
       <div className="pt-28 pb-20 px-6 md:px-12 max-w-5xl mx-auto">
@@ -108,5 +110,6 @@ export default function MyAgentsPage() {
       </div>
       <SovereignStatusBar />
     </div>
+    </ErrorBoundary>
   );
 }
