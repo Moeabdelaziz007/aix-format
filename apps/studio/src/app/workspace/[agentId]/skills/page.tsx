@@ -8,6 +8,7 @@ import {
   Globe, Code2, Search, MessageSquare, Database, Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 // ── Skill definitions ──────────────────────────────────────────────────────
 const SKILL_TREE = [
@@ -64,6 +65,7 @@ export default function SkillsPage() {
   const manifestCaps: string[] = agent?.manifest?.abom?.capabilities ?? [];
 
   return (
+    <ErrorBoundary>
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -174,5 +176,6 @@ export default function SkillsPage() {
         ))}
       </div>
     </motion.div>
+    </ErrorBoundary>
   );
 }

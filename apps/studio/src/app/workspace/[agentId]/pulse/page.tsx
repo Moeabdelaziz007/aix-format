@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Zap, AlertCircle, CheckCircle2, Clock, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 interface PulseEvent {
   id:        string;
@@ -89,7 +90,8 @@ export default function PulsePage() {
   }, [events.length]);
 
   return (
-    <motion.div 
+    <ErrorBoundary>
+    <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -185,6 +187,7 @@ export default function PulsePage() {
         <div ref={bottomRef} />
       </div>
     </motion.div>
+    </ErrorBoundary>
   );
 }
 

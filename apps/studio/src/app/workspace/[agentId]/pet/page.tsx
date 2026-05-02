@@ -6,6 +6,7 @@ import { AgentPet } from "@/components/shared/AgentPet";
 import { motion } from "framer-motion";
 import { Sparkles, Zap, Heart, Moon, Coffee, AlertTriangle, Palette } from "lucide-react";
 import { PetConfig } from "@/lib/types";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -56,6 +57,7 @@ export default function PetPage() {
   };
 
   return (
+    <ErrorBoundary>
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -173,5 +175,6 @@ export default function PetPage() {
         </div>
       </div>
     </motion.div>
+    </ErrorBoundary>
   );
 }

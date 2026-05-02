@@ -5,12 +5,14 @@ import { WikiBrain } from "@/components/shared/WikiBrain";
 import { BrainCircuit, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 export default function WikiBrainPage() {
   const { agentId } = useParams<{ agentId: string }>();
   const [key, setKey] = useState(0); // force remount to re-fetch
 
   return (
+    <ErrorBoundary>
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -40,5 +42,6 @@ export default function WikiBrainPage() {
         <WikiBrain key={key} agentId={agentId} />
       </div>
     </motion.div>
+    </ErrorBoundary>
   );
 }
