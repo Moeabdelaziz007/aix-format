@@ -16,7 +16,7 @@ import {
   Star
 } from 'lucide-react';
 import { MarketplaceItem } from '../../lib/marketplace-api';
-import { KYABadge } from './KYABadge';
+import { KYABadge } from '@/components/agents/AgentCard/sub/KYABadge';
 import { TrustScore } from './TrustScore';
 import { RatingStars } from './RatingStars';
 import { InfoTooltip } from '@/components/shared';
