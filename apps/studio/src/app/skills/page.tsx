@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { Badge, Typography } from '@/components/shared';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { 
   Plus, 
   Search, 
@@ -79,7 +80,7 @@ Generates standard AIX Service Agreements.
   }
 ];
 
-export default function SkillsCatalogPage() {
+function SkillsCatalogContent() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [previewSkill, setPreviewSkill] = useState<any>(null);
 
@@ -232,5 +233,13 @@ export default function SkillsCatalogPage() {
 
       <SovereignStatusBar />
     </div>
+  );
+}
+
+export default function SkillsCatalogPage() {
+  return (
+    <ErrorBoundary boundaryName="SkillsCatalogPage">
+      <SkillsCatalogContent />
+    </ErrorBoundary>
   );
 }

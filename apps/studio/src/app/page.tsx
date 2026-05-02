@@ -9,8 +9,9 @@ import { VoiceOrb } from "@/components/studio/VoiceOrb";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
-export default function Home() {
+function HomeContent() {
   return (
     <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-manrope)]">
       <Navbar />
@@ -83,5 +84,13 @@ export default function Home() {
 
       <SovereignStatusBar />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <ErrorBoundary boundaryName="HomePage">
+      <HomeContent />
+    </ErrorBoundary>
   );
 }

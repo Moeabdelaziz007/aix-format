@@ -7,10 +7,11 @@ import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { ShoppingCart, Star, Shield, Zap, Search, Filter } from "lucide-react";
 import { mockAgents } from "@/lib/mock-agents";
 import { AgentCard } from "@/components/agents/AgentCard";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 const tags = ["All", "research", "support", "coding", "robotics", "finance", "content"];
 
-export default function MarketplacePage() {
+function MarketplaceContent() {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("All");
   const [kycFilter, setKycFilter] = useState("All");
@@ -144,5 +145,13 @@ export default function MarketplacePage() {
       </div>
       <SovereignStatusBar />
     </div>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <ErrorBoundary boundaryName="MarketplacePage">
+      <MarketplaceContent />
+    </ErrorBoundary>
   );
 }

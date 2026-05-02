@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { Badge, Typography } from '@/components/shared';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -26,7 +27,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-export default function AnalyticsHubPage() {
+function AnalyticsHubContent() {
   const [activeTab, setActiveTab] = useState<'revenue' | 'performance' | 'users'>('revenue');
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -307,5 +308,13 @@ export default function AnalyticsHubPage() {
 
       <SovereignStatusBar />
     </div>
+  );
+}
+
+export default function AnalyticsHubPage() {
+  return (
+    <ErrorBoundary boundaryName="AnalyticsHubPage">
+      <AnalyticsHubContent />
+    </ErrorBoundary>
   );
 }

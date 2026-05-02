@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronRight, 
@@ -39,7 +40,7 @@ const STEPS = [
   { id: 4, name: "Economics", icon: <Wallet className="w-4 h-4" /> }
 ];
 
-export default function AgentBuilderPage() {
+function AgentBuilderContent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [previewFormat, setPreviewFormat] = useState<"yaml" | "json">("yaml");
   const [copied, setCopied] = useState(false);
@@ -550,5 +551,13 @@ export default function AgentBuilderPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function AgentBuilderPage() {
+  return (
+    <ErrorBoundary boundaryName="AgentBuilderPage">
+      <AgentBuilderContent />
+    </ErrorBoundary>
   );
 }
