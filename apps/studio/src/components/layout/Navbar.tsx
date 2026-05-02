@@ -94,22 +94,7 @@ export function Navbar() {
           : "bg-transparent border-transparent"
       )}>
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:rotate-12 transition-transform duration-500  /20">
-            <Typography variant="h4" className="text-primary-dark italic leading-none m-0">A</Typography>
-          </div>
-          <div className="flex flex-col leading-none">
-            <Typography variant="h6" className="text-white uppercase italic tracking-tighter m-0">
-              AIX<span className="text-primary">Studio</span>
-            </Typography>
-            <Typography variant="caption" className="tracking-[0.2em] uppercase opacity-40 font-bold m-0">
-              Sovereign Intel
-            </Typography>
-          </div>
-        </Link>
-
-          {/* ── Logo ── */}
-          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
+        <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
             <div className="relative">
               <div className="absolute inset-0 rounded-xl bg-[rgba(0,212,255,0.15)] blur-md group-hover:bg-[rgba(0,212,255,0.25)] transition-all duration-300" />
               <div className="relative w-9 h-9 rounded-xl bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.2)] flex items-center justify-center">
@@ -201,19 +186,17 @@ export function Navbar() {
                       transition={{ duration: 0.15 }}
                       className="absolute right-0 top-full mt-2 w-60 glass-heavy rounded-2xl border border-white/10 overflow-hidden z-50"
                     >
-                      <div className="bg-surface-2/95  border border-white/10 rounded-xl p-1.5 ">
-                        {cat.links.map(link => (
-                          <Link 
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                              "block px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors",
-                              pathname === link.href ? "bg-primary/10 text-primary" : "text-white/40 hover:bg-white/5 hover:text-white"
-                            )}
-                          >
-                            {link.label}
-                          </Link>
-                        ))}
+                      <div className="bg-surface-2/95 border border-white/10 rounded-xl p-1.5">
+                        <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-foreground/60 hover:bg-white/5 hover:text-white transition-colors">
+                          <Shield className="w-4 h-4" /> Account Security
+                        </button>
+                        <div className="h-px bg-white/5 my-1" />
+                        <button
+                          onClick={handleDisconnect}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-danger hover:bg-danger/10 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" /> Disconnect
+                        </button>
                       </div>
                     </motion.div>
                   )}
@@ -225,32 +208,16 @@ export function Navbar() {
                 disabled={isAuthenticating}
                 className="btn btn-primary btn-md flex items-center gap-2 disabled:opacity-50"
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-mcp flex items-center justify-center text-[10px] font-black text-white">
-                  {user.username[0].toUpperCase()}
-                </div>
-                <Typography variant="caption" weight="bold" className="text-white uppercase italic">{user.username}</Typography>
-                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform text-foreground/40", showUserMenu && "rotate-180")} />
-              </button>
-
-              <AnimatePresence>
-                {showUserMenu && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-surface-3 border border-white/10 rounded-xl overflow-hidden  z-50 p-1"
-                  >
-                    <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-foreground/60 hover:bg-white/5 hover:text-white transition-colors">
-                      <Shield className="w-4 h-4" /> Account Security
-                    </button>
-                    <div className="h-px bg-white/5 my-1" />
-                    <button 
-                      onClick={handleDisconnect}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-danger hover:bg-danger/10 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" /> Disconnect
-                    </button>
-                  </motion.div>
+                {isAuthenticating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="w-4 h-4" />
+                    Connect Pi
+                  </>
                 )}
               </button>
             )}
@@ -268,9 +235,9 @@ export function Navbar() {
               </div>
             </button>
           </div>
-        </div>
+        </nav>
 
-      {/* Mobile Navigation */}
+        {/* Mobile Navigation */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div 

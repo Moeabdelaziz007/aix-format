@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { useSettings } from '@/hooks/useSettings';
-import { 
+import {
   AlertTriangle,
-  Copy, 
-  Check, 
+  Copy,
+  Check,
   LogOut,
   Download,
   Settings as SettingsIcon,
@@ -15,7 +15,9 @@ import {
   Box,
   Layers,
   Fingerprint,
-  Bell
+  Bell,
+  Key,
+  Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge, InfoTooltip, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/shared';
