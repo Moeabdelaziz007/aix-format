@@ -16,14 +16,20 @@
     },
     "./package.json": "./package.json"
   },
-  "keywords": ["redis", "storage", "aix", "session"],
+  "keywords": [
+    "redis",
+    "storage",
+    "aix",
+    "session"
+  ],
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@upstash/redis": "^1.34.3"
+    "@upstash/redis": "^1.34.3",
+    "@xenova/transformers": "^2.17.2"
   },
   "devDependencies": {
     "typescript": "^5.4.5"

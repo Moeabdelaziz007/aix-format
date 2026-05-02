@@ -1,4 +1,5 @@
-import { kv, KEYS, LearningEngine } from './index';
+import { kv, KEYS } from "./index";
+import * as LearningEngine from './learning';
 
 /**
  * Readable Memory System (v1.3.6)

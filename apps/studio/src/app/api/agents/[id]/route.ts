@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRegistry, updateRegistryEntry, deleteRegistryEntry } from "@/lib/registry";
+import { indexAgent } from '@aix-core/storage';
 
 /**
  * GET /api/agents/[id]
@@ -56,6 +57,7 @@ export async function PUT(
     };
 
     await updateRegistryEntry(updatedEntry);
+    try { await indexAgent(updatedEntry); } catch(e) { console.warn('Failed to semantically index agent:', e); }
     return NextResponse.json(updatedEntry);
   } catch (error) {
     console.error("Agent PUT Error:", error);

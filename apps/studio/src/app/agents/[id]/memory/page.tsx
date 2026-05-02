@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
 import { useLocalAgents } from '@/hooks/useLocalAgents';
+import { useWikiBrainSearch } from '@/hooks/useWikiBrainSearch';
 
 // --- Custom Node Components ---
 
@@ -108,7 +109,7 @@ export default function WikiBrainExplorer() {
   const { getAgent, loaded } = useLocalAgents();
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const [search, setSearch] = useState('');
+  const { query: search, setQuery: setSearch, results: searchResults, loading: searchLoading } = useWikiBrainSearch();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [timeValue, setTimeValue] = useState(100);
 
@@ -230,11 +231,19 @@ export default function WikiBrainExplorer() {
 
   const filteredNodes = useMemo(() => {
     if (!search) return nodes;
-    return nodes.map(n => ({
-      ...n,
-      hidden: n.type === 'item' && !n.data.label.toLowerCase().includes(search.toLowerCase()) && !n.data.summary?.toLowerCase().includes(search.toLowerCase())
-    }));
-  }, [nodes, search]);
+
+    // Create a set of IDs from semantic search results
+    const matchingIds = new Set(searchResults.map(r => r.id));
+
+    return nodes.map(n => {
+      const isMatch = searchResults.some(r => r.id === n.id);
+      return {
+        ...n,
+        style: isMatch ? { ...n.style, filter: 'drop-shadow(0 0 10px rgba(99,102,241,0.8))' } : n.style,
+        hidden: n.type === 'item' && !matchingIds.has(n.id) && !n.data.label.toLowerCase().includes(search.toLowerCase())
+      };
+    });
+  }, [nodes, search, searchResults]);
 
   if (!loaded) return <div className="min-h-screen bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>;
 

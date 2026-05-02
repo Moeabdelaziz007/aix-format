@@ -125,3 +125,8 @@ export async function updateEpisodicMemory(agentId: string, pattern: string): Pr
   const key = KEYS.memEpisodic(agentId);
   await kv.sadd(key, pattern);
 }
+
+export async function getAgentMemory(agentId: string): Promise<string[]> {
+    const key = KEYS.memEpisodic(agentId);
+    return await kv.smembers<string>(key);
+}
