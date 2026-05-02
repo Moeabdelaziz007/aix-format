@@ -31,9 +31,10 @@
     "dead-code:report": "cat .generated/dead-code-report.md",
     "health-score": "ts-node scripts/health-score.ts",
     "health-score:report": "cat .generated/health-score.json",
-    "health:check": "npm run health-score && node scripts/health-trend.js",
+    "health:check": "ts-node scripts/self-heal.ts",
     "health:fix": "node scripts/auto-issue-generator.js",
-    "health:full": "npm run health:check && npm run health:fix"
+    "health:full": "npm run health:check && npm run health:fix",
+    "health:report": "cat .generated/HEALTH_REPORT.md"
   },
   "keywords": [
     "ai",
