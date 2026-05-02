@@ -1,4 +1,4 @@
-import { Manifest, AbomData, ScanResult, RiskItem, ComplianceReport } from '../apps/studio/src/lib/types';
+import { Manifest, AbomData, ScanResult, RiskItem, ComplianceReport } from '../apps/studio/src/lib/types.ts';
 
 /**
  * ABOM Scanner - Sovereign Risk Scoring Engine

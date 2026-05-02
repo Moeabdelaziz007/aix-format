@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { IdentityLayer, KycProof } from '../apps/studio/src/lib/types';
+import { IdentityLayer, KycProof } from '../apps/studio/src/lib/types.ts';
 
 export interface ProviderResult {
   uid: string;

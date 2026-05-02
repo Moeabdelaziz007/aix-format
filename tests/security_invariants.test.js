@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
-import { scanAgent } from '../packages/core/src/abom-scanner.ts';
+import { scanAgent } from '../core/abom-scanner.ts';
 
 test('Security Invariants: Low Risk Manifest', async (t) => {
   const content = await fs.readFile('tests/golden_manifests/low-risk.aix.json', 'utf8');

@@ -38,7 +38,7 @@ export default function MyAgentsPage() {
         </motion.div>
 
             <button onClick={() => router.push('/builder')}
-              className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:brightness-110 
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] hover:brightness-110
                          rounded-xl text-black font-bold transition shadow-[0_10px_20px_rgba(0,219,233,0.2)]">
               <Plus className="w-4 h-4" />
               Build Agent
