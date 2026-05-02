@@ -1,12 +1,12 @@
 /**
  * AIX Parser - Reference Implementation
  * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026
- * 
+ *
  * Zero-dependency parser for AIX (Artificial Intelligence eXchange) files.
  * Supports YAML, JSON, and TOML formats with built-in validation.
- * 
+ *
  * Copyright © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions
- * Licensed under MIT License - See LICENSE.md
+ * Licensed under Apache-2.0 License - See LICENSE.md
  */
 
 import fs from 'fs';
