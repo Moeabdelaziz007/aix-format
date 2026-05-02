@@ -1169,6 +1169,355 @@ function calculateComputePrice(
 - Compute fit accuracy: >90%
 
 ---
+## Layer 9: Reinforcement Learning Compression Policy
+
+### Purpose
+
+Layer 9 provides intelligent, adaptive compression that learns optimal strategies from task outcomes, storing task-specific profiles in fold_trace for continuous improvement.
+
+### Key Innovation: Learning from Outcomes
+
+Unlike traditional compression that applies fixed algorithms, Layer 9 uses reinforcement learning to discover which compression strategies work best for different task types, contexts, and quality requirements.
+
+**Philosophy**: Compression decisions should improve over time based on real-world outcomes, not remain static.
+
+### Key Components
+
+#### 1. Reinforcement Learning Engine
+
+```typescript
+// packages/aix-core/src/learning/rl-compression.ts
+interface RLCompressionState {
+  taskType: string;
+  contextSize: number;
+  qualityRequirement: number;
+  latencyBudget: number;
+  currentMemory: number;
+}
+
+interface RLCompressionAction {
+  algorithm: 'lz4' | 'zstd' | 'brotli' | 'semantic';
+  compressionLevel: 1-9;
+  preserveTokens: number;
+  aggressiveness: 'conservative' | 'balanced' | 'aggressive';
+}
+
+interface RLReward {
+  compressionRatio: number;      // Higher is better
+  qualityPreserved: number;      // 0-1, higher is better
+  latency: number;               // Lower is better
+  taskSuccess: boolean;          // Did the task succeed?
+  userSatisfaction: number;      // 0-1, from feedback
+}
+
+class RLCompressionEngine {
+  private qTable: Map<string, Map<string, number>>;  // State-Action Q-values
+  private learningRate: number = 0.1;
+  private discountFactor: number = 0.95;
+  private explorationRate: number = 0.1;
+  
+  async selectAction(state: RLCompressionState): Promise<RLCompressionAction> {
+    // Epsilon-greedy exploration
+    if (Math.random() < this.explorationRate) {
+      return this.exploreAction(state);
+    }
+    
+    // Exploit: Choose best known action
+    return this.exploitAction(state);
+  }
+  
+  async updatePolicy(
+    state: RLCompressionState,
+    action: RLCompressionAction,
+    reward: RLReward,
+    nextState: RLCompressionState
+  ): Promise<void> {
+    // Q-learning update
+    const stateKey = this.encodeState(state);
+    const actionKey = this.encodeAction(action);
+    
+    const currentQ = this.qTable.get(stateKey)?.get(actionKey) || 0;
+    const maxNextQ = this.getMaxQ(nextState);
+    
+    // Calculate total reward
+    const totalReward = this.calculateTotalReward(reward);
+    
+    // Q-learning formula: Q(s,a) = Q(s,a) + α[r + γ·max(Q(s',a')) - Q(s,a)]
+    const newQ = currentQ + this.learningRate * (
+      totalReward + this.discountFactor * maxNextQ - currentQ
+    );
+    
+    // Update Q-table
+    if (!this.qTable.has(stateKey)) {
+      this.qTable.set(stateKey, new Map());
+    }
+    this.qTable.get(stateKey)!.set(actionKey, newQ);
+    
+    // Store in fold_trace for audit and analysis
+    await this.foldTrace.record({
+      type: 'rl_update',
+      state,
+      action,
+      reward,
+      oldQ: currentQ,
+      newQ,
+      timestamp: Date.now()
+    });
+  }
+  
+  private calculateTotalReward(reward: RLReward): number {
+    // Multi-objective reward function
+    return (
+      reward.compressionRatio * 0.3 +
+      reward.qualityPreserved * 0.4 +
+      (1 - reward.latency / 1000) * 0.1 +
+      (reward.taskSuccess ? 1 : -1) * 0.15 +
+      reward.userSatisfaction * 0.05
+    );
+  }
+}
+```
+
+#### 2. Task-Specific Profile Storage
+
+```typescript
+interface CompressionProfile {
+  taskType: string;
+  profileId: string;
+  learnedStrategy: {
+    preferredAlgorithm: string;
+    optimalLevel: number;
+    preservePatterns: string[];
+    aggressiveness: string;
+  };
+  performance: {
+    averageRatio: number;
+    averageQuality: number;
+    averageLatency: number;
+    successRate: number;
+  };
+  trainingHistory: {
+    episodes: number;
+    lastUpdated: number;
+    convergenceScore: number;
+  };
+  didAxiom: string;  // Stored with did:axiom identity
+}
+
+class ProfileManager {
+  async storeProfile(profile: CompressionProfile): Promise<void> {
+    // 1. Generate did:axiom identity for profile
+    profile.didAxiom = await this.generateDidAxiom(profile);
+    
+    // 2. Store in fold_trace for audit trail
+    await this.foldTrace.record({
+      type: 'profile_update',
+      profile,
+      timestamp: Date.now()
+    });
+    
+    // 3. Store in vector DB for semantic retrieval
+    await this.vectorDB.store({
+      id: profile.profileId,
+      embedding: await this.embedProfile(profile),
+      metadata: profile
+    });
+  }
+  
+  async retrieveProfile(taskType: string, context: any): Promise<CompressionProfile | null> {
+    // Semantic search for similar task profiles
+    const results = await this.vectorDB.search({
+      query: `${taskType} ${JSON.stringify(context)}`,
+      limit: 1,
+      threshold: 0.8
+    });
+    
+    return results[0]?.metadata || null;
+  }
+}
+```
+
+#### 3. Outcome-Based Learning
+
+```typescript
+interface TaskOutcome {
+  taskId: string;
+  taskType: string;
+  compressionUsed: RLCompressionAction;
+  results: {
+    success: boolean;
+    quality: number;
+    latency: number;
+    memoryUsed: number;
+    userFeedback?: number;
+  };
+}
+
+class OutcomeLearner {
+  async learnFromOutcome(outcome: TaskOutcome): Promise<void> {
+    // 1. Calculate reward from outcome
+    const reward: RLReward = {
+      compressionRatio: this.baseline / outcome.results.memoryUsed,
+      qualityPreserved: outcome.results.quality,
+      latency: outcome.results.latency,
+      taskSuccess: outcome.results.success,
+      userSatisfaction: outcome.results.userFeedback || 0.5
+    };
+    
+    // 2. Update RL policy
+    await this.rlEngine.updatePolicy(
+      this.getStateFromTask(outcome),
+      outcome.compressionUsed,
+      reward,
+      this.getNextState(outcome)
+    );
+    
+    // 3. Update task-specific profile
+    const profile = await this.profileManager.retrieveProfile(
+      outcome.taskType,
+      outcome
+    );
+    
+    if (profile) {
+      await this.updateProfile(profile, outcome, reward);
+    } else {
+      await this.createProfile(outcome, reward);
+    }
+    
+    // 4. Record in fold_trace
+    await this.foldTrace.record({
+      type: 'outcome_learning',
+      outcome,
+      reward,
+      timestamp: Date.now()
+    });
+  }
+}
+```
+
+#### 4. Adaptive Strategy Selection
+
+```typescript
+class AdaptiveCompressionSelector {
+  async selectStrategy(
+    taskType: string,
+    context: CompressionContext
+  ): Promise<CompressionStrategy> {
+    // 1. Check for learned profile
+    const profile = await this.profileManager.retrieveProfile(taskType, context);
+    
+    if (profile && profile.trainingHistory.convergenceScore > 0.8) {
+      // Use learned strategy
+      return {
+        algorithm: profile.learnedStrategy.preferredAlgorithm,
+        level: profile.learnedStrategy.optimalLevel,
+        preservePatterns: profile.learnedStrategy.preservePatterns,
+        source: 'learned'
+      };
+    }
+    
+    // 2. Use RL engine to select action
+    const state: RLCompressionState = {
+      taskType,
+      contextSize: context.size,
+      qualityRequirement: context.qualityThreshold,
+      latencyBudget: context.latencyBudget,
+      currentMemory: context.currentMemory
+    };
+    
+    const action = await this.rlEngine.selectAction(state);
+    
+    return {
+      algorithm: action.algorithm,
+      level: action.compressionLevel,
+      preservePatterns: [],
+      source: 'rl_policy'
+    };
+  }
+}
+```
+
+### Integration with Other Layers
+
+**Layer 3 (Adaptive Compression):**
+- Layer 9 provides learned compression strategies to Layer 3
+- Layer 3 executes compression and reports outcomes back to Layer 9
+
+**Layer 7 (Security Redlines):**
+- Layer 9 respects security vetoes from Layer 7
+- Never learns strategies that violate security policies
+
+**Layer 6 (Economic Optimization):**
+- Layer 9 considers cost in reward function
+- Learns cost-effective compression strategies
+
+**fold_trace (Audit Trail):**
+- All learning updates stored in fold_trace
+- Enables audit of compression decisions
+- Supports regulatory compliance
+
+### Performance Targets
+
+| Metric | Target | Rationale |
+|--------|--------|-----------|
+| Learning Convergence | <1000 episodes | Reasonable training time |
+| Strategy Selection | <20ms | Minimal overhead |
+| Profile Retrieval | <50ms | Fast semantic search |
+| Improvement Over Baseline | 15-25% | Learned vs. fixed strategies |
+| Adaptation Time | <100 tasks | Quick learning for new task types |
+
+### Example: Learning Optimal Compression for Code Tasks
+
+```typescript
+// Initial state: No learned profile for code tasks
+const codeTask = {
+  taskType: 'code_generation',
+  context: { language: 'typescript', complexity: 'medium' }
+};
+
+// Episode 1: Try LZ4 (fast, low ratio)
+const action1 = { algorithm: 'lz4', level: 3 };
+const outcome1 = { success: true, quality: 0.85, latency: 30 };
+// Reward: 0.6 (good latency, moderate quality)
+
+// Episode 2: Try Zstd (balanced)
+const action2 = { algorithm: 'zstd', level: 5 };
+const outcome2 = { success: true, quality: 0.92, latency: 45 };
+// Reward: 0.75 (better quality, acceptable latency)
+
+// Episode 3: Try Brotli (high ratio, slow)
+const action3 = { algorithm: 'brotli', level: 7 };
+const outcome3 = { success: true, quality: 0.95, latency: 120 };
+// Reward: 0.65 (best quality, but too slow)
+
+// After 100 episodes: Learned profile
+const learnedProfile = {
+  taskType: 'code_generation',
+  learnedStrategy: {
+    preferredAlgorithm: 'zstd',
+    optimalLevel: 5,
+    preservePatterns: ['function', 'class', 'import'],
+    aggressiveness: 'balanced'
+  },
+  performance: {
+    averageRatio: 3.8,
+    averageQuality: 0.93,
+    averageLatency: 42,
+    successRate: 0.98
+  }
+};
+```
+
+### Benefits
+
+1. **Continuous Improvement**: System gets better over time
+2. **Task-Specific Optimization**: Different strategies for different tasks
+3. **Adaptation to Changes**: Learns new patterns as workload evolves
+4. **Audit Trail**: All learning stored in fold_trace
+5. **Reusability**: Profiles stored with did:axiom for sharing
+
+---
+
 
 ## Compression Integration
 
@@ -1259,6 +1608,685 @@ interface CompressionPipeline {
 ```
 
 ---
+## Task-Specific Compression Profiles
+
+### Overview
+
+Different task types require different compression strategies. This section defines optimized compression profiles for common agentic AI tasks, learned through Layer 9's reinforcement learning system.
+
+### Profile Categories
+
+#### 1. Code Generation & Analysis
+
+**Characteristics:**
+- High structure (functions, classes, imports)
+- Repetitive patterns (syntax, keywords)
+- Critical: Preserve code semantics
+- Moderate tolerance for latency
+
+**Optimal Strategy:**
+```typescript
+const codeProfile: CompressionProfile = {
+  taskType: 'code_generation',
+  algorithm: 'zstd',
+  level: 5,
+  preservePatterns: [
+    'function', 'class', 'import', 'export',
+    'const', 'let', 'var', 'interface', 'type'
+  ],
+  aggressiveness: 'balanced',
+  expectedRatio: 3.8,
+  qualityThreshold: 0.95,
+  maxLatency: 50  // ms
+};
+```
+
+**Rationale:**
+- Zstd provides good balance of speed and ratio
+- Preserving keywords maintains code structure
+- 3.8x ratio achievable without semantic loss
+
+---
+
+#### 2. Data Processing & Analytics
+
+**Characteristics:**
+- Numeric data dominates
+- Temporal patterns (time series)
+- High compression potential
+- Latency-sensitive (real-time analytics)
+
+**Optimal Strategy:**
+```typescript
+const dataProfile: CompressionProfile = {
+  taskType: 'data_processing',
+  algorithm: 'delta-lz4',
+  level: 3,
+  preservePatterns: ['timestamp', 'id', 'key'],
+  aggressiveness: 'aggressive',
+  expectedRatio: 4.2,
+  qualityThreshold: 0.98,  // High accuracy needed
+  maxLatency: 20  // ms - real-time requirement
+};
+```
+
+**Rationale:**
+- Delta encoding excellent for numeric sequences
+- LZ4 provides fastest decompression
+- 4.2x ratio from temporal patterns
+
+---
+
+#### 3. KYC & Compliance Documents
+
+**Characteristics:**
+- Sensitive PII data
+- Legal/regulatory requirements
+- Must preserve exact content
+- Audit trail critical
+
+**Optimal Strategy:**
+```typescript
+const kycProfile: CompressionProfile = {
+  taskType: 'kyc_compliance',
+  algorithm: 'brotli',
+  level: 7,
+  preservePatterns: ['ssn', 'passport', 'address', 'dob'],
+  aggressiveness: 'conservative',
+  expectedRatio: 3.2,
+  qualityThreshold: 1.0,  // Lossless required
+  maxLatency: 100,  // ms - not time-critical
+  securityRedlines: [
+    'never_compress_ssn',
+    'never_compress_passport',
+    'always_encrypt_before_compress'
+  ]
+};
+```
+
+**Rationale:**
+- Brotli provides highest compression for text
+- Conservative approach for legal compliance
+- Security redlines prevent PII exposure
+- fold_trace records all operations
+
+---
+
+#### 4. Creative Content Generation
+
+**Characteristics:**
+- Natural language
+- Context-dependent meaning
+- Tolerance for lossy compression
+- Quality over speed
+
+**Optimal Strategy:**
+```typescript
+const creativeProfile: CompressionProfile = {
+  taskType: 'creative_generation',
+  algorithm: 'semantic',
+  level: 6,
+  preservePatterns: ['key_concepts', 'entities', 'sentiment'],
+  aggressiveness: 'balanced',
+  expectedRatio: 4.5,
+  qualityThreshold: 0.85,  // Some loss acceptable
+  maxLatency: 80,  // ms
+  semanticPreservation: {
+    embeddings: true,
+    keyPhrases: true,
+    sentiment: true
+  }
+};
+```
+
+**Rationale:**
+- Semantic compression preserves meaning, not exact words
+- 4.5x ratio from redundancy in natural language
+- Lower quality threshold acceptable for creative tasks
+
+---
+
+#### 5. Real-Time Conversation
+
+**Characteristics:**
+- Short messages
+- Low latency critical
+- Context window management
+- Frequent updates
+
+**Optimal Strategy:**
+```typescript
+const conversationProfile: CompressionProfile = {
+  taskType: 'realtime_conversation',
+  algorithm: 'lz4',
+  level: 1,
+  preservePatterns: ['user_intent', 'entities'],
+  aggressiveness: 'conservative',
+  expectedRatio: 2.8,
+  qualityThreshold: 0.92,
+  maxLatency: 10,  // ms - real-time requirement
+  streamingOptimized: true
+};
+```
+
+**Rationale:**
+- LZ4 level 1 provides fastest compression
+- Lower ratio acceptable for speed
+- Streaming optimization for incremental updates
+
+---
+
+### Profile Comparison Table
+
+| Task Type | Algorithm | Level | Ratio | Latency | Quality | Use Case |
+|-----------|-----------|-------|-------|---------|---------|----------|
+| **Code** | Zstd | 5 | 3.8x | 50ms | 0.95 | Development, analysis |
+| **Data** | Delta-LZ4 | 3 | 4.2x | 20ms | 0.98 | Analytics, metrics |
+| **KYC** | Brotli | 7 | 3.2x | 100ms | 1.0 | Compliance, legal |
+| **Creative** | Semantic | 6 | 4.5x | 80ms | 0.85 | Content generation |
+| **Conversation** | LZ4 | 1 | 2.8x | 10ms | 0.92 | Chat, real-time |
+
+### Profile Selection Logic
+
+```typescript
+class ProfileSelector {
+  async selectProfile(task: Task): Promise<CompressionProfile> {
+    // 1. Check for learned profile (Layer 9)
+    const learned = await this.layer9.getLearnedProfile(task.type);
+    if (learned && learned.convergenceScore > 0.8) {
+      return learned;
+    }
+    
+    // 2. Use predefined profile
+    const predefined = this.profiles.get(task.type);
+    if (predefined) {
+      return predefined;
+    }
+    
+    // 3. Infer from task characteristics
+    return this.inferProfile(task);
+  }
+  
+  private inferProfile(task: Task): CompressionProfile {
+    // Analyze task to determine best profile
+    if (task.hasCode) return this.profiles.get('code_generation');
+    if (task.hasNumericData) return this.profiles.get('data_processing');
+    if (task.hasPII) return this.profiles.get('kyc_compliance');
+    if (task.isRealtime) return this.profiles.get('realtime_conversation');
+    
+    // Default: creative profile
+    return this.profiles.get('creative_generation');
+  }
+}
+```
+
+### Profile Evolution
+
+Profiles evolve over time through Layer 9's reinforcement learning:
+
+1. **Initial**: Use predefined profile
+2. **Learning**: Collect outcomes, adjust parameters
+3. **Convergence**: Learned profile replaces predefined
+4. **Continuous**: Keep learning from new outcomes
+
+**Example Evolution:**
+```
+Week 1: Code profile uses Zstd level 5 (predefined)
+Week 4: Learning shows level 6 gives better quality with acceptable latency
+Week 8: Converged to Zstd level 6, 4.1x ratio, 55ms latency
+Week 12: Continues to adapt to new code patterns
+```
+
+### Integration with Security Redlines (Layer 7)
+
+All profiles respect security redlines:
+
+```typescript
+interface SecurityRedline {
+  pattern: RegExp;
+## Total Economic Model
+
+### Overview
+
+The Total Economic Model provides a comprehensive cost function that considers not just API costs, but also latency impact on UX, quality degradation risks, compression overhead, and reuse savings.
+
+**Philosophy**: True cost optimization requires understanding the full economic picture, not just direct API expenses.
+
+### The Complete Cost Function
+
+```typescript
+interface TotalCost {
+  apiCost: number;              // Direct LLM API costs
+  latencyCost: number;          // UX impact of delays
+  qualityDegradationCost: number; // Risk of failures
+  compressionOverhead: number;  // Processing cost
+  reuseSavings: number;         // Pattern reuse benefits
+  total: number;                // Net cost
+}
+
+function calculateTotalCost(operation: Operation): TotalCost {
+  const apiCost = operation.tokens * operation.pricePerToken;
+  
+  const latencyCost = operation.latency * UX_COST_PER_MS;
+  
+  const qualityDegradationCost = 
+    operation.qualityDegradation * 
+    operation.failureProbability * 
+    FAILURE_COST;
+  
+  const compressionOverhead = 
+    operation.compressionTime * COMPUTE_COST_PER_MS;
+  
+  const reuseSavings = 
+    operation.patternsReused * PATTERN_VALUE;
+  
+  const total = 
+    apiCost + 
+    latencyCost + 
+    qualityDegradationCost + 
+    compressionOverhead - 
+    reuseSavings;
+  
+  return {
+    apiCost,
+    latencyCost,
+    qualityDegradationCost,
+    compressionOverhead,
+    reuseSavings,
+    total
+  };
+}
+```
+
+### Cost Components Breakdown
+
+#### 1. API Cost (Direct)
+
+**Formula**: `tokens × price_per_token`
+
+```typescript
+interface APICost {
+  inputTokens: number;
+  outputTokens: number;
+  pricePerInputToken: number;   // e.g., $0.01/1k
+  pricePerOutputToken: number;  // e.g., $0.03/1k
+  total: number;
+}
+
+function calculateAPICost(operation: Operation): number {
+  return (
+    (operation.inputTokens / 1000) * operation.inputPrice +
+    (operation.outputTokens / 1000) * operation.outputPrice
+  );
+}
+
+// Example: 10k input, 2k output tokens
+// Cost = (10 * $0.01) + (2 * $0.03) = $0.16
+```
+
+**Baseline**: $120/month per agent (400k tokens/day)  
+**With Compression**: $48/month (3.3x reduction)
+
+---
+
+#### 2. Latency Cost (UX Impact)
+
+**Formula**: `latency_ms × ux_cost_per_ms`
+
+```typescript
+interface LatencyCost {
+  latency: number;              // milliseconds
+  uxCostPerMs: number;          // $ per ms of delay
+  userDropoffRate: number;      // % per 100ms
+  revenueImpact: number;        // $ lost
+}
+
+function calculateLatencyCost(latency: number): number {
+  // Research shows:
+  // - 100ms delay = 1% conversion drop
+  // - 1s delay = 7% conversion drop
+  
+  const UX_COST_PER_MS = 0.0001;  // $0.0001 per ms
+  
+  // For 500ms latency:
+  // Cost = 500 * 0.0001 = $0.05 per operation
+  
+  return latency * UX_COST_PER_MS;
+}
+```
+
+**Example Impact:**
+- Baseline latency: 450ms → $0.045/operation
+- With compression: 480ms → $0.048/operation
+- Net: +$0.003/operation (acceptable tradeoff)
+
+---
+
+#### 3. Quality Degradation Cost (Failure Risk)
+
+**Formula**: `quality_loss × failure_probability × failure_cost`
+
+```typescript
+interface QualityDegradationCost {
+  qualityLoss: number;          // 0-1 (0 = no loss)
+  failureProbability: number;   // 0-1
+  failureCost: number;          // $ per failure
+  expectedCost: number;
+}
+
+function calculateQualityDegradationCost(
+  operation: Operation
+): number {
+  // Quality loss from compression
+  const qualityLoss = 1 - operation.qualityScore;
+  
+  // Probability of task failure
+  const failureProbability = qualityLoss * 0.5;  // 50% correlation
+  
+  // Cost of failure (retry + user frustration)
+  const failureCost = 2.0;  // $2 per failure
+  
+  return qualityLoss * failureProbability * failureCost;
+}
+
+// Example:
+// Quality score: 0.95 (5% loss)
+// Failure prob: 0.05 * 0.5 = 0.025 (2.5%)
+// Expected cost: 0.05 * 0.025 * $2 = $0.0025
+```
+
+**Key Insight**: Aggressive compression that degrades quality can cost more than it saves.
+
+---
+
+#### 4. Compression Overhead (Processing Cost)
+
+**Formula**: `compression_time_ms × compute_cost_per_ms`
+
+```typescript
+interface CompressionOverhead {
+  compressionTime: number;      // ms
+  decompressionTime: number;    // ms
+  computeCostPerMs: number;     // $ per ms
+  totalOverhead: number;
+}
+
+function calculateCompressionOverhead(
+  operation: Operation
+): number {
+  const COMPUTE_COST_PER_MS = 0.00001;  // $0.00001 per ms
+  
+  const totalTime = 
+    operation.compressionTime + 
+    operation.decompressionTime;
+  
+  return totalTime * COMPUTE_COST_PER_MS;
+}
+
+// Example:
+// Compression: 50ms
+// Decompression: 20ms
+// Cost: 70 * 0.00001 = $0.0007
+```
+
+**Optimization**: Choose fast algorithms (LZ4) for latency-sensitive tasks.
+
+---
+
+#### 5. Reuse Savings (Pattern Value)
+
+**Formula**: `patterns_reused × pattern_value`
+
+```typescript
+interface ReuseSavings {
+  patternsExtracted: number;
+  patternsReused: number;
+  patternValue: number;         // $ saved per reuse
+  totalSavings: number;
+}
+
+function calculateReuseSavings(
+  operation: Operation
+): number {
+  // Value of reusing a pattern (avoids recomputation)
+  const PATTERN_VALUE = 0.05;  // $0.05 per pattern reuse
+  
+  // Patterns stored via Layer 4 Knowledge Distillation
+  const patternsReused = operation.patternsReused;
+  
+  return patternsReused * PATTERN_VALUE;
+}
+
+// Example:
+// Task reuses 10 patterns from knowledge base
+// Savings: 10 * $0.05 = $0.50
+```
+
+**Key Benefit**: Knowledge distillation (Layer 4) provides compounding savings over time.
+
+---
+
+### Complete Example Calculation
+
+```typescript
+// Scenario: Code generation task with compression
+
+const operation = {
+  // API costs
+  inputTokens: 5000,
+  outputTokens: 1500,
+  inputPrice: 0.01,   // per 1k tokens
+  outputPrice: 0.03,
+  
+  // Performance
+  latency: 480,       // ms (includes compression)
+  compressionTime: 50,
+  decompressionTime: 20,
+  
+  // Quality
+  qualityScore: 0.95,
+  
+  // Reuse
+  patternsReused: 8
+};
+
+const costs = calculateTotalCost(operation);
+
+// Results:
+{
+  apiCost: 0.095,              // (5 * 0.01) + (1.5 * 0.03)
+  latencyCost: 0.048,          // 480 * 0.0001
+  qualityDegradationCost: 0.0025,  // 0.05 * 0.025 * 2
+  compressionOverhead: 0.0007,  // 70 * 0.00001
+  reuseSavings: -0.40,         // 8 * 0.05
+  total: -0.254                // Net savings!
+}
+```
+
+**Interpretation**: Despite adding latency and overhead, compression + reuse provides net savings of $0.254 per operation.
+
+---
+
+### Cost Optimization Strategies
+
+#### Strategy 1: Minimize Total Cost
+
+```typescript
+class CostOptimizer {
+  async optimizeForTotalCost(task: Task): Promise<Strategy> {
+    const strategies = [
+      this.noCompression(task),
+      this.lightCompression(task),
+      this.aggressiveCompression(task),
+      this.semanticCompression(task)
+    ];
+    
+    const costs = await Promise.all(
+      strategies.map(s => this.calculateTotalCost(s))
+    );
+    
+    // Select strategy with lowest total cost
+    const minCostIndex = costs.indexOf(Math.min(...costs));
+    return strategies[minCostIndex];
+  }
+}
+```
+
+#### Strategy 2: Maximize ROI
+
+```typescript
+function calculateROI(strategy: Strategy): number {
+  const baseline = calculateTotalCost(noCompressionStrategy);
+  const optimized = calculateTotalCost(strategy);
+  
+  const savings = baseline.total - optimized.total;
+  const investment = strategy.implementationCost;
+  
+  return (savings / investment) * 100;  // ROI percentage
+}
+
+// Example:
+// Baseline: $160/month
+// Optimized: $48/month
+// Savings: $112/month
+// Investment: $500 (one-time)
+// ROI: ($112 * 12 / $500) * 100 = 268% annual ROI
+```
+
+#### Strategy 3: Balance Quality and Cost
+
+```typescript
+function findOptimalBalance(
+  qualityThreshold: number,
+  costBudget: number
+): Strategy {
+  // Find strategy that:
+  // 1. Meets quality threshold
+  // 2. Minimizes cost
+  // 3. Stays within budget
+  
+  const candidates = strategies.filter(s => 
+    s.qualityScore >= qualityThreshold &&
+    s.totalCost <= costBudget
+  );
+  
+  return candidates.reduce((best, current) =>
+    current.totalCost < best.totalCost ? current : best
+  );
+}
+```
+
+---
+
+### Economic Model Integration with Layers
+
+**Layer 6 (Economic Optimization):**
+- Uses Total Economic Model for all decisions
+- Tracks costs in real-time
+- Predicts future costs based on patterns
+
+**Layer 9 (Reinforcement Learning):**
+- Reward function includes total cost
+- Learns cost-effective strategies
+- Adapts to changing cost dynamics
+
+**Layer 7 (Governance):**
+- Enforces cost budgets
+- Alerts on cost anomalies
+- Prevents runaway expenses
+
+---
+
+### Cost Monitoring Dashboard
+
+```typescript
+interface CostDashboard {
+  current: {
+    apiCost: number;
+    latencyCost: number;
+    qualityDegradationCost: number;
+    compressionOverhead: number;
+    reuseSavings: number;
+    total: number;
+  };
+  
+  trends: {
+    daily: CostTrend[];
+    weekly: CostTrend[];
+    monthly: CostTrend[];
+  };
+  
+  projections: {
+    nextMonth: number;
+    nextQuarter: number;
+    nextYear: number;
+  };
+  
+  alerts: CostAlert[];
+}
+```
+
+---
+
+### Key Takeaways
+
+1. **API cost is only part of the picture** - Latency and quality matter too
+2. **Compression has overhead** - Must be factored into total cost
+3. **Reuse provides compounding value** - Knowledge distillation pays off over time
+4. **Optimal strategy varies by task** - No one-size-fits-all solution
+5. **Total cost can be negative** - Savings exceed costs with good strategy
+
+**Bottom Line**: The Total Economic Model enables intelligent cost optimization that considers all factors, not just API expenses.
+
+---
+
+  action: 'veto' | 'encrypt_first' | 'redact';
+  reason: string;
+}
+
+const kycRedlines: SecurityRedline[] = [
+  {
+    pattern: /\b\d{3}-\d{2}-\d{4}\b/,  // SSN
+    action: 'veto',
+    reason: 'Never compress SSN in plain text'
+  },
+  {
+    pattern: /\b[A-Z]{2}\d{6,9}\b/,  // Passport
+    action: 'encrypt_first',
+    reason: 'Encrypt passport before compression'
+  }
+];
+```
+
+### Performance Monitoring
+
+Each profile tracks performance metrics:
+
+```typescript
+interface ProfileMetrics {
+  taskType: string;
+  totalTasks: number;
+  averageRatio: number;
+  averageLatency: number;
+  averageQuality: number;
+  successRate: number;
+  lastUpdated: number;
+}
+
+// Example metrics after 1000 tasks
+const codeMetrics: ProfileMetrics = {
+  taskType: 'code_generation',
+  totalTasks: 1000,
+  averageRatio: 3.9,  // Improved from 3.8
+  averageLatency: 48,  // Improved from 50
+  averageQuality: 0.96,  // Improved from 0.95
+  successRate: 0.98,
+  lastUpdated: Date.now()
+};
+```
+
+---
+
 
 ## Pi Network Compute Marketplace
 
