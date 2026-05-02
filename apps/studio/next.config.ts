@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // Fix monorepo tracing root - pointing to workspace root
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  outputFileTracingRoot: path.join(process.cwd(), "../../"),
   transpilePackages: ["@aix-core/storage", "aix-format"], 
   
   env: {
