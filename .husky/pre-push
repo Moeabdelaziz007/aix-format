@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Health Score Check (Autonomous Improvement Protocol)
+# يتم تشغيل فحص النقاط الصحية قبل كل push
+
+echo "🔍 Running Health Score check..."
+npm run health-score
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "⚠️  Health score below threshold!"
+  echo "⚠️  النقاط الصحية أقل من الحد المطلوب!"
+  echo ""
+  echo "Review the report: cat .generated/health-score.json"
+  echo "راجع التقرير: cat .generated/health-score.json"
+  echo ""
+  echo "Or push with --no-verify to skip this check."
+  echo "أو استخدم --no-verify لتجاوز هذا الفحص."
+  exit 1
+fi
+
+echo "✅ Health score check passed"
