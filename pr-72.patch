@@ -1,0 +1,206 @@
+From 74ff0f67e9c9888aa201fe68651a1df7280a3ab4 Mon Sep 17 00:00:00 2001
+From: Moeabdelaziz007 <200681198+Moeabdelaziz007@users.noreply.github.com>
+Date: Fri, 1 May 2026 18:39:22 +0000
+Subject: [PATCH] chore: replace console.log with structured logger and fix CI
+ workflows
+
+- Refactored `apps/aix-detective` to use a structured logger in `src/logger.js`.
+- Separated audit results (stdout) from terminal errors (stderr).
+- Fixed incorrect working directory for core tests in `ci.yml`.
+- Updated `pattern-watcher.yml` to use Node 20 and actions v4.
+- Fixed Next.js linting error in `apps/studio` by specifying directory.
+
+Co-authored-by: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>
+---
+ .github/workflows/ci.yml              |  2 +-
+ .github/workflows/pattern-watcher.yml |  6 ++--
+ apps/aix-detective/index.js           | 49 ++++++++++++---------------
+ apps/aix-detective/src/logger.js      | 33 ++++++++++++++++++
+ apps/studio/package.json              |  2 +-
+ 5 files changed, 59 insertions(+), 33 deletions(-)
+ create mode 100644 apps/aix-detective/src/logger.js
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 2f92538..8337939 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -51,7 +51,7 @@ jobs:
+     runs-on: ubuntu-latest
+     defaults:
+       run:
+-        working-directory: packages/core
++        working-directory: packages/aix-core
+     steps:
+       - uses: actions/checkout@v4
+ 
+diff --git b/.github/workflows/pattern-watcher.yml b/.github/workflows/pattern-watcher.yml
+index 1e00916..0da78fa 100644
+--- a/.github/workflows/pattern-watcher.yml
++++ b/.github/workflows/pattern-watcher.yml
+@@ -9,14 +9,14 @@ jobs:
+   watch-patterns:
+     runs-on: ubuntu-latest
+     steps:
+-      - uses: actions/checkout@v3
++      - uses: actions/checkout@v4
+         with:
+           fetch-depth: 0
+ 
+       - name: Setup Node.js
+-        uses: actions/setup-node@v3
++        uses: actions/setup-node@v4
+         with:
+-          node-version: '18'
++          node-version: '20'
+ 
+       - name: Install dependencies
+         run: npm ci
+diff --git b/apps/aix-detective/index.js b/apps/aix-detective/index.js
+index 2e021d2..c8c4794 100755
+--- a/apps/aix-detective/index.js
++++ b/apps/aix-detective/index.js
+@@ -9,28 +9,18 @@ import {
+   auditIdentity, 
+   calculateTrustTier 
+ } from './src/scanner.js';
+-
+-// ANSI Colors
+-const colors = {
+-  reset: "\x1b[0m",
+-  bright: "\x1b[1m",
+-  red: "\x1b[31m",
+-  green: "\x1b[32m",
+-  yellow: "\x1b[33m",
+-  blue: "\x1b[34m",
+-  cyan: "\x1b[36m",
+-};
++import { logger, style } from './src/logger.js';
+ 
+ const [,, command, targetPath] = process.argv;
+ 
+ if (command !== 'scan' || !targetPath) {
+-  console.log(`${colors.bright}AIX Detective v1.0.0${colors.reset}`);
+-  console.log(`Usage: npx aix-detective scan <path-to-aix-or-skill-md>`);
++  logger.header(`AIX Detective v1.0.0`);
++  logger.info(`Usage: npx aix-detective scan <path-to-aix-or-skill-md>`);
+   process.exit(1);
+ }
+ 
+ async function run() {
+-  console.log(`${colors.cyan}🔍 Auditing AI Agent: ${path.basename(targetPath)}...${colors.reset}\n`);
++  logger.cyan(`🔍 Auditing AI Agent: ${path.basename(targetPath)}...\n`);
+ 
+   try {
+     const content = fs.readFileSync(targetPath, 'utf8');
+@@ -96,41 +86,44 @@ async function run() {
+     });
+ 
+     // Output Report
+-    console.log(`${colors.bright}--- Audit Report ---${colors.reset}`);
++    logger.header(`--- Audit Report ---`);
+ 
+     // ABOM Status
+     if (abomAudit.valid) {
+-      console.log(`${colors.green}✅ ABOM Integrity: PASSED${colors.reset}`);
++      logger.success(`✅ ABOM Integrity: PASSED`);
+     } else {
+-      console.log(`${colors.red}❌ ABOM Integrity: FAILED${colors.reset}`);
+-      abomAudit.errors.forEach(err => console.log(`   - ${err}`));
++      logger.error(`❌ ABOM Integrity: FAILED`);
++      abomAudit.errors.forEach(err => logger.info(`   - ${err}`));
+     }
+ 
+     // Identity Status
+-    const idColor = idAudit.verified ? colors.green : colors.yellow;
+-    console.log(`${idColor}🆔 Identity Layer: ${idAudit.status.toUpperCase()} (Tier ${idAudit.tier})${colors.reset}`);
++    if (idAudit.verified) {
++      logger.success(`🆔 Identity Layer: ${idAudit.status.toUpperCase()} (Tier ${idAudit.tier})`);
++    } else {
++      logger.warn(`🆔 Identity Layer: ${idAudit.status.toUpperCase()} (Tier ${idAudit.tier})`);
++    }
+ 
+     // Security Status
+     if (injections.length === 0) {
+ 
+-      console.log(`${colors.green}🛡️ Security: No malicious patterns detected.${colors.reset}`);
++      logger.success(`🛡️ Security: No malicious patterns detected.`);
+     } else {
+-      console.log(`${colors.red}⚠️ Security: ${injections.length} potential injection patterns found!${colors.reset}`);
+-      injections.forEach(inj => console.log(`   - [${inj.severity.toUpperCase()}] ${inj.name} (Source: ${inj.source})`));
++      logger.error(`⚠️ Security: ${injections.length} potential injection patterns found!`);
++      injections.forEach(inj => logger.info(`   - [${inj.severity.toUpperCase()}] ${inj.name} (Source: ${inj.source})`));
+     }
+ 
+-    console.log(`\n${colors.bright}Trust Decision: ${getTrustBanner(trustTier)}${colors.reset}`);
++    logger.header(`\nTrust Decision: ${getTrustBanner(trustTier)}`);
+ 
+   } catch (err) {
+-    console.error(`${colors.red}Error reading or parsing file: ${err.message}${colors.reset}`);
++    logger.fatal(`Error reading or parsing file: ${err.message}`);
+     process.exit(1);
+   }
+ }
+ 
+ function getTrustBanner(tier) {
+   switch (tier) {
+-    case 'trusted': return `${colors.green}TRUSTED (Axiom Sovereign)${colors.reset}`;
+-    case 'caution': return `${colors.yellow}CAUTION (Unverified/Incomplete)${colors.reset}`;
+-    case 'malicious': return `${colors.red}MALICIOUS (High Risk)${colors.reset}`;
++    case 'trusted': return style.green(`TRUSTED (Axiom Sovereign)`);
++    case 'caution': return style.yellow(`CAUTION (Unverified/Incomplete)`);
++    case 'malicious': return style.red(`MALICIOUS (High Risk)`);
+     default: return 'UNKNOWN';
+   }
+ }
+diff --git b/apps/aix-detective/src/logger.js b/apps/aix-detective/src/logger.js
+new file mode 100644
+index 0000000..292bfae
+--- /dev/null
++++ b/apps/aix-detective/src/logger.js
+@@ -0,0 +1,33 @@
++import chalk from 'chalk';
++
++/**
++ * Structured logger for AIX Detective.
++ * All audit-related logs are directed to stdout (console.log) to ensure consistent CLI behavior.
++ * Errors that cause process termination are directed to stderr (console.error).
++ */
++export const logger = {
++  // Logging methods (to stdout)
++  info: (msg) => console.log(msg),
++  success: (msg) => console.log(chalk.green(msg)),
++  warn: (msg) => console.log(chalk.yellow(msg)),
++  error: (msg) => console.log(chalk.red(msg)),
++  header: (msg) => console.log(chalk.bold(msg)),
++  cyan: (msg) => console.log(chalk.cyan(msg)),
++
++  // Terminal errors (to stderr)
++  fatal: (msg) => console.error(chalk.red(msg)),
++};
++
++/**
++ * Style helpers that return chalk-formatted strings.
++ * Useful for building complex log messages or banners.
++ */
++export const style = {
++  green: (msg) => chalk.green(msg),
++  red: (msg) => chalk.red(msg),
++  yellow: (msg) => chalk.yellow(msg),
++  bold: (msg) => chalk.bold(msg),
++  cyan: (msg) => chalk.cyan(msg),
++};
++
++export default logger;
+diff --git b/apps/studio/package.json b/apps/studio/package.json
+index f4a529f..0978a5c 100644
+--- a/apps/studio/package.json
++++ b/apps/studio/package.json
+@@ -6,7 +6,7 @@
+     "dev": "next dev",
+     "build": "next build",
+     "start": "next start",
+-    "lint": "next lint",
++    "lint": "next lint .",
+     "test": "jest",
+     "postbuild": "node --loader ts-node/esm ../../scripts/validate-routes.ts",
+     "check:all": "npx tsc --noEmit && npm run lint && npm run build"

@@ -261,19 +261,6 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 }
 
 /* ─── Sovereign Masterpiece Tokens ─────────────────────────────────────────── */
-:root {
-
-  to { transform: translateY(-50%); }
-}
-
-
-
-  to { background-position: -200% 0; }
-}
-
-
-  50% { box-shadow: 0 0 40px rgba(0, 242, 255, 0.35); }
-}
 
 
 /* ─── Glitch Effect ────────────────────────────────────────────────────────── */
@@ -291,14 +278,8 @@ input, button, textarea, select   { font: inherit; color: inherit; }
   text-shadow: 2px 0 var(--color-primary), -2px 0 var(--color-secondary);
 }
 
-/* AIX Space Visual Tricks */
-  50% { filter: drop-shadow(0 0 15px #FF0044); }
-  100% { filter: drop-shadow(0 0 4px #FF0044); }
-}
-
 .node-active { filter: drop-shadow(0 0 10px #00FF88); }
 .node-idle { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.1)); }
-.node-flagged {  }
 
 .graph-container canvas {
   outline: none;

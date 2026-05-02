@@ -26,9 +26,8 @@ export async function getRegistry(): Promise<RegistryEntry[]> {
     const dids = await kv.get<string[]>(GLOBAL_INDEX_KEY);
     if (!dids || dids.length === 0) return [];
 
-    const entries = await Promise.all(
-      dids.map(did => kv.get<RegistryEntry>(KEYS.registry(did)))
-    );
+    const entryKeys = dids.map(did => KEYS.registry(did));
+    const entries = await kv.mget<RegistryEntry>(...entryKeys);
 
     return entries.filter((e): e is RegistryEntry => e !== null);
   } catch (error) {
