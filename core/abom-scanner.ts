@@ -1,10 +1,59 @@
-import { Manifest, AbomData, ScanResult, RiskItem, ComplianceReport } from '../apps/studio/src/lib/types.ts';
+// Define types locally to avoid circular dependencies
+interface Manifest {
+  meta?: { id?: string; name?: string; version?: string };
+  abom?: AbomData;
+  skills?: Array<{ name: string; [key: string]: any }>;
+  identity_layer?: { kyc_tier?: number; [key: string]: any };
+  [key: string]: any;
+}
+
+interface AbomData {
+  constituents?: Array<{
+    name: string;
+    version?: string;
+    type?: string;
+    trust_tier?: string;
+    security_status?: string;
+    integrity_hash?: string;
+  }>;
+  saas_services?: Array<{
+    name: string;
+    provider: string;
+    compliance_tier?: string;
+    endpoint?: string;
+    usage_policy?: string;
+  }>;
+  dependencies?: string[];
+  risk_score?: number;
+  risk_level?: string;
+}
+
+interface RiskItem {
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  category: string;
+  message: string;
+  component?: string;
+}
+
+interface ComplianceReport {
+  eu_cra: boolean;
+  nist_ai_rmf: boolean;
+  kyc_complete: boolean;
+}
+
+interface ScanResult {
+  score: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  risks: RiskItem[];
+  recommendations: string[];
+  compliance: ComplianceReport;
+  timestamp: string;
+}
 
 /**
  * ABOM Scanner - Sovereign Risk Scoring Engine
  * Analyzes AIX manifests for security, compliance, and supply chain risks.
  */
-
 export function scanAgent(agent: Partial<Manifest>): ScanResult {
   const risks: RiskItem[] = [];
   const recommendations: string[] = [];
@@ -17,7 +66,7 @@ export function scanAgent(agent: Partial<Manifest>): ScanResult {
 
   // 1. Analyze Capabilities (Skills)
   const highRiskSkills = ['filesystem_access', 'network_request', 'shell_exec', 'code_execution'];
-  skills.forEach((skill) => {
+  skills.forEach((skill: { name: string; [key: string]: any }) => {
     if (highRiskSkills.includes(skill.name)) {
       risks.push({
         category: 'Capability',
@@ -55,7 +104,7 @@ export function scanAgent(agent: Partial<Manifest>): ScanResult {
   // 3. Analyze SaaS-BOM (SaaS Services)
   const saasServices = abom.saas_services || [];
   if (saasServices.length > 0) {
-    saasServices.forEach((service) => {
+    saasServices.forEach((service: { name: string; endpoint?: string; usage_policy?: string; [key: string]: any }) => {
       if (!service.endpoint) {
         risks.push({
           category: 'Supply Chain',
@@ -96,7 +145,7 @@ export function scanAgent(agent: Partial<Manifest>): ScanResult {
     score -= 10;
   }
 
-  // 4. Compliance Checks
+  // 5. Compliance Checks
   const compliance: ComplianceReport = {
     eu_cra: score > 70 && deps.length > 0,
     nist_ai_rmf: score > 60 && !!abom.risk_level,
@@ -120,3 +169,4 @@ export function scanAgent(agent: Partial<Manifest>): ScanResult {
   };
 }
 
+// Made with Bob

@@ -1,5 +1,43 @@
 import crypto from 'crypto';
-import { IdentityLayer, KycProof } from '../apps/studio/src/lib/types.ts';
+
+// Define types locally to avoid circular dependencies
+export interface IdentityLayer {
+  id: string;
+  provider: {
+    type: string;
+    name: string;
+    authority: string;
+  };
+  verification: {
+    status: string;
+    trust_level: number;
+    provider_specific_tier: string;
+  };
+  issuedAt: string;
+  expiresAt?: string;
+  publicKey?: {
+    algorithm: string;
+    value: string;
+    encoding?: string;
+  };
+  signature?: {
+    algorithm: string;
+    value: string;
+    canonicalization?: string;
+  };
+  dna_hash?: string;
+}
+
+export interface KycProof {
+  version: string;
+  provider: string;
+  assurance_level: string;
+  uid_hash: string;
+  uid_hash_algorithm: string;
+  uid_hash_salted: boolean;
+  verified_at: string;
+  access_token_hash: string;
+}
 
 export interface ProviderResult {
   uid: string;
