@@ -58,11 +58,6 @@ export const AgentCard = memo(function AgentCard({
         style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
       />
 
-      {/* Ambient background glow */}
-      <div
-        className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity duration-500"
-        style={{ backgroundColor: color }}
-      />
 
       <div className="relative z-10 p-6 flex flex-col gap-5">
 
@@ -73,22 +68,22 @@ export const AgentCard = memo(function AgentCard({
 
           <div className="flex items-center gap-2">
             {agent.deployment?.status === 'deploying' ? (
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-sm bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 text-[var(--color-primary)]">
                 <Activity className="w-3 h-3 animate-spin" />
                 Deploying
               </span>
             ) : agent.deployment?.status === 'failed' ? (
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-sm bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 text-[var(--color-error)]">
                 <AlertCircle className="w-3 h-3" />
                 Failed
               </span>
             ) : agent.deployment?.status === 'deployed' ? (
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-sm bg-[var(--color-success)]/10 border border-[var(--color-success)]/20 text-[var(--color-success)]">
                 <Rocket className="w-3 h-3" />
                 Deployed
               </span>
             ) : (
-              <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full  border border-white/[0.06] ${statusConfig.textColor}`}>
+              <span className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-sm border border-white/[0.06] ${statusConfig.textColor}`}>
                 <span className={`status-dot ${statusConfig.dot}`} />
                 {statusConfig.label}
               </span>
@@ -99,14 +94,14 @@ export const AgentCard = memo(function AgentCard({
                 href={agent.deployment.endpointUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
+                className="p-1.5 rounded-sm bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
               >
                 <Globe className="w-3.5 h-3.5" />
               </a>
             )}
             
             <button
-              className="btn btn-ghost btn-sm w-7 h-7 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              className="btn btn-ghost btn-sm w-7 h-7 p-0 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label="Agent options"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -151,14 +146,14 @@ export const AgentCard = memo(function AgentCard({
           {showDeploy ? (
             <button
               onClick={() => router.push(`/agents/${agent.id}?action=deploy`)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl transition-all [0_10px_20px_rgba(99,102,241,0.2)]"
+              className="btn btn-sm bg-[var(--color-primary)] text-black font-black uppercase tracking-wider"
             >
               <Rocket className="w-3 h-3" />
               Deploy
             </button>
           ) : (
             <button
-              className="agent-card-hire-btn btn btn-sm rounded-xl"
+              className="agent-card-hire-btn btn btn-sm rounded-none"
               style={{
                 ['--agent-color' as string]: color,
               } as React.CSSProperties}
@@ -174,7 +169,7 @@ export const AgentCard = memo(function AgentCard({
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             whileHover={{ opacity: 1, y: 0 }}
-            className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[rgba(16,185,129,0.1)] border border-[rgba(16,185,129,0.2)] px-3 py-1 rounded-full pointer-events-none"
+            className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[var(--color-success)]/10 border border-[var(--color-success)]/20 px-3 py-1 rounded-sm pointer-events-none"
           >
             <Shield className="w-3 h-3 text-[var(--color-success)]" />
             <span className="text-[10px] font-semibold text-[var(--color-success)]">AxiomID Verified</span>

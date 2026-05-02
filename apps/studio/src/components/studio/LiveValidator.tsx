@@ -87,8 +87,8 @@ export default function LiveValidator({
     : "unknown";
 
   return (
-    <div className="rounded-2xl border border-[var(var(--color-border))] bg-[rgba(12,16,28,0.5)] p-5 ">
-      <h3 className="text-white font-semibold text-lg mb-2">Live Validator</h3>
+    <div className="card p-5">
+      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white mb-2">Live Validator</h3>
       <p className="text-xs text-[var(--color-on-surface-variant)] mb-4">
         Drop a .aix file to inspect SHA-256 DNA, required fields, and signature status.
       </p>
@@ -102,18 +102,18 @@ export default function LiveValidator({
           setDragging(false);
           if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
         }}
-        className={`rounded-xl border-2 border-dashed p-6 text-center transition ${
+        className={`rounded-sm border-2 border-dashed p-6 text-center transition ${
           dragging
-            ? "border-cyan-400 bg-cyan-500/10"
-            : "border-[var(var(--color-border))] hover:border-white/20"
+            ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            : "border-[var(--color-border)] hover:border-white/20"
         }`}
       >
-        <UploadCloud className="w-7 h-7 mx-auto text-cyan-300 mb-2" />
+        <UploadCloud className="w-7 h-7 mx-auto text-[var(--color-primary)] mb-2" />
         <p className="text-sm text-white">
           Drag &amp; Drop <span className="font-semibold">.aix</span> here
         </p>
         <label className="mt-3 block cursor-pointer">
-          <span className="text-xs text-gray-400 underline underline-offset-2">or browse</span>
+          <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--color-on-surface-variant)] underline underline-offset-2">or browse</span>
           <input
             className="sr-only"
             type="file"
@@ -126,11 +126,11 @@ export default function LiveValidator({
       </div>
 
       {fileName && (
-        <p className="mt-4 text-xs text-gray-400 truncate" title={fileName}>File: {fileName}</p>
+        <p className="mt-4 text-[9px] font-bold uppercase tracking-widest text-[var(--color-on-surface-variant)] truncate" title={fileName}>File: {fileName}</p>
       )}
 
       {hash && (
-        <p className="mt-2 text-[10px] font-mono break-all text-cyan-200/80">
+        <p className="mt-2 text-[10px] font-mono break-all text-[var(--color-primary)] opacity-80">
           SHA-256: {hash}
         </p>
       )}
@@ -140,11 +140,11 @@ export default function LiveValidator({
           {/* Structural validity */}
           <div className="flex items-center gap-2 text-sm">
             {validation.valid ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[var(--color-success)] flex-shrink-0" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-[var(--color-warning)] flex-shrink-0" />
             )}
-            <span className={validation.valid ? "text-emerald-300" : "text-amber-300"}>
+            <span className={validation.valid ? "text-[var(--color-success)]" : "text-[var(--color-warning)]"}>
               {validation.valid ? `Valid AIX — ${validation.fieldCount} top-level fields` : `Invalid: missing ${validation.missing.join(", ")}`}
             </span>
           </div>
@@ -152,11 +152,11 @@ export default function LiveValidator({
           {/* Signature status */}
           <div className="flex items-center gap-2 text-sm">
             {sigState === "valid-structure" ? (
-              <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-[var(--color-success)] flex-shrink-0" />
             ) : (
-              <ShieldX className="w-4 h-4 text-amber-400 flex-shrink-0" />
+              <ShieldX className="w-4 h-4 text-[var(--color-warning)] flex-shrink-0" />
             )}
-            <span className={sigState === "valid-structure" ? "text-emerald-300" : "text-amber-300/80"}>
+            <span className={sigState === "valid-structure" ? "text-[var(--color-success)]" : "text-[var(--color-warning)] opacity-80"}>
               {statusLabel}
             </span>
           </div>
@@ -171,7 +171,7 @@ export default function LiveValidator({
       )}
 
       {error && (
-        <p className="mt-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>
+        <p className="mt-3 text-xs text-[var(--color-error)] bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 rounded-sm px-3 py-2">{error}</p>
       )}
     </div>
   );

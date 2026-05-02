@@ -1,6 +1,6 @@
 const DEFAULT_SCHEMA_VERSION = 'aix/v1';
 
-function generateDID(name, url) {
+export function generateDID(name, url) {
   const slug = (name || 'agent').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   return `did:axiom:axiomid.app:${slug}`;
 }

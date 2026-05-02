@@ -1,8 +1,3 @@
-/**
- * AIX Unified Storage Adapter
- * Standardizes access to Upstash Redis across core and apps.
- */
-
 export * from './storage/adapter';
 import { kv } from './storage/adapter';
 
@@ -28,4 +23,5 @@ export * from './swarm/blocks';
 export * from './swarm/hierarchy';
 
 export default kv;
+
 

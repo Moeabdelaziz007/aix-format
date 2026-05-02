@@ -33,7 +33,7 @@ export function Testimonials() {
     <div className="py-24 border-t border-white/5">
       <div className="flex flex-col items-center gap-16">
         <div className="text-center space-y-4">
-           <Badge variant="outline" className="text-[10px] font-black tracking-widest border-emerald-500/20 text-emerald-500 uppercase">Trusted Intelligence</Badge>
+           <Badge variant="outline" className="text-[10px] font-black tracking-widest border-success/20 text-success uppercase">Trusted Intelligence</Badge>
            <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">Validated by the best</h2>
            <p className="text-zinc-500 max-w-lg mx-auto text-sm">Join the 1,000+ organizations and developers architecting the future of trusted agents.</p>
         </div>
@@ -56,14 +56,14 @@ export function Testimonials() {
                 </div>
                 <p className="text-sm text-zinc-300 italic leading-relaxed">"{t.quote}"</p>
                 <div className="flex items-center gap-4 mt-auto">
-                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs border border-primary/20">
+                   <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center text-primary font-black text-xs border border-primary/20">
                       {t.avatar}
                    </div>
                    <div>
                       <div className="text-xs font-black text-white uppercase">{t.name}</div>
                       <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t.role}</div>
                    </div>
-                   <ShieldCheck className="ml-auto text-emerald-500" size={16} />
+                   <ShieldCheck className="ml-auto text-success" size={16} />
                 </div>
              </motion.div>
            ))}

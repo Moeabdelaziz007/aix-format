@@ -76,25 +76,25 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
   };
 
   return (
-    <div className="flex flex-col h-[600px] card rounded-sm border-white/5  overflow-hidden">
+    <div className="flex flex-col h-[600px] card overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-white/5 flex items-center justify-between ">
+      <div className="p-6 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <MessageSquare className="text-primary" size={18} />
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Live Interaction</h3>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Live Interaction</h3>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 [0_0_8px_#10b981]" />
-          <span className="text-[10px] font-black text-emerald-500 uppercase">Sovereign Link Active</span>
+          <div className="w-1.5 h-1.5 rounded-none bg-success" />
+          <span className="text-[10px] font-black text-success uppercase tracking-wider">Sovereign Link Active</span>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-black/20">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-surface-container/50">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40">
             <Zap size={32} className="text-zinc-600" />
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest leading-relaxed">
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] leading-relaxed">
               Initialize interaction to trigger<br />Hermes Skill Extraction
             </p>
           </div>
@@ -110,10 +110,10 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
               )}
             >
               <div className={cn(
-                "max-w-[80%] p-4 rounded-2xl text-xs font-medium leading-relaxed",
+                "max-w-[85%] p-4 text-[11px] font-medium leading-relaxed tracking-wide",
                 msg.role === 'user' 
-                  ? "bg-primary text-white rounded-tr-none" 
-                  : "bg-white/5 border border-white/5 text-zinc-300 rounded-tl-none"
+                  ? "bg-primary text-white border border-primary" 
+                  : "bg-surface-container border border-white/5 text-zinc-300"
               )}>
                 {msg.content}
               </div>
@@ -121,7 +121,7 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
               {msg.role === 'assistant' && (
                 <div className="flex items-center gap-3 ml-1 mt-1">
                   {msg.learned && (
-                    <Badge variant="outline" className="text-[8px] border-primary/20 text-primary py-0 h-4 flex items-center gap-1">
+                    <Badge variant="outline" className="text-[8px] border-primary/20 text-primary py-0 h-4 flex items-center gap-1 rounded-none uppercase">
                       <Brain size={8} /> Auto-Learned
                     </Badge>
                   )}
@@ -130,8 +130,8 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
                       onClick={() => handleFeedback(i, true)}
                       disabled={hasFeedback[i]}
                       className={cn(
-                        "p-1.5 rounded-lg transition-all",
-                        hasFeedback[i] ? "text-primary bg-primary/10" : "text-zinc-600 hover:text-white hover:bg-white/5"
+                        "p-1.5 transition-all border border-transparent",
+                        hasFeedback[i] ? "text-primary bg-primary/10 border-primary/20" : "text-zinc-600 hover:text-white hover:bg-white/5 hover:border-white/10"
                       )}
                     >
                       <ThumbsUp size={12} />
@@ -139,7 +139,7 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
                     <button 
                       onClick={() => handleFeedback(i, false)}
                       disabled={hasFeedback[i]}
-                      className="p-1.5 rounded-lg text-zinc-600 hover:text-white hover:bg-white/5 transition-all"
+                      className="p-1.5 text-zinc-600 hover:text-white hover:bg-white/5 hover:border-white/10 transition-all border border-transparent"
                     >
                       <ThumbsDown size={12} />
                     </button>
@@ -151,27 +151,27 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
         )}
         {isInvoking && (
           <div className="flex items-center gap-3 text-zinc-600 animate-pulse">
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <Loader2 className="w-3 h-3 animate-spin text-primary" />
             <span className="text-[10px] font-black uppercase tracking-widest">Agent Thinking...</span>
           </div>
         )}
       </div>
 
       {/* Input */}
-      <div className="p-6  border-t border-white/5">
+      <div className="p-6 border-t border-white/5 bg-surface-container/30">
         <div className="relative group">
           <input 
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleInvoke()}
-            placeholder="Send instruction to agent..."
-            className="w-full  border border-white/5 rounded-2xl pl-6 pr-14 py-4 text-xs text-white focus:outline-none focus:border-primary/40 transition-all placeholder:text-zinc-700"
+            placeholder="SEND INSTRUCTION TO AGENT..."
+            className="input pr-14 py-4 uppercase tracking-widest"
           />
           <button 
             onClick={handleInvoke}
             disabled={isInvoking || !input.trim()}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-xl bg-white text-black hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-primary text-white hover:bg-primary-dark transition-all disabled:opacity-50 border border-primary/20"
           >
             <Send size={16} />
           </button>

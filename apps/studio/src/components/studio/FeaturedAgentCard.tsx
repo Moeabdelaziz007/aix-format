@@ -29,11 +29,11 @@ export const FeaturedAgentCard = ({
       className="card p-6 rounded-sm border-white/5  hover: transition-all group flex flex-col gap-4"
     >
       <div className="flex items-start justify-between">
-        <div className="p-4 rounded-2xl  border border-white/10 text-primary  group-hover:text-white group-hover:border-primary/50 transition-all">
+        <div className="p-4 rounded-none border border-white/10 text-primary group-hover:text-white group-hover:border-primary/50 transition-all">
           {icon}
         </div>
         {verified && (
-          <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+          <div className="p-2 rounded-none bg-success/10 text-success border border-success/20">
             <ShieldCheck size={14} />
           </div>
         )}
@@ -55,7 +55,7 @@ export const FeaturedAgentCard = ({
         </div>
       </div>
 
-      <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all">
+      <button className="w-full py-3 rounded-none bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all">
         View Agent
       </button>
     </motion.div>

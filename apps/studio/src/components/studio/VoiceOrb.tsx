@@ -120,12 +120,10 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
     : "Voice Ready";
 
   const stateColor = isSpeaking
-    ? "#8b5cf6"
+    ? "var(--color-purple-mcp)"
     : isProcessing
-    ? "#f5a623"
-    : isListening
-    ? "#00d4ff"
-    : "#00d4ff";
+    ? "var(--color-warning)"
+    : "var(--color-primary)";
 
   const orbActive = isListening || isSpeaking || isProcessing;
 
@@ -201,14 +199,14 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
   const orbScale = 1 + micLevel * 0.06;
 
   return (
-    <div className="glass-heavy rounded-sm p-8 flex flex-col items-center gap-6 w-full border border-[rgba(0,212,255,0.1)] relative overflow-hidden">
+    <div className="card rounded-sm p-8 flex flex-col items-center gap-6 w-full relative overflow-hidden">
 
       {/* Background ambient glow */}
       <div
         className="absolute inset-0 pointer-events-none transition-all duration-1000"
         style={{
           background: orbActive
-            ? `radial-gradient(ellipse 60% 50% at 50% 40%, ${stateColor}10 0%, transparent 70%)`
+            ? `radial-gradient(ellipse 60% 50% at 50% 40%, color-mix(in srgb, ${stateColor}, transparent 90%) 0%, transparent 70%)`
             : "transparent",
         }}
       />
@@ -250,7 +248,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
           animate={{ rotate: 360 }}
           transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
           style={{
-            background: `conic-gradient(from 0deg, transparent 60%, ${stateColor}40 80%, transparent 100%)`,
+            background: `conic-gradient(from 0deg, transparent 60%, color-mix(in srgb, ${stateColor}, transparent 75%) 80%, transparent 100%)`,
             opacity: orbActive ? 1 : 0.2,
             transition: "opacity 0.5s",
           }}
@@ -267,11 +265,9 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
           className="relative z-10 w-24 h-24 rounded-full flex items-center justify-center cursor-pointer focus-visible:outline-none"
           style={{
             background: orbActive
-              ? `radial-gradient(circle at 35% 35%, ${stateColor}cc, ${stateColor}44)`
-              : "radial-gradient(circle at 35% 35%, rgba(0,212,255,0.3), rgba(0,212,255,0.08))",
-            boxShadow: orbActive
-              ? `0 0 0 1px ${stateColor}44, 0 0 32px ${stateColor}55, inset 0 0 20px ${stateColor}22`
-              : `0 0 0 1px rgba(0,212,255,0.15), 0 0 16px rgba(0,212,255,0.15), inset 0 1px 0 rgba(255,255,255,0.08)`,
+              ? `radial-gradient(circle at 35% 35%, color-mix(in srgb, ${stateColor}, transparent 20%), color-mix(in srgb, ${stateColor}, transparent 70%))`
+              : "radial-gradient(circle at 35% 35%, var(--color-surface-3), var(--color-surface-1))",
+            border: `1px solid ${orbActive ? stateColor : "var(--color-border)"}`,
             transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
@@ -283,7 +279,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
               </motion.div>
             ) : isSpeaking ? (
               <motion.div key="speak" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                <Volume2 className="w-9 h-9 text-[#8b5cf6]" />
+                <Volume2 className="w-9 h-9 text-[var(--color-purple-mcp)]" />
               </motion.div>
             ) : isListening ? (
               <motion.div key="listen" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
@@ -301,7 +297,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
               </motion.div>
             ) : (
               <motion.div key="idle" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                <Mic className="w-9 h-9 text-white drop-[0_0_8px_rgba(0,212,255,0.8)]" />
+                <Mic className="w-9 h-9 text-white" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -342,7 +338,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="w-full px-4 py-3 rounded-xl bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.1)] text-sm text-[var(--color-on-surface-variant)] italic"
+            className="w-full px-4 py-3 rounded-sm bg-[var(--color-surface-2)] border border-[var(--color-border)] text-sm text-[var(--color-on-surface-variant)] italic"
           >
             <span className="text-[var(--color-primary)] font-medium not-italic">You said: </span>
             &ldquo;{transcript}&rdquo;

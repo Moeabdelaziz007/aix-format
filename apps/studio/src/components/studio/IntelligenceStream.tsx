@@ -39,25 +39,24 @@ export function IntelligenceStream() {
   return (
     <div className="card rounded-sm p-5 h-[350px] flex flex-col gap-4 overflow-hidden border border-white/10  relative">
       {/* Decorative corners */}
-      <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-500/40" />
-      <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-cyan-500/40" />
-      <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-cyan-500/40" />
-      <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-500/40" />
+      <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary/40" />
+      <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-primary/40" />
+      <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-primary/40" />
+      <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary/40" />
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-            <div className="absolute inset-0 w-2 h-2 bg-cyan-400 rounded-full animate-ping opacity-75" />
+            <div className="w-2 h-2 bg-primary rounded-none" />
           </div>
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-500/70">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
             Sovereign Intelligence Stream
           </h3>
         </div>
         <div className="flex gap-2">
-          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
-            <Activity className="w-3 h-3 text-cyan-400" />
-            <span className="text-[9px] text-cyan-400 font-mono">LIVE</span>
+          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-none bg-primary/10 border border-primary/20">
+            <Activity className="w-3 h-3 text-primary" />
+            <span className="text-[9px] text-primary font-mono font-black">LIVE</span>
           </div>
           <span className="text-[9px] text-zinc-600 font-mono self-center">v4.2.0-STABLE</span>
         </div>
@@ -72,9 +71,9 @@ export function IntelligenceStream() {
               animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: 10, scale: 0.98 }}
               transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-              className="group flex items-start gap-3 p-2.5 rounded-lg  border border-white/[0.05] hover: hover:border-cyan-500/30 transition-all duration-300 cursor-default"
+              className="group flex items-start gap-3 p-2.5 rounded-none border border-white/[0.05] hover:border-primary/30 transition-all duration-300 cursor-default"
             >
-              <div className="mt-0.5 opacity-40 group-hover:opacity-100 group-hover:text-cyan-400 transition-all">
+              <div className="mt-0.5 opacity-40 group-hover:opacity-100 group-hover:text-primary transition-all">
                 {event.includes('HS') || event.includes('AUTH') ? <Shield className="w-3 h-3" /> : 
                  event.includes('BOM') ? <Cpu className="w-3 h-3" /> : 
                  <Terminal className="w-3 h-3" />}
@@ -94,7 +93,7 @@ export function IntelligenceStream() {
       </div>
 
       {/* Ambient scanning light */}
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-cyan-500/5 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
     </div>
   );
 }
