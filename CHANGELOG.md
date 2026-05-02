@@ -2,6 +2,31 @@
 Format: [Keep a Changelog](https://keepachangelog.com)
 
 ## [Unreleased]
+
+## [1.3.2] - 2026-05-02
+
+### 🚀 Pi Network Integration Layer
+- **New:** 14 Pi Network API endpoints for comprehensive integration
+- **New:** PiNetworkClient - unified client for Pi Developer Portal API
+- **New:** QueueManager - bulk operations with progress tracking
+- **New:** AIRemediator - AI-powered vulnerability remediation
+- **New:** POST /api/marketplace/clone/:agentId - Deep clone with ownership transfer
+- **New:** POST /api/pi/import-config - Import Pi app configuration
+- **New:** POST /api/economics/project-revenue - Revenue projections & break-even
+- **New:** GET /api/kyc/status-stream - SSE for real-time KYC updates
+- **New:** POST /api/analytics/export-to-pi - Export to Pi Developer Dashboard
+- **New:** POST /api/playground/pi-context - Inject Pi context for testing
+- **New:** POST /api/pi/sandbox-test - Isolated testnet with mock KYC flows
+- **New:** POST /api/pi/payment-setup - Smart contract & payment infrastructure
+- **New:** POST /api/agents/bulk-deploy - Queue-based bulk deployment
+- **New:** POST /api/abom-scan/remediate - AI-powered vulnerability fixes
+
+### 🔧 CI/CD & Quality
+- **New:** Health score baseline system with --init flag
+- **New:** .health-score-baseline.json for tracking codebase health
+- **Improved:** Health score now compares against baseline
+- **Note:** Commits 4b661a2 and 8c3d8e4 are duplicates (network retry artifact)
+
 ### Added
 - Agent detail page (agents/[id]/page.tsx)
 - DiscoveryPreview component — MCP registry UI
