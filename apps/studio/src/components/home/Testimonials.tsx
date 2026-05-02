@@ -46,7 +46,7 @@ export function Testimonials() {
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
                transition={{ delay: i * 0.1 }}
-               className="card p-8 rounded-sm border-white/5  flex flex-col gap-6 relative"
+               className="glass-panel-heavy p-8 rounded-sm border-white/5  flex flex-col gap-6 relative"
              >
                 <Quote className="absolute top-8 right-8 text-white/5" size={40} />
                 <div className="flex gap-1">

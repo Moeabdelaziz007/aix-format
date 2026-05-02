@@ -30,10 +30,10 @@ const COLORS = {
 };
 
 const nodeStyles = {
-  container: "relative px-5 py-4 border bg-surface-container transition-all duration-300 group hover:border-primary",
-  label: "text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-2 group-hover:text-zinc-400 transition-colors",
-  title: "text-[11px] font-black flex items-center gap-2 text-white uppercase tracking-wider",
-  handle: "w-2 h-2 !bg-primary !border-none hover:!scale-125 transition-transform",
+  container: "relative px-5 py-4 rounded-2xl border bg-indigo-950/40   transition-all duration-300 group hover:scale-105",
+  label: "text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 mb-2 group-hover:text-white/60 transition-colors",
+  title: "text-sm font-bold flex items-center gap-2 text-white",
+  handle: "w-2.5 h-2.5 !bg-indigo-400 !border-2 !border-indigo-950 hover:!scale-125 transition-transform",
 };
 
 // --- Custom Node Components with Framer Motion ---
@@ -189,7 +189,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
         nodeTypes={nodeTypes}
         fitView
         colorMode="dark"
-        className="overflow-hidden"
+        className="rounded-3xl border border-white/5 overflow-hidden "
       >
         <Background 
           color="var(--color-border)" 
@@ -198,7 +198,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
           variant={BackgroundVariant.Dots}
           className="opacity-40"
         />
-        <Controls className="!bg-surface !border-white/10 !rounded-none !p-1" />
+        <Controls className="! !border-white/10 !rounded-xl !p-1 " />
         <Panel position="top-left" className="m-4">
           <div className="flex flex-col gap-1">
             <h3 className="text-white font-black text-sm flex items-center gap-2 uppercase tracking-widest">
@@ -212,7 +212,7 @@ export default function BOMVisualizer({ formData }: BOMVisualizerProps) {
         </Panel>
         
         <Panel position="bottom-right" className="m-4">
-          <div className="px-4 py-2 bg-surface border border-white/10 flex gap-4">
+          <div className="px-4 py-2   border border-white/10 rounded-xl flex gap-4">
             {Object.entries(COLORS).map(([key, color]) => (
               <div key={key} className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-none" style={{ backgroundColor: color }} />

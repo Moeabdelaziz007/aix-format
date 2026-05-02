@@ -108,7 +108,7 @@ export default function LiveValidator({
   };
 
   return (
-    <div className="rounded-2xl border border-[var(--color-glass-border)] bg-[rgba(12,16,28,0.5)] p-5 backdrop-blur-xl">
+    <div className="rounded-2xl border border-[var(--color-glass-border)] bg-[rgba(12,16,28,0.5)] p-5 ">
       <h3 className="text-white font-semibold text-lg mb-2">Live Validator</h3>
       <p className="text-xs text-[var(--color-on-surface-variant)] mb-4">
         Drop a .aix file to inspect SHA-256 DNA, required fields, and signature status.

@@ -83,16 +83,30 @@ export function Navbar() {
   const handleDisconnect = () => { setUser(null); setShowUserMenu(false); };
 
   return (
-    <>
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          isScrolled
-            ? "bg-[rgba(5,5,7,0.92)] backdrop-blur-2xl border-b border-white/[0.06] shadow-[0_1px_0_rgba(0,212,255,0.04)]"
-            : "bg-transparent border-b border-transparent"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-6">
+    <header className={cn(
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-4 pt-4",
+      isScrolled ? "pt-2" : "pt-4"
+    )}>
+      <nav className={cn(
+        "max-w-7xl mx-auto h-16 rounded-2xl flex items-center justify-between px-6 transition-all duration-500 border",
+        isScrolled 
+          ? "bg-surface-1/80  border-white/10  /50"
+          : "bg-transparent border-transparent"
+      )}>
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:rotate-12 transition-transform duration-500  /20">
+            <Typography variant="h4" className="text-primary-dark italic leading-none m-0">A</Typography>
+          </div>
+          <div className="flex flex-col leading-none">
+            <Typography variant="h6" className="text-white uppercase italic tracking-tighter m-0">
+              AIX<span className="text-primary">Studio</span>
+            </Typography>
+            <Typography variant="caption" className="tracking-[0.2em] uppercase opacity-40 font-bold m-0">
+              Sovereign Intel
+            </Typography>
+          </div>
+        </Link>
 
           {/* ── Logo ── */}
           <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
@@ -187,25 +201,19 @@ export function Navbar() {
                       transition={{ duration: 0.15 }}
                       className="absolute right-0 top-full mt-2 w-60 glass-heavy rounded-2xl border border-white/10 overflow-hidden z-50"
                     >
-                      <div className="px-4 py-3.5 border-b border-white/[0.06]">
-                        <p className="text-[11px] text-[var(--color-on-surface-variant)] uppercase tracking-wider mb-1">Connected Pioneer</p>
-                        <p className="text-sm font-bold text-white">{user.username}</p>
-                        <p className="text-[10px] font-mono text-[var(--color-on-surface-faint)] mt-0.5 truncate">{user.uid}</p>
-                      </div>
-                      <div className="p-2">
-                        <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.05] transition-all">
-                          <Wallet className="w-4 h-4 text-[var(--color-accent)]" /> Pi Wallet
-                        </button>
-                        <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.05] transition-all">
-                          <Activity className="w-4 h-4 text-[var(--color-primary)]" /> Agent Dashboard
-                        </button>
-                        <div className="my-1.5 divider" />
-                        <button
-                          onClick={handleDisconnect}
-                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--color-error)] hover:bg-red-500/10 transition-all"
-                        >
-                          <LogOut className="w-4 h-4" /> Disconnect
-                        </button>
+                      <div className="bg-surface-2/95  border border-white/10 rounded-xl p-1.5 ">
+                        {cat.links.map(link => (
+                          <Link 
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                              "block px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors",
+                              pathname === link.href ? "bg-primary/10 text-primary" : "text-white/40 hover:bg-white/5 hover:text-white"
+                            )}
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
                       </div>
                     </motion.div>
                   )}
@@ -217,16 +225,32 @@ export function Navbar() {
                 disabled={isAuthenticating}
                 className="btn btn-primary btn-md flex items-center gap-2 disabled:opacity-50"
               >
-                {isAuthenticating ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-t-transparent border-[#050507] rounded-full animate-spin" />
-                    <span>Connecting…</span>
-                  </>
-                ) : (
-                  <>
-                    <Wallet className="w-4 h-4" />
-                    <span>Connect Pi</span>
-                  </>
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-mcp flex items-center justify-center text-[10px] font-black text-white">
+                  {user.username[0].toUpperCase()}
+                </div>
+                <Typography variant="caption" weight="bold" className="text-white uppercase italic">{user.username}</Typography>
+                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform text-foreground/40", showUserMenu && "rotate-180")} />
+              </button>
+
+              <AnimatePresence>
+                {showUserMenu && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 top-full mt-2 w-48 bg-surface-3 border border-white/10 rounded-xl overflow-hidden  z-50 p-1"
+                  >
+                    <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-foreground/60 hover:bg-white/5 hover:text-white transition-colors">
+                      <Shield className="w-4 h-4" /> Account Security
+                    </button>
+                    <div className="h-px bg-white/5 my-1" />
+                    <button 
+                      onClick={handleDisconnect}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold uppercase italic text-danger hover:bg-danger/10 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" /> Disconnect
+                    </button>
+                  </motion.div>
                 )}
               </button>
             )}
@@ -246,36 +270,30 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile nav */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.nav
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-white/[0.06] bg-[rgba(5,5,7,0.95)] backdrop-blur-2xl overflow-hidden"
-            >
-              <div className="px-5 py-4 flex flex-col gap-1">
-                {navLinks.map(link => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                      pathname === link.href
-                        ? "text-white bg-white/[0.06] border border-white/[0.08]"
-                        : "text-[var(--color-on-surface-variant)] hover:text-white hover:bg-white/[0.04]"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
-      </header>
-    </>
+      {/* Mobile Navigation */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-surface-2 border border-white/10 rounded-2xl mt-2 overflow-hidden "
+          >
+            <div className="p-4 flex flex-col gap-2">
+              {navLinks.map(link => (
+                <Link 
+                  key={link.href} 
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="px-4 py-3 rounded-xl text-sm font-bold uppercase italic tracking-wider text-foreground/60 hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  <Typography variant="body" weight="bold">{link.label}</Typography>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }

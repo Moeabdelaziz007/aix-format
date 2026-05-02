@@ -26,7 +26,7 @@ export function HeroSection() {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="group card p-8 rounded-sm border-white/5  hover: transition-all flex flex-col gap-6 cursor-pointer"
+          className="group glass-panel-heavy p-8 rounded-sm border-white/5  hover: transition-all flex flex-col gap-6 cursor-pointer"
         >
           <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
             <Search size={28} />
@@ -47,9 +47,9 @@ export function HeroSection() {
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="group card p-8 rounded-sm border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.04] transition-all flex flex-col gap-6 cursor-pointer"
+          className="group glass-panel-heavy p-8 rounded-sm border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.04] transition-all flex flex-col gap-6 cursor-pointer"
         >
-          <div className="w-14 h-14 rounded-none bg-primary text-black flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-primary text-black flex items-center justify-center [0_0_20px_rgba(57,255,20,0.3)]">
             <Rocket size={28} />
           </div>
           <div className="space-y-2">
@@ -89,7 +89,7 @@ export function HeroSection() {
                     ease: "easeInOut"
                   }}
                   className={cn(
-                    "absolute whitespace-nowrap px-4 py-2 rounded-none border border-white/5 bg-surface text-[9px] font-black text-zinc-400 uppercase tracking-widest",
+                    "absolute whitespace-nowrap px-4 py-2 rounded-full border border-white/5   text-[9px] font-black text-zinc-400 uppercase tracking-widest",
                     i === 0 ? "-top-12 -left-32" : i === 1 ? "top-12 -right-40" : "-bottom-12 -left-12"
                   )}
                 >

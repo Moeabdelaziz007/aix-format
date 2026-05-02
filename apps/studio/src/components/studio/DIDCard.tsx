@@ -50,7 +50,7 @@ export function DIDCard({ did, publicKey, kycTier, verified, username, className
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c101c]/60 backdrop-blur-xl p-6 shadow-2xl",
+        "card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c101c]/60  p-6 ",
         className
       )}
     >
@@ -61,7 +61,7 @@ export function DIDCard({ did, publicKey, kycTier, verified, username, className
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#00dbe9]/10 border border-[#00dbe9]/20 shadow-[0_0_15px_rgba(0,219,233,0.1)]">
+            <div className="p-2.5 rounded-xl bg-[#00dbe9]/10 border border-[#00dbe9]/20 [0_0_15px_rgba(0,219,233,0.1)]">
               <Shield className="w-5 h-5 text-[#00dbe9]" />
             </div>
             <div>
@@ -81,12 +81,12 @@ export function DIDCard({ did, publicKey, kycTier, verified, username, className
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[#8888a0] uppercase tracking-wider">Axiom Identifier (DID)</label>
             <div className="flex items-center gap-2 group">
-              <div className="flex-1 bg-black/40 border border-white/[0.05] rounded-lg px-3 py-2.5 font-mono text-[11px] text-[#d2bbff] truncate transition-colors group-hover:border-white/10">
+              <div className="flex-1  border border-white/[0.05] rounded-lg px-3 py-2.5 font-mono text-[11px] text-[#d2bbff] truncate transition-colors group-hover:border-white/10">
                 {truncate(did, 20, 8)}
               </div>
               <button 
                 onClick={() => handleCopy(did, setCopiedDid)}
-                className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] hover:border-white/20 text-[#8888a0] hover:text-white transition-all active:scale-95"
+                className="p-2.5 rounded-lg  border border-white/[0.05] hover: hover:border-white/20 text-[#8888a0] hover:text-white transition-all active:scale-95"
                 title="Copy DID"
               >
                 {copiedDid ? <CheckCircle2 className="w-4 h-4 text-[#00dbe9]" /> : <Copy className="w-4 h-4" />}
@@ -97,12 +97,12 @@ export function DIDCard({ did, publicKey, kycTier, verified, username, className
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[#8888a0] uppercase tracking-wider">Public Key</label>
             <div className="flex items-center gap-2 group">
-              <div className="flex-1 bg-black/40 border border-white/[0.05] rounded-lg px-3 py-2.5 font-mono text-[11px] text-[#d2bbff] truncate transition-colors group-hover:border-white/10">
+              <div className="flex-1  border border-white/[0.05] rounded-lg px-3 py-2.5 font-mono text-[11px] text-[#d2bbff] truncate transition-colors group-hover:border-white/10">
                 {truncate(publicKey, 12, 6)}
               </div>
               <button
                 onClick={() => handleCopy(publicKey, setCopiedPk)}
-                className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] hover:border-white/20 text-[#8888a0] hover:text-white transition-all active:scale-95"
+                className="p-2.5 rounded-lg  border border-white/[0.05] hover: hover:border-white/20 text-[#8888a0] hover:text-white transition-all active:scale-95"
                 title="Copy Public Key"
               >
                 {copiedPk ? <CheckCircle2 className="w-4 h-4 text-[#00dbe9]" /> : <Copy className="w-4 h-4" />}

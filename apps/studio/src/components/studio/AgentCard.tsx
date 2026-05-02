@@ -83,7 +83,7 @@ export const AgentCard = memo(function AgentCard({
                 Deployed
               </span>
             ) : (
-              <span className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-sm border border-white/[0.06] ${statusConfig.textColor}`}>
+              <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full  border border-white/[0.06] ${statusConfig.textColor}`}>
                 <span className={`status-dot ${statusConfig.dot}`} />
                 {statusConfig.label}
               </span>
@@ -146,7 +146,7 @@ export const AgentCard = memo(function AgentCard({
           {showDeploy ? (
             <button
               onClick={() => router.push(`/agents/${agent.id}?action=deploy`)}
-              className="btn btn-sm bg-[var(--color-primary)] text-black font-black uppercase tracking-wider"
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl transition-all [0_10px_20px_rgba(99,102,241,0.2)]"
             >
               <Rocket className="w-3 h-3" />
               Deploy

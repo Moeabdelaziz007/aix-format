@@ -26,10 +26,10 @@ export const FeaturedAgentCard = ({
   return (
     <motion.div
       whileHover={{ y: -8, scale: 1.02 }}
-      className="card p-6 rounded-sm border-white/5  hover: transition-all group flex flex-col gap-4"
+      className="glass-panel-heavy p-6 rounded-sm border-white/5  hover: transition-all group flex flex-col gap-4"
     >
       <div className="flex items-start justify-between">
-        <div className="p-4 rounded-none border border-white/10 text-primary group-hover:text-white group-hover:border-primary/50 transition-all">
+        <div className="p-4 rounded-2xl  border border-white/10 text-primary  group-hover:text-white group-hover:border-primary/50 transition-all">
           {icon}
         </div>
         {verified && (

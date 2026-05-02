@@ -37,7 +37,7 @@ export function IntelligenceStream() {
   }, []);
 
   return (
-    <div className="card rounded-sm p-5 h-[350px] flex flex-col gap-4 overflow-hidden border border-white/10  relative">
+    <div className="glass-panel-heavy rounded-sm p-5 h-[350px] flex flex-col gap-4 overflow-hidden border border-white/10  relative">
       {/* Decorative corners */}
       <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary/40" />
       <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-primary/40" />
@@ -71,7 +71,7 @@ export function IntelligenceStream() {
               animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: 10, scale: 0.98 }}
               transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-              className="group flex items-start gap-3 p-2.5 rounded-none border border-white/[0.05] hover:border-primary/30 transition-all duration-300 cursor-default"
+              className="group flex items-start gap-3 p-2.5 rounded-lg  border border-white/[0.05] hover: hover:border-cyan-500/30 transition-all duration-300 cursor-default"
             >
               <div className="mt-0.5 opacity-40 group-hover:opacity-100 group-hover:text-primary transition-all">
                 {event.includes('HS') || event.includes('AUTH') ? <Shield className="w-3 h-3" /> : 

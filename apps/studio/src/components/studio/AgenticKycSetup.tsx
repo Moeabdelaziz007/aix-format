@@ -51,7 +51,7 @@ export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: 
   }, []);
 
   return (
-    <div className="card p-6">
+    <div className="bg-[rgba(20,20,20,0.62)] rounded-2xl border border-[var(--color-glass-border)] p-6 ">
       <div className="flex items-center gap-3 mb-6">
         <ShieldCheck className="w-8 h-8 text-primary" />
         <div>

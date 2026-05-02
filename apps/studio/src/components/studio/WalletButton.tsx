@@ -36,7 +36,7 @@ export function WalletButton() {
                 return (
                   <button
                     onClick={openConnectModal}
-                    className="btn btn-sm bg-[var(--color-primary)] text-black font-black uppercase tracking-wider"
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 rounded-xl text-indigo-400 text-sm font-bold transition-all hover:scale-[1.02] active:scale-95 [0_4px_12px_rgba(99,102,241,0.1)]"
                   >
                     <Wallet className="w-3.5 h-3.5" />
                     Link Wallet
@@ -77,10 +77,10 @@ export function WalletButton() {
 
                   <button
                     onClick={openAccountModal}
-                    className="btn btn-sm border-[var(--color-success)] text-[var(--color-success)] font-black uppercase tracking-wider"
+                    className="flex items-center gap-3 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 rounded-xl text-emerald-400 text-xs font-bold transition-all [0_4px_12px_rgba(16,185,129,0.1)]"
                   >
                     <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 bg-[var(--color-success)] rounded-none" />
+                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse [0_0_8px_rgba(52,211,153,0.6)]" />
                       <span className="font-mono">{account.displayName}</span>
                     </div>
                     <Shield className="w-3 h-3 opacity-50" />

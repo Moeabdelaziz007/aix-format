@@ -199,7 +199,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
   const orbScale = 1 + micLevel * 0.06;
 
   return (
-    <div className="card rounded-sm p-8 flex flex-col items-center gap-6 w-full relative overflow-hidden">
+    <div className="glass-heavy rounded-sm p-8 flex flex-col items-center gap-6 w-full border border-[rgba(0,212,255,0.1)] relative overflow-hidden">
 
       {/* Background ambient glow */}
       <div
@@ -297,7 +297,7 @@ export function VoiceOrb({ onTranscript, isProcessing: extProcessing = false }: 
               </motion.div>
             ) : (
               <motion.div key="idle" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                <Mic className="w-9 h-9 text-white" />
+                <Mic className="w-9 h-9 text-white drop-[0_0_8px_rgba(0,212,255,0.8)]" />
               </motion.div>
             )}
           </AnimatePresence>
