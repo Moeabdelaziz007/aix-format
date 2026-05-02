@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: .
+        working-directory: packages/aix-core
     steps:
       - uses: actions/checkout@v4
 

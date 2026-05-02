@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --dir src",
+    "lint": "next lint .",
     "test": "jest",
     "postbuild": "node --loader ts-node/esm ../../scripts/validate-routes.ts",
     "check:all": "npx tsc --noEmit && npm run lint && npm run build"
