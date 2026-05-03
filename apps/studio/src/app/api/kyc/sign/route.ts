@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PiKycAdapter } from "@core/pi_kyc_adapter";
-import { requireAuth, successResponse, ERR, parseBody } from '@/lib/api-helpers';
+import { requireAuth, successResponse, ERR } from '@/lib/api-helpers';
 import { z } from 'zod';
 
 /**
@@ -21,12 +21,10 @@ const KYCSignSchema = z.object({
   publicKey: z.string().min(1, 'Public key is required')
 });
 
-type KYCSignRequest = z.infer<typeof KYCSignSchema>;
-
 export async function POST(req: NextRequest) {
   try {
     // Auth check - KYC endpoints require authentication
-    const { session, error: authError } = await requireAuth();
+    const { error: authError } = await requireAuth();
     if (authError) return authError;
 
     // Parse and validate request body with Zod
