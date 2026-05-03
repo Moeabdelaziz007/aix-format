@@ -123,6 +123,15 @@ export const KEYS = {
   agentManifest:       (agentId: string) => `agent:${agentId}:manifest`,
   aixEconomicsTotalStake: (agentId: string) => `aix:economics:total_stake:${agentId}`,
   aixCompressionProfile: (taskType: string) => `aix:compression:profile:${taskType}`,
+  
+  // 🧬 Lineage Registry (Darwin in Software - PNAS 2025)
+  lineageNode:        (id: string) => `aix:lineage:node:${id}`,
+  lineageGenesis:     () => `aix:lineage:genesis`,
+  lineageByType:      (type: string) => `aix:lineage:type:${type}`,
+  lineageByGeneration: (gen: number) => `aix:lineage:generation:${gen}`,
+  lineageChildren:    (parentId: string) => `aix:lineage:children:${parentId}`,
+  lineageFlagged:     () => `aix:lineage:flagged`,
+  lineageRecalled:    () => `aix:lineage:recalled`,
   agentLastActivity:  (agentId: string) => `agent:${agentId}:last_activity`,
   aixSwarmEdges:      () => `aix:swarm:edges`,
   ghost:  (agentId: string)   => `agent:${agentId}:ghost`
