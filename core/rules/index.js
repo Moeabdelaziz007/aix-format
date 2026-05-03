@@ -12,6 +12,11 @@ import { apisRules } from './apis-rules.js';
 import { mcpRules } from './mcp-rules.js';
 import { memoryRules } from './memory-rules.js';
 import { abomRules } from './abom-rules.js';
+import { requirementsRules } from './requirements-rules.js';
+import { pricingRules } from './pricing-rules.js';
+import { economicsRules } from './economics-rules.js';
+import { identityRules } from './identity-rules.js';
+import { piNetworkRules } from './pi-network-rules.js';
 
 /**
  * All core validation rules combined
@@ -24,7 +29,12 @@ export const allRules = [
   ...apisRules,
   ...mcpRules,
   ...memoryRules,
-  ...abomRules
+  ...abomRules,
+  ...requirementsRules,
+  ...pricingRules,
+  ...economicsRules,
+  ...identityRules,
+  ...piNetworkRules
 ];
 
 // Made with Bob
