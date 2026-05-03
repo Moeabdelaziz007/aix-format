@@ -13,19 +13,10 @@ import fs from 'fs';
 import crypto from 'crypto';
 import yaml from 'js-yaml';
 
-// Import plugin system
-import { PluginRegistry } from './validation-plugins.js';
-import { PluginLoader } from './plugin-loader.js';
-import {
-  MetaValidator,
-  PersonaValidator,
-  SecurityValidator,
-  SkillsValidator,
-  APIsValidator,
-  MCPValidator,
-  MemoryValidator,
-  ABOMValidator
-} from './plugins/index.js';
+// Import new validation engine
+import { validate, register, clear } from './validation-engine.js';
+import { allRules } from './rules/index.js';
+import { loadFromConfig } from './rule-loader.js';
 
 // ─── AI-SBOM constituent field enumerations ───────────────────────────────────
 const ABOM_VALID_TYPES        = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'];
@@ -34,19 +25,9 @@ const ABOM_VALID_SEC_STATUSES = ['clean', 'vulnerable', 'revoked', 'unknown'];
 const ABOM_INTEGRITY_RE       = /^[a-zA-Z0-9-]+:[a-fA-F0-9]{32,}$/;   // alg:hexdigest
 const ABOM_PURL_RE            = /^pkg:[a-zA-Z][a-zA-Z0-9+\-.]*\/.+/;   // pkg:type/...
 
-// ─── Global Plugin Registry ───────────────────────────────────────────────────
-// Create and configure the default plugin registry
-const defaultRegistry = new PluginRegistry();
-
-// Register core validation plugins
-defaultRegistry.register(new MetaValidator());
-defaultRegistry.register(new PersonaValidator());
-defaultRegistry.register(new SecurityValidator());
-defaultRegistry.register(new SkillsValidator());
-defaultRegistry.register(new APIsValidator());
-defaultRegistry.register(new MCPValidator());
-defaultRegistry.register(new MemoryValidator());
-defaultRegistry.register(new ABOMValidator());
+// ─── Register Core Rules ───────────────────────────────────────────────────────
+// Register all core validation rules
+allRules.forEach(register);
 
 /**
  * AIXParser - Main parser class for AIX files
@@ -55,13 +36,10 @@ export class AIXParser {
   constructor(options = {}) {
     this.errors = [];
     this.warnings = [];
-    // Allow custom plugin registry or use default
-    this.registry = options.registry || defaultRegistry;
-    this.loader = new PluginLoader(this.registry);
     
-    // Auto-load from config if exists
-    if (options.autoLoadPlugins !== false) {
-      this.loader.loadFromConfig().catch(() => {}); // Silent fail if no config
+    // Auto-load custom rules from config if exists
+    if (options.autoLoadRules !== false) {
+      loadFromConfig().catch(() => {}); // Silent fail if no config
     }
   }
 
@@ -251,13 +229,18 @@ export class AIXParser {
       }
     }
 
-    // Run plugin-based validation
-    const context = {
-      errors: this.errors,
-      warnings: this.warnings
-    };
+    // Run rule-based validation
+    const ruleErrors = await validate(data);
     
-    await this.registry.runAll(data, context);
+    // Convert rule errors to parser error format
+    for (const err of ruleErrors) {
+      this.errors.push({
+        code: err.error ? 'RULE_ERROR' : 'VALIDATION_FAILED',
+        rule: err.rule,
+        message: err.message || err.error,
+        ...(err.stack && { stack: err.stack })
+      });
+    }
 
     // Validate sections not yet covered by plugins (for backward compatibility)
     // These will be migrated to plugins in future updates
