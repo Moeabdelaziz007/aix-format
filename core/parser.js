@@ -13,6 +13,19 @@ import fs from 'fs';
 import crypto from 'crypto';
 import yaml from 'js-yaml';
 
+// Import plugin system
+import { PluginRegistry } from './validation-plugins.js';
+import {
+  MetaValidator,
+  PersonaValidator,
+  SecurityValidator,
+  SkillsValidator,
+  APIsValidator,
+  MCPValidator,
+  MemoryValidator,
+  ABOMValidator
+} from './plugins/index.js';
+
 // ─── AI-SBOM constituent field enumerations ───────────────────────────────────
 const ABOM_VALID_TYPES        = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'];
 const ABOM_VALID_TRUST_TIERS  = ['verified', 'community', 'unverified', 'revoked'];
@@ -20,13 +33,29 @@ const ABOM_VALID_SEC_STATUSES = ['clean', 'vulnerable', 'revoked', 'unknown'];
 const ABOM_INTEGRITY_RE       = /^[a-zA-Z0-9-]+:[a-fA-F0-9]{32,}$/;   // alg:hexdigest
 const ABOM_PURL_RE            = /^pkg:[a-zA-Z][a-zA-Z0-9+\-.]*\/.+/;   // pkg:type/...
 
+// ─── Global Plugin Registry ───────────────────────────────────────────────────
+// Create and configure the default plugin registry
+const defaultRegistry = new PluginRegistry();
+
+// Register core validation plugins
+defaultRegistry.register(new MetaValidator());
+defaultRegistry.register(new PersonaValidator());
+defaultRegistry.register(new SecurityValidator());
+defaultRegistry.register(new SkillsValidator());
+defaultRegistry.register(new APIsValidator());
+defaultRegistry.register(new MCPValidator());
+defaultRegistry.register(new MemoryValidator());
+defaultRegistry.register(new ABOMValidator());
+
 /**
  * AIXParser - Main parser class for AIX files
  */
 export class AIXParser {
-  constructor() {
+  constructor(options = {}) {
     this.errors = [];
     this.warnings = [];
+    // Allow custom plugin registry or use default
+    this.registry = options.registry || defaultRegistry;
   }
 
   /**
@@ -34,9 +63,9 @@ export class AIXParser {
    * @param {string} filePath - Path to AIX file
    * @returns {AIXAgent} Parsed agent object
    */
-  parseFile(filePath) {
+  async parseFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf-8');
-    return this.parse(content, filePath);
+    return await this.parse(content, filePath);
   }
 
   /**
@@ -45,7 +74,7 @@ export class AIXParser {
    * @param {string} filePath - Optional file path for error reporting
    * @returns {AIXAgent} Parsed agent object
    */
-  parse(content, filePath = '<string>') {
+  async parse(content, filePath = '<string>') {
     this.errors = [];
     this.warnings = [];
 
@@ -77,8 +106,8 @@ export class AIXParser {
       throw this.createParseError('PARSE_ERROR', `Failed to parse ${format.toUpperCase()}: ${error.message}`, filePath, error);
     }
 
-    // Validate structure
-    this.validateStructure(data);
+    // Validate structure (now async with plugin system)
+    await this.validateStructure(data);
 
     // Validate security
     this.validateSecurity(data, content);
@@ -202,7 +231,7 @@ export class AIXParser {
   /**
    * Validate AIX structure
    */
-  validateStructure(data) {
+  async validateStructure(data) {
     // Required sections
     const requiredSections = ['meta', 'persona', 'security', 'identity_layer'];
     for (const section of requiredSections) {
@@ -215,20 +244,21 @@ export class AIXParser {
       }
     }
 
-    // Validate each section
-    if (data.meta) this.validateMeta(data.meta);
-    if (data.persona) this.validatePersona(data.persona);
-    if (data.security) this.validateSecurityStructure(data.security);
-    if (data.skills) this.validateSkills(data.skills);
-    if (data.apis) this.validateAPIs(data.apis);
-    if (data.mcp) this.validateMCP(data.mcp);
-    if (data.memory) this.validateMemory(data.memory);
+    // Run plugin-based validation
+    const context = {
+      errors: this.errors,
+      warnings: this.warnings
+    };
+    
+    await this.registry.runAll(data, context);
+
+    // Validate sections not yet covered by plugins (for backward compatibility)
+    // These will be migrated to plugins in future updates
     if (data.requirements) this.validateRequirements(data.requirements);
     if (data.pricing) this.validatePricing(data.pricing);
     if (data.identity_layer) this.validateIdentityLayer(data.identity_layer);
     if (data.pi_network) this.validatePiNetwork(data.pi_network);
     if (data.economics) this.validateEconomics(data.economics);
-    if (data.abom) this.validateABOM(data.abom);
     if (data.black_box) this.validateBlackBox(data.black_box);
     if (data.build_provenance) this.validateBuildProvenance(data.build_provenance);
   }
@@ -1195,3 +1225,9 @@ export class AIXAgent {
     }
   }
 }
+
+// ─── Plugin System Exports ────────────────────────────────────────────────────
+// Export plugin system for external use
+export { defaultRegistry, PluginRegistry };
+export { ValidationPlugin } from './validation-plugins.js';
+export * from './plugins/index.js';
