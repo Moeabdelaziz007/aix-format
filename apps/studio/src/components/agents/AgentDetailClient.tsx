@@ -399,4 +399,4 @@ export default function AgentDetailClient({ id }: { id: string }) {
   );
 }
 
-function.displayName = 'function';
+// displayName removed - was causing build errors

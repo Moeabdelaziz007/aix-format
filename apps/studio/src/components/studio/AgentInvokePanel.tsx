@@ -762,4 +762,4 @@ function ToolCallBlock({
   );
 }
 
-function.displayName = 'function';
+// displayName removed - was causing build errors

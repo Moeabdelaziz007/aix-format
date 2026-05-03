@@ -408,4 +408,4 @@ export default function DeployModal({ agent, onClose, onDeployed }: Props) {
   );
 }
 
-function.displayName = 'function';
+// displayName removed - was causing build errors

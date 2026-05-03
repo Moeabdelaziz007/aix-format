@@ -158,4 +158,4 @@ export default function DiscoveryPreview({ agentDid, agentName }: Props) {
   );
 }
 
-function.displayName = 'function';
+// displayName removed - was causing build errors

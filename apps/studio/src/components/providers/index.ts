@@ -1,2 +1,2 @@
-export { default as VoiceCommandProvider } from './VoiceCommandProvider';
-export { default as WalletProvider } from './WalletProvider';
+export { VoiceCommandProvider } from './VoiceCommandProvider';
+export { WalletProvider } from './WalletProvider';

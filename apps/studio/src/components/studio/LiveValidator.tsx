@@ -198,4 +198,4 @@ export default function LiveValidator({
   );
 }
 
-function.displayName = 'function';
+// displayName removed - was causing build errors

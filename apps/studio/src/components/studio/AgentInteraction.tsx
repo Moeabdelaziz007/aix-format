@@ -184,4 +184,4 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
   );
 }
 
-function.displayName = 'function';
+// displayName removed - was causing build errors
