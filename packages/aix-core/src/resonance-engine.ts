@@ -83,4 +83,149 @@ export class ResonanceEngine {
     const harmonics = Object.entries(frequencies)
       .filter(([type, res]) => type !== peakFrequency && res >= maxResonance * 0.8)
       .map(([type]) => type);
+    // Amplification: 1.5x to 3x based on peak resonance
+    const amplification = 1.5 + (maxResonance * 1.5);
+
+    const resonance: AgentResonance = {
+      agentId,
+      frequencies,
+      peakFrequency,
+      harmonics,
+      amplification,
+      lastUpdated: Date.now()
+    };
+
+    // Store computed resonance
+    await kv.set(`${this.RESONANCE_KEY}:${agentId}`, resonance);
+    
+    return resonance;
+  }
+
+  /**
+   * Calculate resonance for specific task type
+   * Formula: (success_rate × 0.3) + (speed × 0.2) + (consistency × 0.2) + (recency × 0.3)
+   */
+  private static async calculateTaskResonance(agentId: string, taskType: string): Promise<number> {
+    const key = `${this.PERFORMANCE_KEY}:${agentId}:${taskType}`;
+    const performances = await kv.lrange<string>(key, 0, -1);
+    
+    if (performances.length < this.MIN_SAMPLES) {
+      return 0;
+    }
+
+    const parsed = performances.map(p => JSON.parse(p) as TaskPerformance);
+    
+    // 1. Success Rate (0-1)
+    const successCount = parsed.filter(p => p.success).length;
+    const successRate = successCount / parsed.length;
+    
+    // 2. Speed Score (0-1) - faster is better, normalized against 10 second baseline
+    const avgDuration = parsed.reduce((sum, p) => sum + p.duration, 0) / parsed.length;
+    const speedScore = Math.max(0, Math.min(1, 1 - (avgDuration / 10000)));
+    
+    // 3. Consistency Score (0-1) - based on quality variance
+    const avgQuality = parsed.reduce((sum, p) => sum + p.quality, 0) / parsed.length;
+    const qualityVariance = parsed.reduce((sum, p) => sum + Math.pow(p.quality - avgQuality, 2), 0) / parsed.length;
+    const consistencyScore = Math.max(0, 1 - qualityVariance);
+    
+    // 4. Recency Score (0-1) - recent activity is better
+    const latestTimestamp = Math.max(...parsed.map(p => p.timestamp));
+    const hoursSinceLatest = (Date.now() - latestTimestamp) / (1000 * 60 * 60);
+    const recencyScore = Math.max(0, Math.min(1, 1 - (hoursSinceLatest / 168))); // 7 days = 0
+    
+    // Calculate weighted resonance
+    const resonance = 
+      (successRate * 0.3) +
+      (speedScore * 0.2) +
+      (consistencyScore * 0.2) +
+      (recencyScore * 0.3);
+    
+    return resonance;
+  }
+
+  /**
+   * Get all task types an agent has performed
+   */
+  private static async getAgentTaskTypes(agentId: string): Promise<string[]> {
+    // Scan for all performance keys for this agent
+    // In production, maintain a set of task types per agent
+    const taskTypesKey = `resonance:agent:${agentId}:task_types`;
+    return await kv.smembers<string>(taskTypesKey);
+  }
+
+  /**
+   * Get agent's resonance profile
+   */
+  static async getResonance(agentId: string): Promise<AgentResonance | null> {
+    return await kv.get<AgentResonance>(`${this.RESONANCE_KEY}:${agentId}`);
+  }
+
+  /**
+   * Find best agent for a task based on resonance
+   */
+  static async findResonantAgent(agentIds: string[], taskType: string): Promise<{
+    agentId: string;
+    resonance: AgentResonance;
+    score: number;
+  } | null> {
+    if (agentIds.length === 0) return null;
+
+    const candidates = await Promise.all(
+      agentIds.map(async (agentId) => {
+        const resonance = await this.getResonance(agentId);
+        if (!resonance) return null;
+
+        const score = resonance.frequencies[taskType] || 0;
+        return { agentId, resonance, score };
+      })
+    );
+
+    const valid = candidates.filter((c): c is NonNullable<typeof c> => c !== null && c.score > 0);
+    
+    if (valid.length === 0) return null;
+
+    // Sort by score (highest first)
+    valid.sort((a, b) => b.score - a.score);
+
+    console.log(`[Resonance] Best match for ${taskType}: ${valid[0].agentId} (score: ${valid[0].score.toFixed(3)}, amplification: ${valid[0].resonance.amplification.toFixed(2)}x)`);
+
+    return valid[0];
+  }
+
+  /**
+   * Track task type for an agent (call when recording performance)
+   */
+  static async trackTaskType(agentId: string, taskType: string): Promise<void> {
+    const taskTypesKey = `resonance:agent:${agentId}:task_types`;
+    await kv.sadd(taskTypesKey, taskType);
+  }
+
+  /**
+   * Get resonance leaderboard for a task type
+   */
+  static async getLeaderboard(taskType: string, agentIds: string[], limit: number = 10): Promise<Array<{
+    agentId: string;
+    score: number;
+    amplification: number;
+  }>> {
+    const scores = await Promise.all(
+      agentIds.map(async (agentId) => {
+        const resonance = await this.getResonance(agentId);
+        if (!resonance) return null;
+
+        const score = resonance.frequencies[taskType] || 0;
+        return {
+          agentId,
+          score,
+          amplification: resonance.amplification
+        };
+      })
+    );
+
+    return scores
+      .filter((s): s is NonNullable<typeof s> => s !== null && s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+  }
+}
 
