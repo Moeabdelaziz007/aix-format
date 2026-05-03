@@ -308,12 +308,14 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 		// but if the whole agent pool is empty, it might be a "Transient" infrastructure issue.
 		if len(r.agents) == 0 {
 			r.breaker.RecordFailure(r.metrics)
+			r.deadLetterQueue = append(r.deadLetterQueue, task)
 			return nil, fmt.Errorf("infrastructure failure: no agents registered in the swarm")
 		}
 
 		// Not recording breaker failure for specific task mismatches to avoid false positives
 		// unless failure rate across different tasks is high.
-		return nil, fmt.Errorf("task mismatch: no suitable agent found for task %s with capabilities %v", 
+		r.deadLetterQueue = append(r.deadLetterQueue, task)
+		return nil, fmt.Errorf("task mismatch: no suitable agent found for task %s with capabilities %v",
 			task.ID, task.RequiredCapabilities)
 	}
 
@@ -546,10 +548,12 @@ func (r *SwarmRouter) ListAgentsHandler(w http.ResponseWriter, req *http.Request
 		return
 	}
 
+	r.mu.RLock()
 	agents := make([]AgentNode, 0, len(r.agents))
 	for _, agent := range r.agents {
 		agents = append(agents, agent)
 	}
+	r.mu.RUnlock()
 
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
