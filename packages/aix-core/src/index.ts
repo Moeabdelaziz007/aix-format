@@ -33,6 +33,9 @@ export * from './resonance-engine';
 export * from './p2p-router';
 export * from './trust-chain';
 
+// Agent Runtime (v1.5.0)
+export * from './agent-runtime';
+
 export default kv;
 
 
