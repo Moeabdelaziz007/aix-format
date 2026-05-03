@@ -33,7 +33,27 @@ export type BusEventType =
   | 'TASK_FAILED'
   | 'PAYMENT_SETTLED'
   | 'AGENT_HIBERNATED'
-  | 'CHANNEL_PROVISIONED';
+  | 'CHANNEL_PROVISIONED'
+  // ReAct Loop (Ring 2 — MIND)
+  | 'THOUGHT_GENERATED'
+  | 'ACTION_PLANNED'
+  | 'ACTION_EXECUTING'
+  | 'OBSERVATION_RECORDED'
+  | 'REFLECTION_COMPLETE'
+  // Pet (Ring 1 — SOUL)
+  | 'PET_MOOD_CHANGED'
+  | 'PET_LEVELED_UP'
+  | 'PET_ACCESSORY_UNLOCKED'
+  // Trust (Ring 0 — GENESIS)
+  | 'TRUST_TX_MINING'
+  | 'TRUST_TX_MINED'
+  | 'TRUST_SCORE_UPDATED'
+  // Stream (Ring 3 — BODY)
+  | 'RESULT_CHUNK'
+  | 'RESULT_COMPLETE'
+  | 'METRICS_UPDATED'
+  | 'STEP_STARTED'
+  | 'STEP_COMPLETE';
 
 export interface BusEvent {
   id        : string;
@@ -152,6 +172,152 @@ export function createChannelEvent(
     agentId, agentName,
     `📡 ${platform === 'telegram' ? '✈️ Telegram' : '💬 WhatsApp'} provisioned: ${handle}`,
     { platform, handle });
+}
+
+// ─── Interactive UI Event Factories ──────────────────────────────────────────
+
+/**
+ * Ring 2 — MIND: Emitted by agent-runtime.ts during ReAct loop
+ * @param agentId Agent identifier
+ * @param agentName Agent display name
+ * @param thought The reasoning step content
+ * @param step Current step number in the ReAct loop
+ * @returns BusEvent for THOUGHT_GENERATED
+ */
+export function createThoughtEvent(
+  agentId   : string,
+  agentName : string,
+  thought   : string,
+  step      : number,
+): BusEvent {
+  return mkEvent(
+    BUS_RINGS.MIND,
+    'THOUGHT_GENERATED',
+    agentId,
+    agentName,
+    `💭 Step ${step}: ${thought.slice(0, 80)}${thought.length > 80 ? '...' : ''}`,
+    { thought, step }
+  );
+}
+
+/**
+ * Ring 2 — MIND: Emitted when agent executes a tool
+ * @param agentId Agent identifier
+ * @param agentName Agent display name
+ * @param tool Tool name being executed
+ * @param input Tool input parameters
+ * @param step Current step number
+ * @returns BusEvent for ACTION_EXECUTING
+ */
+export function createActionEvent(
+  agentId   : string,
+  agentName : string,
+  tool      : string,
+  input     : unknown,
+  step      : number,
+): BusEvent {
+  return mkEvent(
+    BUS_RINGS.MIND,
+    'ACTION_EXECUTING',
+    agentId,
+    agentName,
+    `⚡ Action: ${tool}`,
+    { tool, input, step }
+  );
+}
+
+/**
+ * Ring 2 — MIND: Emitted when tool execution completes
+ * @param agentId Agent identifier
+ * @param agentName Agent display name
+ * @param observation Tool execution result
+ * @param step Current step number
+ * @returns BusEvent for OBSERVATION_RECORDED
+ */
+export function createObservationEvent(
+  agentId     : string,
+  agentName   : string,
+  observation : string,
+  step        : number,
+): BusEvent {
+  return mkEvent(
+    BUS_RINGS.MIND,
+    'OBSERVATION_RECORDED',
+    agentId,
+    agentName,
+    `👁️ Observation: ${observation.slice(0, 80)}${observation.length > 80 ? '...' : ''}`,
+    { observation, step }
+  );
+}
+
+/**
+ * Ring 1 — SOUL: Emitted by pets.ts when mood changes
+ * @param agentId Agent identifier
+ * @param agentName Agent display name
+ * @param fromMood Previous mood state
+ * @param toMood New mood state
+ * @param tau Quality threshold (0.1-1.0)
+ * @returns BusEvent for PET_MOOD_CHANGED
+ */
+export function createPetMoodEvent(
+  agentId   : string,
+  agentName : string,
+  fromMood  : string,
+  toMood    : string,
+  tau       : number,
+): BusEvent {
+  return mkEvent(
+    BUS_RINGS.SOUL,
+    'PET_MOOD_CHANGED',
+    agentId,
+    agentName,
+    `🐾 Mood: ${fromMood} → ${toMood} (τ=${tau.toFixed(2)})`,
+    { fromMood, toMood, tau }
+  );
+}
+
+/**
+ * Ring 0 — GENESIS: Emitted by trust-chain.ts during PoW mining
+ * @param agentId Agent identifier
+ * @param agentName Agent display name
+ * @param nonce Current nonce attempt
+ * @param hash Current hash being tested
+ * @param done Whether mining is complete
+ * @returns BusEvent for TRUST_TX_MINING or TRUST_TX_MINED
+ */
+export function createTrustMiningEvent(
+  agentId   : string,
+  agentName : string,
+  nonce     : number,
+  hash      : string,
+  done      : boolean,
+): BusEvent {
+  return mkEvent(
+    BUS_RINGS.GENESIS,
+    done ? 'TRUST_TX_MINED' : 'TRUST_TX_MINING',
+    agentId,
+    agentName,
+    done
+      ? `⛏️ Block mined: ${hash.slice(0, 12)}…`
+      : `⛏️ Mining nonce ${nonce}…`,
+    { nonce, hash, done }
+  );
+}
+
+// ─── UI Layer Metadata Interface ─────────────────────────────────────────────
+
+/**
+ * Optional metadata for UI layer routing and visualization
+ */
+export interface UILayerMeta {
+  /** Target UI component for this event */
+  uiLayer: 'terminal' | 'pet' | 'trust' | 'stream';
+  /** ReAct loop step number (for terminal) */
+  step?: number;
+  /** Quality threshold tau (for pet) */
+  tau?: number;
+  /** Execution time in milliseconds (for metrics) */
+  ms?: number;
 }
 
 // ─── Emit helpers ────────────────────────────────────────────────────────────

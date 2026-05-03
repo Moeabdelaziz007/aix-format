@@ -1,20 +1,11 @@
-export { default as AgentInteraction } from './AgentInteraction';
-export { default as AgentInvokePanel } from './AgentInvokePanel';
-export { default as AgenticKycSetup } from './AgenticKycSetup';
-export { default as BOMVisualizer } from './BOMVisualizer';
-export { default as DIDCard } from './DIDCard';
-export { default as DNABadge } from './DNABadge';
-export { default as DeployModal } from './DeployModal';
-export { default as DiscoveryPreview } from './DiscoveryPreview';
-export { default as FeaturedAgentCard } from './FeaturedAgentCard';
-export { default as GlobalVoiceCommand } from './GlobalVoiceCommand';
-export { default as GlobalVoiceCommandPalette } from './GlobalVoiceCommandPalette';
-export { default as GlobalVoiceFAB } from './GlobalVoiceFAB';
-export { default as IntelligenceStream } from './IntelligenceStream';
-export { default as KycSignatureModal } from './KycSignatureModal';
-export { default as LiveValidator } from './LiveValidator';
-export { default as SetupWizard } from './SetupWizard';
-export { default as SovereignAether } from './SovereignAether';
-export { default as SovereignAetherClient } from './SovereignAetherClient';
-export { default as VoiceWizard } from './VoiceWizard';
-export { default as WalletButton } from './WalletButton';
+/**
+ * Studio Components Barrel Export
+ * 
+ * Interactive development environment components for real-time
+ * agent monitoring and visualization.
+ */
+
+export { ReasoningTerminal } from './ReasoningTerminal';
+export { TrustChainVisualizer } from './TrustChainVisualizer';
+
+// Made with Bob

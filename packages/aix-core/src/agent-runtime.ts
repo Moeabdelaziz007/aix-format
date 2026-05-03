@@ -12,7 +12,7 @@
 
 import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
-import { emit, BUS_RINGS } from './bus';
+import { emit, BUS_RINGS, createThoughtEvent, createActionEvent, createObservationEvent } from './bus';
 import { getFeedbackSkills, getLearnedProcedures, recordSuccessfulProcedure, ProcedureStep } from './learning';
 import { PetOrchestrator } from './pets';
 import { FailureLearning } from './failure-learning';
@@ -334,14 +334,42 @@ export class AgentRuntimeEngine {
       this.runtime.step++;
       this.runtime.status = 'thinking';
 
+      // 1. Emit STEP_STARTED
+      await emit({
+        ring: BUS_RINGS.MIND,
+        type: 'STEP_STARTED',
+        agentId: this.runtime.agentId,
+        agentName: this.runtime.agentName,
+        message: `Step ${this.runtime.step} starting`,
+        metadata: { step: this.runtime.step, maxSteps }
+      });
+
       const prompt = buildReActPrompt(task, this.context!, this.runtime.scratchpad, this.tools);
       const thought = await this.llm.complete(prompt, STOP_TOKENS);
       await this.emitState('AGENT_THINKING', `Step ${this.runtime.step}: ${thought.slice(0, 80)}`);
+
+      // 2. Emit THOUGHT_GENERATED
+      await emit(createThoughtEvent(
+        this.runtime.agentId,
+        this.runtime.agentName,
+        thought,
+        this.runtime.step
+      ));
 
       if (thought.toLowerCase().includes('final answer')) {
         finalAnswer = this.extractFinalAnswer(thought);
         this.runtime.status = 'done';
         await this.emitState('AGENT_DONE', `Completed in ${this.runtime.step} steps`);
+        
+        // Emit REFLECTION_COMPLETE for final step
+        await emit({
+          ring: BUS_RINGS.MIND,
+          type: 'REFLECTION_COMPLETE',
+          agentId: this.runtime.agentId,
+          agentName: this.runtime.agentName,
+          message: `Step ${this.runtime.step} complete`,
+          metadata: { step: this.runtime.step, shouldContinue: false }
+        });
         break;
       }
 
@@ -351,19 +379,56 @@ export class AgentRuntimeEngine {
       if (!action) {
         finalAnswer = thought;
         this.runtime.status = 'done';
+        
+        // Emit REFLECTION_COMPLETE for no-action case
+        await emit({
+          ring: BUS_RINGS.MIND,
+          type: 'REFLECTION_COMPLETE',
+          agentId: this.runtime.agentId,
+          agentName: this.runtime.agentName,
+          message: `Step ${this.runtime.step} complete`,
+          metadata: { step: this.runtime.step, shouldContinue: false }
+        });
         break;
       }
 
       await this.emitState('AGENT_ACTING', `Action: ${action.tool}`);
 
+      // 3. Emit ACTION_EXECUTING
+      await emit(createActionEvent(
+        this.runtime.agentId,
+        this.runtime.agentName,
+        action.tool,
+        action.input,
+        this.runtime.step
+      ));
+
       if (this.detectLoop(action)) {
         finalAnswer = `Loop detected at step ${this.runtime.step}. Last observation: ${this.runtime.scratchpad.at(-1)?.observation ?? 'none'}`;
         this.runtime.status = 'done';
+        
+        // Emit REFLECTION_COMPLETE for loop detection
+        await emit({
+          ring: BUS_RINGS.MIND,
+          type: 'REFLECTION_COMPLETE',
+          agentId: this.runtime.agentId,
+          agentName: this.runtime.agentName,
+          message: `Step ${this.runtime.step} complete`,
+          metadata: { step: this.runtime.step, shouldContinue: false }
+        });
         break;
       }
 
       const observation = await this.executeAction(action);
       await this.emitState('AGENT_OBSERVATION', `Observation: ${observation.slice(0, 100)}`);
+
+      // 4. Emit OBSERVATION_RECORDED
+      await emit(createObservationEvent(
+        this.runtime.agentId,
+        this.runtime.agentName,
+        observation,
+        this.runtime.step
+      ));
 
       this.runtime.scratchpad.push({
         thought,
@@ -375,8 +440,28 @@ export class AgentRuntimeEngine {
         finalAnswer = observation;
         this.runtime.status = 'done';
         await this.emitState('AGENT_DONE', `Early stop with high confidence`);
+        
+        // Emit REFLECTION_COMPLETE for early stop
+        await emit({
+          ring: BUS_RINGS.MIND,
+          type: 'REFLECTION_COMPLETE',
+          agentId: this.runtime.agentId,
+          agentName: this.runtime.agentName,
+          message: `Step ${this.runtime.step} complete`,
+          metadata: { step: this.runtime.step, shouldContinue: false }
+        });
         break;
       }
+
+      // 5. Emit REFLECTION_COMPLETE at end of iteration
+      await emit({
+        ring: BUS_RINGS.MIND,
+        type: 'REFLECTION_COMPLETE',
+        agentId: this.runtime.agentId,
+        agentName: this.runtime.agentName,
+        message: `Step ${this.runtime.step} complete`,
+        metadata: { step: this.runtime.step, shouldContinue: true }
+      });
     }
 
     if (this.runtime.step >= maxSteps && !finalAnswer) {
