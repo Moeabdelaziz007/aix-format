@@ -131,10 +131,17 @@ export class AIXParser {
 
     // Content-based detection
     const trimmed = content.trim();
-    if (trimmed.startsWith('{')) return 'json';
-    if (/^\[\w+\]/.test(trimmed)) return 'toml';
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        JSON.parse(trimmed);
+        return 'json';
+      } catch {
+        // fall through to TOML/YAML detection
+      }
+    }
+    if (/^\[\w+[\w.-]*\]/.test(trimmed)) return 'toml';
     if (/^\w+\s*=/.test(trimmed)) return 'toml';
-    
+
     return 'yaml'; // Default fallback
   }
 
@@ -160,7 +167,7 @@ export class AIXParser {
     let current = out;
 
     for (const rawLine of content.split('\n')) {
-      const line = rawLine.trim();
+      const line = this.stripInlineComment(rawLine).trim();
       if (!line || line.startsWith('#')) continue;
 
       if (line.startsWith('[') && line.endsWith(']')) {
@@ -186,12 +193,7 @@ export class AIXParser {
       } else if (rawValue === 'true' || rawValue === 'false') {
         parsedValue = rawValue === 'true';
       } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
-        parsedValue = rawValue.slice(1, -1).split(',').map((item) => item.trim()).filter((v) => v.length > 0).map((item) => {
-          if ((item.startsWith('"') && item.endsWith('"')) || (item.startsWith("'") && item.endsWith("'"))) return item.slice(1, -1);
-          if (item === 'true' || item === 'false') return item === 'true';
-          if (!Number.isNaN(Number(item))) return Number(item);
-          return item;
-        });
+        parsedValue = this.parseTOMLArray(rawValue);
       } else if (!Number.isNaN(Number(rawValue))) {
         parsedValue = Number(rawValue);
       } else {
@@ -204,6 +206,67 @@ export class AIXParser {
     return out;
   }
 
+
+  stripInlineComment(input) {
+    let inSingle = false;
+    let inDouble = false;
+    let out = '';
+
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+      const prev = i > 0 ? input[i - 1] : '';
+
+      if (char === '"' && !inSingle && prev !== '\\') {
+        inDouble = !inDouble;
+      } else if (char === "'" && !inDouble && prev !== '\\') {
+        inSingle = !inSingle;
+      }
+
+      if (char === '#' && !inSingle && !inDouble) {
+        break;
+      }
+
+      out += char;
+    }
+
+    return out;
+  }
+
+  parseTOMLArray(rawValue) {
+    const values = [];
+    let current = '';
+    let inSingle = false;
+    let inDouble = false;
+
+    for (let i = 1; i < rawValue.length - 1; i++) {
+      const char = rawValue[i];
+      const prev = i > 1 ? rawValue[i - 1] : '';
+
+      if (char === '"' && !inSingle && prev !== '\\') inDouble = !inDouble;
+      if (char === "'" && !inDouble && prev !== '\\') inSingle = !inSingle;
+
+      if (char === ',' && !inSingle && !inDouble) {
+        const parsed = this.parseTOMLScalar(current.trim());
+        if (parsed !== undefined) values.push(parsed);
+        current = '';
+        continue;
+      }
+
+      current += char;
+    }
+
+    const tail = this.parseTOMLScalar(current.trim());
+    if (tail !== undefined) values.push(tail);
+    return values;
+  }
+
+  parseTOMLScalar(value) {
+    if (!value) return undefined;
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) return value.slice(1, -1);
+    if (value === 'true' || value === 'false') return value === 'true';
+    if (!Number.isNaN(Number(value))) return Number(value);
+    return value;
+  }
 
   createParseError(code, message, filePath, originalError) {
     const error = new Error(message);
