@@ -405,4 +405,4 @@ describe('Resonance Engine', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

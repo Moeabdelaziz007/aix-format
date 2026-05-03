@@ -86,4 +86,4 @@ export type {
 import { kv } from './storage/adapter';
 export default kv;
 
-// Made with Bob - Tree Shaking Enabled ✅
+// Made with Moe Abdelaziz - Tree Shaking Enabled ✅

@@ -666,4 +666,4 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for general contribution guidelines.
 
 ---
 
-*Made with Bob - The AI that improves itself* 🤖
+*Made with Moe Abdelaziz - The AI that improves itself* 🤖

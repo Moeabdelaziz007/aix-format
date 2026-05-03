@@ -15,4 +15,4 @@ echo "✅ Removed console.log statements"
 # Count lines saved
 echo "Lines removed: ~78 console.log statements"
 
-# Made with Bob
+# Made with Moe Abdelaziz

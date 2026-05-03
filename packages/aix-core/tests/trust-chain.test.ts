@@ -625,4 +625,4 @@ describe('Trust Chain', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

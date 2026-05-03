@@ -7,4 +7,4 @@
 
 export * from '../swarm';
 
-// Made with Bob - Clean Room Pattern ✅
+// Made with Moe Abdelaziz - Clean Room Pattern ✅

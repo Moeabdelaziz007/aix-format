@@ -92,4 +92,4 @@ export const identityRules = [
   }
 ];
 
-// Made with Bob
+// Made with Moe Abdelaziz

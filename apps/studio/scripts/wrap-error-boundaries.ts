@@ -60,4 +60,4 @@ pages.forEach(pagePath => {
 
 console.log('\n🎉 All pages wrapped with ErrorBoundary!');
 
-// Made with Bob
+// Made with Moe Abdelaziz

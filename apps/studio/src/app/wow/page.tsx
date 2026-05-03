@@ -89,4 +89,4 @@ export default function WowPage({ searchParams }: WowPageProps) {
   );
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

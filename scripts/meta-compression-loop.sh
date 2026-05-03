@@ -185,4 +185,4 @@ echo "1. Review changes with: git diff"
 echo "2. Run tests: npm test"
 echo "3. Commit if successful: git add -A && git commit -m 'feat(compression): meta-loop iteration $ITERATION'"
 
-# Made with Bob
+# Made with Moe Abdelaziz

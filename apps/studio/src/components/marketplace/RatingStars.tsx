@@ -65,4 +65,4 @@ export function RatingStars({
   );
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

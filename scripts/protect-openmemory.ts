@@ -197,4 +197,4 @@ function startWatcher(): void {
 // Start the watcher
 startWatcher();
 
-// Made with Bob
+// Made with Moe Abdelaziz

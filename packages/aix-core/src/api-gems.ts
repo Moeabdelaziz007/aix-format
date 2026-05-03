@@ -939,4 +939,4 @@ export const APIGems = {
   verifySignature,
 };
 
-// Made with Bob
+// Made with Moe Abdelaziz

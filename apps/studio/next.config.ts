@@ -73,4 +73,4 @@ const nextConfig: NextConfig = {
 
 export default withBundleAnalyzer(nextConfig);
 
-// Made with Bob
+// Made with Moe Abdelaziz

@@ -218,4 +218,4 @@ export class SecurityHardeningValidator extends ValidationPlugin {
  * const agent = await parser.parseFile('my-agent.aix');
  */
 
-// Made with Bob
+// Made with Moe Abdelaziz

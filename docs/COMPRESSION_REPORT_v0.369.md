@@ -375,4 +375,4 @@ npm test packages/aix-core/tests/curiosity-engine.test.ts
 
 ---
 
-**Made with Bob - The Meta-Creative Compressor** 🧬
+**Made with Moe Abdelaziz - The Meta-Creative Compressor** 🧬

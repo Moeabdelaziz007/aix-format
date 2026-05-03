@@ -391,4 +391,4 @@ class MetaCompressionEngine {
 const engine = new MetaCompressionEngine();
 engine.run().catch(console.error);
 
-// Made with Bob
+// Made with Moe Abdelaziz

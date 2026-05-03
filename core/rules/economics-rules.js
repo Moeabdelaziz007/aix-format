@@ -102,4 +102,4 @@ export const economicsRules = [
   }
 ];
 
-// Made with Bob
+// Made with Moe Abdelaziz

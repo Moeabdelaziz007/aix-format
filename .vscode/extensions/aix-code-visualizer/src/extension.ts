@@ -478,4 +478,4 @@ export function deactivate() {
   statusBarItem?.dispose();
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

@@ -268,4 +268,4 @@ export function ReasoningTerminal({
   );
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

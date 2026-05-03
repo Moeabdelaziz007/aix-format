@@ -339,4 +339,4 @@ export function generatePaymentProof(
   return Buffer.from(JSON.stringify(proof)).toString('base64');
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

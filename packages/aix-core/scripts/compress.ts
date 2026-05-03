@@ -229,4 +229,4 @@ if (require.main === module) {
 
 export { CompressionEngine, CompressionStats };
 
-// Made with Bob
+// Made with Moe Abdelaziz

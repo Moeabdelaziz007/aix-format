@@ -481,4 +481,4 @@ describe('GatewayManager', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

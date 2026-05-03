@@ -477,7 +477,7 @@ MIT License - See LICENSE file
 
 ---
 
-**Made with Bob - The Meta-Creative Engine** 🧬
+**Made with Moe Abdelaziz - The Meta-Creative Engine** 🧬
 
 **الكود الأقل = القوة الأكبر**  
 **Less Code = More Power**

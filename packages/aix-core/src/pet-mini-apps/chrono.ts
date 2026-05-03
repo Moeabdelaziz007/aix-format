@@ -139,4 +139,4 @@ export const ChronoPet: PetMiniApp = {
   widgetComponent: 'ChronoWidget'
 };
 
-// Made with Bob
+// Made with Moe Abdelaziz

@@ -74,4 +74,4 @@ export const pricingRules = [
   }
 ];
 
-// Made with Bob
+// Made with Moe Abdelaziz

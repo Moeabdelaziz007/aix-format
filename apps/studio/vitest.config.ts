@@ -27,4 +27,4 @@ export default defineConfig({
   },
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

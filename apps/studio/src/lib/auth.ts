@@ -186,4 +186,4 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return hash === 'hashed_' + password;
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

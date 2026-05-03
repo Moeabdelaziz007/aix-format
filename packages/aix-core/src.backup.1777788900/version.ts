@@ -237,4 +237,4 @@ export default {
   isVersionCompatible
 };
 
-// Made with Bob
+// Made with Moe Abdelaziz

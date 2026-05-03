@@ -16,4 +16,4 @@ echo "✅ Fixed circular imports in all files"
 echo "Files affected:"
 grep -l "from './storage/adapter'" packages/aix-core/src/*.ts | wc -l
 
-# Made with Bob
+# Made with Moe Abdelaziz

@@ -73,4 +73,4 @@ program.command('disable <path>').description('Disable a plugin').action(async (
 
 program.parse();
 
-// Made with Bob
+// Made with Moe Abdelaziz

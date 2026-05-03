@@ -39,4 +39,4 @@ else
   grep -rn '\`agent:' "$SRC_DIR" --include="*.ts" 2>/dev/null | grep -v "storage/keys.ts"
 fi
 
-# Made with Bob
+# Made with Moe Abdelaziz

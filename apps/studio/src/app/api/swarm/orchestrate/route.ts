@@ -98,4 +98,4 @@ function calculateCostEstimate(plan: { steps: Array<{ estimatedDuration: number 
   return plan.agents.length * costPerAgent;
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

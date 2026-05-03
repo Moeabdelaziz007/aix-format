@@ -345,4 +345,4 @@ export async function destroyRustBridge(): Promise<void> {
 export { rustCore };
 export default RustBridge;
 
-// Made with Bob
+// Made with Moe Abdelaziz

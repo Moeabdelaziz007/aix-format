@@ -273,4 +273,4 @@ export namespace Serialization {
   export function deserializeSkill(buffer: Buffer): Skill;
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

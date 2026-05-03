@@ -97,4 +97,4 @@ function getSecurityRecommendation(piiTypes: string[], compressionRequested: boo
   return `PII detected (${piiTypes.join(', ')}). Consider redaction before processing.`;
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

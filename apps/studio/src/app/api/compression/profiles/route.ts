@@ -20,4 +20,4 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

@@ -262,4 +262,4 @@ export async function autoBid(
   return submittedBids;
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

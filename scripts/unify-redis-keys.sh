@@ -248,4 +248,4 @@ echo ""
 echo "📊 Compression complete!"
 echo "Next: Review changes with 'git diff packages/aix-core/src'"
 
-# Made with Bob
+# Made with Moe Abdelaziz

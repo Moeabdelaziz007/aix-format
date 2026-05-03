@@ -65,4 +65,4 @@ export const getRules = () => [...registry];
  */
 export const clear = () => registry.length = 0;
 
-// Made with Bob
+// Made with Moe Abdelaziz

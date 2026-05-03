@@ -8,4 +8,4 @@
 export { ReasoningTerminal } from './ReasoningTerminal';
 export { TrustChainVisualizer } from './TrustChainVisualizer';
 
-// Made with Bob
+// Made with Moe Abdelaziz

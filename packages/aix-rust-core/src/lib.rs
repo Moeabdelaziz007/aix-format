@@ -487,4 +487,4 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     Ok(())
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

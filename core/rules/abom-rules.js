@@ -148,4 +148,4 @@ export const abomRules = [
   }
 ];
 
-// Made with Bob
+// Made with Moe Abdelaziz

@@ -261,4 +261,4 @@ export function TrustChainVisualizer({
   );
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

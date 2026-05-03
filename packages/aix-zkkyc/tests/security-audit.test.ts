@@ -249,4 +249,4 @@ describe('ZK-KYC Security Audit', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

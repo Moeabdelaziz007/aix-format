@@ -69,4 +69,4 @@ export class RewardCalculator {
   }
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

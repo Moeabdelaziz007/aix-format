@@ -275,4 +275,4 @@ async function executeAutonomousPets() {
 
 console.log('[SW] Service Worker loaded');
 
-// Made with Bob
+// Made with Moe Abdelaziz

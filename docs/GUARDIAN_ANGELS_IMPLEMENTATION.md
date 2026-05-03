@@ -406,4 +406,4 @@ The Guardian Angels pattern provides **unbypassable behavioral oversight** with:
 
 ---
 
-Made with Bob 👼
+Made with Moe Abdelaziz 👼

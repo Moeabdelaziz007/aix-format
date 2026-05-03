@@ -608,7 +608,7 @@ ${metrics.roi > 100 ? '✅ EXCELLENT ROI - Highly Recommended' :
 }
 
 
-// Made with Bob
+// Made with Moe Abdelaziz
 
 
 // ============================================================================

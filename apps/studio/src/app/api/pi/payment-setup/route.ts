@@ -224,4 +224,4 @@ async function initializePaymentWallet(agentId: string, userId: string) {
   return { walletId, walletAddress, balance: 0, currency: 'PI', status: 'active' };
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

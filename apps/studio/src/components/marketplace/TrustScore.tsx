@@ -87,4 +87,4 @@ export function TrustScore({
   );
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

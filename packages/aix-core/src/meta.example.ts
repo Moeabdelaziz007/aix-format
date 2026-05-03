@@ -342,4 +342,4 @@ if (require.main === module) {
 
 export { runAllExamples };
 
-// Made with Bob
+// Made with Moe Abdelaziz

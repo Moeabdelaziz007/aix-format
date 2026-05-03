@@ -57,4 +57,4 @@ export const metaRules = [
   }
 ];
 
-// Made with Bob
+// Made with Moe Abdelaziz

@@ -47,4 +47,4 @@ export const KEYS = {
   skillsList:   () => `skills:list`,
 } as const
 
-// Made with Bob
+// Made with Moe Abdelaziz

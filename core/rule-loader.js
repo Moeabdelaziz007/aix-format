@@ -54,4 +54,4 @@ export const loadFromConfig = async (configPath = '.aix-plugins.json') => {
   }
 };
 
-// Made with Bob
+// Made with Moe Abdelaziz

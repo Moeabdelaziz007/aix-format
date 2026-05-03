@@ -211,4 +211,4 @@ if (require.main === module) {
 
 export { MetaCompressor, CompressionResult, CompressionTechnique };
 
-// Made with Bob
+// Made with Moe Abdelaziz

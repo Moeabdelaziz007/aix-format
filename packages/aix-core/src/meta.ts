@@ -219,4 +219,4 @@ export class EmergenceTracker {
 
 export default meta;
 
-// Made with Bob
+// Made with Moe Abdelaziz

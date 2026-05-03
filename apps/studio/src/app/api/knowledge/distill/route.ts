@@ -98,4 +98,4 @@ function calculateCompressionRatio(conversations: any[], patterns: any[]): numbe
   return originalSize / compressedSize;
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

@@ -32,4 +32,4 @@ export const skillsRules = [
   }
 ];
 
-// Made with Bob
+// Made with Moe Abdelaziz

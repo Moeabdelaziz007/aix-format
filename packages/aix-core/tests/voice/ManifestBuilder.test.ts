@@ -484,4 +484,4 @@ describe('ManifestBuilder', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

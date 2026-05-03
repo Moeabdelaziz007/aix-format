@@ -66,4 +66,4 @@ export function requireEnv(key: string): string | null {
   return val
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

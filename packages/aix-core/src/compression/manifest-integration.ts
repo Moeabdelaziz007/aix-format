@@ -176,4 +176,4 @@ export class ManifestCompressionIntegration {
   }
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

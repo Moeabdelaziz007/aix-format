@@ -371,4 +371,4 @@ if (require.main === module) {
 
 export { extractFieldsFromSchema, extractFieldsFromTypeScript, compareFields };
 
-// Made with Bob
+// Made with Moe Abdelaziz

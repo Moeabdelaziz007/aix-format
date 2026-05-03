@@ -13,4 +13,4 @@ export type { ZKProof, VerificationResult } from './ProofVerifier';
 export { NullifierRegistry, ProofReplayError } from './NullifierRegistry';
 export type { NullifierRecord } from './NullifierRegistry';
 
-// Made with Bob
+// Made with Moe Abdelaziz

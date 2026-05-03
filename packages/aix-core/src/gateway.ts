@@ -419,4 +419,4 @@ export class GatewayManager {
   }
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

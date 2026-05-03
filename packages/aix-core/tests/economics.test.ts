@@ -436,4 +436,4 @@ describe('Staking Functions', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

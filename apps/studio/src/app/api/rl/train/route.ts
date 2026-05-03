@@ -146,4 +146,4 @@ function simulateCompression(state: number[], action: number): { nextState: numb
   return { nextState, reward, done: true };
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

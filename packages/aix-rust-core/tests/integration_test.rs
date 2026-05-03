@@ -402,4 +402,4 @@ async fn test_full_system_integration() {
     assert!(trust_chain.verify_chain("agent1").await.unwrap());
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

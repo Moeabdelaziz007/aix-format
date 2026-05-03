@@ -294,4 +294,4 @@ export class CuriosityEngine {
   }
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

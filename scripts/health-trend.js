@@ -725,4 +725,4 @@ module.exports = {
   calculateSlope
 };
 
-// Made with Bob
+// Made with Moe Abdelaziz
