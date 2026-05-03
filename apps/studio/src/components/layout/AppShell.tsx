@@ -191,7 +191,7 @@ function Sidebar({
             <ChevronLeft className="w-4 h-4" />
           </button>
         )}
-        {canToggle && collapsed && !isMobileWidth(width) && (
+        {canToggle && collapsed && (
           <button
             onClick={onToggle}
             className="p-1 hover:text-zinc-300 transition-colors"
@@ -280,10 +280,6 @@ function Sidebar({
       </div>
     </aside>
   );
-}
-
-function isMobileWidth(w: number) {
-  return w === 40;
 }
 
 // ─── NAV GROUP ────────────────────────────────────────────
