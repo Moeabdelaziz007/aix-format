@@ -1,0 +1,127 @@
+{
+  "name": "aix-code-visualizer",
+  "displayName": "AIX Code Visualizer",
+  "description": "Visual color coding for AIX components: Meta Engine, Pet Skills, Trust Chain, and more",
+  "version": "1.0.0",
+  "publisher": "aix-team",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "aix",
+    "meta-engine",
+    "pets",
+    "trust-chain",
+    "visualization"
+  ],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:javascript"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "aix-code-visualizer.toggle",
+        "title": "Toggle AIX Code Highlighting"
+      },
+      {
+        "command": "aix-code-visualizer.analyzeFile",
+        "title": "Analyze AIX Code Density"
+      }
+    ],
+    "configuration": {
+      "title": "AIX Code Visualizer",
+      "properties": {
+        "aixCodeVisualizer.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable AIX code highlighting"
+        },
+        "aixCodeVisualizer.metaEngine.textColor": {
+          "type": "string",
+          "default": "#00ff88",
+          "description": "Color for Meta Engine functions (recursive, meta())"
+        },
+        "aixCodeVisualizer.metaEngine.backgroundColor": {
+          "type": "string",
+          "default": "",
+          "description": "Background color for Meta Engine code"
+        },
+        "aixCodeVisualizer.petSkill.textColor": {
+          "type": "string",
+          "default": "#ff719b",
+          "description": "Color for Pet Skills (Chrono, Volt, Shade, Bull, Drop)"
+        },
+        "aixCodeVisualizer.petSkill.backgroundColor": {
+          "type": "string",
+          "default": "",
+          "description": "Background color for Pet Skills"
+        },
+        "aixCodeVisualizer.trustChain.textColor": {
+          "type": "string",
+          "default": "#ffd700",
+          "description": "Color for Trust Chain operations"
+        },
+        "aixCodeVisualizer.trustChain.backgroundColor": {
+          "type": "string",
+          "default": "",
+          "description": "Background color for Trust Chain code"
+        },
+        "aixCodeVisualizer.gateway.textColor": {
+          "type": "string",
+          "default": "#4ec9b0",
+          "description": "Color for Gateway/Router code"
+        },
+        "aixCodeVisualizer.gateway.backgroundColor": {
+          "type": "string",
+          "default": "",
+          "description": "Background color for Gateway code"
+        },
+        "aixCodeVisualizer.multiFunction.textColor": {
+          "type": "string",
+          "default": "#ff6b6b",
+          "description": "Color for multi-function lines (2+ operations)"
+        },
+        "aixCodeVisualizer.multiFunction.underlineColor": {
+          "type": "string",
+          "default": "#ff6b6b",
+          "description": "Underline color for multi-function lines"
+        },
+        "aixCodeVisualizer.showDensityMetrics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show code density metrics in status bar"
+        },
+        "aixCodeVisualizer.highlightEmergentPatterns": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight emergent behavior patterns"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.100.0",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "typescript": "^5.4.5"
+  }
+}

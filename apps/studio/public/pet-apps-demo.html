@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIX Pet Apps</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600&display=swap');
+
+:root {
+  --bg:      #080B10;
+  --surface: #0E1219;
+  --border:  #1C2230;
+  --border2: #2A3445;
+  --text:    #C8D4E8;
+  --muted:   #4A5568;
+  --mono:    'JetBrains Mono', monospace;
+  --sans:    'Space Grotesk', sans-serif;
+
+  --chrono: #4A9EFF;
+  --volt:   #FFD700;
+  --shade:  #A855F7;
+  --bull:   #00C896;
+  --drop:   #FF6B6B;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+
+/* ── Scanline overlay ── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  pointer-events:none;z-index:999
+}
+
+.shell{max-width:1100px;margin:0 auto;padding:20px 16px}
+
+/* ── Header ── */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.logo{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:.15em}
+.logo span{color:var(--text)}
+.status-row{display:flex;align-items:center;gap:16px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#00C896;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status-label{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
+.feed-all{font-family:var(--mono);font-size:11px;padding:6px 14px;background:transparent;border:1px solid var(--border2);border-radius:4px;color:var(--muted);cursor:pointer;letter-spacing:.08em;transition:all .15s}
+.feed-all:hover{border-color:var(--text);color:var(--text)}
+
+/* ── Bus log ── */
+.bus-strip{font-family:var(--mono);font-size:10px;height:28px;overflow:hidden;border-bottom:1px solid var(--border);margin-bottom:20px;display:flex;align-items:center;gap:0;opacity:.7}
+.bus-ticker{display:flex;gap:32px;animation:ticker 20s linear infinite;white-space:nowrap}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.bus-event{color:var(--muted)}
+.bus-event .ev{color:var(--text)}
+
+/* ── Grid ── */
+.pet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+
+/* ── Pet Card ── */
+.pet-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s;cursor:pointer;position:relative}
+.pet-card:hover{border-color:var(--border2)}
+.pet-card.active{border-color:var(--accent,#4A9EFF)}
+
+/* Accent bar on left */
+.pet-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent,#4A9EFF);opacity:0;transition:opacity .2s}
+.pet-card.active::before{opacity:1}
+
+.card-head{padding:14px 16px 10px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)}
+.head-left{display:flex;align-items:center;gap:10px}
+.pet-emoji{font-size:22px;line-height:1}
+.pet-name{font-weight:600;font-size:15px;color:var(--text);letter-spacing:-.01em}
+.pet-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.05em}
+.head-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+
+/* Mood pill */
+.mood-pill{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:20px;letter-spacing:.06em;font-weight:700;text-transform:uppercase;border:1px solid transparent}
+.mood-ecstatic {background:rgba(0,255,136,.1);border-color:rgba(0,255,136,.3);color:#00FF88}
+.mood-energized {background:rgba(74,158,255,.1);border-color:rgba(74,158,255,.3);color:#4A9EFF}
+.mood-happy    {background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.3);color:#A855F7}
+.mood-curious  {background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.3);color:#FFD700}
+.mood-tired    {background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.3);color:#FF6B6B}
+.mood-sleeping {background:rgba(74,85,104,.1);border-color:rgba(74,85,104,.3);color:#4A5568}
+.mood-dying    {background:rgba(255,0,0,.15);border-color:rgba(255,0,0,.4);color:#FF4444;animation:flash .8s step-end infinite}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* τ bar */
+.tau-wrap{display:flex;align-items:center;gap:6px}
+.tau-label{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.tau-bar{width:48px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.tau-fill{height:100%;border-radius:2px;transition:width .5s ease}
+
+/* Level badge */
+.level-badge{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.05em}
+.level-badge span{color:var(--text);font-weight:700}
+
+/* Metrics grid */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:0}
+.metric{padding:10px 16px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.metric:nth-child(2n){border-right:none}
+.metric:nth-last-child(-n+2){border-bottom:none}
+.metric-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.metric-value{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);display:flex;align-items:baseline;gap:3px}
+.metric-value.highlight{color:var(--accent,#4A9EFF)}
+.metric-unit{font-size:9px;color:var(--muted);font-weight:400}
+.trend-up::after{content:'↑';font-size:9px;color:#00C896;margin-left:2px}
+.trend-down::after{content:'↓';font-size:9px;color:#FF6B6B;margin-left:2px}
+
+/* Footer */
+.card-foot{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)}
+.last-activity{font-family:var(--mono);font-size:9px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.next-run{font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.run-dot{width:5px;height:5px;border-radius:50%;background:var(--accent,#4A9EFF);animation:runpulse 1s ease-in-out infinite}
+.run-dot.idle{background:var(--muted);animation:none}
+@keyframes runpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+
+/* XP bar */
+.xp-bar-wrap{padding:0 16px 12px;display:flex;align-items:center;gap:8px}
+.xp-bar{flex:1;height:2px;background:var(--border2);border-radius:1px;overflow:hidden}
+.xp-fill{height:100%;border-radius:1px;transition:width .5s ease;opacity:.6}
+.xp-label{font-family:var(--mono);font-size:9px;color:var(--muted)}
+
+/* ── Detail drawer ── */
+.drawer{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:18px;margin-top:12px;display:none}
+.drawer.open{display:block}
+.drawer h3{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.drawer-body{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.8}
+.drawer-body .ev-line{padding:3px 0;border-bottom:1px solid var(--border);display:flex;gap:12px}
+.drawer-body .ev-line:last-child{border:none}
+.ev-time{color:var(--muted);min-width:50px}
+.ev-name{color:var(--text)}
+.ev-data{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+
+/* ── Signals (Bull) ── */
+.signal-tag{display:inline-block;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:.06em}
+.sig-STRONG_BUY{background:rgba(0,200,150,.15);color:#00C896;border:1px solid rgba(0,200,150,.3)}
+.sig-BUY{background:rgba(0,200,150,.08);color:#00C896;border:1px solid rgba(0,200,150,.2)}
+.sig-HOLD{background:rgba(74,85,104,.1);color:var(--muted);border:1px solid var(--border)}
+.sig-SELL{background:rgba(255,107,107,.08);color:#FF6B6B;border:1px solid rgba(255,107,107,.2)}
+.sig-STRONG_SELL{background:rgba(255,107,107,.15);color:#FF6B6B;border:1px solid rgba(255,107,107,.3)}
+
+/* ── Skeleton shimmer ── */
+.skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--border2) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:3px;height:14px;width:60%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Bus event log ── */
+.log-panel{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.log-head{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.log-head span{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+.log-clear{font-family:var(--mono);font-size:10px;padding:3px 10px;background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer}
+.log-clear:hover{border-color:var(--border2);color:var(--text)}
+.log-body{height:160px;overflow-y:auto;padding:0}
+.log-entry{font-family:var(--mono);font-size:10px;padding:5px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.log-entry:last-child{border:none}
+.log-time{color:var(--muted);min-width:44px;flex-shrink:0}
+.log-pet{min-width:48px;flex-shrink:0}
+.log-ev{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.empty-state{text-align:center;padding:40px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="header">
+    <div class="logo">AIX // <span>PET APPS</span> v1.0</div>
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label" id="status-label">INITIALIZING</span>
+      <button class="feed-all" onclick="feedAll()">FEED ALL ↑</button>
+    </div>
+  </div>
+
+  <div class="bus-strip">
+    <div class="bus-ticker" id="bus-ticker">
+      <span class="bus-event"><span class="ev">pet.alarm.fire</span> · Chrono · Morning standup · 09:00</span>
+      <span class="bus-event"><span class="ev">pet.boost.applied</span> · Volt · heap 78% → GC triggered</span>
+      <span class="bus-event"><span class="ev">pet.spy.alert</span> · Shade · AIX stars: 1→2</span>
+      <span class="bus-event"><span class="ev">pet.trade.signal</span> · Bull · BTC STRONG_BUY RSI=28</span>
+      <span class="bus-event"><span class="ev">pet.airdrop.found</span> · Drop · NewProtocol on ETH $1,200 est.</span>
+      <span class="bus-event"><span class="ev">pet.mood.changed</span> · Bull · happy → energized</span>
+      <span class="bus-event"><span class="ev">pet.alarm.fire</span> · Chrono · Morning standup · 09:00</span>
+      <span class="bus-event"><span class="ev">pet.boost.applied</span> · Volt · heap 78% → GC triggered</span>
+      <span class="bus-event"><span class="ev">pet.spy.alert</span> · Shade · AIX stars: 1→2</span>
+      <span class="bus-event"><span class="ev">pet.trade.signal</span> · Bull · BTC STRONG_BUY RSI=28</span>
+    </div>
+  </div>
+
+  <div class="pet-grid" id="pet-grid"></div>
+
+  <div class="log-panel" style="margin-top:16px">
+    <div class="log-head">
+      <span>BUS EVENT LOG</span>
+      <button class="log-clear" onclick="clearLog()">CLEAR</button>
+    </div>
+    <div class="log-body" id="log-body">
+      <div class="empty-state">Waiting for events...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PETS = [
+  {
+    petId:'chrono-01', name:'Chrono', emoji:'🗓️', accent:'#4A9EFF',
+    skill:'Calendar + Smart Alarms', interval:60,
+    busEvent:'pet.alarm.fire',
+    mood:'happy', level:3, experience:45, xpMax:300,
+    metrics:[
+      {label:'Now',         value:'09:42',    unit:''},
+      {label:'Active alarms',value:'3',       unit:'set'},
+      {label:'Next alarm',  value:'13:00',    highlight:true},
+      {label:'Fired today', value:'1',        unit:'times'},
+    ],
+    lastActivity:'Fired: Morning standup',
+    nextRunIn:47, isRunning:true,
+    logColor:'#4A9EFF',
+    detail: {
+      title:'Recent alarms',
+      rows:[
+        {time:'09:00', name:'pet.alarm.fire',    data:'Morning standup fired'},
+        {time:'08:58', name:'pet.skill.complete', data:'checked=3 fired=1 next=13:00'},
+        {time:'08:57', name:'pet.mood.changed',   data:'happy → energized'},
+      ]
+    }
+  },
+  {
+    petId:'volt-01', name:'Volt', emoji:'⚡', accent:'#FFD700',
+    skill:'CPU/Memory Booster', interval:30,
+    busEvent:'pet.boost.applied',
+    mood:'energized', level:5, experience:20, xpMax:500,
+    metrics:[
+      {label:'Heap used',   value:'142',      unit:'MB'},
+      {label:'Heap %',      value:'61',       unit:'%', highlight:true},
+      {label:'RSS',         value:'218',      unit:'MB'},
+      {label:'Boosts',      value:'7',        unit:'total'},
+      {label:'Peak heap',   value:'84',       unit:'%', trend:'up'},
+      {label:'Uptime',      value:'312',      unit:'min'},
+    ],
+    lastActivity:'Heap OK at 61%',
+    nextRunIn:18, isRunning:true,
+    logColor:'#FFD700',
+    detail: {
+      title:'System events',
+      rows:[
+        {time:'09:41', name:'pet.boost.applied',  data:'heap 84% → GC → 61%'},
+        {time:'09:40', name:'pet.skill.complete',  data:'mem=medium suggestion=monitor'},
+        {time:'09:38', name:'pet.boost.applied',   data:'heap 78% → GC triggered'},
+      ]
+    }
+  },
+  {
+    petId:'shade-01', name:'Shade', emoji:'🕵️', accent:'#A855F7',
+    skill:'Web Spy & Price Alerts', interval:300,
+    busEvent:'pet.spy.alert',
+    mood:'curious', level:2, experience:70, xpMax:200,
+    metrics:[
+      {label:'Watching',    value:'4',        unit:'targets'},
+      {label:'Alerts today',value:'2',        highlight:true},
+      {label:'Last alert',  value:'AIX stars'},
+      {label:'Errors',      value:'0',        unit:''},
+    ],
+    lastActivity:'Alert: AIX stars changed 1→2',
+    nextRunIn:183, isRunning:true,
+    logColor:'#A855F7',
+    detail: {
+      title:'Spy alerts',
+      rows:[
+        {time:'09:30', name:'pet.spy.alert',      data:'AIX stars: 1→2 (+100%)'},
+        {time:'09:25', name:'pet.skill.complete',  data:'monitored=4 alerts=1 errors=0'},
+        {time:'09:20', name:'pet.spy.alert',       data:'BTC price: 60120→61440 (+2.2%)'},
+      ]
+    }
+  },
+  {
+    petId:'bull-01', name:'Bull', emoji:'📈', accent:'#00C896',
+    skill:'Crypto Signals (RSI/MACD)', interval:60,
+    busEvent:'pet.trade.signal',
+    mood:'ecstatic', level:7, experience:88, xpMax:700,
+    metrics:[
+      {label:'Top signal',  value:'BTC BUY',   highlight:true},
+      {label:'Confidence',  value:'78',        unit:'%'},
+      {label:'RSI',         value:'34',        trend:'down'},
+      {label:'MACD',        value:'bullish'},
+      {label:'24h change',  value:'+4.2',      unit:'%', trend:'up'},
+      {label:'Signals fired',value:'23',       unit:'total'},
+    ],
+    lastActivity:'BTC: BUY — RSI low (34)',
+    nextRunIn:31, isRunning:true,
+    logColor:'#00C896',
+    detail: {
+      title:'Trade signals',
+      rows:[
+        {time:'09:42', name:'pet.trade.signal',   data:'BTC BUY conf=78% RSI=34 bullish'},
+        {time:'09:41', name:'pet.trade.signal',   data:'ETH HOLD RSI=52 neutral'},
+        {time:'09:40', name:'pet.mood.changed',   data:'happy → ecstatic (BTC signal)'},
+      ]
+    }
+  },
+  {
+    petId:'drop-01', name:'Drop', emoji:'🪂', accent:'#FF6B6B',
+    skill:'Airdrop Hunter', interval:600,
+    busEvent:'pet.airdrop.found',
+    mood:'happy', level:4, experience:10, xpMax:400,
+    metrics:[
+      {label:'Scanned',       value:'847',      unit:''},
+      {label:'New finds',     value:'3',        highlight:true},
+      {label:'Est. value',    value:'$2,400'},
+      {label:'Total found',   value:'12',       unit:'all-time'},
+      {label:'Latest',        value:'YieldArk'},
+      {label:'Risk score',    value:'0.31',     trend:'flat'},
+    ],
+    lastActivity:'Found: YieldArk on Arbitrum',
+    nextRunIn:420, isRunning:true,
+    logColor:'#FF6B6B',
+    detail: {
+      title:'Airdrop finds',
+      rows:[
+        {time:'09:30', name:'pet.airdrop.found',  data:'YieldArk ARB tvl=$480k est=$4,800'},
+        {time:'09:30', name:'pet.airdrop.found',  data:'NovaDEX ETH tvl=$220k est=$2,200'},
+        {time:'09:30', name:'pet.skill.complete',  data:'scanned=847 found=3 total=$2,400'},
+      ]
+    }
+  },
+];
+
+const MOODS_ORDER = ['ecstatic','energized','happy','curious','tired','sleeping','dying'];
+const TAU = {ecstatic:.9,energized:.7,happy:.5,curious:.4,tired:.2,sleeping:.1,dying:.0};
+
+// ── Countdown state ──
+const timers = {};
+PETS.forEach(p => { timers[p.petId] = p.nextRunIn; });
+
+// ── Render ──
+function renderGrid() {
+  const grid = document.getElementById('pet-grid');
+  grid.innerHTML = PETS.map(p => renderCard(p)).join('');
+}
+
+function renderCard(p) {
+  const tau = TAU[p.mood] ?? 0.5;
+  const tauPct = Math.round(tau * 100);
+  const xpPct = Math.round((p.experience / p.xpMax) * 100);
+  const countdown = timers[p.petId] ?? p.nextRunIn;
+
+  const metricsHtml = p.metrics.map((m,i) => `
+    <div class="metric">
+      <div class="metric-label">${m.label}</div>
+      <div class="metric-value${m.highlight ? ' highlight' : ''}${m.trend === 'up' ? ' trend-up' : m.trend === 'down' ? ' trend-down' : ''}"
+           style="${m.highlight ? `--accent:${p.accent};color:${p.accent}` : ''}">
+        ${m.value}<span class="metric-unit">${m.unit ?? ''}</span>
+      </div>
+    </div>`).join('');
+
+  const detailRows = p.detail.rows.map(r => `
+    <div class="ev-line">
+      <span class="ev-time">${r.time}</span>
+      <span class="ev-name" style="color:${p.accent}">${r.name}</span>
+      <span class="ev-data">${r.data}</span>
+    </div>`).join('');
+
+  return `
+  <div class="pet-card" id="card-${p.petId}" style="--accent:${p.accent}" onclick="toggleDetail('${p.petId}')">
+    <div class="card-head">
+      <div class="head-left">
+        <div class="pet-emoji">${p.emoji}</div>
+        <div>
+          <div class="pet-name">${p.name}</div>
+          <div class="pet-sub">${p.skill} · every ${formatInterval(p.interval)}</div>
+        </div>
+      </div>
+      <div class="head-right">
+        <div class="mood-pill mood-${p.mood}">${p.mood}</div>
+        <div class="tau-wrap">
+          <span class="tau-label">τ=${tau.toFixed(1)}</span>
+          <div class="tau-bar"><div class="tau-fill" style="width:${tauPct}%;background:${p.accent}"></div></div>
+        </div>
+        <div class="level-badge">LVL <span>${p.level}</span></div>
+      </div>
+    </div>
+    <div class="metrics">${metricsHtml}</div>
+    <div class="xp-bar-wrap">
+      <div class="xp-bar"><div class="xp-fill" style="width:${xpPct}%;background:${p.accent}"></div></div>
+      <span class="xp-label">${p.experience}/${p.xpMax} XP</span>
+    </div>
+    <div class="card-foot">
+      <span class="last-activity">${p.lastActivity}</span>
+      <div class="next-run">
+        <div class="run-dot ${p.isRunning ? '' : 'idle'}"></div>
+        <span id="timer-${p.petId}">${countdown}s</span>
+      </div>
+    </div>
+    <div class="drawer" id="drawer-${p.petId}">
+      <h3 style="color:${p.accent}">◈ ${p.detail.title}</h3>
+      <div class="drawer-body">${detailRows}</div>
+    </div>
+  </div>`;
+}
+
+function formatInterval(s) {
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${s/60}m`;
+  return `${s/3600}h`;
+}
+
+function toggleDetail(petId) {
+  const drawer = document.getElementById(`drawer-${petId}`);
+  const card = document.getElementById(`card-${petId}`);
+  const isOpen = drawer.classList.contains('open');
+  document.querySelectorAll('.drawer.open').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.pet-card.active').forEach(c => c.classList.remove('active'));
+  if (!isOpen) {
+    drawer.classList.add('open');
+    card.classList.add('active');
+  }
+}
+
+// ── Countdown timers ──
+setInterval(() => {
+  PETS.forEach(p => {
+    timers[p.petId] = (timers[p.petId] ?? p.nextRunIn) - 1;
+    if (timers[p.petId] <= 0) {
+      timers[p.petId] = p.interval;
+      simulateSkillRun(p);
+    }
+    const el = document.getElementById(`timer-${p.petId}`);
+    if (el) el.textContent = `${timers[p.petId]}s`;
+  });
+}, 1000);
+
+// ── Simulated skill results ──
+function simulateSkillRun(p) {
+  const events = {
+    'chrono-01': () => {
+      const alarms = ['Daily standup','Design review','Deployment window'];
+      const fired = Math.random() > 0.6;
+      if (fired) {
+        const alarm = alarms[Math.floor(Math.random() * alarms.length)];
+        addLog(p, 'pet.alarm.fire', `Fired: ${alarm}`);
+        p.lastActivity = `Fired: ${alarm}`;
+      } else {
+        addLog(p, 'pet.skill.complete', `checked=3 fired=0`);
+        p.lastActivity = 'Checked 3 alarms — none due';
+      }
+    },
+    'volt-01': () => {
+      const heap = 40 + Math.round(Math.random() * 50);
+      const gc = heap > 70;
+      if (gc) {
+        addLog(p, 'pet.boost.applied', `heap ${heap}% → GC triggered`);
+        p.lastActivity = `GC triggered — heap was ${heap}%`;
+        p.metrics[1].value = String(Math.round(heap * .6));
+      } else {
+        addLog(p, 'pet.skill.complete', `heap=${heap}% OK`);
+        p.lastActivity = `Heap OK at ${heap}%`;
+        p.metrics[1].value = String(heap);
+      }
+      p.metrics[0].value = String(100 + Math.round(Math.random() * 80));
+    },
+    'shade-01': () => {
+      const hasAlert = Math.random() > 0.7;
+      if (hasAlert) {
+        const targets = ['AIX stars','BTC price','GitHub issues'];
+        const t = targets[Math.floor(Math.random() * targets.length)];
+        addLog(p, 'pet.spy.alert', `${t} changed`);
+        p.lastActivity = `Alert: ${t} changed`;
+        p.metrics[1].value = String(parseInt(String(p.metrics[1].value))+1);
+      } else {
+        addLog(p, 'pet.skill.complete', `monitored=4 alerts=0`);
+        p.lastActivity = 'Scanned 4 targets — no changes';
+      }
+    },
+    'bull-01': () => {
+      const coins = ['BTC','ETH','SOL'];
+      const sigs = ['STRONG_BUY','BUY','HOLD','SELL'];
+      const coin = coins[Math.floor(Math.random() * coins.length)];
+      const sig = sigs[Math.floor(Math.random() * sigs.length)];
+      const rsi = Math.round(20 + Math.random() * 60);
+      const conf = Math.round(50 + Math.random() * 40);
+      if (sig !== 'HOLD') {
+        addLog(p, 'pet.trade.signal', `${coin} ${sig} RSI=${rsi} conf=${conf}%`);
+        p.lastActivity = `${coin}: ${sig} — RSI ${rsi}`;
+        p.metrics[0].value = `${coin} ${sig}`;
+        p.metrics[1].value = String(conf);
+        p.metrics[2].value = String(rsi);
+      } else {
+        addLog(p, 'pet.skill.complete', `${coin} HOLD RSI=${rsi}`);
+        p.lastActivity = `Markets calm — ${coin} holding`;
+      }
+    },
+    'drop-01': () => {
+      const names = ['YieldArk','NovaDEX','FluxBridge','OmegaSwap','ZetaFi'];
+      const chains = ['ETH','ARB','SOL','OP','BASE'];
+      const found = Math.random() > 0.5;
+      if (found) {
+        const name = names[Math.floor(Math.random() * names.length)];
+        const chain = chains[Math.floor(Math.random() * chains.length)];
+        const est = `$${(Math.round(Math.random() * 5000 / 100) * 100).toLocaleString()}`;
+        addLog(p, 'pet.airdrop.found', `${name} on ${chain} est=${est}`);
+        p.lastActivity = `Found: ${name} on ${chain}`;
+        p.metrics[1].value = String(parseInt(String(p.metrics[1].value)) + 1);
+        p.metrics[4].value = name;
+      } else {
+        addLog(p, 'pet.skill.complete', `scanned=847 found=0`);
+        p.lastActivity = 'Scanned 847 protocols — no new drops';
+      }
+    },
+  };
+
+  events[p.petId]?.();
+  updateCard(p);
+
+  // mood drift
+  if (Math.random() > 0.85) {
+    const idx = MOODS_ORDER.indexOf(p.mood);
+    const dir = Math.random() > 0.4 ? -1 : 1;
+    const newIdx = Math.max(0, Math.min(MOODS_ORDER.length - 1, idx + dir));
+    if (newIdx !== idx) {
+      const from = p.mood;
+      p.mood = MOODS_ORDER[newIdx];
+      addLog(p, 'pet.mood.changed', `${from} → ${p.mood}`);
+    }
+  }
+
+  p.experience = Math.min(p.xpMax, p.experience + (10 + Math.round(Math.random()*5)));
+}
+
+function updateCard(p) {
+  const card = document.getElementById(`card-${p.petId}`);
+  if (!card) return;
+  const tau = TAU[p.mood] ?? 0.5;
+  const tauPct = Math.round(tau * 100);
+  const xpPct = Math.round((p.experience / p.xpMax) * 100);
+
+  const moodEl = card.querySelector('.mood-pill');
+  if (moodEl) { moodEl.className = `mood-pill mood-${p.mood}`; moodEl.textContent = p.mood; }
+
+  const tauLabel = card.querySelector('.tau-label');
+  if (tauLabel) tauLabel.textContent = `τ=${tau.toFixed(1)}`;
+
+  const tauFill = card.querySelector('.tau-fill');
+  if (tauFill) tauFill.style.width = `${tauPct}%`;
+
+  const xpFill = card.querySelector('.xp-fill');
+  if (xpFill) xpFill.style.width = `${xpPct}%`;
+
+  const xpLabel = card.querySelector('.xp-label');
+  if (xpLabel) xpLabel.textContent = `${p.experience}/${p.xpMax} XP`;
+
+  const metricVals = card.querySelectorAll('.metric-value');
+  p.metrics.forEach((m, i) => {
+    if (metricVals[i]) {
+      metricVals[i].childNodes[0].textContent = String(m.value);
+    }
+  });
+
+  const lastAct = card.querySelector('.last-activity');
+  if (lastAct) lastAct.textContent = p.lastActivity;
+}
+
+// ── Log ──
+const logEntries = [];
+function addLog(p, event, data) {
+  const now = new Date();
+  const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  logEntries.unshift({ time: t, pet: p.name, emoji: p.emoji, color: p.accent, event, data });
+  if (logEntries.length > 50) logEntries.pop();
+  renderLog();
+}
+
+function renderLog() {
+  const body = document.getElementById('log-body');
+  if (!logEntries.length) {
+    body.innerHTML = '<div class="empty-state">Waiting for events...</div>';
+    return;
+  }
+  body.innerHTML = logEntries.slice(0,30).map(e => `
+    <div class="log-entry">
+      <span class="log-time">${e.time}</span>
+      <span class="log-pet" style="color:${e.color}">${e.emoji} ${e.pet}</span>
+      <span class="log-ev">${e.event} · ${e.data}</span>
+    </div>`).join('');
+}
+
+function clearLog() {
+  logEntries.length = 0;
+  renderLog();
+}
+
+function feedAll() {
+  PETS.forEach(p => {
+    const idx = MOODS_ORDER.indexOf(p.mood);
+    if (idx > 0) p.mood = MOODS_ORDER[idx - 1];
+    addLog(p, 'pet.fed', `mood → ${p.mood}`);
+    updateCard(p);
+  });
+  const lbl = document.getElementById('status-label');
+  lbl.textContent = 'ALL PETS FED ↑';
+  setTimeout(() => { lbl.textContent = `${PETS.length} PETS RUNNING`; }, 2000);
+}
+
+// ── Init ──
+renderGrid();
+setTimeout(() => {
+  document.getElementById('status-label').textContent = `${PETS.length} PETS RUNNING`;
+}, 400);
+
+// Seed some initial log entries
+setTimeout(() => {
+  addLog(PETS[3], 'pet.trade.signal', 'BTC BUY RSI=34 conf=78%');
+  addLog(PETS[0], 'pet.skill.complete', 'checked=3 fired=0 next=13:00');
+  addLog(PETS[4], 'pet.airdrop.found', 'YieldArk ARB est=$4,800');
+}, 600);
+</script>
+</body>
+</html>
