@@ -1,4 +1,5 @@
-import { kv, KEYS, NS } from './index';
+import { kv } from './storage/adapter';
+import { KEYS, NS } from './storage/keys';
 
 /**
  * AIX Global Agent Registry Manager

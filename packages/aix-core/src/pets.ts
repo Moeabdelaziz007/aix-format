@@ -1,4 +1,5 @@
-import { kv, KEYS } from './index';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 import { PetConfig } from '@studio-types'; // Assuming we can reach types
 import { ExpectationEngine } from './expectation-engine';
 import { CuriosityEngine } from './curiosity-engine';

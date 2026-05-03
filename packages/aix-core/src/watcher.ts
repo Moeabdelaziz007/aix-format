@@ -24,7 +24,8 @@
  * النتيجة: Unbypassable behavioral oversight, 0 cost, always-on
  */
 
-import { kv, KEYS } from './index';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 import { PulseEngine } from './pulse';
 import type { BusEvent, BusEventType } from './bus';
 

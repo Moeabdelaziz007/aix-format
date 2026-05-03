@@ -1,4 +1,5 @@
-import { kv, KEYS, TTL } from './index';
+import { kv } from './storage/adapter';
+import { KEYS, TTL } from './storage/keys';
 
 /**
  * AIX Dead Hand Protocol (Autonomous Safety System)

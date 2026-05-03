@@ -1,4 +1,4 @@
-import { kv } from './index';
+import { kv } from './storage/adapter';
 import { createHash } from 'crypto';
 
 /**

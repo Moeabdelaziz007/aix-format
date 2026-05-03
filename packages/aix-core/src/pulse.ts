@@ -1,4 +1,5 @@
-import { kv, KEYS } from './index';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 
 /**
  * AIX Pulse Engine (v1.3.6)

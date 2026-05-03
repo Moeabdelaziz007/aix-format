@@ -1,4 +1,5 @@
-import { kv, KEYS, TTL } from './index';
+import { kv } from './storage/adapter';
+import { KEYS, TTL } from './storage/keys';
 import { CuriosityEngine } from './curiosity-engine';
 import { ExpectationEngine, TaskReality } from './expectation-engine';
 import { FailureLearning } from './failure-learning';
