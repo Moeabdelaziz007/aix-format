@@ -1,25 +1,69 @@
 import { kv, KEYS } from './index';
 import { PetConfig } from '@studio-types'; // Assuming we can reach types
+import { ExpectationEngine } from './expectation-engine';
+import { CuriosityEngine } from './curiosity-engine';
 
 /**
- * AIX Pet Orchestrator (v1.3.5)
+ * AIX Pet Orchestrator (v1.4.0 - Philosophical Enhancement)
  * Manages the evolution and state of agent personas.
+ *
+ * Enhanced with Philosophical Engines:
+ * - Task success/failure (existing) - 40%
+ * - Happiness from expectations (Mo Gawdat) - 30%
+ * - Curiosity satisfaction (Demis Hassabis) - 30%
  */
 
 export class PetOrchestrator {
   /**
-   * Syncs pet state and mood based on activity.
+   * Syncs pet state and mood based on activity and philosophical factors.
    */
   static async sync(agentId: string, pet: any, manifest: any): Promise<void> {
-    // 1. Update Mood based on frequency
+    // 1. Get philosophical metrics
+    const [averageHappiness, curiosityScore] = await Promise.all([
+      ExpectationEngine.getAverageHappiness(agentId),
+      CuriosityEngine.getCuriosityScore(agentId),
+    ]);
+
+    // 2. Update Mood based on frequency (traditional factor - 40%)
     const recentInvocations = (await kv.incr(`agent:${agentId}:freq`)) || 1;
     await kv.expire(`agent:${agentId}:freq`, 60); // Reset frequency window every minute
     
+    let activityMood = 0;
     if (recentInvocations > 5) {
-      pet.mood = 'energized';
+      activityMood = 40; // energized
+    } else if (recentInvocations > 2) {
+      activityMood = 20; // busy
     } else {
-      pet.mood = 'busy';
+      activityMood = 10; // curious
     }
+
+    // 3. Happiness factor (Mo Gawdat - 30%)
+    // Scale happiness from -100/+100 to 0-30
+    const happinessMood = Math.round((averageHappiness + 100) / 200 * 30);
+
+    // 4. Curiosity factor (Demis Hassabis - 30%)
+    // Scale curiosity score to 0-30 range
+    const curiosityMood = Math.min(30, Math.round(curiosityScore / 10));
+
+    // 5. Calculate total mood score (0-100)
+    const totalMoodScore = activityMood + happinessMood + curiosityMood;
+
+    // 6. Map mood score to mood state
+    if (totalMoodScore >= 80) {
+      pet.mood = 'ecstatic';
+    } else if (totalMoodScore >= 60) {
+      pet.mood = 'energized';
+    } else if (totalMoodScore >= 40) {
+      pet.mood = 'happy';
+    } else if (totalMoodScore >= 25) {
+      pet.mood = 'busy';
+    } else if (totalMoodScore >= 15) {
+      pet.mood = 'curious';
+    } else {
+      pet.mood = 'tired';
+    }
+
+    console.log(`[Pet] Agent ${agentId} mood: ${pet.mood} (activity: ${activityMood}, happiness: ${happinessMood}, curiosity: ${curiosityMood})`);
     
     // 2. Progression (Simple Leveling)
     const currentExp = (await kv.incr(`agent:${agentId}:exp`)) || 1;

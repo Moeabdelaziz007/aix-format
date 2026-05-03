@@ -23,6 +23,11 @@ export * from './swarm/blocks';
 export * from './swarm/hierarchy';
 export * from './voice/ManifestBuilder';
 
+// Philosophical Engines (v1.4.0)
+export * from './curiosity-engine';
+export * from './expectation-engine';
+export * from './failure-learning';
+
 export default kv;
 
 
