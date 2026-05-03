@@ -1,89 +1,56 @@
-// ✅ FIXED: Named exports only (tree shaking enabled)
-// Bundle size: 120KB → 48KB (60% reduction)
+/**
+ * aix-core public surface — 33 smart exports
+ *
+ * Primary API (start here):
+ *   import aix from 'aix-core';
+ *   import { aix, ParallelSim, GatewayManager } from 'aix-core';
+ */
 
-export { kv } from './storage/adapter';
-export { NS, TTL, KEYS } from './storage/keys';
+// ─── PRIMARY: The one function you need ──────────────────────────────────
+export { aix, aix as default }          from './aix';
+export type { AixOptions, AixResult, AixSwarmOptions, SwarmPattern } from './aix';
 
-// Core Systems
-export { getRegistry } from './registry';
-export { getFeedbackSkills, getLearnedProcedures, recordSuccessfulProcedure } from './learning';
-export { GatewayManager } from './gateway';
-export type { GatewayProcess } from './gateway';
-export { GatewaySecurity } from './security';
-export { ReadableMemory } from './memory-readable';
-export { executeDeadHand } from './dead-hand';
-export { ChannelManager } from './channels';
-export { PetOrchestrator } from './pets';
-export { PulseEngine } from './pulse';
-export { RevenueRouter } from './economics';
-export { BondingCurve } from './economics/BondingCurve';
+// ─── SIMULATION: Parallel execution engine ────────────────────────────
+export { ParallelSim }                  from './parallel-sim';
+export type { SimAgent, SimOptions, SimResult, AgentOutcome } from './parallel-sim';
 
-// Design Patterns
-export {
-  AgentBlock,
-  AgentSkill,
-  PulseHandler,
-  RedisEventBus,
-  AgentFactory
-} from './patterns';
-export type { ICommand, IHierarchy } from './patterns';
+// ─── CONTROL PLANE: Gateway process lifecycle ───────────────────────
+export { GatewayManager }               from './gateway';
+export type { GatewayProcess, GatewayTask, GatewayResult, GatewayStatus } from './gateway';
 
-// Swarm (merged into single export - 6 files → 1)
-export {
-  // Handlers
-  SecurityHandler,
-  EconomicsHandler,
-  GhostHandler,
-  // Orchestrator
-  PulseOrchestrator,
-  // Commands
-  PulseCommand,
-  SpawnSubTaskCommand,
-  // Factory
-  SovereignAgentFactory,
-  // Blocks
-  AuthBlock,
-  KYCBlock,
-  PayBlock,
-  AgentComposer,
-  // Hierarchy
-  TradingSkill,
-  BaseAgent,
-  AgentCluster,
-  GlobalOrchestrator
-} from './swarm';
-export type { PulseRequest, AgentType } from './swarm';
+// ─── EXECUTION ENGINE: ReAct loop ─────────────────────────────────
+export { AgentRuntimeEngine }           from './agent-runtime';
+export type { RuntimeResult }           from './agent-runtime';
 
-// Philosophical Engines (v1.4.0)
-export { CuriosityEngine } from './curiosity-engine';
-export { ExpectationEngine } from './expectation-engine';
-export { FailureLearning } from './failure-learning';
+// ─── LLM PROVIDERS: OpenAI / Anthropic / Ollama / Mock ────────────────
+export { createDefaultRouter, MockProvider, LLMRouter } from './llm-provider';
+export type { LLMProvider, CompletionOptions, CompletionResponse } from './llm-provider';
 
-// Decentralization Engines (v1.5.0)
-export { ResonanceEngine } from './resonance-engine';
-export { getTrustChain, recordTrustTransaction } from './trust-chain';
+// ─── SWARM: Multi-agent coordination (lower-level) ──────────────────
+export { SwarmRouter }                  from './SwarmRouter';
 
-// arXiv Research Integration (v0.369)
-export { ConstrainedRouter } from './constrained-router';
-export { ModelDatabase } from './model-database';
+// ─── PHILOSOPHICAL ENGINES ──────────────────────────────────────
+export { CuriosityEngine }              from './curiosity-engine';
+export { ExpectationEngine }            from './expectation-engine';
+export { FailureLearning }              from './failure-learning';
 
-// Agent Runtime (v1.5.0) - THE ONE CALL ORCHESTRATOR
-export {
-  AgentRuntimeEngine,
-  runTask,
-  getRuntimeState,
-  listActiveRuntimes
-} from './agent-runtime';
-export type {
-  AgentMood,
-  RuntimeStatus,
-  Task,
-  AgentRuntime,
-  RuntimeResult
-} from './agent-runtime';
+// ─── ROUTING: Constrained model selection ──────────────────────────
+export { ConstrainedRouter }            from './constrained-router';
+export type { Task, TaskConstraints }   from './constrained-router';
 
-// Default export
-import { kv } from './storage/adapter';
-export default kv;
+// ─── SAFETY: Lineage + Trust ─────────────────────────────────────
+export { LineageRegistry }              from './lineage-registry';
+export { TrustChain }                   from './trust-chain';
 
-// Made with Bob - Tree Shaking Enabled ✅
+// ─── STORAGE: Redis adapter + key registry ────────────────────────
+export { kv }                           from './storage/adapter';
+export { KEYS, TTL }                    from './storage/keys';
+
+// ─── BUS: Event system ────────────────────────────────────────
+export { emit, subscribe, BUS_RINGS }  from './bus';
+
+// ─── MODELS: Performance database ───────────────────────────────
+export { ModelDatabase }               from './model-database';
+
+// ─── PETS: Mood-driven routing ──────────────────────────────────
+export { getPetState, getDynamicConstraints } from './pets';
