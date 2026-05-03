@@ -20,6 +20,9 @@ export interface RegistryEntry {
 
 /**
  * Retrieves all agents from the global registry.
+ * @returns {Promise<RegistryEntry[]>} A list of all registered agents.
+ * @example
+ * const agents = await getRegistry();
  */
 export async function getRegistry(): Promise<RegistryEntry[]> {
   try {
@@ -38,6 +41,10 @@ export async function getRegistry(): Promise<RegistryEntry[]> {
 
 /**
  * Upserts a single entry in the registry.
+ * @param {RegistryEntry} entry - The registry entry to update.
+ * @returns {Promise<void>} Resolves when the entry is updated.
+ * @example
+ * await updateRegistryEntry({ did: "did:axiom:...", name: "Agent" });
  */
 export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
   const did = entry.did;
@@ -53,6 +60,12 @@ export async function updateRegistryEntry(entry: RegistryEntry): Promise<void> {
 /**
  * Transfers ownership of an agent (Pet Gifting).
  * Preserves all memory, skills, and evolution state.
+ * @param {string} did - The agent identifier.
+ * @param {string} fromUserId - The current owner's user ID.
+ * @param {string} toUserId - The new owner's user ID.
+ * @returns {Promise<void>} Resolves when the transfer is complete.
+ * @example
+ * await transferOwnership("did:axiom:123", "user1", "user2");
  */
 export async function transferOwnership(did: string, fromUserId: string, toUserId: string): Promise<void> {
   const entry = await kv.get<RegistryEntry & { ownerId?: string }>(KEYS.registry(did));

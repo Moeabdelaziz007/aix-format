@@ -6,12 +6,22 @@
 import { kv } from "../storage/adapter";
 
 // --- Lego Block Pattern (Composition) ---
+/**
+ * Lego Block Pattern for agent composition.
+ * @example
+ * class Auth extends AgentBlock { id = 'auth'; async execute(ctx) { return ctx; } }
+ */
 export abstract class AgentBlock {
   abstract id: string;
   abstract execute(context: any): Promise<any>;
 }
 
 // --- Skill Pattern (Atomic Logic) ---
+/**
+ * Atomic skill logic inside an agent.
+ * @example
+ * class Jump extends AgentSkill { name = 'jump'; async run() { return true; } }
+ */
 export abstract class AgentSkill {
   abstract name: string;
   abstract run(params: any): Promise<any>;
@@ -24,6 +34,11 @@ export interface IHierarchy {
 }
 
 // --- Event Bus (Redis Pub/Sub for Decoupling) ---
+/**
+ * Redis Pub/Sub implementation for Event Bus decoupling.
+ * @example
+ * await RedisEventBus.getInstance().publish('ch', 'msg');
+ */
 export class RedisEventBus {
   private static instance: RedisEventBus;
   
@@ -45,6 +60,11 @@ export class RedisEventBus {
 }
 
 // --- Previous Patterns (Chain, Command, Strategy, Factory) ---
+/**
+ * Chain of Responsibility pattern for processing gateway pulses.
+ * @example
+ * class SecHandler extends PulseHandler {}
+ */
 export abstract class PulseHandler {
   private nextHandler?: PulseHandler;
   setNext(handler: PulseHandler): PulseHandler {
@@ -66,8 +86,18 @@ export interface IStrategy<T, R> {
   execute(input: T): Promise<R>;
 }
 
+/**
+ * Factory pattern for agent creation.
+ * @example
+ * class Factory extends AgentFactory<MyAgent> { create() { ... } }
+ */
 export abstract class AgentFactory<T> {
   abstract create(type: string, config: any): T;
 }
 
+/**
+ * In-memory event bus for agent communications.
+ * @example
+ * new AgentEventBus().emit('event');
+ */
 export class AgentEventBus { emit(e: any){} on(e: any){} }

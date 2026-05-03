@@ -3,6 +3,8 @@ import { GatewayProcess } from "@aix-types";
 
 /**
  * Skill: Atomic unit of logic inside an agent.
+ * @example
+ * const res = await new TradingSkill().run({ amount: 10 });
  */
 export class TradingSkill extends AgentSkill {
   name = 'arbitrage';
@@ -13,6 +15,8 @@ export class TradingSkill extends AgentSkill {
 
 /**
  * Base Agent: The core doll.
+ * @example
+ * const agent = new BaseAgent("id1");
  */
 export class BaseAgent implements IHierarchy {
   children: AgentSkill[] = [];
@@ -32,6 +36,8 @@ export class BaseAgent implements IHierarchy {
 
 /**
  * Agent Cluster: Manages groups of agents.
+ * @example
+ * const cluster = new AgentCluster("c1");
  */
 export class AgentCluster implements IHierarchy {
   children: BaseAgent[] = [];
@@ -50,6 +56,8 @@ export class AgentCluster implements IHierarchy {
 
 /**
  * Orchestrator: The outer layer managing clusters.
+ * @example
+ * const orch = new GlobalOrchestrator();
  */
 export class GlobalOrchestrator {
   private clusters: AgentCluster[] = [];

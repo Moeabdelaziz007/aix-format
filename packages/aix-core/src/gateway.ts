@@ -23,10 +23,18 @@ export interface GatewayProcess {
 
 /**
  * Manages the lifecycle of persistent agent processes.
+ * @example
+ * const proc = await GatewayManager.spawn("agent-1", "do task");
  */
 export class GatewayManager {
   /**
    * Initializes a new agentic process (The Control Plane).
+   * @param {string} agentId - The agent identifier.
+   * @param {string} task - The task to execute.
+   * @param {any} [metadata] - Additional metadata.
+   * @returns {Promise<GatewayProcess>} The spawned gateway process.
+   * @example
+   * const proc = await GatewayManager.spawn("agent-1", "do task");
    */
   static async spawn(agentId: string, task: string, metadata: any = {}): Promise<GatewayProcess> {
     const processId = `proc_${Math.random().toString(36).slice(2, 11)}`;
@@ -49,6 +57,11 @@ export class GatewayManager {
 
   /**
    * Updates the state of a running process (The Heartbeat).
+   * @param {string} processId - The process identifier.
+   * @param {Partial<GatewayProcess>} update - Process updates to apply.
+   * @returns {Promise<GatewayProcess>} The updated process state.
+   * @example
+   * await GatewayManager.pulse("proc-1", { status: 'COMPLETED' });
    */
   static async pulse(processId: string, update: Partial<GatewayProcess>): Promise<GatewayProcess> {
     const key = KEYS.gateway(processId);
@@ -70,6 +83,10 @@ export class GatewayManager {
 
   /**
    * Retrieves the current state of a process.
+   * @param {string} processId - The process identifier.
+   * @returns {Promise<GatewayProcess | null>} The process state.
+   * @example
+   * const proc = await GatewayManager.getProcess("proc-1");
    */
   static async getProcess(processId: string): Promise<GatewayProcess | null> {
     return kv.get<GatewayProcess>(KEYS.gateway(processId));
@@ -77,6 +94,12 @@ export class GatewayManager {
 
   /**
    * Appends an observation to the process (The ReAct Loop).
+   * @param {string} processId - The process identifier.
+   * @param {string} actionId - The action identifier.
+   * @param {any} result - The observation result.
+   * @returns {Promise<void>} Resolves when recorded.
+   * @example
+   * await GatewayManager.recordObservation("proc-1", "act-1", { success: true });
    */
   static async recordObservation(processId: string, actionId: string, result: any): Promise<void> {
     const process = await this.getProcess(processId);
@@ -98,6 +121,11 @@ export class GatewayManager {
 
   /**
    * Resource Locking for M2M Integrity
+   * @param {string} agentId - The agent identifier.
+   * @param {string} processId - The process identifier.
+   * @returns {Promise<boolean>} True if lock was acquired.
+   * @example
+   * const locked = await GatewayManager.lockAgent("agent-1", "proc-1");
    */
   static async lockAgent(agentId: string, processId: string): Promise<boolean> {
     const lockKey = `aix:lock:agent:${agentId}`;
@@ -110,6 +138,13 @@ export class GatewayManager {
     }
   }
 
+  /**
+   * Releases the resource lock for an agent.
+   * @param {string} agentId - The agent identifier.
+   * @returns {Promise<void>} Resolves when the lock is released.
+   * @example
+   * await GatewayManager.unlockAgent("agent-1");
+   */
   static async unlockAgent(agentId: string): Promise<void> {
     await kv.del(`aix:lock:agent:${agentId}`);
   }

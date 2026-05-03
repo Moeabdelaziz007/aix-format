@@ -22,10 +22,17 @@ export interface ChannelConfig {
 
 /**
  * Manages the automated provisioning of communication channels for agents.
+ * @example
+ * const config = await ChannelManager.getChannels("agent-1");
  */
 export class ChannelManager {
   /**
    * Provisions a new Telegram bot via the AIX Manager Bot (Pattern: Managed Bots API 9.6).
+   * @param {string} agentId - The agent identifier.
+   * @param {any} manifest - The agent manifest.
+   * @returns {Promise<ChannelConfig['telegram']>} The telegram config.
+   * @example
+   * const tg = await ChannelManager.setupTelegram("agent-1", manifest);
    */
   static async setupTelegram(agentId: string, manifest: any): Promise<ChannelConfig['telegram']> {
     console.log(`[Channels] Auto-provisioning Telegram bot for agent ${agentId}`);
@@ -58,6 +65,10 @@ export class ChannelManager {
 
   /**
    * Provisions a WhatsApp sub-number via the AIX Verified Business account.
+   * @param {string} agentId - The agent identifier.
+   * @returns {Promise<ChannelConfig['whatsapp']>} The whatsapp config.
+   * @example
+   * const wa = await ChannelManager.setupWhatsApp("agent-1");
    */
   static async setupWhatsApp(agentId: string): Promise<ChannelConfig['whatsapp']> {
     console.log(`[Channels] Allocating WhatsApp sub-number for agent ${agentId}`);
@@ -75,6 +86,10 @@ export class ChannelManager {
   /**
    * Generates a "One-Link" deployment URL for Telegram.
    * Format: https://t.me/aix_deploy_bot?start=agt_1234
+   * @param {string} agentId - The agent identifier.
+   * @returns {string} The One-Link URL.
+   * @example
+   * const url = ChannelManager.getOneLinkUrl("agent-1");
    */
   static getOneLinkUrl(agentId: string): string {
     const MANAGER_BOT_USERNAME = 'aix_deploy_bot';
@@ -83,6 +98,10 @@ export class ChannelManager {
 
   /**
    * Retrieves all active channels for an agent.
+   * @param {string} agentId - The agent identifier.
+   * @returns {Promise<ChannelConfig>} The channel configurations.
+   * @example
+   * const channels = await ChannelManager.getChannels("agent-1");
    */
   static async getChannels(agentId: string): Promise<ChannelConfig> {
     const telegram = await kv.get<ChannelConfig['telegram']>(`agent:${agentId}:channels:telegram`);

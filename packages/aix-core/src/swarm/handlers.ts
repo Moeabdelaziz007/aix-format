@@ -18,6 +18,11 @@ export interface PulseRequest {
 }
 
 // 🛡️ Security Handler
+/**
+ * Security middleware in the pulse chain.
+ * @example
+ * const handler = new SecurityHandler();
+ */
 export class SecurityHandler extends PulseHandler {
   async handle(request: PulseRequest) {
     const frozen = await kv.get(KEYS.frozen(request.process.agentId));
@@ -36,6 +41,11 @@ export class SecurityHandler extends PulseHandler {
 }
 
 // 💰 Economics Handler
+/**
+ * Economics middleware in the pulse chain.
+ * @example
+ * const handler = new EconomicsHandler();
+ */
 export class EconomicsHandler extends PulseHandler {
   async handle(request: PulseRequest) {
     const econ = request.manifest.economics;
@@ -55,6 +65,11 @@ export class EconomicsHandler extends PulseHandler {
 }
 
 // 👻 Ghost Handler (Strategy Pattern integration)
+/**
+ * Ghost pattern middleware for stealth operations.
+ * @example
+ * const handler = new GhostHandler();
+ */
 export class GhostHandler extends PulseHandler {
   async handle(request: PulseRequest) {
     if (request.manifest.ghost_config?.enabled) {

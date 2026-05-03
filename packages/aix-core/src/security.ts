@@ -4,13 +4,17 @@ import canonicalize from 'canonical-json';
 /**
  * AIX Gateway Security (Sovereign Shield)
  * Addresses CVE-2026-25253: One-click RCE via unvalidated WebSocket connections.
- * 
  * Implements strict Token-based authentication and Origin validation for Gateway connections.
+ * @example
+ * const token = GatewaySecurity.generateSessionToken("agent-1");
  */
-
 export class GatewaySecurity {
   /**
    * Generates a one-time use token for a Gateway Session.
+   * @param {string} agentId - The agent identifier.
+   * @returns {string} The generated session token.
+   * @example
+   * const token = GatewaySecurity.generateSessionToken("agent-1");
    */
   static generateSessionToken(agentId: string): string {
     const salt = randomBytes(16).toString('hex');
@@ -21,6 +25,11 @@ export class GatewaySecurity {
 
   /**
    * Validates the Gateway request signature and origin.
+   * @param {Request} req - The incoming request.
+   * @param {string} [sessionToken] - The optional session token.
+   * @returns {boolean} True if the request is valid.
+   * @example
+   * const isValid = GatewaySecurity.validateRequest(req, token);
    */
   static validateRequest(req: Request, sessionToken?: string): boolean {
     const origin = req.headers.get('origin');
@@ -46,11 +55,17 @@ export class GatewaySecurity {
 /**
  * AIX Envelope Security
  * Handles content integrity and checksum validation using JCS (RFC 8785).
+ * @example
+ * const hash = EnvelopeSecurity.calculateHash(doc);
  */
 export class EnvelopeSecurity {
   /**
    * Calculates the SHA-256 hash of the document content (excluding the security layer).
    * Uses canonical-json to ensure deterministic hashing regardless of key order.
+   * @param {any} doc - The document to hash.
+   * @returns {string} The calculated hash.
+   * @example
+   * const hash = EnvelopeSecurity.calculateHash(manifest);
    */
   static calculateHash(doc: any): string {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -66,6 +81,10 @@ export class EnvelopeSecurity {
 
   /**
    * Verifies if the envelope's checksum matches its content.
+   * @param {any} doc - The document to verify.
+   * @returns {boolean} True if integrity check passes.
+   * @example
+   * const isIntact = EnvelopeSecurity.verifyIntegrity(manifest);
    */
   static verifyIntegrity(doc: any): boolean {
     if (!doc.security?.checksum?.value) return false;

@@ -27,6 +27,10 @@ const BANNED_TOOLS = [
 
 /**
  * Evaluates an agent's current state against safety invariants.
+ * @param {string} agentId - The agent identifier.
+ * @returns {Promise<DeadHandTrigger | null>} Returns a trigger if safety invariant is violated, else null.
+ * @example
+ * const trigger = await evaluateAgent("agent-1");
  */
 export async function evaluateAgent(agentId: string): Promise<DeadHandTrigger | null> {
   const manifest = await kv.get<any>(KEYS.registry(agentId));
@@ -63,6 +67,10 @@ export async function evaluateAgent(agentId: string): Promise<DeadHandTrigger | 
 
 /**
  * Executes the Dead Hand Response (Pattern 4).
+ * @param {DeadHandTrigger} t - The dead hand trigger configuration.
+ * @returns {Promise<void>} Resolves when execution completes.
+ * @example
+ * await executeDeadHand(trigger);
  */
 export async function executeDeadHand(t: DeadHandTrigger): Promise<void> {
   console.error(`[DeadHand] TRIGGERED for ${t.agentId} | Reason: ${t.reason} | Action: ${t.threatLevel}`);
@@ -99,6 +107,10 @@ function createTrigger(agentId: string, reason: string, threatLevel: ThreatLevel
 
 /**
  * Sends a heartbeat to prevent Dead Hand trigger.
+ * @param {string} agentId - The agent identifier.
+ * @returns {Promise<void>} Resolves when the heartbeat is recorded.
+ * @example
+ * await sendHeartbeat("agent-1");
  */
 export async function sendHeartbeat(agentId: string): Promise<void> {
   await kv.set(KEYS.heartbeat(agentId), Date.now(), { ex: TTL.HEARTBEAT });

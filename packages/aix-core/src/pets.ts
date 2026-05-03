@@ -4,11 +4,18 @@ import { PetConfig } from '@studio-types'; // Assuming we can reach types
 /**
  * AIX Pet Orchestrator (v1.3.5)
  * Manages the evolution and state of agent personas.
+ * @example
+ * await PetOrchestrator.settle("agent-1");
  */
-
 export class PetOrchestrator {
   /**
    * Syncs pet state and mood based on activity.
+   * @param {string} agentId - The agent identifier.
+   * @param {any} pet - The pet state.
+   * @param {any} manifest - The agent manifest.
+   * @returns {Promise<void>} Resolves when sync is complete.
+   * @example
+   * await PetOrchestrator.sync("agent-1", petData, manifest);
    */
   static async sync(agentId: string, pet: any, manifest: any): Promise<void> {
     // 1. Update Mood based on frequency
@@ -46,6 +53,10 @@ export class PetOrchestrator {
 
   /**
    * Resets pet to idle state.
+   * @param {string} agentId - The agent identifier.
+   * @returns {Promise<void>} Resolves when settled.
+   * @example
+   * await PetOrchestrator.settle("agent-1");
    */
   static async settle(agentId: string): Promise<void> {
     const manifest = await kv.get<any>(KEYS.registry(agentId));
@@ -66,6 +77,10 @@ export class PetOrchestrator {
   /**
    * Evaluates if agent should enter Sleep Mode (7 days inactivity).
    * Saves compute resources by 'hibernating' the gateway.
+   * @param {string} agentId - The agent identifier.
+   * @returns {Promise<boolean>} True if Sleep Mode was entered.
+   * @example
+   * const isSleeping = await PetOrchestrator.checkSleepMode("agent-1");
    */
   static async checkSleepMode(agentId: string): Promise<boolean> {
     const lastActivity = await kv.get<number>(`agent:${agentId}:last_activity`) || 0;

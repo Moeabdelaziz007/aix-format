@@ -23,6 +23,13 @@ export * from './swarm/blocks';
 export * from './swarm/hierarchy';
 export * from './voice/ManifestBuilder';
 
+/**
+ * Global Key-Value storage instance using Upstash Redis.
+ * @returns {StorageAdapter} The global kv instance.
+ * @example
+ * import kv from '@aix-core';
+ * await kv.set('key', 'value');
+ */
 export default kv;
 
 

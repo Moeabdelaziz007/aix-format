@@ -176,4 +176,11 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 }
 
+/**
+ * Global Key-Value storage instance using Upstash Redis.
+ * @returns {StorageAdapter} The global kv instance.
+ * @example
+ * await kv.set('key', 'value');
+ * const val = await kv.get('key');
+ */
 export const kv = new UpstashRedisAdapter();

@@ -1,6 +1,11 @@
 import { ICommand } from "../patterns";
 import { kv, PulseEngine } from "../index";
 
+/**
+ * Command pattern implementation for agent pulse actions.
+ * @example
+ * await new PulseCommand("agent-1", "jump", {}).execute();
+ */
 export class PulseCommand implements ICommand {
   constructor(
     private agentId: string, 
@@ -28,6 +33,11 @@ export class PulseCommand implements ICommand {
   }
 }
 
+/**
+ * Command to spawn child agents for sub-tasks.
+ * @example
+ * await new SpawnSubTaskCommand("parent", "task").execute();
+ */
 export class SpawnSubTaskCommand implements ICommand {
   constructor(private parentId: string, private task: string) {}
 

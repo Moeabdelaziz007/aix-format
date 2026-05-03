@@ -27,8 +27,15 @@ export interface FeedbackSkill {
 }
 
 /**
- * Records a successful run as a 'Learned Skill'.
+ * Records a successful procedure as an episodic memory.
  * In the Hermes model, we don't save what happened, we save what worked.
+ * @param {string} agentId - The agent identifier.
+ * @param {string} processId - The process identifier.
+ * @param {string} task - The task description.
+ * @param {any} result - The result of the task.
+ * @returns {Promise<void>} Resolves when the procedure is recorded.
+ * @example
+ * await recordSuccessfulProcedure("agent-1", "proc-1", "Analyze data", { success: true });
  */
 export async function recordSuccessfulProcedure(
   agentId: string, 
@@ -50,9 +57,14 @@ export async function recordSuccessfulProcedure(
 }
 
 /**
- * Skill Extraction (Hermes Pattern)
+ * Extracts a skill from human feedback and saves it as semantic memory.
  * Triggered by positive user feedback (thumbs up).
- * Saves the successful interaction as a reusable skill.
+ * @param {string} agentId - The agent identifier.
+ * @param {string} prompt - The prompt given to the agent.
+ * @param {string} response - The agent's response.
+ * @returns {Promise<string>} The hash of the extracted skill.
+ * @example
+ * const hash = await extractSkillFromFeedback("agent-1", "Hello", "Hi!");
  */
 export async function extractSkillFromFeedback(
   agentId: string,
@@ -94,6 +106,10 @@ export async function extractSkillFromFeedback(
 
 /**
  * Retrieves learned procedures for an agent to be used as 'few-shot' context or specific skills.
+ * @param {string} agentId - The agent identifier.
+ * @returns {Promise<LearnedProcedure[]>} A list of learned procedures.
+ * @example
+ * const procedures = await getLearnedProcedures("agent-1");
  */
 export async function getLearnedProcedures(agentId: string): Promise<LearnedProcedure[]> {
   const key = KEYS.memSkill(agentId);
@@ -103,6 +119,10 @@ export async function getLearnedProcedures(agentId: string): Promise<LearnedProc
 
 /**
  * Retrieves all feedback-driven skills for an agent.
+ * @param {string} agentId - The agent identifier.
+ * @returns {Promise<FeedbackSkill[]>} A list of feedback skills.
+ * @example
+ * const skills = await getFeedbackSkills("agent-1");
  */
 export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[]> {
   const skillsListKey = `agent:${agentId}:skills`;
@@ -120,6 +140,11 @@ export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[
 /**
  * Episodic Memory: Pattern Recognition
  * Placeholder for long-term pattern extraction (Layer 4).
+ * @param {string} agentId - The agent identifier.
+ * @param {string} pattern - The pattern to record.
+ * @returns {Promise<void>} Resolves when the memory is updated.
+ * @example
+ * await updateEpisodicMemory("agent-1", "User prefers concise answers");
  */
 export async function updateEpisodicMemory(agentId: string, pattern: string): Promise<void> {
   const key = KEYS.memEpisodic(agentId);

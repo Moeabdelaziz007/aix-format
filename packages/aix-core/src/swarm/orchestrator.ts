@@ -7,6 +7,11 @@ import {
 import { GatewayProcess, AIXManifest } from "@aix-types";
 
 
+/**
+ * Orchestrates the execution of pulse handlers.
+ * @example
+ * await new PulseOrchestrator().executePulse(proc, manifest);
+ */
 export class PulseOrchestrator {
   private chain: SecurityHandler;
 

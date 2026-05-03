@@ -1,5 +1,10 @@
 import { AgentBlock } from "../patterns";
 
+/**
+ * Authentication block component.
+ * @example
+ * const result = await new AuthBlock().execute(ctx);
+ */
 export class AuthBlock extends AgentBlock {
   id = 'auth-block';
   async execute(context: any) {
@@ -8,6 +13,11 @@ export class AuthBlock extends AgentBlock {
   }
 }
 
+/**
+ * KYC verification block component.
+ * @example
+ * const result = await new KYCBlock().execute(ctx);
+ */
 export class KYCBlock extends AgentBlock {
   id = 'kyc-block';
   async execute(context: any) {
@@ -16,6 +26,11 @@ export class KYCBlock extends AgentBlock {
   }
 }
 
+/**
+ * Payment processing block component.
+ * @example
+ * const result = await new PayBlock().execute(ctx);
+ */
 export class PayBlock extends AgentBlock {
   id = 'pay-block';
   async execute(context: any) {
@@ -26,6 +41,8 @@ export class PayBlock extends AgentBlock {
 
 /**
  * Agent Composer: Assembles an agent from blocks.
+ * @example
+ * const state = await AgentComposer.compose([new AuthBlock()], {});
  */
 export class AgentComposer {
   static async compose(blocks: AgentBlock[], context: any) {
