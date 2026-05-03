@@ -24,7 +24,6 @@ export class BaseAgent implements IHierarchy {
   }
 
   async pulse(process: GatewayProcess) {
-    console.log(`[RussianDoll] Agent ${this.id} pulsing skills...`);
     // Runs all skills in the doll
     return Promise.all(this.children.map(s => s.run({ amount: 100 })));
   }
@@ -43,7 +42,6 @@ export class AgentCluster implements IHierarchy {
   }
 
   async broadcast(message: any) {
-    console.log(`[Cluster] ${this.clusterId} broadcasting to ${this.children.length} agents.`);
     return Promise.all(this.children.map(a => a.pulse(message)));
   }
 }
@@ -59,6 +57,5 @@ export class GlobalOrchestrator {
   }
 
   async monitorAll() {
-    console.log(`[Orchestrator] Monitoring ${this.clusters.length} clusters.`);
   }
 }

@@ -152,7 +152,6 @@ export class PulseCommand implements ICommand {
   ) {}
 
   async execute() {
-    console.log(`[Command] Executing ${this.action} for ${this.agentId}`);
     
     await PulseEngine.emit({
       type: 'AGENT_CALL',
@@ -165,7 +164,6 @@ export class PulseCommand implements ICommand {
   }
 
   async undo() {
-    console.log(`[Command] Rolling back ${this.action} for ${this.agentId}`);
     await kv.del(`aix:action:result:${this.agentId}`);
   }
 }
@@ -174,7 +172,6 @@ export class SpawnSubTaskCommand implements ICommand {
   constructor(private parentId: string, private task: string) {}
 
   async execute() {
-    console.log(`[Command] Spawning sub-task for ${this.parentId}: ${this.task}`);
     // Logic to spawn a child agent
   }
 }
@@ -207,7 +204,6 @@ export class SovereignAgentFactory extends AgentFactory<any> {
 export class AuthBlock extends AgentBlock {
   id = 'auth-block';
   async execute(context: any) {
-    console.log("[Lego] AuthBlock validating session...");
     return { authenticated: true, user: context.userId };
   }
 }
@@ -215,7 +211,6 @@ export class AuthBlock extends AgentBlock {
 export class KYCBlock extends AgentBlock {
   id = 'kyc-block';
   async execute(context: any) {
-    console.log("[Lego] KYCBlock checking verification level...");
     return { verified: true, level: 2 };
   }
 }
@@ -223,7 +218,6 @@ export class KYCBlock extends AgentBlock {
 export class PayBlock extends AgentBlock {
   id = 'pay-block';
   async execute(context: any) {
-    console.log(`[Lego] PayBlock processing payment of ${context.amount}...`);
     return { success: true, txId: '0xabc' };
   }
 }
@@ -263,7 +257,6 @@ export class BaseAgent implements IHierarchy {
   }
 
   async pulse(process: GatewayProcess) {
-    console.log(`[RussianDoll] Agent ${this.id} pulsing skills...`);
     return Promise.all(this.children.map(s => s.run({ amount: 100 })));
   }
 }
@@ -279,7 +272,6 @@ export class AgentCluster implements IHierarchy {
   }
 
   async broadcast(message: any) {
-    console.log(`[Cluster] ${this.clusterId} broadcasting to ${this.children.length} agents.`);
     return Promise.all(this.children.map(a => a.pulse(message)));
   }
 }
@@ -293,7 +285,6 @@ export class GlobalOrchestrator {
   }
 
   async monitorAll() {
-    console.log(`[Orchestrator] Monitoring ${this.clusters.length} clusters.`);
   }
 }
 

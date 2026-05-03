@@ -29,13 +29,11 @@ export class GatewaySecurity {
     // 1. Strict Origin Validation
     const allowedOrigins = [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'];
     if (origin && !allowedOrigins.includes(origin)) {
-      console.warn(`[Security] Blocked unauthorized origin: ${origin}`);
       return false;
     }
 
     // 2. Token Validation (Sovereign Handshake)
     if (sessionToken && authHeader !== `Bearer ${sessionToken}`) {
-      console.warn(`[Security] Invalid session token for Gateway pulse`);
       return false;
     }
 
@@ -73,7 +71,6 @@ export class EnvelopeSecurity {
     const provided = doc.security.checksum.value;
     
     if (calculated !== provided) {
-      console.error(`[Security] Integrity check failed. Expected: ${calculated}, Got: ${provided}`);
       return false;
     }
     return true;

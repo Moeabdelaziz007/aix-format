@@ -223,7 +223,6 @@ export class AgentRuntimeEngine {
       const similarity = this.calculateSimilarity(task.description, skill.prompt);
       
       if (similarity > CACHE_CONFIDENCE_THRESHOLD && skill.successCount >= 2) {
-        console.log(`[Runtime] Cache hit! Confidence: ${similarity.toFixed(2)}, Success count: ${skill.successCount}`);
         return skill.response;
       }
     }
@@ -333,7 +332,6 @@ export class AgentRuntimeEngine {
 
       // Loop detection
       if (this.detectLoop(action)) {
-        console.log(`[Runtime] Loop detected at step ${this.runtime.step}, forcing completion`);
         finalAnswer = this.generateFallbackAnswer(task);
         this.runtime.status = 'done';
         break;
@@ -534,7 +532,6 @@ export class AgentRuntimeEngine {
       false
     );
 
-    console.log(`[Runtime] Failure analysis: ${analysis.type}, reward: ${analysis.reward}`);
 
     // Record performance (failed)
     await this.recordPerformance(task, false, Date.now() - this.runtime.startTime);

@@ -110,25 +110,21 @@ export class FailureLearning {
       case 'expected':
         // Expected failure - minimal penalty
         reward = FAILURE_RESPONSE.TASK_FAILED_EXPECTED;
-        console.log(`[Failure] Agent ${agentId} failed as expected (${reward} XP)`);
         break;
 
       case 'unexpected':
         // Unexpected failure - learning opportunity
         reward = FAILURE_RESPONSE.TASK_FAILED_UNEXPECTED;
-        console.log(`[Failure] Agent ${agentId} encountered unexpected failure (${reward} XP, but learning...)`);
         break;
 
       case 'tried_new':
         // Failed but tried something new - REWARD the courage!
         reward = FAILURE_RESPONSE.TASK_FAILED_TRIED_NEW;
-        console.log(`[Failure] Agent ${agentId} failed but tried new approach (+${reward} XP for courage!)`);
         break;
 
       case 'learned':
         // Failed but discovered a pattern - REWARD the insight!
         reward = FAILURE_RESPONSE.TASK_FAILED_LEARNED;
-        console.log(`[Failure] Agent ${agentId} failed but learned something (+${reward} XP for discovery!)`);
         break;
     }
 
@@ -154,7 +150,6 @@ export class FailureLearning {
       const learning = `This error has occurred ${pattern.occurrences} times before. ` +
                       `Successful solutions: ${pattern.solutions.join(', ')}`;
       
-      console.log(`[Failure] Agent ${agentId} recalled solution from past failures`);
       return learning;
     }
 
@@ -165,7 +160,6 @@ export class FailureLearning {
     // Store this as a new pattern
     await this.recordFailurePattern(agentId, failure, errorType);
     
-    console.log(`[Failure] Agent ${agentId} created new learning from failure: ${learning}`);
     return learning;
   }
 
@@ -224,7 +218,6 @@ export class FailureLearning {
       suggestedApproach,
     };
 
-    console.log(`[Failure] Complete analysis for agent ${agentId}: ${type}, reward ${reward}, retry: ${shouldRetry}`);
     
     return analysis;
   }
@@ -292,7 +285,6 @@ export class FailureLearning {
       if (!pattern.solutions.includes(solution)) {
         pattern.solutions.push(solution);
         await kv.set(`agent:${agentId}:pattern:${failurePatternHash}`, pattern);
-        console.log(`[Failure] Agent ${agentId} recorded new solution for pattern ${failurePatternHash}`);
       }
     }
   }

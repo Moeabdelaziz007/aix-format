@@ -187,7 +187,6 @@ export class ResonanceEngine {
     // Sort by score (highest first)
     valid.sort((a, b) => b.score - a.score);
 
-    console.log(`[Resonance] Best match for ${taskType}: ${valid[0].agentId} (score: ${valid[0].score.toFixed(3)}, amplification: ${valid[0].resonance.amplification.toFixed(2)}x)`);
 
     return valid[0];
   }

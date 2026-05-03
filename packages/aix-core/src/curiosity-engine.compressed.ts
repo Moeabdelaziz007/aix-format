@@ -60,7 +60,6 @@ export class CuriosityEngine {
       if (condition) {
         total += REWARDS[type];
         await this.recordExploration(agentId, {actionType: type, actionHash: h!, timestamp: Date.now(), context: ctx, reward: REWARDS[type]});
-        console.log(`[Curiosity] Agent ${agentId}: ${type} (+${REWARDS[type]} XP)`);
       }
     }
 
@@ -69,7 +68,6 @@ export class CuriosityEngine {
       const comboReward = await this.checkSkillCombo(agentId, context.skillSequence);
       if (comboReward > 0) {
         total += comboReward;
-        console.log(`[Curiosity] Agent ${agentId}: NEW_SKILL_COMBO (+${comboReward} XP)`);
       }
     }
 

@@ -56,7 +56,6 @@ export async function broadcastTaskOffer(offer: Omit<TaskOffer, 'createdAt'>): P
   // Add to active tasks list
   await kv.sadd('p2p:active_tasks', offer.taskId);
   
-  console.log(`[P2P] 📢 Task broadcast: ${offer.taskId} (${offer.taskType})`);
 }
 
 /**
@@ -107,7 +106,6 @@ export async function submitBid(
   // Add to bids list for this task
   await kv.sadd(`p2p:bids:${taskId}`, agentId);
   
-  console.log(`[P2P] 💰 Bid submitted: ${agentId} → ${taskId} (score: ${bidScore.toFixed(3)})`);
   
   return bid;
 }
@@ -134,7 +132,6 @@ export async function selectWinningBid(taskId: string): Promise<TaskAssignment |
   const bids = await getTaskBids(taskId);
   
   if (bids.length === 0) {
-    console.log(`[P2P] ⚠️  No bids for task ${taskId}`);
     return null;
   }
   
@@ -156,7 +153,6 @@ export async function selectWinningBid(taskId: string): Promise<TaskAssignment |
   // Remove from active tasks
   await kv.srem('p2p:active_tasks', taskId);
   
-  console.log(`[P2P] 🏆 Winner: ${winningBid.agentId} for ${taskId} (score: ${winningBid.bidScore.toFixed(3)})`);
   
   return assignment;
 }
@@ -191,7 +187,6 @@ export async function cancelTaskOffer(taskId: string): Promise<void> {
   }
   await kv.del(`p2p:bids:${taskId}`);
   
-  console.log(`[P2P] ❌ Task cancelled: ${taskId}`);
 }
 
 /**
@@ -262,7 +257,6 @@ export async function autoBid(
   }
   
   if (submittedBids.length > 0) {
-    console.log(`[P2P] 🤖 Auto-bid: ${agentId} submitted ${submittedBids.length} bids`);
   }
   
   return submittedBids;

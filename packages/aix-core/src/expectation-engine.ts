@@ -82,7 +82,6 @@ export class ExpectationEngine {
     // Store expectation
     await kv.set(`agent:${agentId}:expectation:${taskId}`, expectation);
     
-    console.log(`[Expectation] Agent ${agentId} expects task ${taskId}: ${expectation.expectedSteps} steps, ${expectation.expectedDuration}ms, ${Math.round(expectation.expectedSuccess * 100)}% success`);
     
     return expectation;
   }
@@ -100,7 +99,6 @@ export class ExpectationEngine {
     const expectation = await kv.get<AgentExpectation>(`agent:${agentId}:expectation:${taskId}`);
     
     if (!expectation) {
-      console.warn(`[Expectation] No expectation found for task ${taskId}, using neutral happiness`);
       return {
         happiness: 0,
         stepsDeviation: 0,
@@ -162,7 +160,6 @@ export class ExpectationEngine {
     // Update calibration data
     await this.updateCalibration(agentId, expectation, reality);
 
-    console.log(`[Expectation] Agent ${agentId} happiness: ${result.happiness} (${result.mood})`);
     
     return result;
   }
@@ -360,7 +357,6 @@ export class ExpectationEngine {
 
     await kv.set(calibrationKey, calibration);
     
-    console.log(`[Expectation] Calibration updated for agent ${agentId}: steps error ${Math.round(calibration.averageStepsError * 100)}%, accuracy ${Math.round(calibration.successPredictionAccuracy * 100)}%`);
   }
 }
 

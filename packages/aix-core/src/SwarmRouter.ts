@@ -100,7 +100,6 @@ export class CircuitBreaker {
                 metrics.breakerTrips++;
             }
 
-            console.log(
                 `[CircuitBreaker] ${prevState} -> OPEN (Failures: ${this.failureCount}, Total Trips: ${metrics?.breakerTrips ?? 0})`
             );
         }
@@ -126,7 +125,6 @@ export class CircuitBreaker {
                     metrics.recoveries++;
                 }
 
-                console.log('[CircuitBreaker] HALF-OPEN -> CLOSED (System Recovered)');
             }
         } else if (this.state === 'closed') {
             this.failureCount = 0;
@@ -161,7 +159,6 @@ export class CircuitBreaker {
         if (this.state === 'open') {
             if (this.lastFailure && Date.now() - this.lastFailure.getTime() > this.openDuration) {
                 this.state = 'half-open';
-                console.log('[CircuitBreaker] State transitioned to HALF-OPEN (Probing)');
                 return true;
             }
             return false;
@@ -193,7 +190,6 @@ export class SwarmRouter {
         // Initialize with same values as Go: failureThreshold=5, successThreshold=3, openDuration=30s
         this.breaker = new CircuitBreaker(5, 3, 30000);
         this.metrics = new RouterMetrics();
-        console.log('[SwarmRouter] Initialized successfully with Adaptive Circuit Breaker and Metrics');
     }
 
     /**
@@ -209,7 +205,6 @@ export class SwarmRouter {
         this.agents.set(validated.id, validated);
         this.metrics.activeAgents = this.agents.size;
 
-        console.log(
             `[SwarmRouter] Registered agent: ${validated.id} (role: ${validated.role}, trust: ${validated.trustLevel})`
         );
     }
@@ -290,7 +285,6 @@ export class SwarmRouter {
         // Record success in circuit breaker
         this.breaker.recordSuccess(this.metrics);
 
-        console.log(
             `[SwarmRouter] Routed task ${task.id} to agent ${plan.primaryAgentId} (score: ${plan.score.toFixed(2)}, fallbacks: ${fallbackChain.length})`
         );
 

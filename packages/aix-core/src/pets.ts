@@ -86,7 +86,6 @@ export class PetOrchestrator {
       pet.mood = 'tired';
     }
 
-    console.log(`[Pet] Agent ${agentId} mood: ${pet.mood} (activity: ${activityMood}, happiness: ${happinessMood}, curiosity: ${curiosityMood})`);
     
     // 2. Progression (Simple Leveling)
     const currentExp = (await kv.incr(`agent:${agentId}:exp`)) || 1;
@@ -101,7 +100,6 @@ export class PetOrchestrator {
         pet.accessories = [...(pet.accessories || []), 'lightning_bolt'];
       }
       
-      console.log(`[Pet] Agent ${agentId} evolved to Level ${pet.level}!`);
     }
 
     // 3. Save back to manifest
@@ -144,7 +142,6 @@ export class PetOrchestrator {
         manifest.pet.mood = 'sleep';
         manifest.status = 'hibernated';
         await kv.set(KEYS.registry(agentId), manifest);
-        console.log(`[Pet] Agent ${agentId} entered Sleep Mode 💤`);
       }
       return true;
     }

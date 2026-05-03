@@ -251,7 +251,6 @@ class ModelDatabaseImpl {
   ): Promise<void> {
     const model = this.models.get(modelId);
     if (!model) {
-      console.warn(`Model ${modelId} not found in database`);
       return;
     }
     

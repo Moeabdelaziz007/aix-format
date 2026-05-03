@@ -33,14 +33,12 @@ export class RedisEventBus {
   }
 
   async publish(channel: string, message: any) {
-    console.log(`[EventBus] Publishing to ${channel}`);
     await kv.lpush(`aix:events:${channel}`, message); // Simplified persistence
     // In a real pub/sub, we'd use redis.publish
   }
 
   async subscribe(channel: string, callback: (data: any) => void) {
     // Simulated subscription via polling or long-lived connection
-    console.log(`[EventBus] Subscribed to ${channel}`);
   }
 }
 

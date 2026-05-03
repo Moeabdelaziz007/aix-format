@@ -87,7 +87,6 @@ export class GatewayManager {
     process.expectationSet = true;
     await kv.set(KEYS.gateway(processId), process, { ex: TTL.GATEWAY });
     
-    console.log(`[Gateway] Spawned persistent process ${processId} for agent ${agentId}`);
     return process;
   }
 
@@ -200,7 +199,6 @@ export class GatewayManager {
       },
     });
 
-    console.log(`[Gateway] Task ${processId} completed with happiness: ${happiness.happiness} (${happiness.mood})`);
   }
 
   /**
@@ -259,7 +257,6 @@ export class GatewayManager {
       },
     });
 
-    console.log(`[Gateway] Task ${processId} failed but learned: ${analysis.learning} (${analysis.reward} XP)`);
   }
 
   /**
@@ -376,11 +373,6 @@ export class GatewayManager {
       }
     });
     
-    console.log(`[Gateway] Routed task for ${process.agentId}:`);
-    console.log(`  Pet mood: ${petState.mood} (level ${petState.level})`);
-    console.log(`  Constraints: τ=${constraints.qualityThreshold.toFixed(2)}, latency≤${constraints.maxLatency}ms, cost≤${constraints.maxCost}π`);
-    console.log(`  Selected: ${result.modelId} (quality=${result.quality.toFixed(2)}, cost=${result.cost}π)`);
-    console.log(`  Feasible models: ${result.feasibleCount}/${result.totalEvaluated}`);
     
     return {
       modelId: result.modelId,

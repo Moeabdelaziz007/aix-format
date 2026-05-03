@@ -36,7 +36,6 @@ export class PulseEngine {
     await kv.lpush(this.GLOBAL_PULSE_KEY, fullEvent);
     await kv.ltrim(this.GLOBAL_PULSE_KEY, 0, 99);
 
-    console.log(`[Pulse] ${fullEvent.type} from ${fullEvent.agentName}: ${fullEvent.message}`);
   }
 
   /**

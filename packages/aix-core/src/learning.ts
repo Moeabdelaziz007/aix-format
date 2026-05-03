@@ -47,7 +47,6 @@ export async function recordSuccessfulProcedure(
   await kv.lpush(key, JSON.stringify(procedure));
   await kv.ltrim(key, 0, 19);
   
-  console.log(`[Hermes] Learned new procedure for ${agentId}: "${goal}"`);
 }
 
 /**
@@ -89,7 +88,6 @@ export async function extractSkillFromFeedback(
     await kv.sadd(skillsListKey, hash);
   }
 
-  console.log(`[Hermes] Extracted new skill (${hash}) for agent ${agentId}`);
   return hash;
 }
 

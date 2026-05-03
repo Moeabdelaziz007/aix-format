@@ -9,7 +9,6 @@ export class PulseCommand implements ICommand {
   ) {}
 
   async execute() {
-    console.log(`[Command] Executing ${this.action} for ${this.agentId}`);
     
     // Simulate action execution
     await PulseEngine.emit({
@@ -23,7 +22,6 @@ export class PulseCommand implements ICommand {
   }
 
   async undo() {
-    console.log(`[Command] Rolling back ${this.action} for ${this.agentId}`);
     await kv.del(`aix:action:result:${this.agentId}`);
   }
 }
@@ -32,7 +30,6 @@ export class SpawnSubTaskCommand implements ICommand {
   constructor(private parentId: string, private task: string) {}
 
   async execute() {
-    console.log(`[Command] Spawning sub-task for ${this.parentId}: ${this.task}`);
     // Logic to spawn a child agent
   }
 }

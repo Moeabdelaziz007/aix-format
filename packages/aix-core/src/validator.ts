@@ -29,7 +29,6 @@ export class AIXValidator {
       const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
       this.validator = this.ajv.compile(schema);
     } catch (error) {
-      console.error(`[AIXValidator] Critical error loading schema at ${schemaPath}:`, error);
       throw error;
     }
   }

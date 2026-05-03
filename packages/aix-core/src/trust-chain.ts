@@ -145,7 +145,6 @@ export async function recordTrustTransaction(
   // Update trust score
   await updateTrustScore(toAgent, trustDelta);
   
-  console.log(`[TrustChain] ⛓️  Transaction recorded: ${fromAgent} → ${toAgent} (${trustDelta > 0 ? '+' : ''}${trustDelta})`);
   
   return transaction;
 }

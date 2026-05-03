@@ -29,7 +29,6 @@ export class ChannelManager {
    * Provisions a new Telegram bot via the AIX Manager Bot (Pattern: Managed Bots API 9.6).
    */
   static async setupTelegram(agentId: string, manifest: any): Promise<ChannelConfig['telegram']> {
-    console.log(`[Channels] Auto-provisioning Telegram bot for agent ${agentId}`);
     
     // Simulate Telegram Managed Bots API Call
     // In production, this would call: https://api.telegram.org/bot<MANAGER_TOKEN>/createManagedBot
@@ -61,7 +60,6 @@ export class ChannelManager {
    * Provisions a WhatsApp sub-number via the AIX Verified Business account.
    */
   static async setupWhatsApp(agentId: string): Promise<ChannelConfig['whatsapp']> {
-    console.log(`[Channels] Allocating WhatsApp sub-number for agent ${agentId}`);
     
     const config: NonNullable<ChannelConfig['whatsapp']> = {
       phoneNumber: `+1555${Math.floor(1000000 + Math.random() * 9000000)}`,

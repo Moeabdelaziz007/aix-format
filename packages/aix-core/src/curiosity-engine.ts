@@ -94,7 +94,6 @@ export class CuriosityEngine {
         context: { action, params: context.params },
         reward: CURIOSITY_REWARDS.NEW_TOOL_TRIED,
       });
-      console.log(`[Curiosity] Agent ${agentId} tried new tool: ${action} (+${CURIOSITY_REWARDS.NEW_TOOL_TRIED} XP)`);
     }
 
     // 2. NEW_SKILL_COMBO: Novel combination of skills
@@ -102,7 +101,6 @@ export class CuriosityEngine {
       const comboReward = await this.checkSkillCombo(agentId, context.skillSequence);
       if (comboReward > 0) {
         totalReward += comboReward;
-        console.log(`[Curiosity] Agent ${agentId} discovered new skill combo (+${comboReward} XP)`);
       }
     }
 
@@ -116,7 +114,6 @@ export class CuriosityEngine {
         context: { action, method: context.method },
         reward: CURIOSITY_REWARDS.UNEXPECTED_SUCCESS,
       });
-      console.log(`[Curiosity] Agent ${agentId} found unexpected solution (+${CURIOSITY_REWARDS.UNEXPECTED_SUCCESS} XP)`);
     }
 
     // 4. EXPLORED_EDGE_CASE: Tried an edge case or unusual parameter
@@ -129,7 +126,6 @@ export class CuriosityEngine {
         context: { action, edgeCase: context.edgeCaseType },
         reward: CURIOSITY_REWARDS.EXPLORED_EDGE_CASE,
       });
-      console.log(`[Curiosity] Agent ${agentId} explored edge case (+${CURIOSITY_REWARDS.EXPLORED_EDGE_CASE} XP)`);
     }
 
     // 5. FOUND_PATTERN: Discovered a pattern in data
@@ -142,7 +138,6 @@ export class CuriosityEngine {
         context: { action, pattern: context.patternType },
         reward: CURIOSITY_REWARDS.FOUND_PATTERN,
       });
-      console.log(`[Curiosity] Agent ${agentId} found new pattern (+${CURIOSITY_REWARDS.FOUND_PATTERN} XP)`);
     }
 
     return totalReward;

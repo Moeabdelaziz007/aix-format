@@ -819,19 +819,14 @@ export class SimulationEngine {
     const startTime = Date.now();
     const recommendations: string[] = [];
 
-    console.log('🔮 Phase 1: Predictive Analysis...');
     const predictions = this.runPredictiveAnalysis(memoryNodes);
 
-    console.log('🧬 Phase 2: Genetic Policy Evolution...');
     const bestPolicy = await this.runGeneticEvolution(memoryNodes, predictions);
     
-    console.log('💰 Phase 3: Economic Impact Analysis...');
     const economicImpact = this.runEconomicAnalysis(memoryNodes, bestPolicy);
 
-    console.log('⚛️ Phase 4: Quantum Task Scheduling...');
     const quantumStats = await this.runQuantumScheduling(memoryNodes);
 
-    console.log('📊 Phase 5: Generating Recommendations...');
     recommendations.push(...this.generateRecommendations(
       bestPolicy,
       economicImpact,
@@ -903,7 +898,6 @@ export class SimulationEngine {
 
       if (i % 10 === 0) {
         const stats = this.optimizer.getStatistics();
-        console.log(`  Generation ${stats.generation}: Best Fitness = ${stats.bestFitness.toFixed(4)}`);
       }
     }
 
