@@ -123,7 +123,7 @@ export class ManifestCompressionIntegration {
   }
 
   private async updateProfile(outcome: TaskOutcome, reward: number): Promise<void> {
-    const key = `aix:compression:profile:${outcome.taskType}`;
+    const key = KEYS.aixCompressionProfile(outcome.taskType);
     const existing = await kv.get<CompressionProfile>(key);
 
     if (existing) {
@@ -160,7 +160,7 @@ export class ManifestCompressionIntegration {
   }
 
   async getProfile(taskType: string): Promise<CompressionProfile | null> {
-    return kv.get<CompressionProfile>(`aix:compression:profile:${taskType}`);
+    return kv.get<CompressionProfile>(KEYS.aixCompressionProfile(taskType));
   }
 
   async getAllProfiles(): Promise<CompressionProfile[]> {

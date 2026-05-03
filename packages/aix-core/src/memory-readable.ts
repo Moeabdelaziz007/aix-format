@@ -21,7 +21,7 @@ export class ReadableMemory {
    */
   static async getMemoryTree(agentId: string): Promise<MemoryNode> {
     // 1. Fetch Sessions
-    const sessions = await kv.lrange<any>(`agent:${agentId}:sessions`, 0, 9);
+    const sessions = await kv.lrange<any>(KEYS.agentSessions(agentId), 0, 9);
     const sessionNodes: MemoryNode[] = sessions.map(s => ({
       id: `session-${s.timestamp}`,
       label: new Date(s.timestamp).toLocaleDateString(),
@@ -37,7 +37,7 @@ export class ReadableMemory {
     }));
 
     // 3. Fetch Skills
-    const skills = await kv.smembers<string>(`agent:${agentId}:skills`);
+    const skills = await kv.smembers<string>(KEYS.agentSkills(agentId));
     const skillNodes: MemoryNode[] = skills.map(s => ({
       id: `skill-${s}`,
       label: s,

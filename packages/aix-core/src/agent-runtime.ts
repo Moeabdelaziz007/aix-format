@@ -264,7 +264,7 @@ export class AgentRuntimeEngine {
    */
   private async selectModel(task: Task): Promise<string> {
     // Get current mood from pets
-    const manifest = await kv.get<any>(`agent:${this.runtime.agentId}:manifest`);
+    const manifest = await kv.get<any>(KEYS.agentManifest(this.runtime.agentId));
     const mood: AgentMood = manifest?.pet?.mood || 'curious';
     this.runtime.mood = mood;
 

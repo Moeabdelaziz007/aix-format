@@ -297,7 +297,7 @@ export class GatewayManager {
    * Resource Locking for M2M Integrity
    */
   static async lockAgent(agentId: string, processId: string): Promise<boolean> {
-    const lockKey = `aix:lock:agent:${agentId}`;
+    const lockKey = KEYS.aixLockAgent(agentId);
     try {
       // Upstash set with nx returns true/false or null
       await kv.set(lockKey, processId, { nx: true, ex: 300 }); 
@@ -308,7 +308,7 @@ export class GatewayManager {
   }
 
   static async unlockAgent(agentId: string): Promise<void> {
-    await kv.del(`aix:lock:agent:${agentId}`);
+    await kv.del(KEYS.aixLockAgent(agentId));
   }
 
   /**

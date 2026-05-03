@@ -33,7 +33,7 @@ export class RedisEventBus {
   }
 
   async publish(channel: string, message: any) {
-    await kv.lpush(`aix:events:${channel}`, message); // Simplified persistence
+    await kv.lpush(KEYS.aixEvents(channel), message); // Simplified persistence
     // In a real pub/sub, we'd use redis.publish
   }
 

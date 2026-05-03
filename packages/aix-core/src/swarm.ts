@@ -164,7 +164,7 @@ export class PulseCommand implements ICommand {
   }
 
   async undo() {
-    await kv.del(`aix:action:result:${this.agentId}`);
+    await kv.del(KEYS.aixActionResult(this.agentId));
   }
 }
 

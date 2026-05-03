@@ -76,7 +76,7 @@ export class FailureLearning {
     const context = await this.getFailureContext(agentId, taskId, error);
     
     // Check if this failure was expected (low success probability)
-    const expectation = await kv.get<any>(`agent:${agentId}:expectation:${taskId}`);
+    const expectation = await kv.get<any>(KEYS.agentExpectation(agentId, taskId));
     if (expectation && expectation.expectedSuccess < 0.3) {
       return 'expected';
     }
@@ -233,7 +233,7 @@ export class FailureLearning {
     learningMoments: number;
     patternsDiscovered: number;
   }> {
-    const stats = await kv.get<any>(`agent:${agentId}:failure_stats`) || {
+    const stats = await kv.get<any>(KEYS.agentFailureStats(agentId)) || {
       totalFailures: 0,
       expectedFailures: 0,
       unexpectedFailures: 0,
@@ -252,7 +252,7 @@ export class FailureLearning {
     agentId: string,
     limit: number = 10
   ): Promise<FailureContext[]> {
-    const data = await kv.lrange<string>(`agent:${agentId}:failures`, 0, limit - 1);
+    const data = await kv.lrange<string>(KEYS.agentFailures(agentId), 0, limit - 1);
     return data.map(d => JSON.parse(d));
   }
 
@@ -260,11 +260,11 @@ export class FailureLearning {
    * Get all failure patterns discovered by agent
    */
   static async getFailurePatterns(agentId: string): Promise<FailurePattern[]> {
-    const patternHashes = await kv.smembers<string>(`agent:${agentId}:failure_patterns`);
+    const patternHashes = await kv.smembers<string>(KEYS.agentFailurePatterns(agentId));
     if (!patternHashes.length) return [];
 
     const patterns = await Promise.all(
-      patternHashes.map(hash => kv.get<FailurePattern>(`agent:${agentId}:pattern:${hash}`))
+      patternHashes.map(hash => kv.get<FailurePattern>(KEYS.agentFailurePattern(agentId, hash)))
     );
 
     return patterns.filter((p): p is FailurePattern => p !== null);
@@ -279,12 +279,12 @@ export class FailureLearning {
     failurePatternHash: string,
     solution: string
   ): Promise<void> {
-    const pattern = await kv.get<FailurePattern>(`agent:${agentId}:pattern:${failurePatternHash}`);
+    const pattern = await kv.get<FailurePattern>(KEYS.agentFailurePattern(agentId, failurePatternHash));
     
     if (pattern) {
       if (!pattern.solutions.includes(solution)) {
         pattern.solutions.push(solution);
-        await kv.set(`agent:${agentId}:pattern:${failurePatternHash}`, pattern);
+        await kv.set(KEYS.agentFailurePattern(agentId, failurePatternHash), pattern);
       }
     }
   }
@@ -298,7 +298,7 @@ export class FailureLearning {
     error: any
   ): Promise<FailureContext> {
     // Get recent actions to determine if tried new approach
-    const recentActions = await kv.lrange<string>(`agent:${agentId}:recent_actions`, 0, 4);
+    const recentActions = await kv.lrange<string>(KEYS.agentRecentActions(agentId), 0, 4);
     const actionSet = new Set(recentActions);
     const triedNewApproach = actionSet.size > 3; // Diverse actions = exploration
 
@@ -329,7 +329,7 @@ export class FailureLearning {
       .digest('hex')
       .slice(0, 16);
 
-    return await kv.get<FailurePattern>(`agent:${agentId}:pattern:${patternHash}`);
+    return await kv.get<FailurePattern>(KEYS.agentFailurePattern(agentId, patternHash));
   }
 
   /**
@@ -346,12 +346,12 @@ export class FailureLearning {
       .digest('hex')
       .slice(0, 16);
 
-    const existing = await kv.get<FailurePattern>(`agent:${agentId}:pattern:${patternHash}`);
+    const existing = await kv.get<FailurePattern>(KEYS.agentFailurePattern(agentId, patternHash));
 
     if (existing) {
       existing.occurrences += 1;
       existing.lastSeen = Date.now();
-      await kv.set(`agent:${agentId}:pattern:${patternHash}`, existing);
+      await kv.set(KEYS.agentFailurePattern(agentId, patternHash), existing);
     } else {
       const newPattern: FailurePattern = {
         patternHash,
@@ -362,8 +362,8 @@ export class FailureLearning {
         lastSeen: Date.now(),
         solutions: [],
       };
-      await kv.set(`agent:${agentId}:pattern:${patternHash}`, newPattern);
-      await kv.sadd(`agent:${agentId}:failure_patterns`, patternHash);
+      await kv.set(KEYS.agentFailurePattern(agentId, patternHash), newPattern);
+      await kv.sadd(KEYS.agentFailurePatterns(agentId), patternHash);
     }
   }
 
@@ -378,12 +378,12 @@ export class FailureLearning {
   ): Promise<void> {
     // Add to failure history
     await kv.lpush(
-      `agent:${agentId}:failures`,
+      KEYS.agentFailures(agentId),
       JSON.stringify({ ...context, type, reward })
     );
     
     // Keep only last 50 failures
-    await kv.ltrim(`agent:${agentId}:failures`, 0, 49);
+    await kv.ltrim(KEYS.agentFailures(agentId), 0, 49);
 
     // Update failure stats
     const stats = await this.getFailureStats(agentId);
@@ -407,7 +407,7 @@ export class FailureLearning {
         break;
     }
 
-    await kv.set(`agent:${agentId}:failure_stats`, stats);
+    await kv.set(KEYS.agentFailureStats(agentId), stats);
   }
 
   /**

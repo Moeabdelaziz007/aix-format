@@ -42,7 +42,7 @@ export class ChannelManager {
     };
 
     // Save to agent's channel specific store
-    await kv.set(`agent:${agentId}:channels:telegram`, config);
+    await kv.set(KEYS.agentChannelsTelegram(agentId), config);
     
     // Update agent registry with channel flag
     const current = await kv.get<any>(KEYS.registry(agentId));
@@ -67,7 +67,7 @@ export class ChannelManager {
       setupAt: Date.now()
     };
 
-    await kv.set(`agent:${agentId}:channels:whatsapp`, config);
+    await kv.set(KEYS.agentChannelsWhatsapp(agentId), config);
     return config;
   }
 
@@ -84,8 +84,8 @@ export class ChannelManager {
    * Retrieves all active channels for an agent.
    */
   static async getChannels(agentId: string): Promise<ChannelConfig> {
-    const telegram = await kv.get<ChannelConfig['telegram']>(`agent:${agentId}:channels:telegram`);
-    const whatsapp = await kv.get<ChannelConfig['whatsapp']>(`agent:${agentId}:channels:whatsapp`);
+    const telegram = await kv.get<ChannelConfig['telegram']>(KEYS.agentChannelsTelegram(agentId));
+    const whatsapp = await kv.get<ChannelConfig['whatsapp']>(KEYS.agentChannelsWhatsapp(agentId));
     
     return {
       telegram: telegram || undefined,

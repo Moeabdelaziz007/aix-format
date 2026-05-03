@@ -149,7 +149,7 @@ export class ResonanceEngine {
   private static async getAgentTaskTypes(agentId: string): Promise<string[]> {
     // Scan for all performance keys for this agent
     // In production, maintain a set of task types per agent
-    const taskTypesKey = `resonance:agent:${agentId}:task_types`;
+    const taskTypesKey = KEYS.agentResonanceTaskTypes(agentId);
     return await kv.smembers<string>(taskTypesKey);
   }
 
@@ -195,7 +195,7 @@ export class ResonanceEngine {
    * Track task type for an agent (call when recording performance)
    */
   static async trackTaskType(agentId: string, taskType: string): Promise<void> {
-    const taskTypesKey = `resonance:agent:${agentId}:task_types`;
+    const taskTypesKey = KEYS.agentResonanceTaskTypes(agentId);
     await kv.sadd(taskTypesKey, taskType);
   }
 

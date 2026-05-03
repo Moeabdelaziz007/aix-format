@@ -80,7 +80,7 @@ export class ExpectationEngine {
     };
 
     // Store expectation
-    await kv.set(`agent:${agentId}:expectation:${taskId}`, expectation);
+    await kv.set(KEYS.agentExpectation(agentId, taskId), expectation);
     
     
     return expectation;
@@ -96,7 +96,7 @@ export class ExpectationEngine {
     reality: TaskReality
   ): Promise<HappinessResult> {
     // Retrieve expectation
-    const expectation = await kv.get<AgentExpectation>(`agent:${agentId}:expectation:${taskId}`);
+    const expectation = await kv.get<AgentExpectation>(KEYS.agentExpectation(agentId, taskId));
     
     if (!expectation) {
       return {
@@ -169,7 +169,7 @@ export class ExpectationEngine {
    * Agents become more realistic about their capabilities
    */
   static async calibrateExpectations(agentId: string): Promise<ExpectationCalibration> {
-    const calibrationKey = `agent:${agentId}:calibration`;
+    const calibrationKey = KEYS.agentCalibration(agentId);
     const calibration = await kv.get<ExpectationCalibration>(calibrationKey);
     
     if (!calibration) {
@@ -192,7 +192,7 @@ export class ExpectationEngine {
    * Get current calibration data
    */
   static async getCalibration(agentId: string): Promise<ExpectationCalibration> {
-    const calibration = await kv.get<ExpectationCalibration>(`agent:${agentId}:calibration`);
+    const calibration = await kv.get<ExpectationCalibration>(KEYS.agentCalibration(agentId));
     
     if (!calibration) {
       return await this.calibrateExpectations(agentId);
@@ -205,7 +205,7 @@ export class ExpectationEngine {
    * Get agent's average happiness over recent tasks
    */
   static async getAverageHappiness(agentId: string, limit: number = 10): Promise<number> {
-    const recentHappiness = await kv.lrange<string>(`agent:${agentId}:happiness_history`, 0, limit - 1);
+    const recentHappiness = await kv.lrange<string>(KEYS.agentHappinessHistory(agentId), 0, limit - 1);
     
     if (recentHappiness.length === 0) return 0;
     
@@ -219,7 +219,7 @@ export class ExpectationEngine {
    * Get recent happiness history
    */
   static async getHappinessHistory(agentId: string, limit: number = 20): Promise<HappinessResult[]> {
-    const data = await kv.lrange<string>(`agent:${agentId}:happiness_history`, 0, limit - 1);
+    const data = await kv.lrange<string>(KEYS.agentHappinessHistory(agentId), 0, limit - 1);
     return data.map(d => JSON.parse(d));
   }
 
@@ -315,15 +315,15 @@ export class ExpectationEngine {
   ): Promise<void> {
     // Add to happiness history
     await kv.lpush(
-      `agent:${agentId}:happiness_history`,
+      KEYS.agentHappinessHistory(agentId),
       JSON.stringify({ ...result, taskId, timestamp: Date.now() })
     );
     
     // Keep only last 50 happiness records
-    await kv.ltrim(`agent:${agentId}:happiness_history`, 0, 49);
+    await kv.ltrim(KEYS.agentHappinessHistory(agentId), 0, 49);
     
     // Update current mood
-    await kv.set(`agent:${agentId}:current_mood`, result.mood);
+    await kv.set(KEYS.agentCurrentMood(agentId), result.mood);
   }
 
   /**
@@ -334,7 +334,7 @@ export class ExpectationEngine {
     expectation: AgentExpectation,
     reality: TaskReality
   ): Promise<void> {
-    const calibrationKey = `agent:${agentId}:calibration`;
+    const calibrationKey = KEYS.agentCalibration(agentId);
     const calibration = await this.getCalibration(agentId);
 
     // Calculate errors

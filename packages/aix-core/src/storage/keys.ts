@@ -73,6 +73,58 @@ export const KEYS = {
   
   // Ghost Agent Pattern
   shadow: (processId: string) => `aix:shadow:${processId}`,
+  
+  // 🧬 META-COMPRESSION: Unified Key Registry (88 keys compressed)
+  // Agent-scoped keys
+  agentSessions:      (agentId: string) => `agent:${agentId}:sessions`,
+  agentSkills:        (agentId: string) => `agent:${agentId}:skills`,
+  agentSkillDetail:   (agentId: string, hash: string) => `agent:${agentId}:skill:${hash}`,
+  agentExpectation:   (agentId: string, taskId: string) => `agent:${agentId}:expectation:${taskId}`,
+  agentFailureStats:  (agentId: string) => `agent:${agentId}:failure_stats`,
+  agentFailures:      (agentId: string) => `agent:${agentId}:failures`,
+  agentFailurePatterns: (agentId: string) => `agent:${agentId}:failure_patterns`,
+  agentFailurePattern: (agentId: string, hash: string) => `agent:${agentId}:pattern:${hash}`,
+  agentRecentActions: (agentId: string) => `agent:${agentId}:recent_actions`,
+  agentChannelsTelegram: (agentId: string) => `agent:${agentId}:channels:telegram`,
+  agentChannelsWhatsapp: (agentId: string) => `agent:${agentId}:channels:whatsapp`,
+  agentCuriosityScore: (agentId: string) => `agent:${agentId}:curiosity_score`,
+  agentActionUsage:   (agentId: string, actionId: string) => `agent:${agentId}:action:${actionId}:usage`,
+  agentExplorations:  (agentId: string) => `agent:${agentId}:explorations`,
+  agentHappinessHistory: (agentId: string) => `agent:${agentId}:happiness_history`,
+  agentExpectationCalibration: (agentId: string) => `agent:${agentId}:expectation_calibration`,
+  agentPetState:      (agentId: string) => `agent:${agentId}:pet_state`,
+  agentModelMetrics:  (agentId: string, modelId: string) => `agent:${agentId}:model:${modelId}:metrics`,
+  agentTrustScore:    (agentId: string) => `agent:${agentId}:trust_score`,
+  agentTrustHistory:  (agentId: string) => `agent:${agentId}:trust_history`,
+  agentResonanceProfile: (agentId: string) => `agent:${agentId}:resonance_profile`,
+  agentResonanceTaskTypes: (agentId: string) => `resonance:agent:${agentId}:task_types`,
+  
+  // AIX-scoped keys
+  aixActionResult:    (agentId: string) => `aix:action:result:${agentId}`,
+  aixEvents:          (channel: string) => `aix:events:${channel}`,
+  aixEconomicsLedger: (agentId: string) => `aix:economics:ledger:${agentId}`,
+  aixEconomicsReinvestment: (agentId: string) => `aix:economics:reinvestment:${agentId}`,
+  aixEconomicsStake:  (agentId: string) => `aix:economics:stake:${agentId}`,
+  aixLockAgent:       (agentId: string) => `aix:lock:agent:${agentId}`,
+  aixModelStats:      (modelId: string) => `aix:model:${modelId}:stats`,
+  aixModelCalls:      (modelId: string) => `aix:model:${modelId}:calls`,
+  aixP2PNode:         (nodeId: string) => `aix:p2p:node:${nodeId}`,
+  aixP2PRouting:      (fromId: string, toId: string) => `aix:p2p:routing:${fromId}:${toId}`,
+  aixSwarmTopology:   () => `aix:swarm:topology`,
+  aixSwarmNodes:      () => `aix:swarm:nodes`,
+  agentCalibration:   (agentId: string) => `agent:${agentId}:calibration`,
+  agentCurrentMood:   (agentId: string) => `agent:${agentId}:current_mood`,
+  agentFreq:          (agentId: string) => `agent:${agentId}:freq`,
+  agentExp:           (agentId: string) => `agent:${agentId}:exp`,
+  agentExplorationHistory: (agentId: string) => `agent:${agentId}:exploration_history`,
+  agentSkillCombo:     (agentId: string, hash: string) => `agent:${agentId}:skill_combo:${hash}`,
+  agentSkillCombos:    (agentId: string) => `agent:${agentId}:skill_combos`,
+  agentActionCount:    (agentId: string, action: string) => `agent:${agentId}:action_count:${action}`,
+  agentManifest:       (agentId: string) => `agent:${agentId}:manifest`,
+  aixEconomicsTotalStake: (agentId: string) => `aix:economics:total_stake:${agentId}`,
+  aixCompressionProfile: (taskType: string) => `aix:compression:profile:${taskType}`,
+  agentLastActivity:  (agentId: string) => `agent:${agentId}:last_activity`,
+  aixSwarmEdges:      () => `aix:swarm:edges`,
   ghost:  (agentId: string)   => `agent:${agentId}:ghost`
 };
 

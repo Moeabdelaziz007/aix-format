@@ -38,7 +38,7 @@ const hash = (data: string) => createHash('sha256').update(data).digest('hex').s
 export class CuriosityEngine {
   // Get exploration history
   static async getExplorationHistory(agentId: string): Promise<Set<string>> {
-    return new Set(await kv.smembers<string>(`agent:${agentId}:exploration_history`) || []);
+    return new Set(await kv.smembers<string>(KEYS.agentExplorationHistory(agentId)) || []);
   }
 
   // Calculate curiosity reward (array-driven instead of 5 if-blocks)
@@ -82,7 +82,7 @@ export class CuriosityEngine {
       availableActions.map(async action => ({
         action,
         score: history.has(hash(action)) 
-          ? Math.max(0, 10 - (await kv.get<number>(`agent:${agentId}:action_count:${action}`) || 0))
+          ? Math.max(0, 10 - (await kv.get<number>(KEYS.agentActionCount(agentId, action)) || 0))
           : 100
       }))
     );
@@ -93,12 +93,12 @@ export class CuriosityEngine {
   // Check skill combo (simplified)
   private static async checkSkillCombo(agentId: string, skills: string[]): Promise<number> {
     const comboHash = hash(skills.sort().join(':'));
-    const key = `agent:${agentId}:skill_combo:${comboHash}`;
+    const key = KEYS.agentSkillCombo(agentId, comboHash);
     const existing = await kv.get<SkillCombo>(key);
 
     if (!existing) {
       await kv.set(key, {skills, comboHash, successCount: 1, firstUsed: Date.now(), lastUsed: Date.now()});
-      await kv.sadd(`agent:${agentId}:skill_combos`, comboHash);
+      await kv.sadd(KEYS.agentSkillCombos(agentId), comboHash);
       return REWARDS.NEW_SKILL_COMBO;
     }
     
@@ -109,25 +109,25 @@ export class CuriosityEngine {
   // Record exploration (batched kv operations)
   private static async recordExploration(agentId: string, exp: ExplorationAction): Promise<void> {
     const [currentScore] = await Promise.all([
-      kv.get<number>(`agent:${agentId}:curiosity_score`),
-      kv.sadd(`agent:${agentId}:exploration_history`, exp.actionHash),
-      kv.lpush(`agent:${agentId}:explorations`, JSON.stringify(exp)),
-      kv.ltrim(`agent:${agentId}:explorations`, 0, 99),
+      kv.get<number>(KEYS.agentCuriosityScore(agentId)),
+      kv.sadd(KEYS.agentExplorationHistory(agentId), exp.actionHash),
+      kv.lpush(KEYS.agentExplorations(agentId), JSON.stringify(exp)),
+      kv.ltrim(KEYS.agentExplorations(agentId), 0, 99),
     ]);
-    await kv.set(`agent:${agentId}:curiosity_score`, (currentScore || 0) + exp.reward);
+    await kv.set(KEYS.agentCuriosityScore(agentId), (currentScore || 0) + exp.reward);
   }
 
   // Simple getters (one-liners)
-  static incrementActionUsage = (agentId: string, action: string) => kv.incr(`agent:${agentId}:action_count:${action}`);
-  static getCuriosityScore = async (agentId: string) => await kv.get<number>(`agent:${agentId}:curiosity_score`) || 0;
+  static incrementActionUsage = (agentId: string, action: string) => kv.incr(KEYS.agentActionCount(agentId, action));
+  static getCuriosityScore = async (agentId: string) => await kv.get<number>(KEYS.agentCuriosityScore(agentId)) || 0;
   
   static async getRecentExplorations(agentId: string, limit = 10): Promise<ExplorationAction[]> {
-    return (await kv.lrange<string>(`agent:${agentId}:explorations`, 0, limit - 1)).map(d => JSON.parse(d));
+    return (await kv.lrange<string>(KEYS.agentExplorations(agentId), 0, limit - 1)).map(d => JSON.parse(d));
   }
 
   static async getSkillCombos(agentId: string): Promise<SkillCombo[]> {
-    const hashes = await kv.smembers<string>(`agent:${agentId}:skill_combos`) || [];
-    const combos = await Promise.all(hashes.map(h => kv.get<SkillCombo>(`agent:${agentId}:skill_combo:${h}`)));
+    const hashes = await kv.smembers<string>(KEYS.agentSkillCombos(agentId)) || [];
+    const combos = await Promise.all(hashes.map(h => kv.get<SkillCombo>(KEYS.agentSkillCombo(agentId, h))));
     return combos.filter((c): c is SkillCombo => c !== null);
   }
 }

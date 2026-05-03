@@ -48,8 +48,8 @@ export class PetOrchestrator {
     ]);
 
     // 2. Update Mood based on frequency (traditional factor - 40%)
-    const recentInvocations = (await kv.incr(`agent:${agentId}:freq`)) || 1;
-    await kv.expire(`agent:${agentId}:freq`, 60); // Reset frequency window every minute
+    const recentInvocations = (await kv.incr(KEYS.agentFreq(agentId))) || 1;
+    await kv.expire(KEYS.agentFreq(agentId), 60); // Reset frequency window every minute
     
     let activityMood = 0;
     if (recentInvocations > 5) {
@@ -88,12 +88,12 @@ export class PetOrchestrator {
 
     
     // 2. Progression (Simple Leveling)
-    const currentExp = (await kv.incr(`agent:${agentId}:exp`)) || 1;
+    const currentExp = (await kv.incr(KEYS.agentExp(agentId))) || 1;
     const levelThreshold = pet.level * 10;
     
     if (currentExp >= levelThreshold) {
       pet.level += 1;
-      await kv.set(`agent:${agentId}:exp`, 0); // Reset for next level
+      await kv.set(KEYS.agentExp(agentId), 0); // Reset for next level
       
       // Reward with accessory at Level 5
       if (pet.level === 5) {
@@ -120,7 +120,7 @@ export class PetOrchestrator {
     pet.mood = 'curious';
     
     // Track activity timestamp for Sleep Mode
-    await kv.set(`agent:${agentId}:last_activity`, Date.now());
+    await kv.set(KEYS.agentLastActivity(agentId), Date.now());
 
     await kv.set(KEYS.registry(agentId), {
       ...manifest,
@@ -133,7 +133,7 @@ export class PetOrchestrator {
    * Saves compute resources by 'hibernating' the gateway.
    */
   static async checkSleepMode(agentId: string): Promise<boolean> {
-    const lastActivity = await kv.get<number>(`agent:${agentId}:last_activity`) || 0;
+    const lastActivity = await kv.get<number>(KEYS.agentLastActivity(agentId)) || 0;
     const sevenDays = 7 * 24 * 60 * 60 * 1000;
     
     if (Date.now() - lastActivity > sevenDays) {

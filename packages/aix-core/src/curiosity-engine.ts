@@ -61,7 +61,7 @@ export class CuriosityEngine {
    * Returns a Set of action hashes representing the agent's exploration history
    */
   static async getExplorationHistory(agentId: string): Promise<Set<string>> {
-    const key = `agent:${agentId}:exploration_history`;
+    const key = KEYS.agentExplorationHistory(agentId);
     const history = await kv.smembers<string>(key);
     return new Set(history || []);
   }
@@ -191,7 +191,7 @@ export class CuriosityEngine {
       .digest('hex')
       .slice(0, 16);
 
-    const comboKey = `agent:${agentId}:skill_combo:${comboHash}`;
+    const comboKey = KEYS.agentSkillCombo(agentId, comboHash);
     const existing = await kv.get<SkillCombo>(comboKey);
 
     if (!existing) {
@@ -206,7 +206,7 @@ export class CuriosityEngine {
       await kv.set(comboKey, newCombo);
       
       // Track in combo list
-      await kv.sadd(`agent:${agentId}:skill_combos`, comboHash);
+      await kv.sadd(KEYS.agentSkillCombos(agentId), comboHash);
       
       return CURIOSITY_REWARDS.NEW_SKILL_COMBO;
     } else {
@@ -226,20 +226,20 @@ export class CuriosityEngine {
     exploration: ExplorationAction
   ): Promise<void> {
     // Add to exploration history
-    await kv.sadd(`agent:${agentId}:exploration_history`, exploration.actionHash);
+    await kv.sadd(KEYS.agentExplorationHistory(agentId), exploration.actionHash);
     
     // Store detailed exploration record
     await kv.lpush(
-      `agent:${agentId}:explorations`,
+      KEYS.agentExplorations(agentId),
       JSON.stringify(exploration)
     );
     
     // Keep only last 100 explorations
-    await kv.ltrim(`agent:${agentId}:explorations`, 0, 99);
+    await kv.ltrim(KEYS.agentExplorations(agentId), 0, 99);
     
     // Update total curiosity score
-    const currentScore = await kv.get<number>(`agent:${agentId}:curiosity_score`) || 0;
-    await kv.set(`agent:${agentId}:curiosity_score`, currentScore + exploration.reward);
+    const currentScore = await kv.get<number>(KEYS.agentCuriosityScore(agentId)) || 0;
+    await kv.set(KEYS.agentCuriosityScore(agentId), currentScore + exploration.reward);
   }
 
   /**
@@ -249,7 +249,7 @@ export class CuriosityEngine {
     agentId: string,
     action: string
   ): Promise<number> {
-    const count = await kv.get<number>(`agent:${agentId}:action_count:${action}`);
+    const count = await kv.get<number>(KEYS.agentActionCount(agentId, action));
     return count || 0;
   }
 
@@ -257,14 +257,14 @@ export class CuriosityEngine {
    * Increment action usage count
    */
   static async incrementActionUsage(agentId: string, action: string): Promise<void> {
-    await kv.incr(`agent:${agentId}:action_count:${action}`);
+    await kv.incr(KEYS.agentActionCount(agentId, action));
   }
 
   /**
    * Get agent's total curiosity score
    */
   static async getCuriosityScore(agentId: string): Promise<number> {
-    const score = await kv.get<number>(`agent:${agentId}:curiosity_score`);
+    const score = await kv.get<number>(KEYS.agentCuriosityScore(agentId));
     return score || 0;
   }
 
@@ -275,7 +275,7 @@ export class CuriosityEngine {
     agentId: string,
     limit: number = 10
   ): Promise<ExplorationAction[]> {
-    const data = await kv.lrange<string>(`agent:${agentId}:explorations`, 0, limit - 1);
+    const data = await kv.lrange<string>(KEYS.agentExplorations(agentId), 0, limit - 1);
     return data.map(d => JSON.parse(d));
   }
 
@@ -283,11 +283,11 @@ export class CuriosityEngine {
    * Get all skill combos discovered by agent
    */
   static async getSkillCombos(agentId: string): Promise<SkillCombo[]> {
-    const comboHashes = await kv.smembers<string>(`agent:${agentId}:skill_combos`);
+    const comboHashes = await kv.smembers<string>(KEYS.agentSkillCombos(agentId));
     if (!comboHashes.length) return [];
 
     const combos = await Promise.all(
-      comboHashes.map(hash => kv.get<SkillCombo>(`agent:${agentId}:skill_combo:${hash}`))
+      comboHashes.map(hash => kv.get<SkillCombo>(KEYS.agentSkillCombo(agentId, hash)))
     );
 
     return combos.filter((c): c is SkillCombo => c !== null);

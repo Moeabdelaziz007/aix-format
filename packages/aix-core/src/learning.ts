@@ -65,8 +65,8 @@ export async function extractSkillFromFeedback(
     .digest('hex')
     .slice(0, 16);
 
-  const skillsListKey = `agent:${agentId}:skills`;
-  const skillDetailKey = `agent:${agentId}:skill:${hash}`;
+  const skillsListKey = KEYS.agentSkills(agentId);
+  const skillDetailKey = KEYS.agentSkillDetail(agentId, hash);
 
   // 2. Check if skill already exists
   const existing = await kv.get<FeedbackSkill>(skillDetailKey);
@@ -104,13 +104,13 @@ export async function getLearnedProcedures(agentId: string): Promise<LearnedProc
  * Retrieves all feedback-driven skills for an agent.
  */
 export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[]> {
-  const skillsListKey = `agent:${agentId}:skills`;
+  const skillsListKey = KEYS.agentSkills(agentId);
   const hashes = await kv.smembers<string>(skillsListKey);
   
   if (!hashes.length) return [];
 
   const skills = await Promise.all(
-    hashes.map(hash => kv.get<FeedbackSkill>(`agent:${agentId}:skill:${hash}`))
+    hashes.map(hash => kv.get<FeedbackSkill>(KEYS.agentSkillDetail(agentId, hash)))
   );
 
   return skills.filter((s): s is FeedbackSkill => s !== null);
