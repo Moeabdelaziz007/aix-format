@@ -1,5 +1,4 @@
-import { kv } from './storage/adapter';
-import { KEYS } from './storage/keys';
+import { kv, KEYS } from './index';
 
 /**
  * AIX Pulse Engine (v1.3.6)
@@ -36,6 +35,7 @@ export class PulseEngine {
     await kv.lpush(this.GLOBAL_PULSE_KEY, fullEvent);
     await kv.ltrim(this.GLOBAL_PULSE_KEY, 0, 99);
 
+    console.log(`[Pulse] ${fullEvent.type} from ${fullEvent.agentName}: ${fullEvent.message}`);
   }
 
   /**

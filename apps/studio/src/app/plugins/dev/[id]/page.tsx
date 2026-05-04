@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
-
+import { Badge, Typography } from '@/components/shared';
 import { 
   Download, 
   Star, 
@@ -18,7 +18,7 @@ import {
   Github
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 const DEVELOPERS = {
@@ -192,5 +192,3 @@ export default function DeveloperProfilePage() {
     </div>
   );
 }
-
-function.displayName = 'function';

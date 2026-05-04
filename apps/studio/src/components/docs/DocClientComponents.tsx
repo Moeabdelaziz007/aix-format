@@ -35,7 +35,7 @@ export function ScrollSpySidebar({ links }: { links: { id: string, label: string
         if (entry.isIntersecting) {
           setActiveId(entry.target.id);
         }
-      }, []);
+      });
     }, {
       rootMargin: "-10% 0px -80% 0px",
       threshold: 0.1

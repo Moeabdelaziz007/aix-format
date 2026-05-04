@@ -1,4 +1,3 @@
-import Image from 'next/image';
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -17,9 +16,10 @@ import {
   Star
 } from 'lucide-react';
 import { MarketplaceItem } from '../../lib/marketplace-api';
-import { KYABadge } from '@/components/agents/AgentCard/sub/KYABadge';
+import { KYABadge } from './KYABadge';
 import { TrustScore } from './TrustScore';
 import { RatingStars } from './RatingStars';
+import { InfoTooltip } from '@/components/shared';
 
 interface AgentDetailModalProps {
   item: MarketplaceItem | null;
@@ -61,7 +61,7 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({ item, onClos
           {/* Header */}
           <div className="relative h-64 flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent z-10" />
-            <Image width={0} height={0} 
+            <img
               src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.name}&backgroundColor=0a0a0f`}
               className="w-full h-full object-cover"
               alt=""
@@ -77,7 +77,7 @@ export const AgentDetailModal: React.FC<AgentDetailModalProps> = ({ item, onClos
             <div className="absolute bottom-6 left-8 right-8 z-20 flex items-end justify-between">
               <div className="flex items-center gap-6">
                 <div className="w-24 h-24 rounded-2xl border-2 border-white/10 overflow-hidden bg-black ">
-                  <Image width={0} height={0} src={item.author.avatar} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={item.author.avatar} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <div className="flex items-center gap-3 mb-2">
@@ -238,6 +238,7 @@ economics:
                 </div>
               </div>
             )}
+
 
             {activeTab === 'pricing' && (
               <div className="flex flex-col items-center justify-center py-12 text-center">

@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         'Cache-Control': 'no-cache'
       },
     });
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("[Voice TTS] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

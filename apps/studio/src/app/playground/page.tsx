@@ -24,7 +24,6 @@ import {
   Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { cn } from '@/lib/utils';
 
 const API_ENDPOINTS = [
@@ -89,7 +88,7 @@ export default function PlaygroundPage() {
   const [activeLang, setActiveLang] = useState('curl');
   const [copied, setCopied] = useState(false);
 
-  const handleEndpointSelect = (endpoint: typeof API_ENDPOINTS[number]) => {
+  const handleEndpointSelect = (endpoint: any) => {
     setSelectedEndpoint(endpoint);
     setRequestPayload(endpoint.defaultRequest ? JSON.stringify(endpoint.defaultRequest, null, 2) : "{}");
     setResponse(null);
@@ -151,7 +150,6 @@ func main() {
   }, [selectedEndpoint, requestPayload]);
 
   return (
-    <ErrorBoundary>
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -308,7 +306,7 @@ func main() {
                        <button 
                          className="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-white transition-colors"
                          onClick={() => {
-                            navigator.clipboard.writeText((codeSamples as unknown)[activeLang]);
+                            navigator.clipboard.writeText((codeSamples as any)[activeLang]);
                             setCopied(true);
                             setTimeout(() => setCopied(false), 2000);
                          }}
@@ -317,7 +315,7 @@ func main() {
                        </button>
                     </div>
                     <div className="flex-1 p-8 font-mono text-[11px] overflow-auto custom-scrollbar bg-black/40 text-zinc-500">
-                       <pre className="whitespace-pre leading-relaxed">{(codeSamples as unknown)[activeLang]}</pre>
+                       <pre className="whitespace-pre leading-relaxed">{(codeSamples as any)[activeLang]}</pre>
                     </div>
                  </div>
               </div>
@@ -327,8 +325,5 @@ func main() {
 
       <SovereignStatusBar />
     </div>
-    </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

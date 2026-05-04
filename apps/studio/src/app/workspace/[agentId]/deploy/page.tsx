@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 type DeployState = "idle" | "signing" | "deploying" | "done" | "error";
 
@@ -79,8 +78,7 @@ export default function DeployPage() {
 
       setState("done");
       toast.success("Agent deployed successfully!");
-    } catch (error: unknown) {
-      const err = error as Error;
+    } catch (err: any) {
       setError(err.message ?? "Deployment failed");
       setState("error");
     }
@@ -100,7 +98,6 @@ export default function DeployPage() {
   const stepIndex = { idle: -1, signing: 0, deploying: 1, done: 2, error: -1 }[state];
 
   return (
-    <ErrorBoundary>
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -251,8 +248,5 @@ export default function DeployPage() {
         )}
       </button>
     </motion.div>
-    </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

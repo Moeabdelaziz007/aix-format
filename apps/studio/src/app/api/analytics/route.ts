@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       payoutDue: "74.2π"
     });
 
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Analytics API Error:', error);
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }

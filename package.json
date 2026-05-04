@@ -1,15 +1,14 @@
 {
   "name": "aix-format",
-  "version": "1.4.0",
-  "description": "AIX (Artificial Intelligence eXchange) - Universal Agent Passport for the agentic payment economy. Sovereign Protocol v1.4 with Identity (v1.3), Payment Layer (v1.0), HTTP 402, Multi-Chain, and Platform Adapters.",
+  "version": "1.3.0",
+  "description": "AIX (Artificial Intelligence eXchange) - Standard file format for AI agents. Sovereign Protocol v1.3 with TypeScript types and Meta Arbiter support.",
   "main": "core/parser.js",
   "types": "types/parser.d.ts",
   "type": "module",
   "bin": {
     "aix-validate": "./bin/aix-validate.js",
     "aix-convert": "./bin/aix-convert.js",
-    "aix-regulator-export": "./bin/aix-regulator-export.js",
-    "aix-plugins": "./bin/aix-plugins.js"
+    "aix-regulator-export": "./bin/aix-regulator-export.js"
   },
   "scripts": {
     "test": "vitest run",
@@ -25,17 +24,7 @@
     "detective": "node apps/aix-detective/index.js",
     "lint": "echo 'Linting not configured yet'",
     "format": "echo 'Formatting not configured yet'",
-    "docs": "echo 'Documentation generation not configured yet'",
-    "schema:sync:check": "ts-node scripts/schema-type-sync.ts",
-    "schema:sync:fix": "npm run generate:types:unified && npm run schema:sync:check",
-    "dead-code:scan": "bash scripts/dead-code-scan.sh",
-    "dead-code:report": "cat .generated/dead-code-report.md",
-    "health-score": "ts-node scripts/health-score.ts",
-    "health-score:report": "cat .generated/health-score.json",
-    "health:check": "ts-node scripts/self-heal.ts",
-    "health:fix": "node scripts/auto-issue-generator.js",
-    "health:full": "npm run health:check && npm run health:fix",
-    "health:report": "cat .generated/HEALTH_REPORT.md"
+    "docs": "echo 'Documentation generation not configured yet'"
   },
   "keywords": [
     "ai",
@@ -101,24 +90,19 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@octokit/rest": "^20.0.0",
     "@upstash/redis": "^1.37.0",
     "framer-motion": "^12.38.0",
     "js-yaml": "^4.1.1",
     "lucide-react": "^1.14.0",
     "smol-toml": "^1.3.1",
-    "snarkjs": "^0.7.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
     "zod": "^4.4.1"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.2.4",
     "@playwright/test": "^1.50.0",
     "@tailwindcss/postcss": "^4.2.4",
-    "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^3.0.0",
-    "ajv": "^8.12.0",
     "json-schema-to-typescript": "^15.0.4",
     "playwright": "^1.50.0",
     "postcss": "^8.5.12",
@@ -126,7 +110,6 @@
     "tailwindcss": "^4.2.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
-    "vitest": "^3.2.4"
-  },
-  "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
+    "vitest": "^3.0.0"
+  }
 }

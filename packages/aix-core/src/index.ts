@@ -1,56 +1,31 @@
 /**
- * aix-core public surface — 33 smart exports
- *
- * Primary API (start here):
- *   import aix from 'aix-core';
- *   import { aix, ParallelSim, GatewayManager } from 'aix-core';
+ * AIX Unified Storage Adapter
+ * Standardizes access to Upstash Redis across core and apps.
  */
 
-// ─── PRIMARY: The one function you need ──────────────────────────────────
-export { aix, aix as default }          from './aix';
-export type { AixOptions, AixResult, AixSwarmOptions, SwarmPattern } from './aix';
+export * from './storage/adapter';
+import { kv } from './storage/adapter';
 
-// ─── SIMULATION: Parallel execution engine ────────────────────────────
-export { ParallelSim }                  from './parallel-sim';
-export type { SimAgent, SimOptions, SimResult, AgentOutcome } from './parallel-sim';
+import { NS, TTL, KEYS } from './storage/keys';
+export { NS, TTL, KEYS };
+export * from './registry';
+export * from './learning';
+export * from './gateway';
+export * from './security';
+export * from './memory-readable';
+export * from './dead-hand';
+export * from './channels';
+export * from './pets';
+export * from './pulse';
+export * from './economics';
+export * from './economics/BondingCurve';
+export * from './patterns';
+export * from './swarm/handlers';
+export * from './swarm/orchestrator';
+export * from './swarm/commands';
+export * from './swarm/factory';
+export * from './swarm/blocks';
+export * from './swarm/hierarchy';
 
-// ─── CONTROL PLANE: Gateway process lifecycle ───────────────────────
-export { GatewayManager }               from './gateway';
-export type { GatewayProcess, GatewayTask, GatewayResult, GatewayStatus } from './gateway';
+export default kv;
 
-// ─── EXECUTION ENGINE: ReAct loop ─────────────────────────────────
-export { AgentRuntimeEngine }           from './agent-runtime';
-export type { RuntimeResult }           from './agent-runtime';
-
-// ─── LLM PROVIDERS: OpenAI / Anthropic / Ollama / Mock ────────────────
-export { createDefaultRouter, MockProvider, LLMRouter } from './llm-provider';
-export type { LLMProvider, CompletionOptions, CompletionResponse } from './llm-provider';
-
-// ─── SWARM: Multi-agent coordination (lower-level) ──────────────────
-export { SwarmRouter }                  from './SwarmRouter';
-
-// ─── PHILOSOPHICAL ENGINES ──────────────────────────────────────
-export { CuriosityEngine }              from './curiosity-engine';
-export { ExpectationEngine }            from './expectation-engine';
-export { FailureLearning }              from './failure-learning';
-
-// ─── ROUTING: Constrained model selection ──────────────────────────
-export { ConstrainedRouter }            from './constrained-router';
-export type { Task, TaskConstraints }   from './constrained-router';
-
-// ─── SAFETY: Lineage + Trust ─────────────────────────────────────
-export { LineageRegistry }              from './lineage-registry';
-export { TrustChain }                   from './trust-chain';
-
-// ─── STORAGE: Redis adapter + key registry ────────────────────────
-export { kv }                           from './storage/adapter';
-export { KEYS, TTL }                    from './storage/keys';
-
-// ─── BUS: Event system ────────────────────────────────────────
-export { emit, subscribe, BUS_RINGS }  from './bus';
-
-// ─── MODELS: Performance database ───────────────────────────────
-export { ModelDatabase }               from './model-database';
-
-// ─── PETS: Mood-driven routing ──────────────────────────────────
-export { getPetState, getDynamicConstraints } from './pets';

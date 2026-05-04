@@ -1,9 +1,8 @@
-import React from 'react';
 "use client";
 
 import { Rocket } from "lucide-react";
 
-function Loading() {
+export default function Loading() {
   return (
     <div className="p-6 space-y-8 max-w-2xl animate-pulse">
       <div className="space-y-2">
@@ -29,7 +28,3 @@ function Loading() {
     </div>
   );
 }
-
-export default React.memo(Loading);
-
-Loading.displayName = 'Loading';

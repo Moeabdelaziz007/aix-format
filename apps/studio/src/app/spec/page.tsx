@@ -478,5 +478,3 @@ export default function SpecPage() {
     </div>
   );
 }
-
-function.displayName = 'function';

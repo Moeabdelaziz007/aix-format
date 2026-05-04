@@ -1,7 +1,8 @@
-import React from 'react';
 "use client";
 
-function Loading() {
+import { Shield } from "lucide-react";
+
+export default function Loading() {
   return (
     <div className="p-6 space-y-6 animate-pulse">
       <div className="space-y-2">
@@ -37,7 +38,3 @@ function Loading() {
     </div>
   );
 }
-
-export default React.memo(Loading);
-
-Loading.displayName = 'Loading';

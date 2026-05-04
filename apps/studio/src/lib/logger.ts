@@ -32,19 +32,19 @@ class Logger {
 
   debug(message: string, ...args: any[]) {
     if (this.shouldLog('debug')) {
-
+      console.debug(...this.format('debug', message, ...args));
     }
   }
 
   info(message: string, ...args: any[]) {
     if (this.shouldLog('info')) {
-
+      console.info(...this.format('info', message, ...args));
     }
   }
 
   warn(message: string, ...args: any[]) {
     if (this.shouldLog('warn')) {
-
+      console.warn(...this.format('warn', message, ...args));
     }
   }
 

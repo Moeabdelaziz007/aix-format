@@ -40,6 +40,7 @@ export interface PetConfig {
   accessories?: string[];
 }
 
+
 /**
  * RegistryEntry: Canonical + UI Overlays
  */
@@ -69,6 +70,7 @@ export interface AgentRecord {
   tasksCompleted?: number;
   manifest?: Manifest;
 }
+
 
 export type NormalizedAgent = AgentRecord & { isMock: boolean };
 

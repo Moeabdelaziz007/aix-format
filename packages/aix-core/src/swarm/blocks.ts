@@ -3,6 +3,7 @@ import { AgentBlock } from "../patterns";
 export class AuthBlock extends AgentBlock {
   id = 'auth-block';
   async execute(context: any) {
+    console.log("[Lego] AuthBlock validating session...");
     return { authenticated: true, user: context.userId };
   }
 }
@@ -10,6 +11,7 @@ export class AuthBlock extends AgentBlock {
 export class KYCBlock extends AgentBlock {
   id = 'kyc-block';
   async execute(context: any) {
+    console.log("[Lego] KYCBlock checking verification level...");
     return { verified: true, level: 2 };
   }
 }
@@ -17,6 +19,7 @@ export class KYCBlock extends AgentBlock {
 export class PayBlock extends AgentBlock {
   id = 'pay-block';
   async execute(context: any) {
+    console.log(`[Lego] PayBlock processing payment of ${context.amount}...`);
     return { success: true, txId: '0xabc' };
   }
 }

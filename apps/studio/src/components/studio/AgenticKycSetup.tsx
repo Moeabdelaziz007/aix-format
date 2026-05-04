@@ -7,7 +7,7 @@ import { PiUser } from "@/lib/types";
 
 // ─── Stable class maps — defined outside component, never recreated ───────────
 const stepActive   = "border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10";
-const stepInactive = "border-[var(--color-border)] bg-[var(--color-surface)]";
+const stepInactive = "border-[var(var(--color-border))] bg-[var(--color-surface)]";
 
 export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: PiUser }) {
   const [step, setStep] = useState(1);
@@ -51,32 +51,32 @@ export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: 
   }, []);
 
   return (
-    <div className="bg-[rgba(20,20,20,0.62)] rounded-2xl border border-[var(--color-glass-border)] p-6 ">
+    <div className="bg-[rgba(20,20,20,0.62)] rounded-2xl border border-[var(var(--color-border))] p-6 ">
       <div className="flex items-center gap-3 mb-6">
-        <ShieldCheck className="w-8 h-8 text-primary" />
+        <ShieldCheck className="w-8 h-8 text-[var(--color-primary)]" />
         <div>
-          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Agentic KYC Setup</h3>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Zero-code Pi Network Verification</p>
+          <h3 className="text-xl font-bold text-white">Agentic KYC Setup</h3>
+          <p className="text-sm text-[var(--color-on-surface-variant)]">Zero-code Pi Network Verification</p>
         </div>
       </div>
 
       <div className="space-y-6">
         {/* Step 1 */}
-        <div className={cn("p-4 border transition-all duration-300", step >= 1 ? stepActive : stepInactive)}>
+        <div className={cn("p-4 rounded-xl border transition-all duration-300", step >= 1 ? stepActive : stepInactive)}>
           <div className="flex items-center gap-4">
             <div className={cn(
-              "w-8 h-8 flex items-center justify-center text-xs font-black transition-colors",
-              step >= 2 ? "bg-primary text-white" : "bg-surface-container text-zinc-500"
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
+              step >= 2 ? "bg-[var(--color-primary)] text-black" : "bg-[var(--color-surface-container-high)] text-[var(--color-on-surface-variant)]"
             )}>1</div>
             <div>
-              <h4 className="text-[11px] font-black uppercase tracking-wider text-white">Initiate Agentic Request</h4>
-              <p className="text-[10px] text-zinc-400 mt-1">Our agent will automatically request a secure Pi KYC check.</p>
+              <h4 className="font-semibold text-white">Initiate Agentic Request</h4>
+              <p className="text-xs text-[var(--color-on-surface-variant)]">Our agent will automatically request a secure Pi KYC check.</p>
             </div>
           </div>
           {step === 1 && (
             <button
               onClick={startKyc}
-              className="mt-4 w-full btn btn-primary"
+              className="mt-4 w-full py-2 bg-[var(--color-primary)] hover:brightness-110 text-black rounded-lg text-sm font-semibold transition-all duration-150 active:scale-[0.98]"
             >
               Start KYC Agent
             </button>
@@ -84,36 +84,36 @@ export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: 
         </div>
 
         {/* Step 2 */}
-        <div className={cn("p-4 border transition-all duration-300", step >= 2 ? stepActive : stepInactive)}>
+        <div className={cn("p-4 rounded-xl border transition-all duration-300", step >= 2 ? stepActive : stepInactive)}>
           <div className="flex items-center gap-4">
             <Smartphone className={cn(
               "w-8 h-8 transition-colors",
-              step >= 2 ? "text-primary" : "text-zinc-700"
+              step >= 2 ? "text-[var(--color-primary)]" : "text-[var(--color-on-surface-faint)]"
             )} />
             <div>
-              <h4 className="text-[11px] font-black uppercase tracking-wider text-white">Pi Browser Verification</h4>
-              <p className="text-[10px] text-zinc-400 mt-1">
-                {step === 2 ? "WAITING FOR APPROVAL ON PI APP..." : "PLEASE OPEN PI BROWSER TO APPROVE."}
+              <h4 className="font-semibold text-white">Pi Browser Verification</h4>
+              <p className="text-xs text-[var(--color-on-surface-variant)]">
+                {step === 2 ? "Waiting for your approval on Pi App\u2026" : "Please open your Pi Browser app to approve."}
               </p>
             </div>
           </div>
         </div>
 
         {/* Step 3 */}
-        <div className={cn("p-4 border transition-all duration-300", step >= 3 ? stepActive : stepInactive)}>
+        <div className={cn("p-4 rounded-xl border transition-all duration-300", step >= 3 ? stepActive : stepInactive)}>
           <div className="flex items-center gap-4">
             <UserCheck className={cn(
               "w-8 h-8 transition-colors",
               step >= 4
-                ? "text-primary"
+                ? "text-[var(--color-primary)]"
                 : step === 3
-                ? "text-warning animate-pulse"
-                : "text-zinc-700"
+                ? "text-[var(--color-secondary)] animate-pulse"
+                : "text-[var(--color-on-surface-faint)]"
             )} />
             <div>
-              <h4 className="text-[11px] font-black uppercase tracking-wider text-white">AxiomID Generated</h4>
-              <p className="text-[10px] text-zinc-400 mt-1">
-                {step === 4 ? "DID SUCCESSFULLY ATTACHED TO AIX PAYLOAD." : "GENERATING CRYPTOGRAPHIC SIGNATURE..."}
+              <h4 className="font-semibold text-white">AxiomID Generated</h4>
+              <p className="text-xs text-[var(--color-on-surface-variant)]">
+                {step === 4 ? "DID successfully attached to AIX payload." : "Generating cryptographic signature\u2026"}
               </p>
             </div>
           </div>
@@ -122,15 +122,15 @@ export const AgenticKycSetup = memo(function AgenticKycSetup({ user }: { user?: 
 
       {step === 4 && (
         <div className="mt-6 space-y-3">
-          <div className="p-4 bg-primary/10 border border-primary/30">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 flex-shrink-0" />
-              Verified & Ready for Sovereign Network deployment
+          <div className="p-4 bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/40 rounded-lg">
+            <p className="text-sm text-[var(--color-primary)] flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 flex-shrink-0" />
+              Your AI agent is now KYC verified and ready to deploy to the Sovereign Network!
             </p>
           </div>
           <button
             onClick={resetKyc}
-            className="w-full btn btn-ghost border-white/10"
+            className="w-full py-2 rounded-lg border border-[var(var(--color-border))] text-sm text-[var(--color-on-surface-variant)] hover:text-white hover:border-white/20 transition-all"
           >
             Reset KYC
           </button>

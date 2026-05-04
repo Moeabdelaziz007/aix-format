@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from "framer-motion";
+import { Zap, TrendingUp, CheckCircle2 } from "lucide-react";
 
 const activities = [
   "Agent 'FinanceBot' just completed 1,247 tasks for 623π",

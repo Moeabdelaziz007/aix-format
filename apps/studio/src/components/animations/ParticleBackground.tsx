@@ -7,7 +7,7 @@ export function ParticleBackground() {
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; size: number; duration: number }>>([]);
 
   useEffect(() => {
-    const newParticles = Array.from({ length: 20 }, []).map((_, i) => ({
+    const newParticles = Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,

@@ -8,7 +8,7 @@ import { Badge } from "@/components/shared";
 
 const VoiceOrb = dynamic(
   () => import("@/components/studio/VoiceOrb").then(mod => mod.VoiceOrb),
-  { ssr: false, loading: () => <div className="w-64 h-64 animate-pulse bg-white/5 rounded-none" /> }
+  { ssr: false, loading: () => <div className="w-64 h-64 animate-pulse bg-white/5 rounded-full" /> }
 );
 
 export function HeroSection() {
@@ -26,9 +26,9 @@ export function HeroSection() {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="group glass-panel-heavy p-8 rounded-sm border-white/5  hover: transition-all flex flex-col gap-6 cursor-pointer"
+          className="group card p-8 rounded-sm border-white/5  hover: transition-all flex flex-col gap-6 cursor-pointer"
         >
-          <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
             <Search size={28} />
           </div>
           <div className="space-y-2">
@@ -37,7 +37,7 @@ export function HeroSection() {
           </div>
           <Link href="/marketplace" className="mt-4 flex items-center justify-between group-hover:text-primary transition-colors">
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Explore Marketplace</span>
-            <div className="w-10 h-10 rounded-none border border-white/10 flex items-center justify-center group-hover:border-primary/40">
+            <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-primary/40">
               <Star size={16} />
             </div>
           </Link>
@@ -47,7 +47,7 @@ export function HeroSection() {
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="group glass-panel-heavy p-8 rounded-sm border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.04] transition-all flex flex-col gap-6 cursor-pointer"
+          className="group card p-8 rounded-sm border-primary/20 bg-primary/[0.02] hover:bg-primary/[0.04] transition-all flex flex-col gap-6 cursor-pointer"
         >
           <div className="w-14 h-14 rounded-2xl bg-primary text-black flex items-center justify-center [0_0_20px_rgba(57,255,20,0.3)]">
             <Rocket size={28} />
@@ -58,7 +58,7 @@ export function HeroSection() {
           </div>
           <Link href="/builder" className="mt-4 flex items-center justify-between group-hover:text-primary transition-colors">
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Launch AIX Studio</span>
-            <div className="w-10 h-10 rounded-none border border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all">
+            <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all">
               <ShieldCheck size={16} />
             </div>
           </Link>
@@ -115,8 +115,8 @@ export function HeroSection() {
                  <span className="font-black text-white tracking-tighter text-xl">Pi Network</span>
               </div>
               <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 rounded-none border-2 border-white flex items-center justify-center font-black text-[10px]">ID</div>
-                 <span className="font-black text-white tracking-tighter text-xl uppercase">AxiomID</span>
+                 <div className="w-8 h-8 rounded-full border-4 border-white" />
+                 <span className="font-black text-white tracking-tighter text-xl">AxiomID</span>
               </div>
               <div className="flex items-center gap-3">
                  <ShieldCheck size={28} className="text-white" />

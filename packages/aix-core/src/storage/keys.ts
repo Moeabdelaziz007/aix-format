@@ -1,5 +1,5 @@
 /**
- * AIX Storage Keys & TTL Configuration (v1.3.4)
+ * AIX Storage Keys & TTL Configuration (v1.3.3)
  * Centralized registry for all Redis namespaces and their expiry policies.
  */
 
@@ -22,7 +22,7 @@ export const NS = {
   WIZARD_SESSION: 'aix:wizard:session', // aix:wizard:session:{sessionId}
   
   // Agent Intelligence & Learning (Hermes Layers)
-  MEMORY_SESSION: 'aix:mem:sess',    // Layer 1: Session (24h)
+  MEMORY_SESSION: 'aix:mem:sess',   // Layer 1: Session (24h)
   MEMORY_SKILL: 'aix:mem:skill',     // Layer 2: Learned Skills (Permanent)
   MEMORY_CONTEXT: 'aix:mem:ctx',     // Layer 3: Task Context (Per task)
   MEMORY_EPISODIC: 'aix:mem:epi',    // Layer 4: Long-term Patterns (Permanent)
@@ -32,9 +32,6 @@ export const NS = {
   
   // Dead Hand Protocol (Autonomous Safety)
   DEAD_HAND: 'aix:deadhand',        // Status, heartbeats, incidents
-
-  // Nervous System Bus
-  PULSE: 'aix:pulse',               // aix:pulse:global (ring-buffer, 100 events)
   
   SKILLS: 'aix:skills',         
   INVOKE: 'aix:invoke',
@@ -43,108 +40,47 @@ export const NS = {
 
 /** Helper functions for key generation to ensure consistency */
 export const KEYS = {
-  registry:  (agentId: string)  => `agent:${agentId}`,
-  analytics: (agentId: string)  => `agent:${agentId}:analytics`,
-  identity:  (userId: string)   => `user:${userId}:identity`,
-  economics: (agentId: string)  => `agent:${agentId}:economics`,
-  session:   (uid: string)      => `aix:sessions:${uid}`,
-  mcpQuota:  (tenantId: string) => `aix:mcp:quota:${tenantId}`,
+  registry: (agentId: string) => `agent:${agentId}`,
+  analytics: (agentId: string) => `agent:${agentId}:analytics`,
+  identity: (userId: string) => `user:${userId}:identity`,
+  economics: (agentId: string) => `agent:${agentId}:economics`,
+  session: (uid: string) => `aix:sessions:${uid}`,
+  mcpQuota: (tenantId: string) => `aix:mcp:quota:${tenantId}`,
   wizardSession: (sessionId: string) => `wizard:session:${sessionId}`,
   
   // Intelligence Layers
-  memory:      (agentId: string)             => `agent:${agentId}:memory`,
-  memSession:  (agentId: string, sid: string) => `agent:${agentId}:mem:sess:${sid}`,
-  memSkill:    (agentId: string)             => `agent:${agentId}:mem:skill`,
-  memContext:  (agentId: string, taskId: string) => `agent:${agentId}:mem:ctx:${taskId}`,
-  memEpisodic: (agentId: string)             => `agent:${agentId}:mem:epi`,
+  memory: (agentId: string) => `agent:${agentId}:memory`,
+  memSession: (agentId: string, sid: string) => `agent:${agentId}:mem:sess:${sid}`,
+  memSkill: (agentId: string) => `agent:${agentId}:mem:skill`,
+  memContext: (agentId: string, taskId: string) => `agent:${agentId}:mem:ctx:${taskId}`,
+  memEpisodic: (agentId: string) => `agent:${agentId}:mem:epi`,
   
   // Gateway Logic
   gateway: (processId: string) => `aix:gateway:${processId}`,
   
   // Dead Hand Protocol
   heartbeat: (agentId: string) => `agent:${agentId}:heartbeat`,
-  status:    (agentId: string) => `agent:${agentId}:status`,
-  frozen:    (agentId: string) => `agent:${agentId}:frozen`,
-  incident:  (agentId: string) => `agent:${agentId}:incident`,
-  stats:     (agentId: string) => `agent:${agentId}:stats`,
+  status: (agentId: string) => `agent:${agentId}:status`,
+  frozen: (agentId: string) => `agent:${agentId}:frozen`,
+  incident: (agentId: string) => `agent:${agentId}:incident`,
+  stats: (agentId: string) => `agent:${agentId}:stats`,
   
-  skill:  (agentId: string)  => `agent:${agentId}:skills`, 
-  invoke: (traceId: string)  => `agent:${traceId}:invoke`,
+  skill: (agentId: string) => `agent:${agentId}:skills`,
+  invoke: (traceId: string) => `agent:${traceId}:invoke`,
   
   // Ghost Agent Pattern
   shadow: (processId: string) => `aix:shadow:${processId}`,
-  
-  // 🧬 META-COMPRESSION: Unified Key Registry (88 keys compressed)
-  // Agent-scoped keys
-  agentSessions:      (agentId: string) => `agent:${agentId}:sessions`,
-  agentSkills:        (agentId: string) => `agent:${agentId}:skills`,
-  agentSkillDetail:   (agentId: string, hash: string) => `agent:${agentId}:skill:${hash}`,
-  agentExpectation:   (agentId: string, taskId: string) => `agent:${agentId}:expectation:${taskId}`,
-  agentFailureStats:  (agentId: string) => `agent:${agentId}:failure_stats`,
-  agentFailures:      (agentId: string) => `agent:${agentId}:failures`,
-  agentFailurePatterns: (agentId: string) => `agent:${agentId}:failure_patterns`,
-  agentFailurePattern: (agentId: string, hash: string) => `agent:${agentId}:pattern:${hash}`,
-  agentRecentActions: (agentId: string) => `agent:${agentId}:recent_actions`,
-  agentChannelsTelegram: (agentId: string) => `agent:${agentId}:channels:telegram`,
-  agentChannelsWhatsapp: (agentId: string) => `agent:${agentId}:channels:whatsapp`,
-  agentCuriosityScore: (agentId: string) => `agent:${agentId}:curiosity_score`,
-  agentActionUsage:   (agentId: string, actionId: string) => `agent:${agentId}:action:${actionId}:usage`,
-  agentExplorations:  (agentId: string) => `agent:${agentId}:explorations`,
-  agentHappinessHistory: (agentId: string) => `agent:${agentId}:happiness_history`,
-  agentExpectationCalibration: (agentId: string) => `agent:${agentId}:expectation_calibration`,
-  agentPetState:      (agentId: string) => `agent:${agentId}:pet_state`,
-  agentModelMetrics:  (agentId: string, modelId: string) => `agent:${agentId}:model:${modelId}:metrics`,
-  agentTrustScore:    (agentId: string) => `agent:${agentId}:trust_score`,
-  agentTrustHistory:  (agentId: string) => `agent:${agentId}:trust_history`,
-  agentResonanceProfile: (agentId: string) => `agent:${agentId}:resonance_profile`,
-  agentResonanceTaskTypes: (agentId: string) => `resonance:agent:${agentId}:task_types`,
-  
-  // AIX-scoped keys
-  aixActionResult:    (agentId: string) => `aix:action:result:${agentId}`,
-  aixEvents:          (channel: string) => `aix:events:${channel}`,
-  aixEconomicsLedger: (agentId: string) => `aix:economics:ledger:${agentId}`,
-  aixEconomicsReinvestment: (agentId: string) => `aix:economics:reinvestment:${agentId}`,
-  aixEconomicsStake:  (agentId: string) => `aix:economics:stake:${agentId}`,
-  aixLockAgent:       (agentId: string) => `aix:lock:agent:${agentId}`,
-  aixModelStats:      (modelId: string) => `aix:model:${modelId}:stats`,
-  aixModelCalls:      (modelId: string) => `aix:model:${modelId}:calls`,
-  aixP2PNode:         (nodeId: string) => `aix:p2p:node:${nodeId}`,
-  aixP2PRouting:      (fromId: string, toId: string) => `aix:p2p:routing:${fromId}:${toId}`,
-  aixSwarmTopology:   () => `aix:swarm:topology`,
-  aixSwarmNodes:      () => `aix:swarm:nodes`,
-  agentCalibration:   (agentId: string) => `agent:${agentId}:calibration`,
-  agentCurrentMood:   (agentId: string) => `agent:${agentId}:current_mood`,
-  agentFreq:          (agentId: string) => `agent:${agentId}:freq`,
-  agentExp:           (agentId: string) => `agent:${agentId}:exp`,
-  agentExplorationHistory: (agentId: string) => `agent:${agentId}:exploration_history`,
-  agentSkillCombo:     (agentId: string, hash: string) => `agent:${agentId}:skill_combo:${hash}`,
-  agentSkillCombos:    (agentId: string) => `agent:${agentId}:skill_combos`,
-  agentActionCount:    (agentId: string, action: string) => `agent:${agentId}:action_count:${action}`,
-  agentManifest:       (agentId: string) => `agent:${agentId}:manifest`,
-  aixEconomicsTotalStake: (agentId: string) => `aix:economics:total_stake:${agentId}`,
-  aixCompressionProfile: (taskType: string) => `aix:compression:profile:${taskType}`,
-  
-  // 🧬 Lineage Registry (Darwin in Software - PNAS 2025)
-  lineageNode:        (id: string) => `aix:lineage:node:${id}`,
-  lineageGenesis:     () => `aix:lineage:genesis`,
-  lineageByType:      (type: string) => `aix:lineage:type:${type}`,
-  lineageByGeneration: (gen: number) => `aix:lineage:generation:${gen}`,
-  lineageChildren:    (parentId: string) => `aix:lineage:children:${parentId}`,
-  lineageFlagged:     () => `aix:lineage:flagged`,
-  lineageRecalled:    () => `aix:lineage:recalled`,
-  agentLastActivity:  (agentId: string) => `agent:${agentId}:last_activity`,
-  aixSwarmEdges:      () => `aix:swarm:edges`,
-  ghost:  (agentId: string)   => `agent:${agentId}:ghost`
+  ghost: (agentId: string) => `agent:${agentId}:ghost`
 };
 
 export const TTL = {
   SESSIONS: 60 * 60 * 24,       // 24 Hours
-  REGISTRY: 0,                  // Permanent
-  ABOM: 60 * 60 * 24 * 30,      // 30 Days
-  MCP: 60,                      // 60 Seconds
-  METRICS: 60 * 60 * 24 * 90,   // 90 Days
-  SCAN: 60 * 60 * 24 * 7,       // 7 Days
-  HEALTH: 300,                   // 5 Minutes
+  REGISTRY: 0,                 // Permanent
+  ABOM: 60 * 60 * 24 * 30,     // 30 Days
+  MCP: 60,                     // 60 Seconds
+  METRICS: 60 * 60 * 24 * 90,  // 90 Days
+  SCAN: 60 * 60 * 24 * 7,      // 7 Days
+  HEALTH: 300,                  // 5 Minutes
   
   // Intelligence TTLs
   MEM_SESSION: 60 * 60 * 24,    // 24 Hours
@@ -155,15 +91,12 @@ export const TTL = {
   GATEWAY: 60 * 60 * 2,         // 2 Hours
   
   // Dead Hand
-  HEARTBEAT: 90,                // 90 Seconds (Dead Hand trigger window)
-  INCIDENT: 60 * 60 * 24 * 30, // 30 Days (Forensic window)
+  HEARTBEAT: 90,                // 90 Seconds (Dead Hand window)
+  INCIDENT: 60 * 60 * 24 * 30,  // 30 Days (Forensic window)
   
-  // MCP Quota (was missing — caused compile error in mcp-gateway)
-  QUOTA_WINDOW: 60,             // 60 Seconds per rate-limit window
-
-  MEMORY: 60 * 60 * 24 * 30,   // 30 Days
-  SKILLS: 0,                   // Permanent
-  INVOKE: 60 * 60,              // 1 Hour
+  MEMORY: 60 * 60 * 24 * 30,    // 30 Days
+  SKILLS: 0,                    // Permanent
+  INVOKE: 60 * 60,               // 1 Hour
   SHADOW: 60 * 60 * 24         // 24 Hours
 } as const;
 

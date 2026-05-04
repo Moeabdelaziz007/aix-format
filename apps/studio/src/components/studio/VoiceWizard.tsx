@@ -3,8 +3,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, X, Loader2, Volume2, Sparkles, CheckCircle2 } from "lucide-react";
 import { useVoiceWizard } from "@/hooks/useVoiceWizard";
-
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * AIX Voice Setup Wizard UI
@@ -37,7 +38,7 @@ export function VoiceWizard({
       exit={{ opacity: 0, scale: 0.95 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 "
     >
-      <Card className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 ">
+      <div className="card" className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/50">
           <div className="flex items-center gap-3">

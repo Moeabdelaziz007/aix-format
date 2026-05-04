@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { useRouter } from 'next/navigation';
-import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -25,7 +24,7 @@ import {
 import { Badge } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
-function MissionControlContent() {
+export default function MissionControlPage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
@@ -194,13 +193,3 @@ function MissionControlContent() {
     </div>
   );
 }
-
-export default function MissionControlPage() {
-  return (
-    <ErrorBoundary boundaryName="MissionControlPage">
-      <MissionControlContent />
-    </ErrorBoundary>
-  );
-}
-
-function.displayName = 'function';

@@ -157,5 +157,3 @@ export default function DiscoveryPreview({ agentDid, agentName }: Props) {
     </div>
   );
 }
-
-function.displayName = 'function';

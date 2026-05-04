@@ -1,5 +1,4 @@
-import { kv } from './storage/adapter';
-import { KEYS } from './storage/keys';
+import { kv, KEYS } from './index';
 import { ArbitrageStrategy, Economics } from '@aix-types';
 import { IStrategy } from './patterns';
 
@@ -47,14 +46,14 @@ export class RevenueRouter {
   }
 
   static async recordArbitrage(agentId: string, strategy: ArbitrageStrategy, yieldAmount: number) {
-    const key = KEYS.aixEconomicsLedger(agentId);
+    const key = `aix:economics:ledger:${agentId}`;
     await kv.lpush(key, { strategy, yieldAmount, timestamp: Date.now() });
   }
 }
 
 export class SovereignLoopManager {
   static async triggerReinvestment(agentId: string, amount: number) {
-    await kv.incrby(KEYS.aixEconomicsReinvestment(agentId), Math.floor(amount));
+    await kv.incrby(`aix:economics:reinvestment:${agentId}`, Math.floor(amount));
   }
 }
 
@@ -68,8 +67,8 @@ export interface AgentStake {
 export async function stakeAgent(agentId: string, stakerAddress: string, amount: number, lockDurationMs: number = 0): Promise<AgentStake> {
   const unlocksAt = Date.now() + lockDurationMs;
   const stakeObj: AgentStake = { agentId, stakedAmount: amount, stakerAddress, unlocksAt };
-  await kv.lpush(KEYS.aixEconomicsStake(agentId), stakeObj);
-  await kv.incrby(KEYS.aixEconomicsTotalStake(agentId), Math.floor(amount));
+  await kv.lpush(`aix:economics:stake:${agentId}`, stakeObj);
+  await kv.incrby(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
   return stakeObj;
 }
 
@@ -79,11 +78,11 @@ export async function unstakeAgent(agentId: string, stakerAddress: string, amoun
 
   // In a real system, we'd find the specific stakes for the stakerAddress and handle unlocksAt.
   // For this basic mechanism, we just decrement the total stake.
-  await kv.decrby(KEYS.aixEconomicsTotalStake(agentId), Math.floor(amount));
+  await kv.decrby(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
   return true;
 }
 
 export async function getTotalAgentStake(agentId: string): Promise<number> {
-  const val = await kv.get(KEYS.aixEconomicsTotalStake(agentId));
+  const val = await kv.get(`aix:economics:total_stake:${agentId}`);
   return typeof val === 'number' ? val : (val ? parseInt(val as string, 10) : 0);
 }

@@ -1,5 +1,4 @@
-import { kv } from './storage/adapter';
-import { KEYS } from './storage/keys';
+import { kv, KEYS } from './index';
 import { createHash } from 'crypto';
 
 /**
@@ -47,6 +46,7 @@ export async function recordSuccessfulProcedure(
   await kv.lpush(key, JSON.stringify(procedure));
   await kv.ltrim(key, 0, 19);
   
+  console.log(`[Hermes] Learned new procedure for ${agentId}: "${goal}"`);
 }
 
 /**
@@ -65,8 +65,8 @@ export async function extractSkillFromFeedback(
     .digest('hex')
     .slice(0, 16);
 
-  const skillsListKey = KEYS.agentSkills(agentId);
-  const skillDetailKey = KEYS.agentSkillDetail(agentId, hash);
+  const skillsListKey = `agent:${agentId}:skills`;
+  const skillDetailKey = `agent:${agentId}:skill:${hash}`;
 
   // 2. Check if skill already exists
   const existing = await kv.get<FeedbackSkill>(skillDetailKey);
@@ -88,6 +88,7 @@ export async function extractSkillFromFeedback(
     await kv.sadd(skillsListKey, hash);
   }
 
+  console.log(`[Hermes] Extracted new skill (${hash}) for agent ${agentId}`);
   return hash;
 }
 
@@ -104,13 +105,13 @@ export async function getLearnedProcedures(agentId: string): Promise<LearnedProc
  * Retrieves all feedback-driven skills for an agent.
  */
 export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[]> {
-  const skillsListKey = KEYS.agentSkills(agentId);
+  const skillsListKey = `agent:${agentId}:skills`;
   const hashes = await kv.smembers<string>(skillsListKey);
   
   if (!hashes.length) return [];
 
   const skills = await Promise.all(
-    hashes.map(hash => kv.get<FeedbackSkill>(KEYS.agentSkillDetail(agentId, hash)))
+    hashes.map(hash => kv.get<FeedbackSkill>(`agent:${agentId}:skill:${hash}`))
   );
 
   return skills.filter((s): s is FeedbackSkill => s !== null);
@@ -123,9 +124,4 @@ export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[
 export async function updateEpisodicMemory(agentId: string, pattern: string): Promise<void> {
   const key = KEYS.memEpisodic(agentId);
   await kv.sadd(key, pattern);
-}
-
-export async function getAgentMemory(agentId: string): Promise<string[]> {
-    const key = KEYS.memEpisodic(agentId);
-    return await kv.smembers<string>(key);
 }

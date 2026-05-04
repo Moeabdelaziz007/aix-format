@@ -15,7 +15,7 @@ import {
   Info
 } from "lucide-react";
 
-function DesignSystemPage() {
+export default function DesignSystemPage() {
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
       <Navbar />
@@ -184,7 +184,3 @@ function ColorSwatch({ name, color }: { name: string; color: string }) {
     </div>
   );
 }
-
-export default React.memo(DesignSystemPage);
-
-DesignSystemPage.displayName = 'DesignSystemPage';

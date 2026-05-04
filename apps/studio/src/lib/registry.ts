@@ -14,7 +14,7 @@ export async function getRegistry(): Promise<RegistryEntry[]> {
     if (!res.ok) throw new Error("Failed to fetch registry");
     return await res.json();
   } catch (error) {
-
+    console.warn("[Registry] Client fetch failed:", error);
     return [];
   }
 }

@@ -37,7 +37,7 @@ export class PulseReasoner {
     const { text } = await generateText({
       model: google('gemini-2.0-flash'),
       system: systemPrompt,
-      messages: process.history.map(h => ({ role: h.role as unknown, content: h.content }))
+      messages: process.history.map(h => ({ role: h.role as any, content: h.content }))
     });
 
     return this.parseResponse(text);

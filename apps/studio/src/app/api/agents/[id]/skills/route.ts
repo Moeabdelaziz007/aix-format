@@ -16,7 +16,7 @@ export async function GET(
   try {
     const skills = await kv.smembers(AGENT_SKILLS_KEY(params.id));
     return Response.json({ agentId: params.id, skills });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 });
   }
 }
@@ -31,7 +31,7 @@ export async function POST(
     
     await kv.sadd(AGENT_SKILLS_KEY(params.id), skillId);
     return Response.json({ attached: skillId });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 });
   }
 }
@@ -46,7 +46,7 @@ export async function DELETE(
     
     await kv.srem(AGENT_SKILLS_KEY(params.id), skillId);
     return Response.json({ detached: skillId });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 });
   }
 }

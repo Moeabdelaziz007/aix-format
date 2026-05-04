@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRegistry } from "@/lib/registry";
-import { KYATier, MarketplaceItem } from "@/lib/marketplace-api";
+import { MarketplaceItem } from "@/lib/marketplace-api";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("q") || "";
-    const typeParam = searchParams.get("type") || "all";
-    const type = normalizeMarketplaceType(typeParam);
+    const type = searchParams.get("type") || "all";
 
     const entries = await getRegistry();
     
@@ -21,7 +20,13 @@ export async function GET(req: NextRequest) {
         name: "Sovereign Pioneer",
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.did}`,
       },
-      kyaTier: mapKycTier(entry.kyc_tier),
+      kyaTier: (() => {
+        if (typeof entry.kyc_tier === 'number') return entry.kyc_tier;
+        if (entry.kyc_tier === "sovereign") return 3;
+        if (entry.kyc_tier === "full" || entry.kyc_tier === "verified") return 2;
+        if (entry.kyc_tier === "basic") return 1;
+        return 0;
+      })() as any,
       trustScore: 90,
       rating: 4.5,
       reviewCount: 0,
@@ -53,22 +58,4 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function normalizeMarketplaceType(value: string): MarketplaceItem['type'] | "all" {
-  const allowed = new Set<MarketplaceItem['type']>(['agent', 'skill', 'mcp', 'plugin', 'api']);
-  return allowed.has(value as MarketplaceItem['type']) ? (value as MarketplaceItem['type']) : "all";
-}
-
-function mapKycTier(value: unknown): KYATier {
-  if (typeof value === 'number') {
-    if (value >= 4) return 4;
-    if (value <= 0) return 0;
-    return Math.floor(value) as KYATier;
-  }
-
-  if (value === 'sovereign') return 3;
-  if (value === 'full' || value === 'verified') return 2;
-  if (value === 'basic') return 1;
-  return 0;
 }

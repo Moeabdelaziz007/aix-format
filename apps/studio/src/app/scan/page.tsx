@@ -28,7 +28,7 @@ export default function ScanPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Scan failed');
       setReport(data);
-    } catch (error: unknown) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -208,7 +208,7 @@ export default function ScanPage() {
                       <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-full text-gray-400 font-mono">{report.risks.length}</span>
                     </div>
                     <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                      {report.risks.length > 0 ? report.risks.map((risk: { severity: string; description: string }, i: number) => (
+                      {report.risks.length > 0 ? report.risks.map((risk: any, i: number) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, x: -10 }}
@@ -250,5 +250,3 @@ export default function ScanPage() {
     </div>
   );
 }
-
-function.displayName = 'function';

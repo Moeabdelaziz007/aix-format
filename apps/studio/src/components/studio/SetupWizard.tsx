@@ -92,7 +92,7 @@ export function SetupWizard() {
         setFile(updated);
       }
     } catch (err) {
-
+      console.warn("API unavailable, demo fallback:", err);
     } finally {
       setIsSigning(false);
       setIsKycModalOpen(false);
@@ -109,7 +109,7 @@ export function SetupWizard() {
 
   return (
     <>
-      <aside className="w-full lg:w-[450px] flex-shrink-0 glass-panel rounded-sm p-6 flex flex-col h-[calc(100vh-120px)] sticky top-24 overflow-hidden relative">
+      <aside className="w-full lg:w-[450px] flex-shrink-0 card rounded-sm p-6 flex flex-col h-[calc(100vh-120px)] sticky top-24 overflow-hidden relative">
         {/* Progress bar */}
         <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-surface-container-high)]">
           <motion.div

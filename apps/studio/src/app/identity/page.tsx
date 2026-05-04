@@ -1,279 +1,226 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from 'react';
+import { Navbar } from '@/components/layout/Navbar';
+import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
+import { Badge, Typography } from '@/components/shared';
 import {
   ShieldCheck,
   Key,
-  History,
-  Cpu,
-  ShieldAlert,
-  ArrowRight,
-  ExternalLink,
+  Fingerprint,
   Lock,
-  Wallet
-} from "lucide-react";
-import { Navbar } from "@/components/layout/Navbar";
-import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
-import { DIDCard } from "@/components/studio/DIDCard";
-import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
-import { cn } from "@/lib/utils";
+  UserCheck,
+  Globe,
+  ArrowUpRight,
+  ShieldAlert,
+  History,
+  FileCode,
+  QrCode,
+  Zap,
+  CheckCircle2,
+  Loader2
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
-const IDENTITY_FEATURES = [
-  {
-    icon: <Lock className="w-5 h-5" />,
-    title: "Zero-Knowledge Proofs",
-    description: "Verify your identity without revealing sensitive underlying data.",
-    status: "Active"
-  },
-  {
-    icon: <Key className="w-5 h-5" />,
-    title: "Key Management",
-    description: "Securely rotate and manage your cryptographic signing keys.",
-    status: "Locked"
-  },
-  {
-    icon: <History className="w-5 h-5" />,
-    title: "Audit Trail",
-    description: "Immutable history of all identity claims and authorizations.",
-    status: "Active"
-  }
-];
+export default function IdentityManagerPage() {
+   const [kycStatus, setKycStatus] = useState('Tier 2 (Verified)');
+   const [isClaiming, setIsClaiming] = useState(false);
+   const [domainStatus, setDomainStatus] = useState<'pending' | 'active'>('pending');
 
-export default function IdentityPage() {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [piUser, setPiUser] = useState<{ username: string; uid: string } | null>(null);
-  const [authError, setAuthError] = useState<string | null>(null);
+   const handleClaimDomain = async () => {
+      setIsClaiming(true);
+      toast.info("Connecting to Pi Network...", {
+         description: "Initiating domain ownership claim for aix-format.app"
+      });
 
-  const handlePiConnect = async () => {
-    setIsConnecting(true);
-    setAuthError(null);
-    try {
-      if (typeof window !== "undefined" && window.Pi) {
-        window.Pi.init({ version: "2.0", sandbox: process.env.NODE_ENV !== "production" });
-        const authResult = await window.Pi.authenticate(["username", "payments"], (payment: unknown) => {
+      // Simulate Pi SDK interaction
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-        });
-        setPiUser(authResult.user);
-      } else {
-        // Fallback for demo/development if Pi SDK not loaded
-        await new Promise(r => setTimeout(r, 1000));
-        setPiUser({
-          username: "Pioneer_Dev",
-          uid: "dev_" + Math.random().toString(36).slice(2, 8)
-        });
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Authentication failed";
-      setAuthError(msg);
-      setTimeout(() => setAuthError(null), 4000);
-    } finally {
-      setIsConnecting(false);
-    }
-  };
+      setDomainStatus('active');
+      setIsClaiming(false);
+      toast.success("Domain Claimed!", {
+         description: "AXIOM DNA has successfully verified domain ownership."
+      });
+   };
 
-  // Mock vs Real data
-  const didProps = piUser ? {
-    did: `did:pi:axiom:${piUser.uid}`,
-    publicKey: "axm1" + piUser.uid + "000000000000000000",
-    kycTier: 1 as const,
-    verified: true,
-    username: piUser.username,
-  } : {
-    did: "did:pi:axiom:0x000...demo",
-    publicKey: "axm1demo000000000000000000000000",
-    kycTier: 0 as const,
-    verified: false,
-  };
+  const kycTiers = [
+    { level: 'Tier 0', label: 'Unverified', status: 'Incomplete', color: 'zinc' },
+    { level: 'Tier 1', label: 'Basic KYC', status: 'Verified', color: 'emerald' },
+    { level: 'Tier 2', label: 'Advanced KYC', status: 'Verified', color: 'primary' },
+    { level: 'Tier 3', label: 'Institutional', status: 'Pending', color: 'amber' },
+  ];
 
   return (
-    <ErrorBoundary>
-    <div className="min-h-screen bg-[#050507] text-[#e4e4e8] font-body selection:bg-[#00dbe9]/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--color-background)]">
       <Navbar />
-      <SovereignStatusBar />
 
-      <main className="max-w-[1400px] mx-auto px-6 py-12 relative">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#00dbe9]/5 blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#d2bbff]/5 blur-[120px] rounded-full pointer-events-none" />
+      <main className="max-w-7xl mx-auto px-6 pt-32 pb-20 space-y-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="space-y-1">
+             <h1 className="text-4xl font-extrabold text-white tracking-tight italic uppercase flex items-center gap-4">
+                Identity Manager
+                <Badge variant="outline" className="text-[10px] font-black border-primary/20 text-primary uppercase italic tracking-widest bg-primary/5">AxiomID did:axiom</Badge>
+             </h1>
+             <p className="text-[var(--color-on-surface-variant)] text-sm">Manage your sovereign DID, KYC tiers, and cryptographic signing keys.</p>
+          </div>
+          <button className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest hover:scale-[1.02] transition-all">
+             <QrCode size={18} /> Reveal AxiomID QR
+          </button>
+        </div>
 
-        <div className="flex flex-col lg:flex-row gap-12 relative z-10">
-          {/* Left Side: Hero & DID Card */}
-          <section className="flex-1 space-y-10">
-            <div className="space-y-4">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00dbe9]/10 border border-[#00dbe9]/20 text-[#00dbe9] text-[10px] font-bold uppercase tracking-widest"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Sovereign Identity Layer
-              </motion.div>
-              <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-4xl lg:text-5xl font-display font-bold text-white tracking-tight leading-tight"
-              >
-                Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00dbe9] to-[#d2bbff]">AxiomID</span> Control Plane
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-lg text-[#8888a0] max-w-xl"
-              >
-                Manage your Decentralized Identifier (DID), manage cryptographic keys, and authorize AI agents to act on your behalf across the Sovereign Network.
-              </motion.p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+           {/* DID Card */}
+           <div className="lg:col-span-8 card p-10 rounded-[3rem] border-white/5 bg-black/40 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                 <Fingerprint size={200} className="text-primary" />
+              </div>
 
-              {!piUser && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <button
-                    onClick={handlePiConnect}
-                    disabled={isConnecting}
-                    className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#00dbe9] hover:bg-[#00c5d2] text-black font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_20px_rgba(0,219,233,0.2)] disabled:opacity-50 disabled:hover:scale-100"
-                  >
-                    {isConnecting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-t-transparent border-black rounded-full animate-spin" />
-                        Connecting Pi...
-                      </>
-                    ) : (
-                      <>
-                        <Wallet className="w-5 h-5" />
-                        Connect Pi Identity
-                      </>
-                    )}
-                  </button>
-                  {authError && <p className="text-red-400 mt-2 text-sm">{authError}</p>}
-                </motion.div>
-              )}
-            </div>
-
-            {isConnecting ? (
-               <div className="max-w-xl rounded-2xl border border-white/[0.08] bg-[#0c101c]/60 p-6 h-[250px] animate-pulse">
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white/10" />
-                      <div>
-                        <div className="w-32 h-5 bg-white/10 rounded mb-2" />
-                        <div className="w-20 h-3 bg-white/10 rounded" />
-                      </div>
+              <div className="space-y-8">
+                 <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center border border-primary/20">
+                       <UserCheck className="text-primary" size={32} />
                     </div>
-                    <div className="w-20 h-6 bg-white/10 rounded-full" />
-                  </div>
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                       <div className="w-32 h-3 bg-white/10 rounded" />
-                       <div className="w-full h-10 bg-white/10 rounded-lg" />
+                    <div>
+                       <div className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Primary Sovereign Identity</div>
+                       <div className="text-2xl font-black text-white italic tracking-tight">Pioneer_Abdelaziz.did</div>
                     </div>
-                    <div className="space-y-2">
-                       <div className="w-24 h-3 bg-white/10 rounded" />
-                       <div className="w-full h-10 bg-white/10 rounded-lg" />
+                 </div>
+
+                 <div className="space-y-4">
+                    <div className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Public Identifier (DID)</div>
+                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                       <code className="text-xs text-zinc-400 font-mono flex-1">did:axiom:axiomid.app:8b5cf6...ec4899</code>
+                       <button className="text-primary text-[10px] font-black uppercase tracking-widest hover:underline">Copy</button>
                     </div>
-                  </div>
-               </div>
-            ) : (
-              <DIDCard
-                {...didProps}
-                className="max-w-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-              />
-            )}
+                 </div>
 
-            {piUser && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-xl"
-              >
-                <AgenticKycSetup />
-              </motion.div>
-            )}
+                 <div className="grid grid-cols-2 gap-6 pt-4">
+                    <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 space-y-2">
+                       <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Authored Agents</div>
+                       <div className="text-2xl font-black text-white italic">14</div>
+                    </div>
+                    <div className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 space-y-2">
+                       <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Total Signatures</div>
+                       <div className="text-2xl font-black text-white italic">1,284</div>
+                    </div>
+                 </div>
+              </div>
+           </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
-              <button className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
-                Manage Keys
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              <button className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
-                Export Identity
-                <ExternalLink className="w-4 h-4" />
-              </button>
-            </div>
-          </section>
+           {/* KYC Tiers */}
+           <div className="lg:col-span-4 card p-8 rounded-[3rem] border-white/5 bg-black/40 space-y-8">
+              <div className="flex items-center justify-between">
+                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-3">
+                    <ShieldCheck className="text-emerald-400" size={18} />
+                    KYC Status
+                 </h3>
+                 <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 italic">Verified</Badge>
+              </div>
 
-          {/* Right Side: Features & Stats */}
-          <section className="w-full lg:w-[450px] space-y-6">
-            <div className="glass-panel rounded-2xl p-6 border-white/[0.08] space-y-6">
-              <h3 className="text-white font-bold flex items-center gap-2">
-                <Cpu className="w-5 h-5 text-[#d2bbff]" />
-                Identity Security
-              </h3>
-              
-              <div className="space-y-4">
-                {IDENTITY_FEATURES.map((feature, idx) => (
-                  <div key={idx} className="group p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 transition-all">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="p-2 rounded-lg bg-white/5 text-[#8888a0] group-hover:text-white transition-colors">
-                        {feature.icon}
+              <div className="space-y-3">
+                 {kycTiers.map((tier, i) => (
+                   <div key={i} className={cn(
+                     "p-4 rounded-2xl border flex items-center justify-between transition-all",
+                     tier.status === 'Verified' ? "bg-emerald-500/5 border-emerald-500/10" : tier.status === 'Pending' ? "bg-amber-500/5 border-amber-500/10" : "bg-white/[0.02] border-white/5"
+                   )}>
+                      <div className="flex items-center gap-4">
+                         <div className={cn(
+                           "w-1.5 h-1.5 rounded-full",
+                           tier.status === 'Verified' ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : tier.status === 'Pending' ? "bg-amber-500 shadow-[0_0_8px_#f59e0b]" : "bg-zinc-700"
+                         )} />
+                         <div>
+                            <div className="text-[10px] font-black text-white uppercase">{tier.level}</div>
+                            <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{tier.label}</div>
+                         </div>
                       </div>
                       <span className={cn(
-                        "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full",
-                        feature.status === "Active" ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-[#404050]"
-                      )}>
-                        {feature.status}
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-bold text-white mb-1">{feature.title}</h4>
-                    <p className="text-xs text-[#8888a0] leading-relaxed">{feature.description}</p>
-                  </div>
-                ))}
+                        "text-[8px] font-black uppercase tracking-widest",
+                        tier.status === 'Verified' ? "text-emerald-400" : tier.status === 'Pending' ? "text-amber-400" : "text-zinc-700"
+                      )}>{tier.status}</span>
+                   </div>
+                 ))}
               </div>
 
-              <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10 flex gap-4">
-                <ShieldAlert className="w-6 h-6 text-amber-500 shrink-0" />
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-amber-500 uppercase tracking-wider">Security Notice</p>
-                  <p className="text-[11px] text-amber-200/60 leading-relaxed">
-                    Your master key is stored in your secure enclave. Never share your seed phrase with anyone.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-panel rounded-2xl p-6 border-white/[0.08]">
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[10px] font-bold text-[#404050] uppercase tracking-widest mb-1">Network Presence</p>
-                  <h4 className="text-2xl font-display font-bold text-white">82% Verified</h4>
-                </div>
-                <div className="w-24 h-12 flex items-end gap-1">
-                  {[40, 65, 45, 80, 95, 70, 82].map((h, i) => (
-                    <div key={i} className="flex-1 bg-[#00dbe9]/20 rounded-t-sm" style={{ height: `${h}%` }}>
-                      <div className="w-full bg-[#00dbe9] rounded-t-sm transition-all duration-1000" style={{ height: i === 6 ? '100%' : '30%' }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
+              <button className="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest hover:scale-[1.02] transition-all">
+                 Upgrade to Tier 3
+              </button>
+           </div>
         </div>
+
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+             {/* Pi Network Integration */}
+             <div className="card p-8 rounded-[2.5rem] border-[#8A2BE2]/20 bg-black/40 space-y-6">
+                <div className="flex items-center gap-3 text-[#8A2BE2]">
+                   <Globe size={18} />
+                   <h3 className="text-xs font-black uppercase tracking-[0.2em]">Pi Network</h3>
+                </div>
+                <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase">Domain Validation</span>
+                      <Badge className={domainStatus === 'active' ? "bg-emerald-500/10 text-emerald-400 text-[8px] border-emerald-500/20" : "bg-[#8A2BE2]/10 text-[#8A2BE2] text-[8px] border-[#8A2BE2]/20"}>
+                         {domainStatus === 'active' ? 'Verified' : 'Pending'}
+                      </Badge>
+                   </div>
+                   <p className="text-[9px] text-zinc-600 leading-tight">Verification key: <code>33394e...1af</code></p>
+                   <button
+                      onClick={handleClaimDomain}
+                      disabled={isClaiming || domainStatus === 'active'}
+                      className="w-full py-3 rounded-xl bg-[#8A2BE2]/10 border border-[#8A2BE2]/20 text-[#8A2BE2] font-black text-[9px] uppercase tracking-widest hover:bg-[#8A2BE2]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                   >
+                      {isClaiming ? <Loader2 className="animate-spin" size={10} /> : domainStatus === 'active' ? <CheckCircle2 size={10} /> : null}
+                      {isClaiming ? 'Claiming...' : domainStatus === 'active' ? 'Domain Verified' : 'Claim Domain'}
+                   </button>
+                </div>
+             </div>
+
+            {/* Signing Keys */}
+            <div className="card p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+               <div className="flex items-center gap-3 text-primary">
+                  <Key size={18} />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em]">Signing Keys</h3>
+               </div>
+               <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                     <span className="text-[10px] font-bold text-zinc-500 uppercase">Ed25519 Active</span>
+                     <Badge className="bg-emerald-500/10 text-emerald-400 text-[8px] border-emerald-500/20">Secure</Badge>
+                  </div>
+                  <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[9px] uppercase tracking-widest hover:bg-white/10 transition-all">Rotate Keys</button>
+               </div>
+            </div>
+
+            {/* ABOM scanner */}
+            <div className="card p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+               <div className="flex items-center gap-3 text-purple-mcp">
+                  <ShieldAlert size={18} />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em]">ABOM Scanner</h3>
+               </div>
+               <p className="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-widest">Audit your agent manifests for supply chain vulnerabilities.</p>
+               <button className="w-full py-3 rounded-xl bg-purple-mcp/10 border border-purple-mcp/20 text-purple-mcp font-black text-[9px] uppercase tracking-widest hover:bg-purple-mcp/20 transition-all">Run Security Scan</button>
+            </div>
+
+            {/* History */}
+            <div className="card p-8 rounded-[2.5rem] border-white/5 bg-black/40 space-y-6">
+               <div className="flex items-center gap-3 text-zinc-400">
+                  <History size={18} />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em]">Trust History</h3>
+               </div>
+               <div className="space-y-3">
+                  <div className="flex justify-between items-center text-[9px]">
+                     <span className="text-zinc-600">KYC Verified</span>
+                     <span className="text-white font-bold">2 days ago</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[9px]">
+                     <span className="text-zinc-600">DID Registered</span>
+                     <span className="text-white font-bold">14 days ago</span>
+                  </div>
+               </div>
+            </div>
+         </div>
       </main>
 
-      <style jsx global>{`
-        .glass-panel {
-          background: rgba(20, 20, 25, 0.6);
-          backdrop-filter: blur(20px);
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-      `}</style>
+      <SovereignStatusBar />
     </div>
-    </ErrorBoundary>
   );
 }
-
-function.displayName = 'function';

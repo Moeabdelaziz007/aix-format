@@ -5,4 +5,3 @@ export * from './Badge';
 export * from './Typography';
 export * from './Layout';
 export * from './Guidance';
-export * from './ErrorBoundary';

@@ -1,6 +1,5 @@
-import React from 'react';
 import type { Metadata } from "next";
-import { Manrope, Inter, JetBrains_Mono, Oswald, Poppins } from "next/font/google";
+import { Manrope, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { Analytics } from '@vercel/analytics/next';
@@ -30,19 +29,6 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const oswald = Oswald({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-oswald",
-  display: "swap",
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-poppins",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Sovereign Pi Agents Studio",
@@ -50,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 // ROLE: layout
-function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -58,7 +44,7 @@ function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${manrope.variable} ${inter.variable} ${jetbrainsMono.variable} ${oswald.variable} ${poppins.variable} min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] font-sans antialiased overflow-x-hidden`}
+        className={`${manrope.variable} ${inter.variable} ${jetbrainsMono.variable} min-h-screen bg-[var(--color-background)] text-[var(--color-on-background)] font-sans antialiased overflow-x-hidden`}
       >
         <Toaster richColors theme="dark" position="bottom-right" />
         <SovereignAetherClient />
@@ -88,7 +74,3 @@ function RootLayout({
     </html>
   );
 }
-
-export default React.memo(RootLayout);
-
-RootLayout.displayName = 'RootLayout';

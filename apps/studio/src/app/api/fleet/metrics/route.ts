@@ -48,7 +48,7 @@ export async function GET() {
       agents: agentMetrics
     });
 
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("[Fleet Metrics API] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

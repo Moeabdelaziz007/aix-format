@@ -3,7 +3,6 @@ import { nanoid } from 'nanoid';
 import { kv, NS, KEYS } from '@/lib/redis';
 import { updateRegistryEntry } from '@/lib/registry';
 import { validateSovereignManifest } from '@/lib/protocol-validator';
-import { indexAgent } from '@aix-core/storage';
 
 import { LATEST_VERSION } from '@/constants/protocol';
 // DNAVerifier import removed to fix build error. It seems this might need a different path mapping or configuration to work in Next.js
@@ -23,9 +22,7 @@ export async function POST(req: Request) {
     // 1. Runtime Protocol Enforcement (Sovereign Pattern 1)
     const validation = validateSovereignManifest(manifest);
     if (!validation.valid) {
-      try { await indexAgent(manifest); } catch(e) { console.warn('Failed to semantically index agent:', e); }
-
-    return NextResponse.json({
+      return NextResponse.json({
         success: false, 
         error: 'Sovereign Protocol Violation',
         details: validation.errors 
@@ -58,7 +55,7 @@ export async function POST(req: Request) {
         publishedAt: new Date().toISOString(),
         yaml: JSON.stringify(manifest),
         risk_score: validation.risk_score
-      } as unknown);
+      } as any);
     }
 
     return NextResponse.json({
@@ -70,7 +67,7 @@ export async function POST(req: Request) {
       warnings: validation.warnings,
       manifestUrl: `/agents/${did}`
     });
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Deploy API Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
@@ -117,7 +114,7 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json(manifests.filter(Boolean));
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Agents List API Error:', error);
     return NextResponse.json({ error: 'Failed to list agents' }, { status: 500 });
   }

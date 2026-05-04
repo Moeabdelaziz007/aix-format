@@ -290,18 +290,7 @@
           }
         },
         "level": { "type": "string", "description": "Shorthand security level label", "examples": ["standard", "high", "sovereign"] },
-        "authentication": { "type": "array", "items": { "type": "string" } },
-        "guardian_logic": {
-          "type": "object",
-          "description": "Protector/Sentinel logic for mempool monitoring and autonomous defense against flash loan exploits.",
-          "additionalProperties": false,
-          "properties": {
-            "mempool_monitor": { "type": "boolean", "default": false },
-            "front_run_defense": { "type": "boolean", "default": false },
-            "max_slippage_tolerance": { "type": "number", "default": 0.005 },
-            "emergency_circuit_breaker": { "type": "boolean", "default": true }
-          }
-        }
+        "authentication": { "type": "array", "items": { "type": "string" } }
       }
     },
 
@@ -497,76 +486,12 @@
 
     "economics": {
       "type": "object",
-      "description": "Economic and transaction layer for agent settlements and payments (AIX v1.4)",
+      "description": "Economic and transaction layer for agent settlements and payments",
       "additionalProperties": true,
       "properties": {
-        "wallets": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["chain", "address"],
-            "properties": {
-              "chain": { "type": "string", "enum": ["base", "solana", "arbitrum", "pi-mainnet"] },
-              "address": { "type": "string" },
-              "provider": { "type": "string", "enum": ["coinbase-agentkit", "stripe-agent-wallet", "generic"] },
-              "tee_secured": { "type": "boolean", "default": false }
-            }
-          }
-        },
-        "payment_gateways": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "stripe_acp": {
-              "type": "object",
-              "properties": {
-                "enabled": { "type": "boolean" },
-                "merchant_id": { "type": "string" },
-                "spt_supported": { "type": "boolean", "default": true }
-              }
-            },
-            "paypal_ap2": {
-              "type": "object",
-              "properties": {
-                "enabled": { "type": "boolean" },
-                "mandate_id": { "type": "string" }
-              }
-            },
-            "x402": {
-              "type": "object",
-              "properties": {
-                "enabled": { "type": "boolean" },
-                "preferred_stablecoin": { "type": "string", "default": "USDC" }
-              }
-            }
-          }
-        },
-        "delegation": {
-          "type": "object",
-          "description": "Recursive mandate delegation settings (Sub-agents)",
-          "properties": {
-            "allow_recursive": { "type": "boolean", "default": false },
-            "max_depth": { "type": "integer", "default": 2 },
-            "max_spend_per_delegate": {
-              "type": "object",
-              "properties": {
-                "amount": { "type": "number" },
-                "currency": { "type": "string" }
-              }
-            }
-          }
-        },
-        "treasury": {
-          "type": "object",
-          "properties": {
-            "auto_yield_staking": { "type": "boolean", "default": false },
-            "preferred_yield_source": { "type": "string", "examples": ["PYUSD", "AaveV4-Hub"] },
-            "flash_loan_arbitrage_enabled": { "type": "boolean", "default": false }
-          }
-        },
-        "pricing_model": { "type": "string", "examples": ["free", "pay_per_call", "subscription"] },
-        "currency": { "type": "string", "examples": ["PI", "USD", "USDC"] },
-        "token": { "type": "string", "examples": ["PI"] },
+        "pricing_model": { "type": "string", "description": "Shorthand pricing model field", "examples": ["free", "pay_per_call", "subscription"] },
+        "currency": { "type": "string", "description": "Settlement currency", "examples": ["PI", "USD"] },
+        "token": { "type": "string", "description": "Token alias for currency", "examples": ["PI"] },
         "pi_smart_contract": {
           "type": "object",
           "required": ["address", "network"],
@@ -588,7 +513,7 @@
               "additionalProperties": false,
               "properties": {
                 "amount": { "type": "number", "minimum": 0 },
-                "currency": { "type": "string", "default": "PI" }
+                "currency": { "type": "string", "default": "PI", "examples": ["PI", "SOL", "USD"] }
               }
             },
             "subscription": {

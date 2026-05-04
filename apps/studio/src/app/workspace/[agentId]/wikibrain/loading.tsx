@@ -1,9 +1,8 @@
-import React from 'react';
 "use client";
 
 import { BrainCircuit } from "lucide-react";
 
-function Loading() {
+export default function Loading() {
   return (
     <div className="p-6 space-y-6 animate-pulse">
       <div className="flex items-center justify-between">
@@ -28,7 +27,3 @@ function Loading() {
     </div>
   );
 }
-
-export default React.memo(Loading);
-
-Loading.displayName = 'Loading';

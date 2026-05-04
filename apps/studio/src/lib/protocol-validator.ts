@@ -1,4 +1,4 @@
-
+import { AIXManifest } from "@aix-types";
 import { SUPPORTED_VERSIONS } from "@/constants/protocol";
 import { scanAgent } from "./abom-scanner";
 

@@ -1,11 +1,6 @@
-# 🧬 AIX Format (Universal Agent Passport) v1.4.0
+# 🧬 AIX Format (Sovereign Agent Standard) v1.3.0
 
-🇬🇧 **AIX Format** is the industry-first open standard for **Sovereign AI Agents** and the **Universal Agent Passport** for the agentic payment economy. It converges Cryptographic Identity (DIDs), the Model Context Protocol (MCP), HTTP 402 payments, and multi-chain settlement into a single, immutable `.aix` manifest. This protocol is designed for the 10x Moonshot era of autonomous, self-governing machine ecosystems.
-
-**Latest Versions**:
-- 🧬 **AIX Core Format**: v1.3.0 (Identity + MCP + ABOM)
-- 💳 **AIX Payment Layer**: v1.0.0 (HTTP 402 + Multi-Chain + DeFi)
-- 🌐 **Universal Passport**: v1.4.0 (Complete Integration)
+🇬🇧 **AIX Format** is the industry-first open standard for **Sovereign AI Agents**. It converges Cryptographic Identity (DIDs), the Model Context Protocol (MCP), and native micro-payments into a single, immutable `.aix` manifest. This protocol is designed for the 10x Moonshot era of autonomous, self-governing machine ecosystems.
 
 🇦🇪 **تنسيق AIX** هو أول معيار مفتوح في الصناعة لـ **الوكلاء الذكيين السياديين**. يقوم بدمج الهوية التشفيرية (DIDs)، بروتوكول سياق النموذج (MCP)، والمدفوعات الدقيقة الأصلية في بيان `.aix` واحد غير قابل للتغيير. تم تصميم هذا البروتوكول لعصر "Moonshot" للأنظمة الآلية ذاتية الحكم.
 
@@ -57,97 +52,6 @@
 
 | Feature | الميزة | Status | الحالة | Docs |
 | :--- | :--- | :--- | :--- | :--- |
-
----
-
-### 💳 Universal Agent Passport (v1.4.0) | جواز الوكيل العالمي
-
-🇬🇧 **The Payment Economy Revolution**:
-
-AIX Format v1.4.0 introduces the **Universal Agent Passport** - enabling agents to transact across any platform, any blockchain, any payment rail.
-
-#### 🌟 Key Features
-
-| Feature | Description | Status |
-| :--- | :--- | :--- |
-| **HTTP 402 Integration** | Native "Payment Required" protocol support | ✅ v1.0.0 |
-| **Multi-Chain Wallets** | Base, Solana, Ethereum, Pi Network | ✅ v1.0.0 |
-| **Fiat On/Off Ramps** | Stripe, PayPal, PYUSD integration | ✅ v1.0.0 |
-| **DeFi Strategies** | Flash loans, arbitrage, yield optimization | 🔄 Beta |
-| **Platform Adapters** | OpenClaw, Hermes, Kelos, Manus, IBM watsonx | 🔄 Beta |
-| **Payment Routing** | Automatic cost-optimized chain selection | ✅ v1.0.0 |
-
-#### 📊 Payment Layer Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│   AIX Agent (did:axiom:xxx)                     │
-├─────────────────────────────────────────────────┤
-│   HTTP 402 Payment Challenge                    │
-│   ├─ Micropayments: $0.001 - $1 (Base/Solana)  │
-│   ├─ Mid-range: $1 - $1000 (Solana/Base)       │
-│   └─ Enterprise: $1000+ (Stripe/PayPal)        │
-├─────────────────────────────────────────────────┤
-│   Multi-Chain Settlement                        │
-│   ├─ Base L2: $0.0001/tx, 2s finality          │
-│   ├─ Solana: $0.00025/tx, 400ms finality       │
-│   ├─ Stripe: 2.9% + $0.30, instant             │
-│   └─ Pi Network: Native KYC integration         │
-├─────────────────────────────────────────────────┤
-│   ERC-4337 Smart Wallet                         │
-│   ├─ Gasless transactions (Paymaster)          │
-│   ├─ Session keys for automation               │
-│   └─ Social recovery via did:axiom             │
-└─────────────────────────────────────────────────┘
-```
-
-#### 🔗 Platform Interoperability
-
-**Write Once, Deploy Anywhere**:
-```bash
-# Create agent in AIX Format
-aix create my-agent.aix.json
-
-# Deploy to multiple platforms
-aix deploy --platform openclaw
-aix deploy --platform hermes
-aix deploy --platform ibm-watsonx
-
-# Identity and payments work everywhere
-```
-
-#### 💰 Economic Model
-
-**Revenue Streams**:
-- Platform fees: 10-20% of transactions
-- Premium features: $29.99 - $499.99/month
-- DeFi treasury yield: 8% APY target
-- Staking rewards: 12% APY
-
-**Projected Year 1**:
-- 10,000 agents using payment layer
-- 100,000 daily transactions
-- $25M platform revenue
-- 60% profit margin
-
-#### 🔒 Security Features
-
-- **TEE Wallets**: AWS Nitro Enclaves for key isolation
-- **ZK-Proofs**: Privacy-preserving KYC verification
-- **Multi-Sig Treasury**: 5-of-7 governance with 48h timelock
-- **Audit Logs**: Immutable on-chain transaction history
-
-#### 📚 Documentation
-
-- [Payment Economy Strategic Plan](docs/AIX_PAYMENT_ECONOMY_STRATEGIC_PLAN.md)
-- [Payment Schema Specification](schemas/modules/economics.schema.json)
-- [Platform Adapter Guide](docs/PLATFORM_ADAPTERS.md) *(coming soon)*
-- [DeFi Integration Guide](docs/DEFI_INTEGRATION.md) *(coming soon)*
-
-🇦🇪 **ثورة الاقتصاد الدفعي**:
-
-يقدم تنسيق AIX v1.4.0 **جواز الوكيل العالمي** - مما يمكّن الوكلاء من التعامل عبر أي منصة، أي بلوكشين، أي نظام دفع.
-
 | **Agent Builder** | **باني الوكلاء** | ✅ Live | **مباشر** | [Guide](docs/BUILDER_GUIDE.md) |
 | **MCP Registry** | **سجل MCP** | ✅ Live | **مباشر** | [Registry](docs/MCP_GATEWAY.md) |
 | **ABOM Scanner** | **فاحص ABOM** | ✅ Live | **مباشر** | [Security](docs/ABOM_SAAS_BOM.md) |

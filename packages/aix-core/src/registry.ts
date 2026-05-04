@@ -1,5 +1,4 @@
-import { kv } from './storage/adapter';
-import { KEYS, NS } from './storage/keys';
+import { kv, KEYS, NS } from './index';
 
 /**
  * AIX Global Agent Registry Manager
@@ -32,6 +31,7 @@ export async function getRegistry(): Promise<RegistryEntry[]> {
 
     return entries.filter((e): e is RegistryEntry => e !== null);
   } catch (error) {
+    console.warn("[RegistryManager] Failed to fetch registry:", error);
     return [];
   }
 }
@@ -75,5 +75,6 @@ export async function transferOwnership(did: string, fromUserId: string, toUserI
     await kv.set(toKey, toAgents);
   }
 
+  console.log(`[Pet Gifting] Agent ${did} transferred from ${fromUserId} to ${toUserId}`);
 }
 

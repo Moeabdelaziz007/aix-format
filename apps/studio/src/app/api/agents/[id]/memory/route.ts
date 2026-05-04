@@ -22,7 +22,7 @@ export async function GET(
       entries: memory.map(e => JSON.parse(e)),
       count: memory.length 
     });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 });
   }
 }
@@ -46,7 +46,7 @@ export async function POST(
     await kv.expire(memoryKey, 60 * 60 * 24 * 30); // 30 days
     
     return Response.json({ saved: true });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 });
   }
 }
@@ -59,7 +59,7 @@ export async function DELETE(
     const memoryKey = KEYS.memory(params.id);
     await kv.del(memoryKey);
     return Response.json({ cleared: true });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return Response.json({ error: err.message }, { status: 500 });
   }
 }

@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Zap, AlertCircle, CheckCircle2, Clock, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 interface PulseEvent {
   id:        string;
@@ -72,7 +71,7 @@ export default function PulsePage() {
         setEvents(prev => {
           if (prev.length > 0 && Date.now() - new Date(prev[0].timestamp).getTime() < 5000) return prev;
           return [mockEvent(agentId), ...prev].slice(0, 100);
-        }, []);
+        });
       }, 3000);
     } catch (err) {
       console.error("[Pulse] SSE init failed:", err);
@@ -86,11 +85,10 @@ export default function PulsePage() {
 
   // Auto-scroll to top (newest events)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" }, []);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [events.length]);
 
   return (
-    <ErrorBoundary>
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -187,9 +185,6 @@ export default function PulsePage() {
         <div ref={bottomRef} />
       </div>
     </motion.div>
-    </ErrorBoundary>
   );
 }
 
-
-function.displayName = 'function';

@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         });
       }
     } catch (cacheError) {
-
+      console.warn("[ABOM Scan] Cache lookup failed:", cacheError);
     }
 
     // 3. Parse YAML to JS object
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     try {
       await kv.set(cacheKey, report, { ex: TTL.ABOM });
     } catch (cacheError) {
-
+      console.warn("[ABOM Scan] Cache store failed:", cacheError);
     }
 
     return NextResponse.json(report, {

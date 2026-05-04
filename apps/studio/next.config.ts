@@ -1,13 +1,7 @@
 import type { NextConfig } from "next";
 import path from "node:path";
-import bundleAnalyzer from '@next/bundle-analyzer';
 // @ts-ignore
 import packageJson from "./package.json";
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-  openAnalyzer: true,
-});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -18,10 +12,6 @@ const nextConfig: NextConfig = {
   
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
-  },
-
-  experimental: {
-    optimizePackageImports: ['framer-motion', 'lucide-react', '@xyflow/react'],
   },
 
   async headers() {
@@ -71,6 +61,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
-
-// Made with Bob
+export default nextConfig;

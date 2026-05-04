@@ -1,3 +1,8 @@
+/**
+ * tests/abom.test.js — AI-SBOM ABOM validation unit tests
+ * Tests the upgraded validateABOM logic in core/parser.js
+ */
+
 import { AIXParser } from '../core/parser.js';
 
 // ── Minimal valid AIX manifest template ────────────────────────────────────
@@ -234,6 +239,7 @@ test('numeric spec_version produces INVALID_TYPE error', () => {
   assert(hasError(errors, 'INVALID_TYPE'), 'Expected INVALID_TYPE for numeric spec_version');
 });
 
+// ── 15. abomSummary() counts correctly ───────────────────────────────────────
 test('abomSummary returns correct counts', async () => {
   const parser = makeParser();
   const agent = {
@@ -250,7 +256,8 @@ test('abomSummary returns correct counts', async () => {
     warnings: []
   };
   // Import abomSummary by instantiating AIXAgent
-  const { AIXAgent } = await import("../core/parser.js");
+  const module = await import('../core/parser.js');
+  const AIXAgent = module.AIXAgent;
   const inst = new AIXAgent(agent.data, []);
   const s = inst.abomSummary();
   assert(s.total === 4,       `total=${s.total} expected 4`);

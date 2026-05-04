@@ -1,6 +1,4 @@
-import { kv } from './storage/adapter';
-import { KEYS } from './storage/keys';
-import * as LearningEngine from './learning';
+import { kv, KEYS, LearningEngine } from './index';
 
 /**
  * Readable Memory System (v1.3.6)
@@ -21,7 +19,7 @@ export class ReadableMemory {
    */
   static async getMemoryTree(agentId: string): Promise<MemoryNode> {
     // 1. Fetch Sessions
-    const sessions = await kv.lrange<any>(KEYS.agentSessions(agentId), 0, 9);
+    const sessions = await kv.lrange<any>(`agent:${agentId}:sessions`, 0, 9);
     const sessionNodes: MemoryNode[] = sessions.map(s => ({
       id: `session-${s.timestamp}`,
       label: new Date(s.timestamp).toLocaleDateString(),
@@ -37,7 +35,7 @@ export class ReadableMemory {
     }));
 
     // 3. Fetch Skills
-    const skills = await kv.smembers<string>(KEYS.agentSkills(agentId));
+    const skills = await kv.smembers<string>(`agent:${agentId}:skills`);
     const skillNodes: MemoryNode[] = skills.map(s => ({
       id: `skill-${s}`,
       label: s,

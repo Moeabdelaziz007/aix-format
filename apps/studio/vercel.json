@@ -1,40 +1,5 @@
 {
-  "installCommand": "pnpm install",
-  "buildCommand": "cd apps/studio && pnpm run build",
-  "outputDirectory": "apps/studio/.next",
-  "framework": "nextjs",
-  "regions": ["iad1"],
-  "functions": {
-    "apps/studio/src/app/api/**/*.ts": {
-      "runtime": "edge"
-    }
-  },
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ]
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next"
 }

@@ -52,7 +52,7 @@ export function VoiceCommandProvider({ children }: { children: React.ReactNode }
   // ── Speech Recognition init ──────────────────────────────────────────
   const initRecognition = useCallback(() => {
     if (typeof window === "undefined" || recognitionRef.current) return;
-    const SR = (window as unknown).SpeechRecognition || (window as unknown).webkitSpeechRecognition;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) return;
 
     const r = new SR();

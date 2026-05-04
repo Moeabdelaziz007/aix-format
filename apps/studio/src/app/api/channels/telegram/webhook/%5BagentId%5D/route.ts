@@ -17,6 +17,8 @@ export async function POST(
     const chatId = body.message.chat.id;
     const userMessage = body.message.text;
 
+    console.log(`[Telegram Webhook] Message for ${agentId} from ${chatId}: ${userMessage}`);
+
     // 1. Forward to Internal Invoke API
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const invokeRes = await fetch(`${baseUrl}/api/agents/${agentId}/invoke`, {
@@ -35,6 +37,7 @@ export async function POST(
     // 2. Send response back to Telegram
     // Note: In production, we'd use the stored telegram_token for this agent
     // For this pattern, we'll simulate the successful response back
+    console.log(`[Telegram Webhook] Sending response back to ${chatId}: ${botResponse.slice(0, 50)}...`);
 
     return NextResponse.json({
       method: "sendMessage",
@@ -42,7 +45,7 @@ export async function POST(
       text: botResponse,
     });
 
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("[Telegram Webhook] Error:", error);
     return NextResponse.json({ ok: true }); // Telegram needs 200 OK to stop retries
   }

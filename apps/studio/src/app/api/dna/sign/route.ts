@@ -1,27 +1,12 @@
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { generateDNAFingerprint } from '@aix-core/security/dna';
-import { successResponse, ERR, parseBody } from '@/lib/api-helpers';
 
-/**
- * POST /api/dna/sign
- * Generates DNA fingerprint hash for an agent manifest
- *
- * PUBLIC: No auth required - allows public DNA generation
- */
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { body, error } = await parseBody<any>(req);
-    if (error) return error;
-
-    if (!body || typeof body !== 'object') {
-      return ERR.VALIDATION('Valid manifest object required');
-    }
-
-    const hash = generateDNAFingerprint(body);
-    return successResponse({ dna_hash: hash });
-    
-  } catch (error: unknown) {
-    console.error('[dna/sign] DNA generation failed:', error.message);
-    return ERR.INTERNAL('DNA fingerprint generation failed');
+    const manifest = await req.json();
+    const hash = generateDNAFingerprint(manifest);
+    return NextResponse.json({ success: true, dna_hash: hash });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

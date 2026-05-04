@@ -1,0 +1,9 @@
+feat(identity): implement AXIOM DNA fingerprinting for agent authenticity
+
+Integrates the AXIOM DNA tools into the agent creation and loading workflows.
+* Adds dna_hash to IdentityLayer schema and types
+* Implements generateDNAFingerprint utilizing tweetnacl and canonicalizeForSigning
+* In Studio Agent Builder, signs new agents and updates dna_hash
+* Agent fetching route validates identity via DNAVerifier and assigns compromised status appropriately
+* Introduces a DNABadge for UI (unstyled logic-only implementation)
+* Provides extensive test suite covering scenarios

@@ -11,22 +11,16 @@ You are the AIX Sovereign Wizard, a friendly architect for AI agents.
 Your goal is to help users create a valid AIX v1.3.0 manifest (.aix.json) via conversation.
 
 Collect the following information ONE STEP AT A TIME:
-1. Agent Name (required, 3+ characters)
-2. Role/Purpose (required, what the agent does)
-3. Capabilities (required, list of 1-5 specific capabilities)
-4. Identity Preference (required: pi_network, web, key, or none)
-5. Monetization Tier (required: free, basic, premium, or enterprise)
-6. Optional: Tone (friendly, professional, formal, casual)
-7. Optional: Description (brief summary)
+1. Agent Name
+2. Role/Purpose
+3. Capabilities
+4. Identity Preference
+5. Monetization Tier
 
 RULES:
-- Ask only ONE question at a time
-- Be concise and encouraging
-- Validate responses before moving to next question
-- When all required data is collected, inform user that manifest generation is ready
-- The user will then call the /api/voice-wizard/generate-manifest endpoint with collected data
-
-IMPORTANT: Do NOT generate the manifest yourself. Simply collect the data and confirm completion.
+- Ask only ONE question at a time.
+- Be concise.
+- If all data is collected, respond with "MANIFEST_COMPLETE:" followed by JSON.
 `;
 
 export async function POST(req: Request) {
@@ -35,7 +29,7 @@ export async function POST(req: Request) {
     
     // 1. Check for API Key (Sovereign Pattern 2: Fallback)
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-
+      console.warn("[Voice Chat] Google API Key missing. Falling back to local/manual prompt.");
       return new Response(JSON.stringify({ 
         error: "Voice Intelligence Offline",
         fallback: true,
@@ -73,7 +67,7 @@ export async function POST(req: Request) {
     });
     
     return result.toDataStreamResponse();
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("[Voice Chat] Fatal Error:", error);
     // Graceful error response for UI handling
     return new Response(JSON.stringify({ 

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { SovereignStatusBar } from '@/components/layout/SovereignStatusBar';
 import { useSettings } from '@/hooks/useSettings';
-import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import {
   AlertTriangle,
   Copy,
@@ -16,15 +15,13 @@ import {
   Box,
   Layers,
   Fingerprint,
-  Bell,
-  Key,
-  Shield
+  Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge, InfoTooltip, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/shared';
 import { cn } from '@/lib/utils';
 
-function SettingsContent() {
+export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [activeCategory, setActiveCategory] = useState('identity');
   const {
@@ -320,13 +317,3 @@ function SettingsContent() {
     </div>
   );
 }
-
-export default function SettingsPage() {
-  return (
-    <ErrorBoundary boundaryName="SettingsPage">
-      <SettingsContent />
-    </ErrorBoundary>
-  );
-}
-
-function.displayName = 'function';

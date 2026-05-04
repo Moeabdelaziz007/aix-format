@@ -158,5 +158,3 @@ export default function NetworkStatusPage() {
     </div>
   );
 }
-
-function.displayName = 'function';

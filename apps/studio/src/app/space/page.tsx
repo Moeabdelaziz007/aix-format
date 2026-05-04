@@ -305,5 +305,3 @@ export default function SpacePage() {
     </div>
   );
 }
-
-function.displayName = 'function';

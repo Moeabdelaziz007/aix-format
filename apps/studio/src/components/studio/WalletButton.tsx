@@ -38,7 +38,7 @@ export function WalletButton() {
                     onClick={openConnectModal}
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 rounded-xl text-indigo-400 text-sm font-bold transition-all hover:scale-[1.02] active:scale-95 [0_4px_12px_rgba(99,102,241,0.1)]"
                   >
-                    <Wallet className="w-3.5 h-3.5" />
+                    <Wallet className="w-4 h-4" />
                     Link Wallet
                   </button>
                 );
@@ -48,7 +48,7 @@ export function WalletButton() {
                 return (
                   <button
                     onClick={openChainModal}
-                    className="btn btn-sm bg-[var(--color-error)] text-white font-black uppercase tracking-wider"
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm font-bold transition-all"
                   >
                     Wrong Network
                   </button>
@@ -59,7 +59,7 @@ export function WalletButton() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={openChainModal}
-                    className="btn btn-sm btn-ghost border-white/10 text-zinc-400 font-medium uppercase tracking-tight"
+                    className="hidden sm:flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl text-zinc-400 text-xs font-medium transition-all"
                   >
                     {chain.hasIcon && (
                       <div className="w-4 h-4">

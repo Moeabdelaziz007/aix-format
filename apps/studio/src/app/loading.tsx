@@ -1,7 +1,6 @@
-import React from 'react';
 import { Loader2 } from 'lucide-react';
 
-function Loading() {
+export default function Loading() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
       <div className="relative">
@@ -25,7 +24,3 @@ function Loading() {
     </div>
   );
 }
-
-export default React.memo(Loading);
-
-Loading.displayName = 'Loading';

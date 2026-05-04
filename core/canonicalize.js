@@ -1,4 +1,5 @@
-// Buffer is globally available in Node.js, no need to import
+import { Buffer } from 'buffer';
+
 export class CanonicalizationError extends Error {
   constructor(code, message, path = '$') {
     super(`${code}: ${message} @ ${path}`);

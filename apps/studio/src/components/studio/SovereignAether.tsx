@@ -4,58 +4,80 @@ import { motion } from 'framer-motion';
 
 export function SovereignAether() {
   return (
-    <div className="fixed inset-0 z-[-1] overflow-hidden bg-surface">
-      {/* Infrastructure Blueprint Grid */}
-      <div className="absolute inset-0 blueprint-grid opacity-10" />
+    <div className="fixed inset-0 z-[-1] overflow-hidden bg-[#050507]">
+      {/* Dynamic Background Mesh */}
+      <div className="absolute inset-0 opacity-20"
+           style={{
+             backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)`,
+             backgroundSize: '40px 40px'
+           }}
+      />
       
-      {/* Primary Infrastructure Pulsations */}
+      {/* Primary Ambient Glows */}
       <motion.div 
         animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.1, 0.2, 0.1],
-          x: [0, 30, 0],
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+          x: [0, 50, 0],
+          y: [0, 30, 0],
         }}
         transition={{
-          duration: 15,
+          duration: 12,
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-primary/20 blur-[120px]" 
+        className="absolute -top-[10%] -left-[10%] w-[70%] h-[70%] rounded-full bg-cyan-500/10 blur-[150px]"
       />
       
       <motion.div 
         animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.05, 0.15, 0.05],
-          y: [0, -40, 0],
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2],
+          x: [0, -40, 0],
+          y: [0, -60, 0],
         }}
         transition={{
-          duration: 20,
+          duration: 18,
           repeat: Infinity,
           ease: "easeInOut",
           delay: 2
         }}
-        className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-purple-mcp/10 blur-[120px]" 
+        className="absolute -bottom-[20%] -right-[10%] w-[80%] h-[80%] rounded-full bg-purple-600/10 blur-[150px]"
       />
 
-      {/* Vertical Data Stream Sync Line */}
+      {/* Tertiary Accent Glow */}
+      <motion.div
+        animate={{
+          opacity: [0, 0.3, 0],
+          scale: [0.8, 1.1, 0.8],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 4
+        }}
+        className="absolute top-[30%] left-[40%] w-[40%] h-[40%] rounded-full bg-emerald-500/5 blur-[100px]"
+      />
+
+      {/* Scanning Line Effect */}
       <motion.div
         animate={{
           y: ['-100%', '200%'],
         }}
         transition={{
-          duration: 10,
+          duration: 15,
           repeat: Infinity,
           ease: "linear",
         }}
-        className="absolute inset-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent z-10"
+        className="absolute inset-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent z-10"
       />
 
-      {/* Infrastructure Scanline Overlay */}
-      <div className="absolute inset-0 scanline pointer-events-none opacity-20" />
+      {/* Noise/Grain Texture */}
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       
-      {/* System Vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_40%,var(--color-surface)_100%)]" />
+      {/* Vignette */}
+      <div className="absolute inset-0 bg-radial-gradient(circle, transparent 40%, #050507 100%)" />
     </div>
   );
 }

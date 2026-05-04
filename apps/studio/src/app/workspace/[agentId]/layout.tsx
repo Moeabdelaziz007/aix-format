@@ -46,7 +46,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   }
 
   const activeTab = NAV.find(n => pathname.endsWith(n.href))?.href ?? "pulse";
-  const genesisHash = (agent as unknown).genesis_hash || agent.id.slice(0, 8);
+  const genesisHash = (agent as any).genesis_hash || agent.id.slice(0, 8);
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col overflow-hidden h-screen">
@@ -200,5 +200,3 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   );
 }
 
-
-function.displayName = 'function';

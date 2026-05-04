@@ -32,11 +32,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <CombinedButton
-        ref={ref as unknown}
+        ref={ref as any}
         whileHover={isAnimated ? { scale: 1.02, translateY: -1 } : undefined}
         whileTap={isAnimated ? { scale: 0.98 } : undefined}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
-        {...(props as unknown)}
+        {...(props as any)}
       />
     );
   }

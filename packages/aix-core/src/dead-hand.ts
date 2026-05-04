@@ -1,5 +1,4 @@
-import { kv } from './storage/adapter';
-import { KEYS, TTL } from './storage/keys';
+import { kv, KEYS, TTL } from './index';
 
 /**
  * AIX Dead Hand Protocol (Autonomous Safety System)
@@ -66,6 +65,7 @@ export async function evaluateAgent(agentId: string): Promise<DeadHandTrigger | 
  * Executes the Dead Hand Response (Pattern 4).
  */
 export async function executeDeadHand(t: DeadHandTrigger): Promise<void> {
+  console.error(`[DeadHand] TRIGGERED for ${t.agentId} | Reason: ${t.reason} | Action: ${t.threatLevel}`);
 
   // 1. Freeze Memory (Read-only flag)
   await kv.set(KEYS.frozen(t.agentId), '1');

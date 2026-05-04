@@ -23,7 +23,6 @@
       }
     ],
     "paths": {
-<<<<<<< jules-11236845588668213273-02dff76e
       "@/*": [
         "./src/*"
       ],
@@ -33,13 +32,6 @@
       "@aix-core/storage": [
         "../../packages/aix-core/src/index.ts"
       ]
-=======
-      "@/*": ["./src/*"],
-      "@aix-types": ["../../packages/aix-types/index.d.ts"],
-      "@aix-core/*": ["../../packages/aix-core/src/*"],
-      "@aix-core/storage": ["../../packages/aix-core/src/index.ts"],
-      "@core/*": ["../../core/*"]
->>>>>>> main
     }
   },
   "include": [

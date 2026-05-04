@@ -1,5 +1,4 @@
 import { createHash, randomBytes } from 'node:crypto';
-import canonicalize from 'canonical-json';
 
 /**
  * AIX Gateway Security (Sovereign Shield)
@@ -29,50 +28,16 @@ export class GatewaySecurity {
     // 1. Strict Origin Validation
     const allowedOrigins = [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'];
     if (origin && !allowedOrigins.includes(origin)) {
+      console.warn(`[Security] Blocked unauthorized origin: ${origin}`);
       return false;
     }
 
     // 2. Token Validation (Sovereign Handshake)
     if (sessionToken && authHeader !== `Bearer ${sessionToken}`) {
+      console.warn(`[Security] Invalid session token for Gateway pulse`);
       return false;
     }
 
-    return true;
-  }
-}
-
-/**
- * AIX Envelope Security
- * Handles content integrity and checksum validation using JCS (RFC 8785).
- */
-export class EnvelopeSecurity {
-  /**
-   * Calculates the SHA-256 hash of the document content (excluding the security layer).
-   * Uses canonical-json to ensure deterministic hashing regardless of key order.
-   */
-  static calculateHash(doc: any): string {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { security, ...content } = doc;
-    
-    // RFC 8785: JSON Canonicalization Scheme (JCS)
-    const canonical = canonicalize(content);
-    
-    return createHash('sha256')
-      .update(canonical)
-      .digest('hex');
-  }
-
-  /**
-   * Verifies if the envelope's checksum matches its content.
-   */
-  static verifyIntegrity(doc: any): boolean {
-    if (!doc.security?.checksum?.value) return false;
-    const calculated = this.calculateHash(doc);
-    const provided = doc.security.checksum.value;
-    
-    if (calculated !== provided) {
-      return false;
-    }
     return true;
   }
 }

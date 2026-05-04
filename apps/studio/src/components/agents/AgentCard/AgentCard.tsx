@@ -1,4 +1,3 @@
-import Image from 'next/image';
 'use client';
 
 import React, { memo } from 'react';
@@ -119,7 +118,7 @@ function MarketplaceGridView({ item, onClick }: { item: AgentCardProps & { conte
           <TrustScore score={data.trustScore} />
         </div>
         <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2">
-          <Image width={0} height={0} src={data.author.avatar} className="w-6 h-6 rounded-full border border-white/20" alt={data.author.name} />
+          <img src={data.author.avatar} className="w-6 h-6 rounded-full border border-white/20" alt={data.author.name} />
           <span className="text-xs text-white/80 font-medium">{data.author.name}</span>
         </div>
       </div>

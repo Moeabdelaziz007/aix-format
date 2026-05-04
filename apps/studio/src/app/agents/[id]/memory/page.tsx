@@ -36,7 +36,6 @@ import {
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
 import { useLocalAgents } from '@/hooks/useLocalAgents';
-import { useWikiBrainSearch } from '@/hooks/useWikiBrainSearch';
 
 // --- Custom Node Components ---
 
@@ -55,7 +54,7 @@ const CategoryNode = ({ data }: NodeProps) => {
     facts: 'shadow-[0_0_20px_rgba(168,85,247,0.3)]',
     skills: 'shadow-[0_0_20px_rgba(16,185,129,0.3)]',
     connections: 'shadow-[0_0_20px_rgba(249,115,22,0.3)]'
-  } as unknown;
+  } as any;
 
   return (
     <div className={`px-4 py-3 rounded-xl border-2 flex items-center gap-3 min-w-[140px] ${data.color} bg-black/40 backdrop-blur-xl transition-all hover:scale-105 ${glowStyles[data.id] || ''}`}>
@@ -109,7 +108,7 @@ export default function WikiBrainExplorer() {
   const { getAgent, loaded } = useLocalAgents();
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const { query: search, setQuery: setSearch, results: searchResults, loading: searchLoading } = useWikiBrainSearch();
+  const [search, setSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [timeValue, setTimeValue] = useState(100);
 
@@ -145,11 +144,11 @@ export default function WikiBrainExplorer() {
             type: 'root',
             position: { x: 500, y: 0 },
             data: { name: agent?.name, pet: agent?.pet }
-          }, []);
+          });
 
           // Level 1 Categories
           const categories = tree.children || [];
-          categories.forEach((cat: { children?: unknown[] }, i: number) => {
+          categories.forEach((cat: any, i: number) => {
             const x = 100 + (i * 300);
             const y = 200;
             
@@ -158,21 +157,21 @@ export default function WikiBrainExplorer() {
               facts: 'border-purple-500/30 text-purple-400',
               skills: 'border-emerald-500/30 text-emerald-400',
               connections: 'border-orange-500/30 text-orange-400'
-            } as unknown;
+            } as any;
 
             const icons = {
               sessions: <Clock size={16} />,
               facts: <Database size={16} />,
               skills: <Zap size={16} />,
               connections: <Network size={16} />
-            } as unknown;
+            } as any;
 
             const iconBgs = {
               sessions: 'bg-blue-500/20 text-blue-400',
               facts: 'bg-purple-500/20 text-purple-400',
               skills: 'bg-emerald-500/20 text-emerald-400',
               connections: 'bg-orange-500/20 text-orange-400'
-            } as unknown;
+            } as any;
 
             newNodes.push({
               id: cat.id,
@@ -195,7 +194,7 @@ export default function WikiBrainExplorer() {
             });
 
             // Level 2 Items
-            (cat.children || []).forEach((item: unknown, j: number) => {
+            (cat.children || []).forEach((item: any, j: number) => {
                const ix = x - 100 + (j % 3 * 120);
                const iy = y + 150 + (Math.floor(j / 3) * 120);
                
@@ -231,19 +230,11 @@ export default function WikiBrainExplorer() {
 
   const filteredNodes = useMemo(() => {
     if (!search) return nodes;
-
-    // Create a set of IDs from semantic search results
-    const matchingIds = new Set(searchResults.map(r => r.id));
-
-    return nodes.map(n => {
-      const isMatch = searchResults.some(r => r.id === n.id);
-      return {
-        ...n,
-        style: isMatch ? { ...n.style, filter: 'drop-shadow(0 0 10px rgba(99,102,241,0.8))' } : n.style,
-        hidden: n.type === 'item' && !matchingIds.has(n.id) && !n.data.label.toLowerCase().includes(search.toLowerCase())
-      };
-    });
-  }, [nodes, search, searchResults]);
+    return nodes.map(n => ({
+      ...n,
+      hidden: n.type === 'item' && !n.data.label.toLowerCase().includes(search.toLowerCase()) && !n.data.summary?.toLowerCase().includes(search.toLowerCase())
+    }));
+  }, [nodes, search]);
 
   if (!loaded) return <div className="min-h-screen bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -411,5 +402,3 @@ export default function WikiBrainExplorer() {
     </div>
   );
 }
-
-function.displayName = 'function';

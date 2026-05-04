@@ -24,7 +24,7 @@ export function useKyc(user?: PiUser) {
       setStep(3);
       const t2 = setTimeout(() => {
         setIsVerified(true);
-
+        console.log('Identity cryptographically verified');
       }, 2000);
       timersRef.current.push(t2);
     }, 1500);
@@ -43,6 +43,7 @@ export function useKyc(user?: PiUser) {
       startKyc();
     }
   }, [user, step, isVerified, startKyc]);
+
 
   const resetKyc = useCallback(() => {
     timersRef.current.forEach(clearTimeout);

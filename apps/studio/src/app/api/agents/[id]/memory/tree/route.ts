@@ -19,7 +19,7 @@ export async function GET(
     const tree = await ReadableMemory.getMemoryTree(agentId);
 
     return NextResponse.json({ success: true, tree });
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("[Memory Tree API] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

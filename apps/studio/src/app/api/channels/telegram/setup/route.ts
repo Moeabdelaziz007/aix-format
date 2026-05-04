@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       botLink: config.link
     });
 
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("[Telegram Setup] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

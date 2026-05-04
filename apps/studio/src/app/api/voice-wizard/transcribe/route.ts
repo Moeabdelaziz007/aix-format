@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     const groqApiKey = process.env.GROQ_API_KEY;
     if (!groqApiKey) {
-
+      console.warn('تنبيه: GROQ_API_KEY غير موجود في ملف .env');
       return NextResponse.json({ error: 'مفتاح API مفقود' }, { status: 500 });
     }
 

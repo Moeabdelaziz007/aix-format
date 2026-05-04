@@ -23,7 +23,7 @@ export class SecurityHandler extends PulseHandler {
     const frozen = await kv.get(KEYS.frozen(request.process.agentId));
     if (frozen) throw new Error("Agent frozen by Dead Hand Protocol");
 
-    const threat = null;
+    const threat = // await evaluateAgent(request.process.agentId);
     if (threat) {
       await executeDeadHand(threat);
       throw new Error(`Security Quarantine: ${threat.reason}`);

@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Zap, CheckCircle2, PlusCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const ACTIVITIES = [
   { id: 1, type: "completion", text: "ResearchBot completed 50 tasks → π 25 earned", icon: <CheckCircle2 className="w-3 h-3 text-emerald-400" /> },

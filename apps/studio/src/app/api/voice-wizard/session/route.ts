@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     const session = await kv.get<any>(sessionKey);
     
     return NextResponse.json(session ? session : { messages: [], step: 0, partialManifest: {} });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     await kv.set(sessionKey, sessionState, { ex: TTL.SESSIONS }); // 24h TTL from core
     
     return NextResponse.json({ saved: true });
-  } catch (error: unknown) {
+  } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

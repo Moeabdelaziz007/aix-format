@@ -26,10 +26,10 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      if (typeof window !== 'undefined' && (window as unknown).Pi) {
-        (window as unknown).Pi.init({ version: '2.0', sandbox: true });
-        const authResult = await (window as unknown).Pi.authenticate(['username', 'payments'], (payment: any) => {
-
+      if (typeof window !== 'undefined' && (window as any).Pi) {
+        (window as any).Pi.init({ version: '2.0', sandbox: true });
+        const authResult = await (window as any).Pi.authenticate(['username', 'payments'], (payment: any) => {
+          console.warn('Incomplete payment:', payment);
         });
         
         const newUser: AuthUser = {
@@ -52,7 +52,7 @@ export function useAuth() {
         setUser(mockUser);
         localStorage.setItem('aix_user', JSON.stringify(mockUser));
       }
-    } catch (error: unknown) {
+    } catch (err: any) {
       setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);

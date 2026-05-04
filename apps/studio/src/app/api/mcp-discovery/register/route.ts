@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRegistry, updateRegistryEntry } from "../../../../../../../packages/aix-core/src/registry";
-
+import { type RegistryEntry } from "@/lib/types";
 import { RegistryEntry } from "@/lib/types";
 
 /**

@@ -25,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: apps/studio/package-lock.json
 
@@ -51,13 +51,13 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/aix-core
+        working-directory: .
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - run: npm install
       - run: npm test --if-present
@@ -77,7 +77,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
