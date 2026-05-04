@@ -1,10 +1,12 @@
 /**
  * Rate Limiting Helper
- * 
+ *
  * Provides rate limiting utilities for API routes using Redis
- * 
+ *
  * @module rate-limit
  */
+
+import { kv } from '@/lib/redis';
 
 interface RateLimitConfig {
   limit: number;        // Max requests
@@ -18,9 +20,9 @@ interface RateLimitResult {
 }
 
 /**
- * Check rate limit for a key
- * 
- * @param key - Rate limit key (e.g., "invoke:user123:agent456")
+ * Check rate limit for a key using Redis
+ *
+ * @param key - Rate limit key (e.g., "ratelimit:invoke:user123")
  * @param limit - Max requests allowed
  * @param windowSeconds - Time window in seconds
  * @returns Rate limit result
@@ -31,23 +33,37 @@ export async function checkRateLimit(
   windowSeconds: number
 ): Promise<RateLimitResult> {
   try {
-    // TODO: Implement Redis-based rate limiting
-    // For now, use in-memory cache (not production-ready)
+    // Get current count from Redis
+    const current = await kv.get<number>(key);
+    const now = Math.floor(Date.now() / 1000);
     
-    const current = await incrementKey(key);
-    
-    if (current === 1) {
-      await setExpiry(key, windowSeconds);
+    if (current === null) {
+      // First request in window
+      await kv.set(key, 1, { ex: windowSeconds });
+      return {
+        allowed: true,
+        remaining: limit - 1,
+        resetAt: now + windowSeconds,
+      };
     }
     
-    const allowed = current <= limit;
-    const remaining = Math.max(0, limit - current);
-    const resetAt = Date.now() + (windowSeconds * 1000);
+    if (current >= limit) {
+      // Rate limit exceeded
+      const ttl = await kv.ttl(key);
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: now + (ttl > 0 ? ttl : windowSeconds),
+      };
+    }
+    
+    // Increment counter
+    await kv.incr(key);
     
     return {
-      allowed,
-      remaining,
-      resetAt
+      allowed: true,
+      remaining: limit - (current + 1),
+      resetAt: now + (await kv.ttl(key)),
     };
     
   } catch (error) {
@@ -56,7 +72,7 @@ export async function checkRateLimit(
     return {
       allowed: true,
       remaining: limit,
-      resetAt: Date.now() + (windowSeconds * 1000)
+      resetAt: Math.floor(Date.now() / 1000) + windowSeconds,
     };
   }
 }
@@ -118,77 +134,18 @@ export function createRateLimitKey(
   return `ratelimit:${prefix}:${userId}`;
 }
 
-// In-memory cache for development (NOT production-ready)
-const cache = new Map<string, { count: number; expiresAt: number }>();
-
-/**
- * Increment key in cache
- * 
- * @param key - Cache key
- * @returns Current count
- */
-async function incrementKey(key: string): Promise<number> {
-  const now = Date.now();
-  const entry = cache.get(key);
-  
-  if (!entry || entry.expiresAt < now) {
-    cache.set(key, { count: 1, expiresAt: now + 60000 });
-    return 1;
-  }
-  
-  entry.count++;
-  return entry.count;
-  
-  // In production, use Redis:
-  // const redis = await getRedisClient();
-  // return await redis.incr(key);
-}
-
-/**
- * Set expiry for key
- * 
- * @param key - Cache key
- * @param seconds - Expiry in seconds
- */
-async function setExpiry(key: string, seconds: number): Promise<void> {
-  const entry = cache.get(key);
-  if (entry) {
-    entry.expiresAt = Date.now() + (seconds * 1000);
-  }
-  
-  // In production, use Redis:
-  // const redis = await getRedisClient();
-  // await redis.expire(key, seconds);
-}
-
-/**
- * Clean up expired entries (for in-memory cache)
- */
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of cache.entries()) {
-    if (entry.expiresAt < now) {
-      cache.delete(key);
-    }
-  }
-}, 60000); // Clean every minute
-
 /**
  * Reset rate limit for a key (admin function)
- * 
+ *
  * @param key - Rate limit key
  */
 export async function resetRateLimit(key: string): Promise<void> {
-  cache.delete(key);
-  
-  // In production, use Redis:
-  // const redis = await getRedisClient();
-  // await redis.del(key);
+  await kv.del(key);
 }
 
 /**
  * Get current rate limit status
- * 
+ *
  * @param key - Rate limit key
  * @param limit - Max requests allowed
  * @returns Current status
@@ -197,17 +154,9 @@ export async function getRateLimitStatus(
   key: string,
   limit: number
 ): Promise<{ current: number; remaining: number }> {
-  const entry = cache.get(key);
-  const current = entry?.count || 0;
-  const remaining = Math.max(0, limit - current);
-  
-  return { current, remaining };
-  
-  // In production, use Redis:
-  // const redis = await getRedisClient();
-  // const current = await redis.get(key);
-  // const count = current ? parseInt(current) : 0;
-  // return { current: count, remaining: Math.max(0, limit - count) };
+  const current = await kv.get<number>(key);
+  const count = current || 0;
+  return { current: count, remaining: Math.max(0, limit - count) };
 }
 
 // Made with Moe Abdelaziz

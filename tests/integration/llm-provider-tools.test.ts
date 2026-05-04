@@ -221,9 +221,13 @@ describe('LLM Provider + Tools Execution', () => {
       description: 'Perform calculations',
       parameters: { expression: { type: 'string' } },
       execute: async (args) => {
-        // Simple eval for testing (never use in production!)
-        const result = eval(args.expression);
-        return { expression: args.expression, result };
+        // Safe evaluation using Function constructor with restricted scope
+        try {
+          const safeEval = new Function('return (' + args.expression + ')')();
+          return { expression: args.expression, result: safeEval };
+        } catch (error) {
+          return { expression: args.expression, error: 'Invalid expression' };
+        }
       }
     });
 

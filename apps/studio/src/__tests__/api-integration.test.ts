@@ -10,7 +10,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit-middleware';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { requireAuth, successResponse, ERR } from '@/lib/api-helpers';
 
 // Mock Redis

@@ -10,6 +10,10 @@
 !.yarn/releases
 !.yarn/versions
 
+# package managers - pnpm only, ignore npm/yarn locks
+package-lock.json
+yarn.lock
+
 # testing
 /coverage
 

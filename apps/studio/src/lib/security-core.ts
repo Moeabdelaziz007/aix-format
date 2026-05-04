@@ -286,6 +286,64 @@ export function calculateSafetyScore(metrics: {
   return score;
 }
 
-// Made with Moe Abdelaziz
+// ============================================
+// CRYPTOGRAPHIC SIGNATURES (NaCl)
+// ============================================
 
-// Made with Bob
+import * as nacl from 'tweetnacl';
+import { decodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util';
+
+const KEY_PAIR = nacl.sign.keyPair(); // In production, load from secure vault
+
+/**
+ * Sign tool response to prevent cache poisoning
+ */
+export function signToolResponse(response: any): string {
+  const message = JSON.stringify(response);
+  const messageUint8 = decodeUTF8(message);
+  const signature = nacl.sign.detached(messageUint8, KEY_PAIR.secretKey);
+  return encodeBase64(signature);
+}
+
+/**
+ * Verify tool response signature
+ */
+export function verifyToolResponse(response: any, signature: string, publicKey: string): boolean {
+  try {
+    const message = JSON.stringify(response);
+    const messageUint8 = decodeUTF8(message);
+    const signatureUint8 = decodeBase64(signature);
+    const publicKeyUint8 = decodeBase64(publicKey);
+    return nacl.sign.detached.verify(messageUint8, signatureUint8, publicKeyUint8);
+  } catch {
+    return false;
+  }
+}
+
+// ============================================
+// DEAD HAND PROTOCOL
+// ============================================
+
+/**
+ * Check if identity should be killed due to inactivity
+ */
+export function checkDeadHand(lastActiveAt: string, limitDays: number): boolean {
+  const lastActive = new Date(lastActiveAt).getTime();
+  const now = Date.now();
+  const diffDays = (now - lastActive) / (1000 * 60 * 60 * 24);
+  return diffDays > limitDays;
+}
+
+/**
+ * Calculate behavioral entropy to prevent Sybil/Gaming attacks
+ */
+export function calculateBehavioralEntropy(responseTimes: number[]): number {
+  if (responseTimes.length < 5) return 0;
+  
+  const avg = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+  const variance = responseTimes.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / responseTimes.length;
+  
+  return Math.min(1, Math.sqrt(variance) / 100);
+}
+
+// Made with Moe Abdelaziz

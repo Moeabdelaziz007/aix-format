@@ -10,6 +10,8 @@
  */
 
 import { requireEnv } from './api-helpers';
+import { secureId } from './security-core';
+import { z } from 'zod';
 
 export interface ABOMVulnerability {
   id: string;
@@ -97,7 +99,7 @@ export class AIRemediator {
     if (scanResult.vulnerabilities && Array.isArray(scanResult.vulnerabilities)) {
       for (const vuln of scanResult.vulnerabilities) {
         vulnerabilities.push({
-          id: vuln.id || `vuln_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: vuln.id || secureId('vuln', 12),
           severity: vuln.severity || 'medium',
           category: vuln.category || 'unknown',
           description: vuln.description || vuln.message || 'No description',
@@ -376,7 +378,7 @@ Respond in JSON format:
         results.push({
           vulnerabilityId: suggestion.vulnerabilityId,
           status: 'failed',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
