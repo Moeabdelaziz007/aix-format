@@ -272,4 +272,4 @@ describe('Custom Error Classes', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

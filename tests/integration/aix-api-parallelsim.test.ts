@@ -481,4 +481,4 @@ describe('ParallelSim + aix() API', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

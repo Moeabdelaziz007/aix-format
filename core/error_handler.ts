@@ -263,4 +263,4 @@ function sanitizeMessage(error: unknown): string {
 // TokenBucket removed per ADR-002: Rate-limiting is out-of-scope for core/
 // Use core/rate-limit-adapter.ts (AIXTokenBucket) for rate-limiting functionality
 
-// Made with Bob
+// Made with Moe Abdelaziz

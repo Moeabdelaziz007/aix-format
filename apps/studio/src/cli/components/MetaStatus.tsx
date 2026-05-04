@@ -173,4 +173,4 @@ MetaStatus.displayName = 'MetaStatus';
 
 export default MetaStatus;
 
-// Made with Bob
+// Made with Moe Abdelaziz

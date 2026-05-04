@@ -1,21 +1,19 @@
-/**
- * AIX LLM Provider — The Missing Keystone
- *
- * This file is the gravity center that was absent.
- * Without it, agent-runtime.ts had TODO placeholders.
- * With it, AIX becomes a real library.
- *
- * Usage:
- *   import { OpenAIProvider } from './llm-provider';
- *   const agent = new AgentRuntimeEngine(id, name, task, {
- *     llm: new OpenAIProvider(openai),
- *     tools: { search: mySearchFn }
- *   });
- */
+import { z } from 'zod';
+import { CircuitBreaker } from './security/circuit-breaker';
 
 /**
- * Core contract: any LLM that AIX can drive
+ * AIX LLM Provider — The Sovereign Standard
  */
+
+export const LLMConfigSchema = z.object({
+  model: z.string().optional(),
+  apiKey: z.string().min(1, "API Key is required"),
+  circuitBreaker: z.object({
+    failureThreshold: z.number().optional(),
+    recoveryTimeout: z.number().optional()
+  }).optional()
+});
+
 export interface LLMProvider {
   complete(prompt: string, stopTokens?: string[]): Promise<string>;
   model?: string;
@@ -43,28 +41,26 @@ export interface AgentRuntimeConfig {
  *   const llm = new OpenAIProvider(new OpenAI({ apiKey: '...' }));
  */
 export class OpenAIProvider implements LLMProvider {
-  model = 'gpt-4o';
+  private cb: CircuitBreaker;
+  model: string;
 
   constructor(
-    private client: {
-      chat: {
-        completions: {
-          create(params: any): Promise<{ choices: Array<{ message: { content: string | null } }> }>;
-        };
-      };
-    },
-    model = 'gpt-4o'
+    private client: any,
+    config: { model?: string; name?: string } = {}
   ) {
-    this.model = model;
+    this.model = config.model || 'gpt-4o';
+    this.cb = new CircuitBreaker({ name: config.name || 'OpenAI' });
   }
 
   async complete(prompt: string, stopTokens?: string[]): Promise<string> {
-    const res = await this.client.chat.completions.create({
-      model: this.model,
-      messages: [{ role: 'user', content: prompt }],
-      stop: stopTokens,
+    return this.cb.execute(async () => {
+      const res = await this.client.chat.completions.create({
+        model: this.model,
+        messages: [{ role: 'user', content: prompt }],
+        stop: stopTokens,
+      });
+      return res.choices[0]?.message?.content ?? '';
     });
-    return res.choices[0]?.message?.content ?? '';
   }
 }
 
@@ -77,27 +73,27 @@ export class OpenAIProvider implements LLMProvider {
  *   const llm = new AnthropicProvider(new Anthropic({ apiKey: '...' }));
  */
 export class AnthropicProvider implements LLMProvider {
-  model = 'claude-3-5-sonnet-20241022';
+  private cb: CircuitBreaker;
+  model: string;
 
   constructor(
-    private client: {
-      messages: {
-        create(params: any): Promise<{ content: Array<{ type: string; text: string }> }>;
-      };
-    },
-    model = 'claude-3-5-sonnet-20241022'
+    private client: any,
+    config: { model?: string; name?: string } = {}
   ) {
-    this.model = model;
+    this.model = config.model || 'claude-3-5-sonnet-20241022';
+    this.cb = new CircuitBreaker({ name: config.name || 'Anthropic' });
   }
 
   async complete(prompt: string, _stopTokens?: string[]): Promise<string> {
-    const res = await this.client.messages.create({
-      model: this.model,
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: prompt }],
+    return this.cb.execute(async () => {
+      const res = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      const block = res.content.find((b: any) => b.type === 'text');
+      return block?.text ?? '';
     });
-    const block = res.content.find(b => b.type === 'text');
-    return block?.text ?? '';
   }
 }
 
@@ -133,17 +129,19 @@ export class MockProvider implements LLMProvider {
  *   const llm = new GroqProvider(process.env.GROQ_API_KEY!);
  */
 export class GroqProvider implements LLMProvider {
-  model = 'llama-3.3-70b-versatile';
+  private cb: CircuitBreaker;
+  model: string;
 
   constructor(
     private apiKey: string,
     model = 'llama-3.3-70b-versatile'
   ) {
     this.model = model;
+    this.cb = new CircuitBreaker({ name: 'Groq' });
   }
 
   async complete(prompt: string, stopTokens?: string[]): Promise<string> {
-    try {
+    return this.cb.execute(async () => {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -159,17 +157,10 @@ export class GroqProvider implements LLMProvider {
         })
       });
 
-      if (!res.ok) {
-        const error = await res.text();
-        throw new Error(`Groq API Error: ${res.status} - ${error}`);
-      }
-
+      if (!res.ok) throw new Error(`Groq API Error: ${res.status}`);
       const data = await res.json() as any;
       return data.choices[0]?.message?.content ?? '';
-    } catch (error) {
-      console.error('❌ GroqProvider Error:', error);
-      throw error;
-    }
+    });
   }
 }
 /**
@@ -178,6 +169,7 @@ export class GroqProvider implements LLMProvider {
  */
 export class LangfuseProvider implements LLMProvider {
   private langfuse: any = null;
+  public model?: string;
 
   constructor(
     private inner: LLMProvider,
@@ -190,9 +182,23 @@ export class LangfuseProvider implements LLMProvider {
     this.model = inner.model;
   }
 
-  model?: string;
+  private redactSensitiveData(data: any): any {
+    if (!data) return data;
+    try {
+      const json = typeof data === 'string' ? data : JSON.stringify(data);
+      const redacted = json
+        .replace(/(sk-|gsk_|upstash_|SECRET_|API_KEY)[a-zA-Z0-9_-]{16,}/gi, '[REDACTED_SECRET]')
+        .replace(/redis(s)?:\/\/[^"'\s]+/gi, '[REDACTED_REDIS_URL]')
+        .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED_EMAIL]');
+      
+      return typeof data === 'string' ? redacted : JSON.parse(redacted);
+    } catch (e) {
+      return '[REDACTION_ERROR]';
+    }
+  }
 
   async complete(prompt: string, stopTokens?: string[]): Promise<string> {
+    const startTime = Date.now();
     if (!this.langfuse) {
       try {
         const { Langfuse } = await import('langfuse');
@@ -202,37 +208,55 @@ export class LangfuseProvider implements LLMProvider {
           baseUrl: this.config.baseUrl || 'https://cloud.langfuse.com',
         });
       } catch (e) {
-        console.warn('⚠️ Langfuse SDK not found, falling back to raw execution');
         return this.inner.complete(prompt, stopTokens);
       }
     }
 
     const trace = this.langfuse.trace({
-      name: 'aix-inference',
-      input: this.redactSensitiveData({ prompt }),
-      tags: ['sovereign-loop']
+      name: 'agent-execution',
+      input: this.redactSensitiveData({ prompt, model: this.model }),
+      metadata: {
+        agentId: 'sovereign-agent', // Should ideally be passed from runtime
+        route: 'aix-gateway',
+        trustScore: 10 // Tesla Harmonic 10
+      },
+      tags: ['production', 'sovereign-loop']
     });
 
     const generation = trace.generation({
       name: 'llm-completion',
+      model: this.model,
       input: this.redactSensitiveData(prompt)
     });
 
     try {
       const response = await this.inner.complete(prompt, stopTokens);
-      
-      generation.update({
-        output: this.redactSensitiveData(response)
+      const latencyMs = Date.now() - startTime;
+
+      generation.update({ 
+        output: this.redactSensitiveData(response),
+        metadata: { latencyMs }
       });
-      
+
       return response;
     } catch (error: any) {
-      generation.update({
-        level: 'ERROR',
-        statusMessage: error.message
+      generation.update({ 
+        level: 'ERROR', 
+        statusMessage: this.redactSensitiveData(error.message) 
       });
       throw error;
     } finally {
+      // In a real long-running process, we'd flush periodically
+      // But for agentic bursts, we flush to ensure visibility
+      await this.langfuse.flushAsync();
+    }
+  }
+
+  /**
+   * Manual flush for shutdown scenarios
+   */
+  async shutdown() {
+    if (this.langfuse) {
       await this.langfuse.flushAsync();
     }
   }

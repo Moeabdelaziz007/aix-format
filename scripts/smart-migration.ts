@@ -261,4 +261,4 @@ class SmartMigrator {
 const migrator = new SmartMigrator();
 migrator.run().catch(console.error);
 
-// Made with Bob
+// Made with Moe Abdelaziz

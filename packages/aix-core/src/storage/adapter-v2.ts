@@ -284,4 +284,4 @@ class SelfHealingStorageAdapter implements StorageAdapter {
 export const kvV2 = new SelfHealingStorageAdapter();
 export const kv = kvV2; // Alias for backward compatibility
 
-// Made with Bob
+// Made with Moe Abdelaziz

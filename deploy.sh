@@ -39,4 +39,4 @@ echo ""
 echo "🌐 Live site:"
 echo "   https://axiomid.app"
 
-# Made with Bob
+# Made with Moe Abdelaziz

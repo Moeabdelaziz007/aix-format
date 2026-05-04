@@ -280,4 +280,4 @@ describe('Signature Verification Integration', () => {
   });
 });
 
-// Made with Bob
+// Made with Moe Abdelaziz

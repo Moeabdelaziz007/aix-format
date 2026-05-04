@@ -306,4 +306,4 @@ export default class PetAppsCoordinator extends EventEmitter {
   // Implementation continues...
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

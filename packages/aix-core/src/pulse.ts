@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
 
@@ -28,7 +29,7 @@ export class PulseEngine {
   static async emit(event: Omit<PulseEvent, 'id' | 'timestamp'>): Promise<void> {
     const fullEvent: PulseEvent = {
       ...event,
-      id: Math.random().toString(36).slice(2, 12),
+      id: crypto.randomBytes(6).toString('hex'),
       timestamp: Date.now()
     };
 

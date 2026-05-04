@@ -161,10 +161,10 @@ aix deploy --platform ibm-watsonx
 | TrustChain Module | ✅ v0.369.0 | [Module](packages/aix-core/src/trust-chain/) |
 | Evolution Tracking | ✅ v0.369.0 | [Schema](schemas/aix.schema.json) |
 | ABOM → MCP Gate | ✅ v0.369.0 | [Gate](core/mcp-gate.ts) |
-| Revenue Router | 🔄 Beta | [Spec](docs/SPEC_V1_3.md#economics) |
+| Sovereign Economy | ✅ v0.369.0 | [Spec](apps/studio/src/app/spec/page.tsx#economy) |
+| Coinbase AgentKit | ✅ Live | [Economics](packages/aix-core/src/economics/) |
+| Stripe MCP | ✅ Live | [Gate](packages/aix-core/src/mcp-gate.ts) |
 | IBM watsonx Bridge | 🔜 Soon | — |
-| Coinbase AgentKit | 🔜 Soon | — |
-| HTTP x402 Protocol | 🔜 Soon | — |
 | aix CLI Tool | 🔜 Soon | — |
 
 ---

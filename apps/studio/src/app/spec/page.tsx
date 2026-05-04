@@ -12,6 +12,9 @@ const sections = [
   { id: "signing",      label: "Cryptographic Signing" },
   { id: "abom",         label: "ABOM" },
   { id: "permissions",  label: "Permissions" },
+  { id: "extensions",   label: "Extensions" },
+  { id: "topology",     label: "Quantum Topology" },
+  { id: "economy",      label: "Sovereign Economy" },
   { id: "versioning",   label: "Versioning" },
   { id: "examples",     label: "Examples" },
 ];
@@ -225,6 +228,143 @@ manifest.signature = base64url(signature);`}</code></pre>
     "required_for": ["financial_transactions", "identity_ops"]
   }
 }`}</code></pre>
+      </div>
+    ),
+  },
+  extensions: {
+    title: "Extensions & Custom Statutes",
+    body: (
+      <div className="space-y-6">
+        <p className="text-[var(--color-on-surface-variant)] leading-relaxed">
+          Extensions allow developers to attach arbitrary metadata or custom logic to an agent. 
+          All extension data must be namespace-scoped to prevent collisions.
+        </p>
+        <pre className="code-block"><code>{`"extensions": {
+  "com.axiom.governance": {
+    "statute_id": "ST-2026-001",
+    "enforcement": "strict",
+    "sovereign_override": false
+  },
+  "io.pi.payment": {
+    "preferred_currency": "PI",
+    "max_gas_fee": 0.01
+  }
+}`}</code></pre>
+        <div className="spec-card rounded-2xl p-5 border border-white/5">
+          <h4 className="text-white font-semibold mb-3">Extension Rules</h4>
+          <ul className="text-sm text-[var(--color-on-surface-variant)] space-y-2">
+            <li><span className="text-primary font-bold">Namespace Required:</span> Use reverse-DNS notation (e.g., <code className="code-inline">com.org.plugin</code>).</li>
+            <li><span className="text-primary font-bold">Immutable Signing:</span> Extensions are included in the manifest signature hash.</li>
+            <li><span className="text-primary font-bold">TrustChain Integration:</span> Extension actions must be logged via <code className="code-inline">TrustChain.append()</code>.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  topology: {
+    title: "Quantum Topology & Meta-Loop",
+    body: (
+      <div className="space-y-8">
+        <p className="text-[var(--color-on-surface-variant)] leading-relaxed">
+          The system doesn't just improve; it observes itself improving. Through Quantum Topology, 
+          we track the relationships and emergent behaviors across the entire agent network.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="spec-card rounded-2xl p-5 border border-white/5 space-y-3">
+             <h4 className="text-white font-black text-xs uppercase tracking-widest text-primary">Layered Evolution</h4>
+             <p className="text-xs text-[var(--color-on-surface-variant)] leading-relaxed">
+                The Meta-Loop operates across 5 distinct layers of consciousness, from raw execution to quantum path optimization.
+             </p>
+             <div className="space-y-2 pt-2">
+                {[
+                   { l: "L0", t: "Execution", d: "Agent performs the task" },
+                   { l: "L1", t: "Reflection", d: "Agent reviews own work" },
+                   { l: "L2", t: "Patterns", d: "Discovery of mistakes" },
+                   { l: "L3", t: "Topology", d: "Cross-agent relationships" },
+                   { l: "L4", t: "Quantum", d: "Parallel path optimization" },
+                ].map(item => (
+                   <div key={item.l} className="flex items-center gap-3 p-2 rounded-xl bg-black/20 border border-white/5">
+                      <span className="w-6 h-6 flex items-center justify-center rounded-lg bg-primary/20 text-primary font-black text-[10px]">{item.l}</span>
+                      <div>
+                         <div className="text-[10px] font-bold text-white">{item.t}</div>
+                         <div className="text-[8px] text-zinc-500">{item.d}</div>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
+          <div className="spec-card rounded-2xl p-5 border border-white/5 space-y-4">
+             <h4 className="text-white font-black text-xs uppercase tracking-widest text-primary">Topological Wisdom</h4>
+             <p className="text-xs text-[var(--color-on-surface-variant)] leading-relaxed">
+                Wisdom is synthesized by contrasting recent performance with historical "scar tissue" failures.
+             </p>
+             <pre className="code-block text-[10px]"><code>{`// Alchemy: Logs -> Wisdom
+const synthesis = await Alchemist.consolidate({
+  recent_logs: logs.slice(-10),
+  historical_scars: failures.all(),
+  goal: "Zero recurrence"
+});
+
+// Result indexed in WikiBrain
+await WikiBrain.index(synthesis);`}</code></pre>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  economy: {
+    title: "Sovereign Economy & Financial Agency",
+    body: (
+      <div className="space-y-8">
+        <p className="text-[var(--color-on-surface-variant)] leading-relaxed">
+          AIX Agents are economic actors. By integrating Coinbase Agentic Wallets (TEE) 
+          and Stripe MCP, we enable agents to hold capital and execute transactions autonomously.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { 
+              t: "Coinbase TEE Vault", 
+              d: "MPC + Trusted Execution Environment for private keys.", 
+              i: "security", 
+              v: "Active" 
+            },
+            { 
+              t: "Stripe MCP Bridge", 
+              d: "Native Stripe tool access via Model Context Protocol.", 
+              i: "payments", 
+              v: "L3 Verified" 
+            },
+            { 
+              t: "Agentic Wallets", 
+              d: "Programmable session caps and spending limits.", 
+              i: "account_balance", 
+              v: "Tesla 3-6-9" 
+            },
+          ].map(item => (
+            <div key={item.t} className="spec-card rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+              <div>
+                <span className="material-symbols-rounded text-primary text-2xl mb-3">{item.i}</span>
+                <h4 className="text-white font-bold text-sm mb-2">{item.t}</h4>
+                <p className="text-xs text-[var(--color-on-surface-variant)] leading-relaxed">{item.d}</p>
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-tighter">{item.v}</span>
+                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_var(--color-primary)]"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="spec-card rounded-2xl p-6 border border-white/5 space-y-4">
+           <h4 className="text-white font-black text-xs uppercase tracking-widest text-primary">Financial Guardrails</h4>
+           <pre className="code-block text-[11px]"><code>{`// Financial Clearance Logic (Tesla Harmony)
+if (tool.isFinancial()) {
+  const safety = await abom.getScore(agentDid);
+  if (safety < 9.0) { // Tesla 9: Universal Security
+    throw new Error("Financial Tier 3 requires 9.0+ Safety Score");
+  }
+  await CoinbaseVault.requestTEEAttestation(agentId, 1369); // Tesla 1-3-6-9
+}`}</code></pre>
+        </div>
       </div>
     ),
   },

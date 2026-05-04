@@ -25,12 +25,21 @@ export interface LineageRecord {
   verified: boolean;
 }
 
+export interface ActionRecord {
+  auditHash: string;
+  prevAction: string;
+  agentId: string;
+  action: string;
+  data: unknown;
+  timestamp: number;
+}
+
 /**
  * TrustChain class
  * Persistent Meta-Cognitive Trust Layer
  */
 export class TrustChain {
-  private chain: any[] = []; // In-memory cache for test compatibility
+  private chain: ActionRecord[] = []; // In-memory cache for test compatibility
   /**
    * Verify signature using Ed25519 (nacl)
    */
@@ -212,12 +221,12 @@ export class TrustChain {
   /**
    * Get all actions in the chain for an agent
    */
-  async getActions(agentId: string, limit: number = 50): Promise<any[]> {
-    const actions: any[] = [];
+  async getActions(agentId: string, limit: number = 50): Promise<ActionRecord[]> {
+    const actions: ActionRecord[] = [];
     let currentHash = await kv.get<string>(`trust:last_action:${agentId}`);
     
     while (currentHash && currentHash !== 'genesis' && actions.length < limit) {
-      const record = await kv.get<any>(`trust:action:${currentHash}`);
+      const record = await kv.get<ActionRecord>(`trust:action:${currentHash}`);
       if (!record) break;
       actions.push(record);
       currentHash = record.prevAction;
@@ -303,7 +312,7 @@ export class TrustChain {
   /**
    * Get all actions as a flat list (Test Compatibility)
    */
-  getChain(): any[] {
+  getChain(): ActionRecord[] {
     return this.chain;
   }
 }

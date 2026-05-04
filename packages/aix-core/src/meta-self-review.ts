@@ -384,68 +384,59 @@ Be honest, specific, and actionable.
   /**
    * E2.2: PROACTIVE SCAN - Scan agent BEFORE task execution
    * Predicts potential issues and suggests preventive actions
+   * 🌀 QUANTUM UPGRADE: Uses QuantumOptimizer for path prediction
    */
   static async proactiveScan(agentId: string): Promise<{
     shouldProceed: boolean;
     warnings: string[];
     suggestedMode?: AgentMode;
     preventiveActions: string[];
+    quantumPath?: any;
   }> {
-    const history = await this.getSelfReviewHistory(agentId, 10);
+    // Import dynamically to avoid circular dependency
+    const { QuantumOptimizer } = await import('./quantum-meta-loop');
     
-    if (history.length === 0) {
-      return {
-        shouldProceed: true,
-        warnings: [],
-        preventiveActions: ['Start building review history'],
-      };
-    }
-
+    const history = await this.getSelfReviewHistory(agentId, 10);
     const warnings: string[] = [];
     const preventiveActions: string[] = [];
     let suggestedMode: AgentMode | undefined;
 
-    // E2.3: USE getImprovementTrend() for decisions
+    // 1. Get Quantum Evolution Path
+    const quantumPath = await QuantumOptimizer.generateEvolutionPaths(agentId);
+    
+    // 2. Map Recommended Scenario to Agent Mode
+    if (quantumPath.recommendedScenario === 'recovery') {
+      suggestedMode = 'SAFE_STRICT';
+      warnings.push('Quantum analysis detected a "recovery" requirement');
+      preventiveActions.push('Enforcing SAFE_STRICT mode for stabilization');
+    } else if (quantumPath.recommendedScenario === 'breakthrough') {
+      suggestedMode = 'EXPLORATORY';
+      preventiveActions.push('Pushing boundaries for breakthrough innovation');
+    } else if (quantumPath.recommendedScenario === 'aggressive') {
+      suggestedMode = 'CREATIVE';
+      preventiveActions.push('Unlocking creative exploration filters');
+    }
+
+    // 3. Fallback to historical trend analysis
     const trend = await this.getImprovementTrend(agentId);
-    if (trend && trend.trend === 'down') {
+    if (trend && trend.trend === 'down' && !suggestedMode) {
       warnings.push(`Performance declining: ${trend.previousAverage.toFixed(1)} → ${trend.recentAverage.toFixed(1)}`);
-      preventiveActions.push('Switch to SAFE_STRICT mode');
       suggestedMode = 'SAFE_STRICT';
     }
 
-    // E2.4: ENFORCE isSafeToEvolve() checks
+    // 4. Final safety check
     const safetyCheck = await this.isSafeToEvolve(agentId);
     if (!safetyCheck.safe) {
-      warnings.push(`Evolution blocked: ${safetyCheck.reason}`);
-      preventiveActions.push('Focus on proven patterns only');
+      warnings.push(`Safety risk: ${safetyCheck.reason}`);
       suggestedMode = 'SAFE_STRICT';
-    }
-
-    // Check recent failures
-    const recentFailures = history.filter(r => r.isFailure).length;
-    if (recentFailures > 3) {
-      warnings.push(`${recentFailures} recent failures detected`);
-      preventiveActions.push('Review failure patterns before proceeding');
-      return {
-        shouldProceed: false,
-        warnings,
-        suggestedMode: 'SAFE_STRICT',
-        preventiveActions,
-      };
-    }
-
-    // Check safety scores
-    const avgSafety = history.reduce((sum, r) => sum + r.evaluation.safety, 0) / history.length;
-    if (avgSafety < 6.0) {
-      warnings.push(`Low safety score: ${avgSafety.toFixed(1)}`);
-      preventiveActions.push('Increase safety checks');
     }
 
     return {
-      shouldProceed: warnings.length < 3,
+      shouldProceed: !warnings.some(w => w.includes('blocked') || w.includes('risk')),
       warnings,
       suggestedMode,
       preventiveActions,
+      quantumPath
     };
   }
 

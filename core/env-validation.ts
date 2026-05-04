@@ -322,4 +322,4 @@ export function exportEnvForDebug(): Record<string, string> {
  * console.log(exportEnvForDebug());
  */
 
-// Made with Bob
+// Made with Moe Abdelaziz

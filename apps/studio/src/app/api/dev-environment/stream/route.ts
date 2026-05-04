@@ -351,4 +351,4 @@ async function simulateAIProcess(sendEvent: (data: any) => Promise<void>) {
   }, 30000); // Every 30 seconds
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz

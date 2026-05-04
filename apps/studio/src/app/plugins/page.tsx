@@ -40,6 +40,7 @@ const PLUGINS = [
     category: 'kyc',
     downloads: '4.2k',
     rating: 4.9,
+    status: 'installed',
     compatibility: 'v1.3',
     developer: { id: 'axiom_labs', name: 'Axiom Labs' },
     icon: <ShieldCheck className="text-emerald-400" />
@@ -51,6 +52,7 @@ const PLUGINS = [
     category: 'connectors',
     downloads: '12.8k',
     rating: 4.8,
+    status: 'available',
     compatibility: 'v1.3',
     developer: { id: 'supabase_dev', name: 'Supabase' },
     icon: <Cpu className="text-blue-400" />
@@ -62,6 +64,7 @@ const PLUGINS = [
     category: 'pricing',
     downloads: '2.1k',
     rating: 4.7,
+    status: 'installed',
     compatibility: 'v1.3',
     developer: { id: 'pi_ecosystem', name: 'Pi Ecosystem' },
     icon: <Wallet className="text-amber-400" />
@@ -73,6 +76,7 @@ const PLUGINS = [
     category: 'audit',
     downloads: '8.4k',
     rating: 4.9,
+    status: 'active',
     compatibility: 'v1.2+',
     developer: { id: 'axiom_labs', name: 'Axiom Labs' },
     icon: <FileSearch className="text-purple-mcp" />
@@ -84,6 +88,7 @@ const PLUGINS = [
     category: 'themes',
     downloads: '1.5k',
     rating: 4.5,
+    status: 'available',
     compatibility: 'v1.0+',
     developer: { id: 'design_ninja', name: 'Design Ninja' },
     icon: <Palette className="text-pink-400" />
@@ -175,12 +180,23 @@ export default function PluginDirectoryPage() {
                       className="group card p-6 rounded-[2.5rem] border-white/5 hover:border-primary/40 hover:bg-white/[0.03] transition-all flex flex-col gap-6 relative overflow-hidden"
                     >
                        <div className="flex items-start justify-between">
-                          <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-2xl shadow-2xl">
+                          <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-2xl shadow-2xl relative">
                              {plugin.icon}
+                             {plugin.status === 'active' && (
+                               <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[var(--color-background)] animate-pulse" />
+                             )}
                           </div>
-                          <Badge variant="outline" className="text-[8px] font-black border-white/10 text-zinc-500">
-                             {plugin.compatibility}
-                          </Badge>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge variant="outline" className="text-[8px] font-black border-white/10 text-zinc-500">
+                               {plugin.compatibility}
+                            </Badge>
+                            {plugin.status === 'installed' && (
+                              <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[8px] font-black">INSTALLED</Badge>
+                            )}
+                            {plugin.status === 'active' && (
+                              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[8px] font-black">ACTIVE</Badge>
+                            )}
+                          </div>
                        </div>
 
                        <div className="space-y-1">
@@ -208,8 +224,15 @@ export default function PluginDirectoryPage() {
                                 <span className="text-[10px] font-bold text-white">{plugin.rating}</span>
                              </div>
                           </div>
-                          <button className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-black hover:border-primary transition-all">
-                             Install
+                          <button 
+                            className={cn(
+                              "px-5 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border",
+                              plugin.status === 'available' 
+                                ? "bg-white text-black border-white hover:bg-primary hover:border-primary" 
+                                : "bg-white/5 text-zinc-400 border-white/10 hover:text-white hover:bg-white/10"
+                            )}
+                          >
+                             {plugin.status === 'available' ? 'Install' : 'Manage'}
                           </button>
                        </div>
                     </motion.div>

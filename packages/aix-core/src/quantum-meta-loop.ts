@@ -527,5 +527,3 @@ export class QuantumMetaLoop {
 }
 
 // Made with Moe Abdelaziz
-
-// Made with Bob
