@@ -64,6 +64,8 @@ export declare const KEYS: {
     readonly bus: (ring: string, event: string) => string;
     readonly busQueue: (ring: string) => string;
     readonly busBacklog: () => string;
+    readonly rate: (key: string) => string;
+    readonly rateLimit: (identifier: string) => string;
 };
 /**
  * Key pattern validation

@@ -30,13 +30,13 @@ jobs:
           cache-dependency-path: apps/studio/package-lock.json
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: TypeScript check
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
         env:
           NODE_ENV: production
 
@@ -59,8 +59,8 @@ jobs:
         with:
           node-version: '22'
 
-      - run: npm install --ignore-scripts
-      - run: npm test --if-present
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test --if-present
 
   # ─────────────────────────────────────────
   # 3. Deploy to Vercel — only on main push

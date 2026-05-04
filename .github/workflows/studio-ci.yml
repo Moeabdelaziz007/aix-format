@@ -28,17 +28,17 @@ jobs:
 
       # ── Root install (workspace deps) ───────────────────────────────────
       - name: Install root dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       # ── Studio install ──────────────────────────────────────────────────
       - name: Install studio dependencies
         working-directory: apps/studio
-        run: npm install --ignore-scripts --no-package-lock
+        run: pnpm install --frozen-lockfile --no-package-lock
 
       # ── Lint ────────────────────────────────────────────────────────────
       - name: Lint
         working-directory: apps/studio
-        run: npm run lint --if-present
+        run: pnpm run lint --if-present
         env:
           UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
           UPSTASH_REDIS_REST_TOKEN: placeholder_token
@@ -47,7 +47,7 @@ jobs:
       # ── Type-check ──────────────────────────────────────────────────────
       - name: TypeScript check
         working-directory: apps/studio
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
         env:
           UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
           UPSTASH_REDIS_REST_TOKEN: placeholder_token
@@ -55,20 +55,20 @@ jobs:
 
       # ── Schema-Type Drift Check ─────────────────────────────────────────
       - name: Schema-Type Sync Verification
-        run: npm run schema:sync:check
+        run: pnpm run schema:sync:check
         env:
           CI: true
 
       # ── Health Score Check ──────────────────────────────────────────────
       - name: Codebase Health Score
-        run: npm run health-score
+        run: pnpm run health-score
         env:
           CI: true
 
       # ── Build ───────────────────────────────────────────────────────────
       - name: Build Next.js (Turbopack)
         working-directory: apps/studio
-        run: npm run build
+        run: pnpm run build
         env:
           UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
           UPSTASH_REDIS_REST_TOKEN: placeholder_token
@@ -78,7 +78,7 @@ jobs:
 
       # ── Core tests ──────────────────────────────────────────────────────
       - name: Core unit tests
-        run: npm test --if-present
+        run: pnpm test --if-present
         env:
           CI: true
 
