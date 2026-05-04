@@ -6,7 +6,7 @@
 export const requirementsRules = [
   {
     name: 'requirements.hardware.cpu_cores',
-    test: (data) => {
+    check: (data) => {
       const cores = data.requirements?.hardware?.cpu_cores;
       return cores === undefined || (Number.isInteger(cores) && cores >= 1);
     },
@@ -17,7 +17,7 @@ export const requirementsRules = [
   
   {
     name: 'requirements.hardware.memory_mb',
-    test: (data) => {
+    check: (data) => {
       const mem = data.requirements?.hardware?.memory_mb;
       return mem === undefined || (Number.isInteger(mem) && mem >= 1);
     },
@@ -28,7 +28,7 @@ export const requirementsRules = [
   
   {
     name: 'requirements.hardware.storage_mb',
-    test: (data) => {
+    check: (data) => {
       const storage = data.requirements?.hardware?.storage_mb;
       return storage === undefined || (Number.isInteger(storage) && storage >= 1);
     },
@@ -39,7 +39,7 @@ export const requirementsRules = [
   
   {
     name: 'requirements.hardware.gpu_memory_mb',
-    test: (data) => {
+    check: (data) => {
       const gpu = data.requirements?.hardware?.gpu_memory_mb;
       return gpu === undefined || (Number.isInteger(gpu) && gpu >= 1);
     },
@@ -50,7 +50,7 @@ export const requirementsRules = [
   
   {
     name: 'requirements.network.bandwidth_mbps',
-    test: (data) => {
+    check: (data) => {
       const bw = data.requirements?.network?.bandwidth_mbps;
       return bw === undefined || (typeof bw === 'number' && bw >= 0);
     },
@@ -61,7 +61,7 @@ export const requirementsRules = [
   
   {
     name: 'requirements.vla.adapter.required',
-    test: (data) => {
+    check: (data) => {
       const vla = data.requirements?.vla;
       return !vla || !!vla.adapter;
     },
@@ -72,7 +72,7 @@ export const requirementsRules = [
   
   {
     name: 'requirements.vla.adapter.valid',
-    test: (data) => {
+    check: (data) => {
       const adapter = data.requirements?.vla?.adapter;
       if (!adapter) return true;
       const allowed = ['openpi', 'π0.7', 'generic'];
