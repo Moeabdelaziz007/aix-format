@@ -31,6 +31,21 @@ export const KEYS = {
   agentState: (id: string) => `${NS.AGENT}${id}:state`,
   agentMetrics: (id: string) => `${NS.AGENT}${id}:metrics`,
   
+  // Agent curiosity/exploration keys
+  agentExplorationHistory: (id: string) => `${NS.AGENT}${id}:exploration_history`,
+  agentExplorations: (id: string) => `${NS.AGENT}${id}:explorations`,
+  agentCuriosityScore: (id: string) => `${NS.AGENT}${id}:curiosity_score`,
+  agentSkillCombos: (id: string) => `${NS.AGENT}${id}:skill_combos`,
+  agentSkillCombo: (id: string, hash: string) => `${NS.AGENT}${id}:skill_combo:${hash}`,
+  agentActionCount: (id: string, action: string) => `${NS.AGENT}${id}:action_count:${action}`,
+  
+  // Agent meta-loop self-review keys
+  agentSelfReview: (id: string, taskId: string) => `${NS.AGENT}${id}:self_review:${taskId}`,
+  agentSelfReviewHistory: (id: string) => `${NS.AGENT}${id}:self_review_history`,
+  agentFailurePatterns: (id: string) => `${NS.AGENT}${id}:failure_patterns`,
+  agentCurrentMode: (id: string) => `${NS.AGENT}${id}:current_mode`,
+  agentExplorationRate: (id: string) => `${NS.AGENT}${id}:exploration_rate`,
+  
   // AIX format keys
   aix: (key: string) => `${NS.AIX}${key}`,
   aixManifest: (agentId: string) => `${NS.AIX}manifest:${agentId}`,

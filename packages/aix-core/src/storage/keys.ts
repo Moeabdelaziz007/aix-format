@@ -121,6 +121,12 @@ export const KEYS = {
   agentSkillCombos:    (agentId: string) => `agent:${agentId}:skill_combos`,
   agentActionCount:    (agentId: string, action: string) => `agent:${agentId}:action_count:${action}`,
   agentManifest:       (agentId: string) => `agent:${agentId}:manifest`,
+  
+  // Meta-loop self-review keys
+  agentSelfReview:     (agentId: string, taskId: string) => `agent:${agentId}:self_review:${taskId}`,
+  agentSelfReviewHistory: (agentId: string) => `agent:${agentId}:self_review_history`,
+  agentCurrentMode:    (agentId: string) => `agent:${agentId}:current_mode`,
+  agentExplorationRate: (agentId: string) => `agent:${agentId}:exploration_rate`,
   aixEconomicsTotalStake: (agentId: string) => `aix:economics:total_stake:${agentId}`,
   aixCompressionProfile: (taskType: string) => `aix:compression:profile:${taskType}`,
   

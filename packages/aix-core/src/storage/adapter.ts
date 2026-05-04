@@ -152,12 +152,12 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 
   async sadd(key: string, ...members: any[]): Promise<number> {
-    const result = await this.withRetry(() => this.client.sadd(key, ...members), 'SADD', key);
+    const result = await this.withRetry(() => this.client.sadd(key, ...(members as [any, ...any[]])), 'SADD', key);
     return Number(result) || 0;
   }
 
   async srem(key: string, ...members: any[]): Promise<number> {
-    const result = await this.withRetry(() => this.client.srem(key, ...members), 'SREM', key);
+    const result = await this.withRetry(() => this.client.srem(key, ...(members as [any, ...any[]])), 'SREM', key);
     return Number(result) || 0;
   }
 

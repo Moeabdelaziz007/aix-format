@@ -16,6 +16,7 @@ export declare const NS: {
     readonly PAYMENT: "payment:";
     readonly EXECUTION: "execution:";
     readonly BUS: "bus:";
+    readonly RATE: "rate:";
 };
 /**
  * Key generation functions

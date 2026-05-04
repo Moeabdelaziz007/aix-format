@@ -1,5 +1,5 @@
 import { kv as upstashKv } from '../packages/aix-core/src/storage/adapter';
-import { NS } from './storage/keys';
+import { KEYS } from './storage/keys';
 
 /**
  * AIXTokenBucket
@@ -21,7 +21,7 @@ export class AIXTokenBucket {
    * Requires Upstash Redis for distributed state.
    */
   async consume(key: string, tokens: number = 1): Promise<boolean> {
-    const upstashKey = `${NS.RATE}:${key}`;
+    const upstashKey = KEYS.rate(key);
 
     try {
       // Atomic SETNX for initialization
@@ -44,7 +44,7 @@ export class AIXTokenBucket {
   }
 
   async reset(key: string): Promise<void> {
-    const upstashKey = `${NS.RATE}:${key}`;
+    const upstashKey = KEYS.rate(key);
     await upstashKv.del(upstashKey).catch(() => {});
   }
 }

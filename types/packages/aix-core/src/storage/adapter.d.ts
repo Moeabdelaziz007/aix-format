@@ -38,8 +38,8 @@ declare class UpstashRedisAdapter implements StorageAdapter {
     ltrim(key: string, start: number, stop: number): Promise<void>;
     sadd(key: string, ...members: any[]): Promise<number>;
     srem(key: string, ...members: any[]): Promise<number>;
-    smembers<T>(key: string): Promise<T[]>;
-    mget<T>(...keys: string[]): Promise<(T | null)[]>;
+    smembers<T = any>(key: string): Promise<T[]>;
+    mget<T = any>(...keys: string[]): Promise<(T | null)[]>;
 }
 export declare const kv: UpstashRedisAdapter;
 export {};
