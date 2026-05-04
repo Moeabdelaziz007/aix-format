@@ -70,4 +70,13 @@ export abstract class AgentFactory<T> {
   abstract create(type: string, config: any): T;
 }
 
-export class AgentEventBus { emit(e: any){} on(e: any){} }
+export class AgentEventBus {
+  private static instance: AgentEventBus;
+  private constructor() {}
+  static getInstance() {
+    if (!this.instance) this.instance = new AgentEventBus();
+    return this.instance;
+  }
+  emit(e: any, payload?: any){}
+  on(e: any, cb?: any){}
+}

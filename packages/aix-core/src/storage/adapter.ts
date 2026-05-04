@@ -13,6 +13,9 @@ export interface StorageAdapter {
   set(key: string, value: any, options?: StorageOptions): Promise<void>;
   del(key: string | string[]): Promise<void>;
   incr(key: string): Promise<number>;
+  incrby?(key: string, decrement: number): Promise<number>;
+  incrBy?(key: string, decrement: number): Promise<number>;
+  decrBy?(key: string, decrement: number): Promise<number>;
   decr(key: string): Promise<number>;
   expire(key: string, seconds: number): Promise<void>;
   exists(key: string): Promise<boolean>;
@@ -106,6 +109,26 @@ class UpstashRedisAdapter implements StorageAdapter {
     }
   }
 
+  async incrBy(key: string, increment: number): Promise<number> {
+    try {
+      this.checkConnection();
+      return await this.client.incrby(key, increment);
+    } catch (error) {
+      console.error(`[Storage] INCRBY failed for ${key}:`, error);
+      throw error;
+    }
+  }
+
+  async decrBy(key: string, decrement: number): Promise<number> {
+    try {
+      this.checkConnection();
+      return await this.client.decrby(key, decrement);
+    } catch (error) {
+      console.error(`[Storage] DECRBY failed for ${key}:`, error);
+      throw error;
+    }
+  }
+
   async incr(key: string): Promise<number> {
     try {
       this.checkConnection();
@@ -151,7 +174,7 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 
   async lrange<T>(key: string, start: number, stop: number): Promise<T[]> {
-    return (await this.withRetry(() => this.client.lrange<T>(key, start, stop), 'LRANGE', key)) || [];
+    return (await this.withRetry(() => this.client.lrange<T>(key, start, stop), 'LRANGE', key)) as T[] || [];
   }
 
   async ltrim(key: string, start: number, stop: number): Promise<void> {
@@ -159,20 +182,20 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 
   async sadd(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.sadd(key, ...members), 'SADD', key) as any;
+    return this.withRetry(() => this.client.sadd(key, members[0], ...members.slice(1)), 'SADD', key) as any;
   }
 
   async srem(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.srem(key, ...members), 'SREM', key) as any;
+    return this.withRetry(() => this.client.srem(key, members[0], ...members.slice(1)), 'SREM', key) as any;
   }
 
   async smembers<T>(key: string): Promise<T[]> {
-    return (await this.withRetry(() => this.client.smembers<T>(key), 'SMEMBERS', key)) || [];
+    return (await this.withRetry(() => this.client.smembers(key), 'SMEMBERS', key)) as T[] || [];
   }
 
   async mget<T>(...keys: string[]): Promise<(T | null)[]> {
     if (keys.length === 0) return [];
-    return (await this.withRetry(() => this.client.mget<T>(...keys), 'MGET', keys[0])) || keys.map(() => null);
+    return (await this.withRetry(() => this.client.mget(...keys), 'MGET', keys[0])) as (T | null)[] || keys.map(() => null);
   }
 }
 

@@ -35,7 +35,8 @@ export const NS = {
   
   SKILLS: 'aix:skills',         
   INVOKE: 'aix:invoke',
-  SHADOW: 'aix:shadow' // Ghost Agent Pattern: Shadow Memory
+  SHADOW: 'aix:shadow', // Ghost Agent Pattern: Shadow Memory
+  RATE: 'aix:rate'
 } as const;
 
 /** Helper functions for key generation to ensure consistency */

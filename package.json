@@ -98,6 +98,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@octokit/rest": "^20.0.0",
     "@upstash/redis": "^1.37.0",

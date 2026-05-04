@@ -11,7 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@aix/core": "*",
+    "@aix-core/storage": "workspace:*",
     "axios": "^1.7.9",
     "zod": "^3.24.1"
   },

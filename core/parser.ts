@@ -1,3 +1,4 @@
+import { ABOMConstituent } from "../types/parser";
 /**
  * AIX Parser - TypeScript Implementation (v1.3)
  * Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026

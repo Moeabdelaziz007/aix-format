@@ -1,5 +1,6 @@
 import { PulseHandler, RedisEventBus } from "../patterns";
-import { GatewayProcess, AIXManifest } from "@aix-types";
+import { AIXManifest } from "@aix-types";
+import { GatewayProcess } from "../gateway";
 import { kv } from "../storage/adapter";
 import { KEYS } from "../storage/keys";
 import { GatewaySecurity } from "../security";
@@ -26,7 +27,7 @@ export class SecurityHandler extends PulseHandler {
     const threat = null;
     if (threat) {
       await executeDeadHand(threat);
-      throw new Error(`Security Quarantine: ${threat.reason}`);
+      throw new Error(`Security Quarantine: ${threat}`);
     }
 
     request.results.security = { safe: true, score: 100 };
@@ -57,7 +58,7 @@ export class EconomicsHandler extends PulseHandler {
 // 👻 Ghost Handler (Strategy Pattern integration)
 export class GhostHandler extends PulseHandler {
   async handle(request: PulseRequest) {
-    if (request.manifest.ghost_config?.enabled) {
+    if (request.manifest.ghost_config?.shadow_memory_enabled) {
       request.process.agentId = `ghost:${request.process.agentId.split(':').pop()}`;
       request.results.ghost = { active: true };
     }

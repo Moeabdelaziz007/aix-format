@@ -1,4 +1,4 @@
-import { kv, KEYS, LearningEngine } from './index';
+import { kv, KEYS } from './index';
 
 /**
  * Readable Memory System (v1.3.6)
@@ -27,7 +27,7 @@ export class ReadableMemory {
     }));
 
     // 2. Fetch Learned Facts
-    const facts = await LearningEngine.getAgentMemory(agentId);
+    const facts = await kv.lrange<string>(`agent:${agentId}:mem:epi`, 0, -1);
     const factNodes: MemoryNode[] = facts.map((f, i) => ({
       id: `fact-${i}`,
       label: f.length > 30 ? f.slice(0, 30) + '...' : f,
@@ -59,7 +59,7 @@ export class ReadableMemory {
    * Archives a session into Markdown format.
    */
   static async archiveToMarkdown(agentId: string, processId: string): Promise<string> {
-    const process = await kv.get<any>(KEYS.process(processId));
+    const process = await kv.get<any>(KEYS.gateway(processId));
     if (!process) return '';
 
     const date = new Date().toISOString().split('T')[0];

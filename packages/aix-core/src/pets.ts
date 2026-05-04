@@ -1,5 +1,5 @@
 import { kv, KEYS } from './index';
-import { PetConfig } from '@studio-types'; // Assuming we can reach types
+
 
 /**
  * AIX Pet Orchestrator (v1.3.5)

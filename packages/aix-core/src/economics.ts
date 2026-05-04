@@ -53,7 +53,7 @@ export class RevenueRouter {
 
 export class SovereignLoopManager {
   static async triggerReinvestment(agentId: string, amount: number) {
-    await kv.incrby(`aix:economics:reinvestment:${agentId}`, Math.floor(amount));
+    await kv.incrBy(`aix:economics:reinvestment:${agentId}`, Math.floor(amount));
   }
 }
 
@@ -68,7 +68,7 @@ export async function stakeAgent(agentId: string, stakerAddress: string, amount:
   const unlocksAt = Date.now() + lockDurationMs;
   const stakeObj: AgentStake = { agentId, stakedAmount: amount, stakerAddress, unlocksAt };
   await kv.lpush(`aix:economics:stake:${agentId}`, stakeObj);
-  await kv.incrby(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
+  await kv.incrBy(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
   return stakeObj;
 }
 
@@ -78,7 +78,7 @@ export async function unstakeAgent(agentId: string, stakerAddress: string, amoun
 
   // In a real system, we'd find the specific stakes for the stakerAddress and handle unlocksAt.
   // For this basic mechanism, we just decrement the total stake.
-  await kv.decrby(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
+  await kv.decrBy(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
   return true;
 }
 

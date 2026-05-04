@@ -4,7 +4,9 @@ import {
   GhostHandler, 
   PulseRequest 
 } from "./handlers";
-import { GatewayProcess, AIXManifest } from "@aix-types";
+import { AIXManifest } from "@aix-types";
+import { GatewayProcess } from "../gateway";
+import { AgentEventBus } from "../patterns";
 
 
 export class PulseOrchestrator {

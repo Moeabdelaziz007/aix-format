@@ -12,7 +12,7 @@ export class AgentStakingManager {
     const unlocksAt = Date.now() + lockDurationMs;
     const stakeObj: AgentStake = { agentId, stakedAmount: amount, stakerAddress, unlocksAt };
     await kv.lpush(`aix:economics:stake:${agentId}`, stakeObj);
-    await kv.incrby(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
+    await kv.incrBy(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
     return stakeObj;
   }
 
@@ -22,7 +22,7 @@ export class AgentStakingManager {
 
     // In a real system, we'd find the specific stakes for the stakerAddress and handle unlocksAt.
     // For this basic mechanism, we just decrement the total stake.
-    await kv.decrby(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
+    await kv.decrBy(`aix:economics:total_stake:${agentId}`, Math.floor(amount));
     return true;
   }
 

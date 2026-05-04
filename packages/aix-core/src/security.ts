@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+// @ts-ignore
 import canonicalize from 'canonical-json';
 
 /**
@@ -60,7 +61,7 @@ export class EnvelopeSecurity {
     const canonical = canonicalize(content);
     
     return createHash('sha256')
-      .update(canonical)
+      .update(canonical || "")
       .digest('hex');
   }
 

@@ -15,6 +15,10 @@
     "lib": ["ES2022"],
     "baseUrl": ".",
     "paths": {
+      "@aix-core": ["./packages/aix-core/src/index.ts"],
+      "@aix-types": ["./packages/aix-types/index.d.ts"],
+      "@studio-types": ["./apps/studio/src/types/index.ts"],
+      "@aix-core/storage": ["./packages/aix-core/src/index.ts"],
       "../types/aix": ["./types/aix.d.ts"]
     }
   },
