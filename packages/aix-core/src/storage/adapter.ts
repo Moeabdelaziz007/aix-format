@@ -152,20 +152,24 @@ class UpstashRedisAdapter implements StorageAdapter {
   }
 
   async sadd(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.sadd(key, ...members), 'SADD', key) as any;
+    const result = await this.withRetry(() => this.client.sadd(key, ...members), 'SADD', key);
+    return Number(result) || 0;
   }
 
   async srem(key: string, ...members: any[]): Promise<number> {
-    return this.withRetry(() => this.client.srem(key, ...members), 'SREM', key) as any;
+    const result = await this.withRetry(() => this.client.srem(key, ...members), 'SREM', key);
+    return Number(result) || 0;
   }
 
-  async smembers<T>(key: string): Promise<T[]> {
-    return (await this.withRetry(() => this.client.smembers<T>(key), 'SMEMBERS', key)) || [];
+  async smembers<T = any>(key: string): Promise<T[]> {
+    const result = await this.withRetry(() => this.client.smembers(key), 'SMEMBERS', key);
+    return (result as T[]) || [];
   }
 
-  async mget<T>(...keys: string[]): Promise<(T | null)[]> {
+  async mget<T = any>(...keys: string[]): Promise<(T | null)[]> {
     if (keys.length === 0) return [];
-    return (await this.withRetry(() => this.client.mget<T>(...keys), 'MGET', keys[0])) || keys.map(() => null);
+    const result = await this.withRetry(() => this.client.mget(...keys), 'MGET', keys[0]);
+    return (result as (T | null)[]) || keys.map(() => null);
   }
 }
 

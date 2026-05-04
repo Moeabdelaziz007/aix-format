@@ -17,6 +17,7 @@ export const NS = {
   PAYMENT: 'payment:',
   EXECUTION: 'execution:',
   BUS: 'bus:',
+  RATE: 'rate:',
 } as const;
 
 /**
