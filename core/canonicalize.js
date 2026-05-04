@@ -42,7 +42,7 @@ export function stripDynamicSecurityFields(input) {
   return cloned;
 }
 
-function serialize(value, path, seen) {
+export function serialize(value, path, seen) {
   if (value === null) return 'null';
 
   const kind = typeof value;
