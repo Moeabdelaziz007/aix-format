@@ -1,26 +1,22 @@
-/**
- * AIX Sovereign Patterns v2.2
- * Foundation for Lego Block Composition & Russian Doll Nesting.
- */
-
 import { kv } from "../storage/adapter";
+import { KEYS } from "../storage/keys";
 
 // --- Lego Block Pattern (Composition) ---
 export abstract class AgentBlock {
   abstract id: string;
-  abstract execute(context: any): Promise<any>;
+  abstract execute(context: unknown): Promise<unknown>;
 }
 
 // --- Skill Pattern (Atomic Logic) ---
 export abstract class AgentSkill {
   abstract name: string;
-  abstract run(params: any): Promise<any>;
+  abstract run(params: unknown): Promise<unknown>;
 }
 
 // --- Russian Doll Pattern (Hierarchy) ---
 export interface IHierarchy {
-  children: any[];
-  addChild(child: any): void;
+  children: unknown[];
+  addChild(child: unknown): void;
 }
 
 // --- Event Bus (Redis Pub/Sub for Decoupling) ---
@@ -32,13 +28,12 @@ export class RedisEventBus {
     return RedisEventBus.instance;
   }
 
-  async publish(channel: string, message: any) {
-    await kv.lpush(KEYS.aixEvents(channel), message); // Simplified persistence
-    // In a real pub/sub, we'd use redis.publish
+  async publish(channel: string, message: unknown) {
+    await kv.lpush(KEYS.aixEvents(channel), message);
   }
 
-  async subscribe(channel: string, callback: (data: any) => void) {
-    // Simulated subscription via polling or long-lived connection
+  async subscribe(channel: string, callback: (data: unknown) => void) {
+    // Simulated subscription
   }
 }
 
@@ -49,14 +44,14 @@ export abstract class PulseHandler {
     this.nextHandler = handler;
     return handler;
   }
-  async handle(request: any): Promise<any> {
+  async handle(request: unknown): Promise<unknown> {
     if (this.nextHandler) return this.nextHandler.handle(request);
     return request;
   }
 }
 
 export interface ICommand {
-  execute(): Promise<any>;
+  execute(): Promise<unknown>;
   undo?(): Promise<void>;
 }
 
@@ -65,7 +60,12 @@ export interface IStrategy<T, R> {
 }
 
 export abstract class AgentFactory<T> {
-  abstract create(type: string, config: any): T;
+  abstract create(type: string, config: unknown): T;
 }
 
-export class AgentEventBus { emit(e: any){} on(e: any){} }
+export class AgentEventBus { 
+  emit(e: string, data: unknown){} 
+  on(e: string, handler: (data: unknown) => void){} 
+}
+
+// Made with Moe Abdelaziz

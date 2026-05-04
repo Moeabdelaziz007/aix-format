@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
   });
 }
 
-async function processPiNetworkPayment(params: any) {
+async function processPiNetworkPayment(params: { paymentId: string, agentId: string, taskId: string, amount: number, userId: string }) {
   // Simulate Pi Network (Replace with SDK in Phase 3)
   const transactionHash = secureTransactionHash();
   return {
@@ -113,7 +113,7 @@ async function processPiNetworkPayment(params: any) {
   };
 }
 
-async function processEscrowPayment(params: any) {
+async function processEscrowPayment(params: { paymentId: string, agentId: string, taskId: string, amount: number, userId: string }) {
   return {
     success: true,
     paymentId: params.paymentId,
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
       const body = await request.json();
       const { paymentId, taskId, success: taskSuccess } = ReleaseRequestSchema.parse(body);
 
-      const payment: any = await kv.get(`pay:${paymentId}`);
+      const payment = await kv.get<{ agentId: string, verified: boolean, releaseAuditHash?: string }>(`pay:${paymentId}`);
       if (!payment) return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
 
       const trustChain = getTrustChain();
@@ -165,4 +165,3 @@ export async function PUT(request: NextRequest) {
 }
 
 // Made with Moe Abdelaziz
-e Abdelaziz

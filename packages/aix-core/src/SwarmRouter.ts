@@ -100,6 +100,7 @@ export class CircuitBreaker {
                 metrics.breakerTrips++;
             }
 
+            console.log(
                 `[CircuitBreaker] ${prevState} -> OPEN (Failures: ${this.failureCount}, Total Trips: ${metrics?.breakerTrips ?? 0})`
             );
         }
@@ -205,6 +206,7 @@ export class SwarmRouter {
         this.agents.set(validated.id, validated);
         this.metrics.activeAgents = this.agents.size;
 
+        console.log(
             `[SwarmRouter] Registered agent: ${validated.id} (role: ${validated.role}, trust: ${validated.trustLevel})`
         );
     }
@@ -285,6 +287,7 @@ export class SwarmRouter {
         // Record success in circuit breaker
         this.breaker.recordSuccess(this.metrics);
 
+        console.log(
             `[SwarmRouter] Routed task ${task.id} to agent ${plan.primaryAgentId} (score: ${plan.score.toFixed(2)}, fallbacks: ${fallbackChain.length})`
         );
 

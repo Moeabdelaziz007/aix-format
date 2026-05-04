@@ -12,7 +12,7 @@ import { KEYS } from './storage/keys';
 
 export interface SignatureData {
   agentId: string;
-  data: any;
+  data: unknown;
   signature: string;
   publicKey: string;  // Ed25519 public key (hex)
   timestamp: number;
@@ -35,7 +35,7 @@ export class TrustChain {
    */
   async verifySignature(
     agentId: string,
-    data: any,
+    data: unknown,
     signature: string,
     publicKey: string
   ): Promise<boolean> {
@@ -140,7 +140,7 @@ export class TrustChain {
    * Append an action to the trust chain (RULE 3)
    * Returns a unique auditHash for the action
    */
-  async append(agentId: string, action: string, data: any): Promise<string> {
+  async append(agentId: string, action: string, data: unknown): Promise<string> {
     const timestamp = Date.now();
     const prevAction = await kv.get<string>(`trust:last_action:${agentId}`) || 'genesis';
     
@@ -180,7 +180,7 @@ export class TrustChain {
   /**
    * Generate hash for data
    */
-  generateHash(data: any): string {
+  generateHash(data: unknown): string {
     const hash = createHash('sha256');
     hash.update(JSON.stringify(data));
     return hash.digest('hex');

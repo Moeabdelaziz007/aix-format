@@ -1,16 +1,3 @@
-/**
- * AIX Swarm - Merged from 6 files into 1 (Clean Room Pattern)
- * 
- * Original: 6 files, 7,473 bytes
- * Merged: 1 file, ~7,500 bytes (same functionality, better structure)
- * 
- * Benefits:
- * - Single import instead of 6
- * - No circular dependencies
- * - Tree shaking works correctly
- * - Clear module boundaries
- */
-
 import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
 import { GatewaySecurity } from './security';
@@ -22,13 +9,16 @@ import { PulseEngine } from './pulse';
 // Types (inline to avoid @aix-types dependency)
 export interface GatewayProcess {
   agentId: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface AIXManifest {
-  economics?: any;
+  economics?: {
+    arbitrage?: { enabled?: boolean };
+    [key: string]: unknown;
+  };
   ghost_config?: { enabled?: boolean };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============================================================================
@@ -39,10 +29,10 @@ export interface PulseRequest {
   process: GatewayProcess;
   manifest: AIXManifest;
   results: {
-    security?: any;
-    economics?: any;
-    reasoning?: any;
-    ghost?: any;
+    security?: { safe: boolean; score: number };
+    economics?: { totalFee: number; yield: number };
+    reasoning?: unknown;
+    ghost?: { active: boolean };
   };
 }
 
@@ -54,49 +44,53 @@ export type AgentType = 'trader' | 'guardian' | 'ghost' | 'scout';
 
 /** 🛡️ Security Handler */
 export class SecurityHandler extends PulseHandler {
-  async handle(request: PulseRequest) {
-    const frozen = await kv.get(KEYS.frozen(request.process.agentId));
+  async handle(request: unknown): Promise<unknown> {
+    const pulseRequest = request as PulseRequest;
+    const frozen = await kv.get(KEYS.frozen(pulseRequest.process.agentId));
     if (frozen) throw new Error("Agent frozen by Dead Hand Protocol");
 
-    const threat: any = null;
+    // Proactive threat detection placeholder
+    const threat: { reason: string } | null = null;
     if (threat) {
       await executeDeadHand(threat);
       throw new Error(`Security Quarantine: ${threat.reason}`);
     }
 
-    request.results.security = { safe: true, score: 100 };
-    await RedisEventBus.getInstance().publish('security:cleared', { agentId: request.process.agentId });
-    return super.handle(request);
+    pulseRequest.results.security = { safe: true, score: 100 };
+    await RedisEventBus.getInstance().publish('security:cleared', { agentId: pulseRequest.process.agentId });
+    return super.handle(pulseRequest);
   }
 }
 
 /** 💰 Economics Handler */
 export class EconomicsHandler extends PulseHandler {
-  async handle(request: PulseRequest) {
-    const econ = request.manifest.economics;
+  async handle(request: unknown): Promise<unknown> {
+    const pulseRequest = request as PulseRequest;
+    const econ = pulseRequest.manifest.economics;
     if (econ) {
-      const feeCalc = await RevenueRouter.calculateFee(request.process.agentId, econ);
-      request.results.economics = { 
+      const feeCalc = await RevenueRouter.calculateFee(pulseRequest.process.agentId, econ);
+      pulseRequest.results.economics = { 
         totalFee: feeCalc.total,
         yield: econ.arbitrage?.enabled ? feeCalc.total * 0.1 : 0 
       };
       await RedisEventBus.getInstance().publish('economics:optimized', { 
-        agentId: request.process.agentId, 
-        yield: request.results.economics.yield 
+        agentId: pulseRequest.process.agentId, 
+        yield: pulseRequest.results.economics.yield 
       });
     }
-    return super.handle(request);
+    return super.handle(pulseRequest);
   }
 }
 
 /** 👻 Ghost Handler (Strategy Pattern integration) */
 export class GhostHandler extends PulseHandler {
-  async handle(request: PulseRequest) {
-    if (request.manifest.ghost_config?.enabled) {
-      request.process.agentId = `ghost:${request.process.agentId.split(':').pop()}`;
-      request.results.ghost = { active: true };
+  async handle(request: unknown): Promise<unknown> {
+    const pulseRequest = request as PulseRequest;
+    if (pulseRequest.manifest.ghost_config?.enabled) {
+      pulseRequest.process.agentId = `ghost:${pulseRequest.process.agentId.split(':').pop()}`;
+      pulseRequest.results.ghost = { active: true };
     }
-    return super.handle(request);
+    return super.handle(pulseRequest);
   }
 }
 
@@ -122,7 +116,7 @@ export class PulseOrchestrator {
     };
 
     try {
-      const finalRequest = await this.chain.handle(request);
+      const finalRequest = await this.chain.handle(request) as PulseRequest;
       
       await RedisEventBus.getInstance().publish('pulse:success', {
         agentId: process.agentId,
@@ -130,10 +124,11 @@ export class PulseOrchestrator {
       });
 
       return finalRequest;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       await RedisEventBus.getInstance().publish('pulse:error', {
         agentId: process.agentId,
-        error: error.message
+        error: message
       });
       throw error;
     }
@@ -148,11 +143,10 @@ export class PulseCommand implements ICommand {
   constructor(
     private agentId: string, 
     private action: string, 
-    private params: any
+    private params: unknown
   ) {}
 
   async execute() {
-    
     await PulseEngine.emit({
       type: 'AGENT_CALL',
       agentId: this.agentId,
@@ -168,29 +162,21 @@ export class PulseCommand implements ICommand {
   }
 }
 
-export class SpawnSubTaskCommand implements ICommand {
-  constructor(private parentId: string, private task: string) {}
-
-  async execute() {
-    // Logic to spawn a child agent
-  }
-}
-
 // ============================================================================
 // FACTORY (Factory Pattern)
 // ============================================================================
 
-export class SovereignAgentFactory extends AgentFactory<any> {
-  create(type: AgentType, config: AIXManifest) {
+export class SovereignAgentFactory extends AgentFactory<unknown> {
+  create(type: AgentType, config: unknown) {
     switch (type) {
       case 'trader':
-        return { ...config, role: 'Economic Arbitrageur' };
+        return { ...(config as object), role: 'Economic Arbitrageur' };
       case 'guardian':
-        return { ...config, role: 'Security Sentinel' };
+        return { ...(config as object), role: 'Security Sentinel' };
       case 'ghost':
-        return { ...config, role: 'Stealth Operator' };
+        return { ...(config as object), role: 'Stealth Operator' };
       case 'scout':
-        return { ...config, role: 'Discovery Probe' };
+        return { ...(config as object), role: 'Discovery Probe' };
       default:
         throw new Error(`Unknown agent type: ${type}`);
     }
@@ -203,31 +189,32 @@ export class SovereignAgentFactory extends AgentFactory<any> {
 
 export class AuthBlock extends AgentBlock {
   id = 'auth-block';
-  async execute(context: any) {
-    return { authenticated: true, user: context.userId };
+  async execute(context: unknown) {
+    const ctx = context as { userId: string };
+    return { authenticated: true, user: ctx.userId };
   }
 }
 
 export class KYCBlock extends AgentBlock {
   id = 'kyc-block';
-  async execute(context: any) {
+  async execute(context: unknown) {
     return { verified: true, level: 2 };
   }
 }
 
 export class PayBlock extends AgentBlock {
   id = 'pay-block';
-  async execute(context: any) {
+  async execute(context: unknown) {
     return { success: true, txId: '0xabc' };
   }
 }
 
 /** Agent Composer: Assembles an agent from blocks */
 export class AgentComposer {
-  static async compose(blocks: AgentBlock[], context: any) {
-    let finalState = { ...context };
+  static async compose(blocks: AgentBlock[], context: unknown) {
+    let finalState = { ...(context as object) };
     for (const block of blocks) {
-      const result = await block.execute(finalState);
+      const result = await block.execute(finalState) as object;
       finalState = { ...finalState, ...result };
     }
     return finalState;
@@ -241,8 +228,9 @@ export class AgentComposer {
 /** Skill: Atomic unit of logic inside an agent */
 export class TradingSkill extends AgentSkill {
   name = 'arbitrage';
-  async run(params: any) {
-    return { yield: params.amount * 0.05 };
+  async run(params: unknown) {
+    const p = params as { amount: number };
+    return { yield: p.amount * 0.05 };
   }
 }
 
@@ -252,8 +240,8 @@ export class BaseAgent implements IHierarchy {
   
   constructor(public id: string) {}
 
-  addChild(skill: AgentSkill) {
-    this.children.push(skill);
+  addChild(skill: unknown) {
+    this.children.push(skill as AgentSkill);
   }
 
   async pulse(process: GatewayProcess) {
@@ -267,25 +255,14 @@ export class AgentCluster implements IHierarchy {
 
   constructor(public clusterId: string) {}
 
-  addChild(agent: BaseAgent) {
-    this.children.push(agent);
+  addChild(agent: unknown) {
+    this.children.push(agent as BaseAgent);
   }
 
-  async broadcast(message: any) {
-    return Promise.all(this.children.map(a => a.pulse(message)));
-  }
-}
-
-/** Orchestrator: The outer layer managing clusters */
-export class GlobalOrchestrator {
-  private clusters: AgentCluster[] = [];
-
-  addCluster(cluster: AgentCluster) {
-    this.clusters.push(cluster);
-  }
-
-  async monitorAll() {
+  async broadcast(message: unknown) {
+    return Promise.all(this.children.map(a => a.pulse(message as GatewayProcess)));
   }
 }
 
-// Made with Moe Abdelaziz - Clean Room Pattern Applied ✅
+// Made with Moe Abdelaziz
+n Applied ✅

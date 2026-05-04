@@ -218,4 +218,14 @@ export class EconomicAnalyzer {
 
   generateReport(impact: EconomicImpact): string {
     return `
-📊 Economic Impact
+📊 Economic Impact Report
+-------------------------
+Current Cost:   $${impact.currentCost.toFixed(2)}
+Projected Cost: $${impact.projectedCost.toFixed(2)}
+Monthly Savings: $${impact.savings.toFixed(2)} (${impact.savingsPercent.toFixed(1)}%)
+Annual ROI:     ${impact.roi.toFixed(1)}x
+
+// Made with Moe Abdelaziz
+    `;
+  }
+}

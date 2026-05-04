@@ -24,7 +24,7 @@ export interface BusEvent {
   type: BusEventType | string;
   agentId: string;
   taskId?: string;
-  data: any;
+  data: unknown;
   timestamp: number;
   ring: BusRing;
   auditHash?: string;
@@ -48,7 +48,7 @@ export class Bus extends EventEmitter {
   /**
    * Emit event to bus and persist to Redis (RULE 3)
    */
-  async emitEvent(type: BusEventType | string, agentId: string, data: any, taskId?: string): Promise<string> {
+  async emitEvent(type: BusEventType | string, agentId: string, data: unknown, taskId?: string): Promise<string> {
     const ring = this.getRingFromEventType(type);
     const eventId = `evt_${randomBytes(8).toString('hex')}`;
     
