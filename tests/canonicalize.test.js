@@ -14,3 +14,9 @@ test('canonicalization is deterministic with reordered keys', () => {
 test('canonicalization rejects unsupported types', () => {
   assert.throws(() => canonicalizeForSigning({ meta: { fn: () => {} } }), /CANON_UNSUPPORTED_TYPE/);
 });
+
+test('canonicalization rejects circular references', () => {
+  const obj = { a: 1 };
+  obj.self = obj;
+  assert.throws(() => canonicalizeForSigning(obj), /CANON_CIRCULAR_REFERENCE/);
+});
