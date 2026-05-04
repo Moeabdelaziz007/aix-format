@@ -11,6 +11,7 @@ import { getTrustChain } from './trust-chain';
 import { ReadableMemory } from './memory-readable';
 import { AgentRuntimeConfig, LLMProvider, ToolRegistry } from './llm-provider';
 import { CircuitBreakers } from '@/lib/security-core';
+import { searchTavily } from './tools/search-tavily';
 
 // RULE 1: Strict Schemas
 export const TaskSchema = z.object({
@@ -77,6 +78,16 @@ export class AgentRuntimeEngine {
     
     this.llm = config.llm;
     this.tools = config.tools ?? {};
+
+    // Auto-register Pro Stack Tools
+    const tavilyKey = process.env.TAVILY_API_KEY;
+    if (tavilyKey && !this.tools.search) {
+      this.tools.search = async (input: any) => {
+        const query = typeof input === 'string' ? input : (input.query || JSON.stringify(input));
+        return await searchTavily(query, tavilyKey);
+      };
+    }
+
     this.runtime = {
       agentId,
       agentName,
@@ -106,7 +117,7 @@ export class AgentRuntimeEngine {
       await this.emitState('agent:started', `Starting task: ${task.description}`);
 
       this.context = await this.buildContext(task);
-      const model = 'gpt-4o'; // Default for now
+      const model = this.llm.model || 'unknown-model';
       this.runtime.model = model;
 
       const result = await this.fullReActLoop(task);

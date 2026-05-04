@@ -125,3 +125,50 @@ export class MockProvider implements LLMProvider {
     return r;
   }
 }
+/**
+ * Groq Provider - Fast as Light (v1.3.4)
+ * Uses Groq Cloud API for near-instant inference.
+ * 
+ * Example:
+ *   const llm = new GroqProvider(process.env.GROQ_API_KEY!);
+ */
+export class GroqProvider implements LLMProvider {
+  model = 'llama-3.3-70b-versatile';
+
+  constructor(
+    private apiKey: string,
+    model = 'llama-3.3-70b-versatile'
+  ) {
+    this.model = model;
+  }
+
+  async complete(prompt: string, stopTokens?: string[]): Promise<string> {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [{ role: 'user', content: prompt }],
+          stop: stopTokens,
+          max_tokens: 2048,
+          temperature: 0.7
+        })
+      });
+
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(`Groq API Error: ${res.status} - ${error}`);
+      }
+
+      const data = await res.json() as any;
+      return data.choices[0]?.message?.content ?? '';
+    } catch (error) {
+      console.error('❌ GroqProvider Error:', error);
+      throw error;
+    }
+  }
+}

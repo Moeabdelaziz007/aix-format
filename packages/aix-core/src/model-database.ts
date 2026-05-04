@@ -48,17 +48,56 @@ export interface ModelMetrics {
   timestamp?: number;        // when measured
 }
 
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
+
 /**
- * In-memory model database
- * 
- * TODO: Persist to Redis/storage for production
+ * In-memory model database with Redis persistence
  */
 class ModelDatabaseImpl {
   private models: Map<string, ModelProfile> = new Map();
   private readonly HISTORY_SIZE = 100; // Keep last 100 measurements
+  private initialized = false;
+  private readonly STORAGE_KEY = 'aix:model_database:profiles';
   
   constructor() {
-    this.initializeDefaultModels();
+    // Initial sync will happen on first use via ensureInitialized()
+  }
+
+  /**
+   * Ensure data is loaded from Redis
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) return;
+    
+    try {
+      const stored = await kv.get<Record<string, ModelProfile>>(this.STORAGE_KEY);
+      if (stored) {
+        this.models = new Map(Object.entries(stored));
+        console.log(`📊 ModelDatabase: Loaded ${this.models.size} profiles from Redis.`);
+      } else {
+        console.log('📊 ModelDatabase: No profiles in Redis. Initializing defaults...');
+        this.initializeDefaultModels();
+        await this.save();
+      }
+    } catch (error) {
+      console.error('❌ ModelDatabase Load Error:', error);
+      this.initializeDefaultModels(); // Fallback to defaults
+    }
+    
+    this.initialized = true;
+  }
+
+  /**
+   * Persist current state to Redis
+   */
+  private async save(): Promise<void> {
+    try {
+      const data = Object.fromEntries(this.models.entries());
+      await kv.set(this.STORAGE_KEY, data);
+    } catch (error) {
+      console.error('❌ ModelDatabase Save Error:', error);
+    }
   }
   
   /**
@@ -202,7 +241,6 @@ class ModelDatabaseImpl {
         latencyHistory: []
       },
       
-      // Gemini Models
       {
         id: 'gemini-pro',
         name: 'Gemini Pro',
@@ -218,6 +256,24 @@ class ModelDatabaseImpl {
         lastUsed: Date.now(),
         qualityHistory: [],
         latencyHistory: []
+      },
+      
+      // Groq Models
+      {
+        id: 'llama-3.3-70b-versatile',
+        name: 'Llama 3.3 70B (Groq)',
+        provider: 'groq',
+        avgQuality: 0.88,
+        avgLatency: 300, // Near instant
+        costPer1kTokens: 0.00, // Free tier mostly
+        maxTokens: 8192,
+        supportsStreaming: true,
+        supportsTools: true,
+        totalCalls: 0,
+        successRate: 0.99,
+        lastUsed: Date.now(),
+        qualityHistory: [],
+        latencyHistory: []
       }
     ];
     
@@ -230,6 +286,7 @@ class ModelDatabaseImpl {
    * Get all available models
    */
   async getAllModels(): Promise<ModelProfile[]> {
+    await this.ensureInitialized();
     return Array.from(this.models.values());
   }
   
@@ -237,6 +294,7 @@ class ModelDatabaseImpl {
    * Get specific model by ID
    */
   async getModel(modelId: string): Promise<ModelProfile | undefined> {
+    await this.ensureInitialized();
     return this.models.get(modelId);
   }
   
@@ -249,6 +307,7 @@ class ModelDatabaseImpl {
     modelId: string,
     metrics: ModelMetrics
   ): Promise<void> {
+    await this.ensureInitialized();
     const model = this.models.get(modelId);
     if (!model) {
       return;
@@ -283,6 +342,8 @@ class ModelDatabaseImpl {
       // Exponential moving average (α=0.2)
       model.avgLatency = 0.8 * model.avgLatency + 0.2 * metrics.latency;
     }
+
+    await this.save();
   }
   
   /**
@@ -345,14 +406,19 @@ class ModelDatabaseImpl {
    * Add or update a model
    */
   async upsertModel(model: ModelProfile): Promise<void> {
+    await this.ensureInitialized();
     this.models.set(model.id, model);
+    await this.save();
   }
   
   /**
    * Remove a model
    */
   async removeModel(modelId: string): Promise<boolean> {
-    return this.models.delete(modelId);
+    await this.ensureInitialized();
+    const deleted = this.models.delete(modelId);
+    if (deleted) await this.save();
+    return deleted;
   }
   
   /**
@@ -385,18 +451,22 @@ class ModelDatabaseImpl {
    * Reset all metrics (for testing)
    */
   async resetMetrics(): Promise<void> {
+    await this.ensureInitialized();
     for (const model of this.models.values()) {
       model.totalCalls = 0;
       model.qualityHistory = [];
       model.latencyHistory = [];
     }
+    await this.save();
   }
   
   /**
    * Clear database (for testing)
    */
   async clear(): Promise<void> {
+    await this.ensureInitialized();
     this.models.clear();
+    await this.save();
   }
 }
 
