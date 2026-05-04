@@ -14,3 +14,9 @@ test('canonicalization is deterministic with reordered keys', () => {
 test('canonicalization rejects unsupported types', () => {
   assert.throws(() => canonicalizeForSigning({ meta: { fn: () => {} } }), /CANON_UNSUPPORTED_TYPE/);
 });
+
+test('canonicalization rejects non-finite numbers', () => {
+  assert.throws(() => canonicalizeForSigning({ value: NaN }), /CANON_NON_FINITE_NUMBER/);
+  assert.throws(() => canonicalizeForSigning({ value: Infinity }), /CANON_NON_FINITE_NUMBER/);
+  assert.throws(() => canonicalizeForSigning({ value: -Infinity }), /CANON_NON_FINITE_NUMBER/);
+});
