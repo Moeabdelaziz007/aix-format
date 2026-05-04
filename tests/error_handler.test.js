@@ -18,7 +18,7 @@ import {
   CircuitBreakerError,
   MaxRetriesExceededError,
   TimeoutError
-} from '../core/error_handler.js';
+} from '../core/error_handler';
 
 describe('CircuitBreaker', () => {
   it('should initialize in CLOSED state', () => {
