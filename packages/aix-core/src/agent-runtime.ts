@@ -62,6 +62,7 @@ export interface RuntimeResult {
   duration: number;
   model: string;
   usedCache: boolean;
+  wisdomGained?: string[]; // New: Sovereign learning
 }
 
 const STOP_TOKENS = ['Observation:', 'Thought:'];
@@ -176,6 +177,62 @@ export class AgentRuntimeEngine {
       await AgentSelfReview.storeSelfReview(reviewRecord);
       await this.emitState('agent:reviewed', `Self-review complete. Score: ${reviewRecord.evaluation.overall.toFixed(1)}/10`);
 
+      // 🌀 SOVEREIGN SKILL SYNTHESIS: Learn from success
+      if (reviewRecord.evaluation.overall >= 8.0) {
+        await this.emitState('agent:synthesizing', `High performance detected, synthesizing new sovereign skill...`);
+        try {
+          const index = new (await import('./wikibrain/SemanticIndex')).SemanticIndex();
+          await index.index(
+            `skill-${this.runtime.agentId}-${task.taskId}`,
+            'skill',
+            `Procedure for: ${task.description}. Result: ${result}`,
+            { agentId: this.runtime.agentId, taskId: task.taskId, quality: reviewRecord.evaluation.overall }
+          );
+          await this.emitState('agent:learned', `New skill indexed for future discovery.`);
+        } catch (e) {
+          console.warn('⚠️ Skill synthesis failed:', e);
+        }
+
+        // 🌀 HERMES INTEGRATION: Record successful procedure pattern
+        try {
+          const steps = this.runtime.scratchpad
+            .filter(s => s.action)
+            .map(s => ({
+              tool: s.action!.tool,
+              input: s.action!.input,
+              output: s.observation,
+              success: !s.observation.toLowerCase().includes('error')
+            }));
+          
+          await LearningEngine.recordSuccessfulProcedure(this.runtime.agentId, task.description, steps);
+          await this.emitState('agent:pattern_saved', `Sovereign execution pattern archived in WikiBrain.`);
+        } catch (e) {
+          console.warn('⚠️ Pattern recording failed:', e);
+        }
+      }
+
+      // 🌀 META WISDOM: Extract Rule of Wisdom
+      if (reviewRecord.evaluation.overall < 7.0 && this.runtime.step < (task.maxSteps || 7) + 2) {
+        await this.emitState('agent:self-correcting', `Low score (${reviewRecord.evaluation.overall.toFixed(1)}), attempting self-correction...`);
+        
+        const correctionPrompt = `Your previous output was evaluated with a low score. 
+        Feedback: ${reviewRecord.reflection.weaknesses.join(', ')}
+        Improvement Plan: ${reviewRecord.improvementPlan.try}
+        
+        Please correct your output and provide a better result.`;
+        
+        const correctedResult = await this.llm.complete(correctionPrompt);
+        result = correctedResult;
+        
+        await this.emitState('agent:corrected', `Self-correction applied.`);
+        
+        // Re-run review for the corrected result
+        const secondReviewPrompt = AgentSelfReview.generateReviewPrompt(task.description, result);
+        const secondReviewResponse = await this.llm.complete(secondReviewPrompt);
+        reviewRecord = AgentSelfReview.parseSelfReview(this.runtime.agentId, task.taskId, task.description, result, secondReviewResponse);
+        await AgentSelfReview.storeSelfReview(reviewRecord);
+      }
+
       // Trigger Pet Sync (Life)
       await PetOrchestrator.sync(this.runtime.agentId, { level: 1 }, { status: 'done' });
 
@@ -211,11 +268,32 @@ export class AgentRuntimeEngine {
 
   private async buildContext(task: Task): Promise<RuntimeContext> {
     const memories = await this.fetchMemories(task);
+    
+    // Sovereign Experience Replay: Fetch past reflections on similar tasks
+    const pastReflections = await this.fetchExperienceReplay(task);
+    
     return {
-      memories,
+      memories: [...memories, ...pastReflections],
       skills: [],
-      instructions: "You are a sovereign agent. Solve the task step by step."
+      instructions: `You are a sovereign agent. Solve the task step by step. 
+      Current Mood Influence: ${this.runtime.mood}. 
+      If you are ecstatic, be more creative. If you are tired, be more efficient.`
     };
+  }
+
+  private async fetchExperienceReplay(task: Task): Promise<string[]> {
+    try {
+      const history = await AgentSelfReview.getSelfReviewHistory(this.runtime.agentId, 5);
+      // Filter for tasks with similarity (simple check for now, can be upgraded to semantic)
+      const relevant = history.filter(h => 
+        h.taskDescription.toLowerCase().includes(task.description.toLowerCase().slice(0, 10)) ||
+        h.evaluation.overall < 5 // Always learn from failures
+      );
+
+      return relevant.map(r => `[PAST_EXPERIENCE] Task: ${r.taskDescription}. Outcome: ${r.evaluation.overall}/10. Lesson: ${r.improvementPlan.try}`);
+    } catch (e) {
+      return [];
+    }
   }
 
   // recordSelfReview removed in favor of AgentSelfReview integration in run()
@@ -227,6 +305,18 @@ export class AgentRuntimeEngine {
 
     while (this.runtime.step < maxSteps) {
       this.runtime.step++;
+      
+      // 🌀 META ALIVE: Quantum Dreaming (Creative Branching)
+      if (this.runtime.step > 3 && this.isStuck()) {
+        await this.emitState('agent:dreaming', `Stuck at step ${this.runtime.step}, triggering creative dream branch...`);
+        const dreamPrompt = `I am stuck solving: ${task.description}. 
+        My current steps: ${JSON.stringify(this.runtime.scratchpad)}
+        What are 3 completely different creative strategies I could try? Think outside the box.`;
+        
+        const dreams = await this.llm.complete(dreamPrompt); // Use high-power model
+        this.runtime.scratchpad.push({ thought: `Dreaming: ${dreams}`, action: null, observation: 'New strategies synthesized.' });
+      }
+
       const prompt = this.buildReActPrompt(task);
       
       const thought = await this.llm.complete(prompt, STOP_TOKENS);
@@ -239,8 +329,11 @@ export class AgentRuntimeEngine {
 
       const action = this.parseAction(thought);
       if (!action) {
-        finalAnswer = thought;
-        break;
+        // Resilient fallback: Try to recover or provide final thought
+        if (this.runtime.step === maxSteps) {
+          finalAnswer = thought;
+        }
+        continue;
       }
 
       ToolCallSchema.parse(action);
@@ -258,6 +351,14 @@ export class AgentRuntimeEngine {
     }
 
     return finalAnswer || "Task incomplete within step limit.";
+  }
+
+  private isStuck(): boolean {
+    if (this.runtime.scratchpad.length < 2) return false;
+    const last2 = this.runtime.scratchpad.slice(-2);
+    // If observations are repeating or erroring, we are stuck
+    return last2[0].observation === last2[1].observation || 
+           last2.some(s => s.observation.toLowerCase().includes('error') || s.observation.toLowerCase().includes('not found'));
   }
 
   private buildReActPrompt(task: Task): string {
@@ -300,14 +401,18 @@ export class AgentRuntimeEngine {
       const { SemanticIndex } = await import('./wikibrain/SemanticIndex');
       const index = new SemanticIndex();
       
-      // Query semantic index for relevant wisdom (Proactive Memory)
-      const relevantWisdom = await index.search(task.description, { limit: 3 });
-      const wisdomStrings = relevantWisdom.map(w => `[WISDOM] ${w.text}`);
-
-      const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
-      const facts = memoryTree.children?.find(c => c.id === 'facts')?.children?.map(f => f.label) || [];
+      // Proactive Memory: Search for similar patterns and skills
+      const query = `${task.description} ${task.type || ''}`;
+      const searchResults = await index.search(query, { limit: 5 });
       
-      return [...wisdomStrings, ...facts];
+      const memories = searchResults.map(r => `[WISDOM] ${r.text} (Similarity: ${r.score.toFixed(2)})`);
+
+      // Fetch facts from ReadableMemory
+      const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
+      const facts = memoryTree.children?.find(c => c.id === 'facts')?.children?.map(f => `[FACT] ${f.label}`) || [];
+      const skills = memoryTree.children?.find(c => c.id === 'skills')?.children?.map(s => `[SKILL] ${s.label}`) || [];
+      
+      return [...memories, ...facts, ...skills];
     } catch (e) {
       console.warn('⚠️ Semantic Index retrieval failed, falling back to basic memory');
       const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
