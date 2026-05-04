@@ -1,19 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "pnpm --filter @aix/studio build",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": "apps/studio/.next",
-  "functions": {},
+  "rootDirectory": "apps/studio",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": ".next",
+  "regions": ["iad1"],
   "redirects": [
     {
       "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.axiomid.app"
-        }
-      ],
+      "has": [{ "type": "host", "value": "www.axiomid.app" }],
       "destination": "https://axiomid.app/$1",
       "permanent": true
     }
