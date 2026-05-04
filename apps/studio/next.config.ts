@@ -7,11 +7,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   
-  // 🚀 GHOST DEPLOY: Ship broken, fix live (Y Combinator strategy)
-  // Working pages stay live, broken pages return 500
-  // Fix incrementally while site is running
+  // TypeScript strict mode enabled for production safety
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   
   // Fix monorepo tracing root - pointing to workspace root
