@@ -208,23 +208,32 @@ export class LangfuseProvider implements LLMProvider {
     }
 
     const trace = this.langfuse.trace({
-      name: `aix-evolution-cycle`,
-      metadata: { model: this.model },
+      name: 'aix-inference',
+      input: this.redactSensitiveData({ prompt }),
+      tags: ['sovereign-loop']
     });
 
     const generation = trace.generation({
       name: 'llm-completion',
-      model: this.model,
-      input: prompt,
+      input: this.redactSensitiveData(prompt)
     });
 
     try {
-      const output = await this.inner.complete(prompt, stopTokens);
-      generation.end({ output });
-      return output;
-    } catch (error) {
-      generation.end({ level: 'ERROR', statusMessage: error instanceof Error ? error.message : String(error) });
+      const response = await this.inner.complete(prompt, stopTokens);
+      
+      generation.update({
+        output: this.redactSensitiveData(response)
+      });
+      
+      return response;
+    } catch (error: any) {
+      generation.update({
+        level: 'ERROR',
+        statusMessage: error.message
+      });
       throw error;
+    } finally {
+      await this.langfuse.flushAsync();
     }
   }
 }

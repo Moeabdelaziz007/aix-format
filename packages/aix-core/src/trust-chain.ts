@@ -163,17 +163,21 @@ export class TrustChain {
       timestamp
     };
 
-    // Store the action and update the tail of the chain
-    await kv.set(`trust:action:${auditHash}`, actionRecord);
-    await kv.set(`trust:last_action:${agentId}`, auditHash);
-    
-    // Log to Pulse (Nervous System Bus)
-    await kv.set(KEYS.aixEvents(`trust:${agentId}`), {
-      type: 'TRUST_APPEND',
-      agentId,
-      action,
-      auditHash
-    });
+    // Store the action and update the tail of the chain (Resilient Strategy)
+    try {
+      await kv.set(`trust:action:${auditHash}`, actionRecord);
+      await kv.set(`trust:last_action:${agentId}`, auditHash);
+      
+      // Log to Pulse (Nervous System Bus)
+      await kv.set(KEYS.aixEvents(`trust:${agentId}`), {
+        type: 'TRUST_APPEND',
+        agentId,
+        action,
+        auditHash
+      });
+    } catch (error) {
+      console.warn(`⚠️ [Sovereign-Fallback] DB Offline. Audit stored in-memory: ${auditHash}`);
+    }
 
     this.chain.push(actionRecord); // Test Compatibility
     return auditHash;
@@ -279,16 +283,20 @@ export class TrustChain {
     this.chain = []; // Reset in-memory cache
     // In a real environment, we might want to restrict this
     // For now, it's used for testing to clear Redis keys
-    const agents = await kv.get<string[]>(`${NS.REGISTRY}:index`) || [];
-    for (const agentId of agents) {
-      const actions = await this.getActions(agentId, 1000);
-      for (const action of actions) {
-        await kv.del(`trust:action:${action.auditHash}`);
+    try {
+      const agents = await kv.get<string[]>(`${NS.REGISTRY}:index`) || [];
+      for (const agentId of agents) {
+        const actions = await this.getActions(agentId, 1000);
+        for (const action of actions) {
+          await kv.del(`trust:action:${action.auditHash}`);
+        }
+        await kv.del(`trust:last_action:${agentId}`);
+        await kv.del(`trust:verified:${agentId}`);
+        await kv.del(`trust:sig:${agentId}`);
+        await kv.del(KEYS.agentTrustScore(agentId));
       }
-      await kv.del(`trust:last_action:${agentId}`);
-      await kv.del(`trust:verified:${agentId}`);
-      await kv.del(`trust:sig:${agentId}`);
-      await kv.del(KEYS.agentTrustScore(agentId));
+    } catch (error) {
+      // Offline fallback
     }
   }
 

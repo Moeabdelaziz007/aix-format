@@ -43,7 +43,7 @@ export async function mcpGate(
 
   // Auto-block
   if (score < 5) {
-    trustChain.append('mcp.auto_blocked', agentDid, { score, toolCall })
+    await trustChain.append('mcp.auto_blocked', agentDid, { score, toolCall })
     throw new Error(`safetyScore ${score} below minimum threshold`)
   }
 
@@ -51,14 +51,14 @@ export async function mcpGate(
   if (score >= 5 && score < 7) {
     const approved = await securityHandlers.requestHumanApproval(toolCall, agentDid, score)
     if (!approved) {
-      trustChain.append('mcp.human_rejected', agentDid, { toolCall, score })
+      await trustChain.append('mcp.human_rejected', agentDid, { toolCall, score })
       throw new Error('Human rejected this tool call')
     }
-    trustChain.append('mcp.human_approved', agentDid, { toolCall, score })
+    await trustChain.append('mcp.human_approved', agentDid, { toolCall, score })
   }
 
   // Execute
   const result = await securityHandlers.executeTool(toolCall)
-  trustChain.append('mcp.executed', agentDid, { toolCall, score })
+  await trustChain.append('mcp.executed', agentDid, { toolCall, score })
   return result
 }
