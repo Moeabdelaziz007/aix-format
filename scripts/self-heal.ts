@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env vite-node
 /**
  * AIX Self-Healing System
  * 
@@ -6,7 +6,7 @@
  * Runs automatically in CI/CD and can be triggered manually.
  * 
  * Usage:
- *   npm run health:check
+ *   npx vite-node scripts/self-heal.ts
  *   npm run health:fix
  */
 
@@ -57,7 +57,7 @@ async function checkHealthScore(): Promise<void> {
   console.log('\n🏥 Running Health Score Check...');
   
   try {
-    runCommand('ts-node scripts/health-score.ts', { silent: true });
+    runCommand('npx vite-node scripts/health-score.ts', { silent: true });
     
     const healthScorePath = join(REPORT_DIR, 'health-score.json');
     if (existsSync(healthScorePath)) {
@@ -249,16 +249,16 @@ function generateReport(): void {
   const overallStatus = failCount > 0 ? '❌ FAILING' : warnCount > 0 ? '⚠️ WARNING' : '✅ HEALTHY';
   
   let report = `# 🏥 AIX Self-Healing System Report
-
-**Generated:** ${timestamp}  
-**Overall Status:** ${overallStatus}  
-**Summary:** ${passCount} passed, ${warnCount} warnings, ${failCount} failures
-
----
-
-## 📊 Health Checks
-
-`;
+ 
+ **Generated:** ${timestamp}  
+ **Overall Status:** ${overallStatus}  
+ **Summary:** ${passCount} passed, ${warnCount} warnings, ${failCount} failures
+ 
+ ---
+ 
+ ## 📊 Health Checks
+ 
+ `;
 
   for (const result of results) {
     const emoji = result.status === 'pass' ? '✅' : result.status === 'warn' ? '⚠️' : '❌';

@@ -143,6 +143,7 @@ export const KEYS = {
   ghost:  (agentId: string)   => `agent:${agentId}:ghost`,
   
   // Evolution Safety keys
+  agentEvolution: (agentId: string) => `agent:${agentId}:evolution`,
   agentEvolutionSnapshots: (agentId: string) => `agent:${agentId}:evolution_snapshots`,
   agentEvolutionAuditLog: (agentId: string) => `agent:${agentId}:evolution_audit_log`
 };

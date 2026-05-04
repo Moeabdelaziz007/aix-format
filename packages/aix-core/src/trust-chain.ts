@@ -195,6 +195,80 @@ export class TrustChain {
     const prefix = '0'.repeat(difficulty);
     return hash.startsWith(prefix);
   }
+
+  /**
+   * Get Trust Score (0-10)
+   */
+  async getScore(agentId: string): Promise<number> {
+    return await kv.get<number>(KEYS.agentTrustScore(agentId)) || 0;
+  }
+
+  /**
+   * Get all actions in the chain for an agent
+   */
+  async getActions(agentId: string, limit: number = 50): Promise<any[]> {
+    const actions: any[] = [];
+    let currentHash = await kv.get<string>(`trust:last_action:${agentId}`);
+    
+    while (currentHash && currentHash !== 'genesis' && actions.length < limit) {
+      const record = await kv.get<any>(`trust:action:${currentHash}`);
+      if (!record) break;
+      actions.push(record);
+      currentHash = record.prevAction;
+    }
+    
+    return actions;
+  }
+
+  /**
+   * Get Trust Leaderboard
+   */
+  async getLeaderboard(limit: number = 10): Promise<{ agentId: string, score: number }[]> {
+    const agents = await kv.get<string[]>(`${NS.REGISTRY}:index`) || [];
+    const scores = await Promise.all(agents.map(async id => ({
+      agentId: id,
+      score: await this.getScore(id)
+    })));
+    
+    return scores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+  }
+
+  /**
+   * Detect tampering in the chain
+   */
+  async detectTampering(agentId: string): Promise<{ tampered: boolean, details: string[] }> {
+    const actions = await this.getActions(agentId, 100);
+    const details: string[] = [];
+    
+    for (let i = 0; i < actions.length - 1; i++) {
+      const current = actions[i];
+      const next = actions[i+1]; // Actually previous in time
+      
+      if (current.prevAction !== next.auditHash) {
+        details.push(`Chain break detected at action ${current.auditHash}`);
+      }
+      
+      // Verify Hash
+      const rehash = this.generateHash({
+        prevAction: current.prevAction,
+        agentId: current.agentId,
+        action: current.action,
+        data: current.data,
+        timestamp: current.timestamp
+      });
+      
+      if (rehash !== current.auditHash) {
+        details.push(`Hash mismatch at action ${current.auditHash}`);
+      }
+    }
+    
+    return {
+      tampered: details.length > 0,
+      details
+    };
+  }
 }
 
 /**

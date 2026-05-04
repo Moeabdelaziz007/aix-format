@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env vite-node
 /**
  * 🧬 ACTIVATE META LOOP
  * 
@@ -9,7 +9,7 @@
  * 4. Connects to gateway, trust-chain, and bus
  * 5. Begins self-improvement loop
  * 
- * Usage: tsx scripts/activate-meta-loop.ts [--mode=production|development]
+ * Usage: vite-node scripts/activate-meta-loop.ts [--mode=production|development]
  */
 
 import { EventEmitter } from 'events';
@@ -111,20 +111,21 @@ function initializePets() {
   for (const config of petConfigs) {
     const pet: Pet = {
       id: config.id,
-      learn: (event: any) => {
+      learn: (event: unknown) => {
+        const e = event as { type: string; source: string };
         if (CONFIG.logLevel === 'verbose') {
-          console.log(`${config.emoji} ${config.name} learned: ${event.type}`);
+          console.log(`${config.emoji} ${config.name} learned: ${e.type}`);
         }
         
         // Record emergent pattern
-        const pattern = `${config.id}_learns_from_${event.source}`;
+        const pattern = `${config.id}_learns_from_${e.source}`;
         emergence.record(pattern, 0.8);
         
         // Emit learning event
         bus.emit(`pet.${config.id}.learned`, {
           pet: config.id,
-          source: event.source,
-          type: event.type,
+          source: e.source,
+          type: e.type,
           timestamp: Date.now(),
         });
       },
@@ -155,7 +156,7 @@ function createMetaAgent(id: string): Agent {
   return {
     id,
     skills: {
-      observe: async (input: any) => {
+      observe: async (input: unknown) => {
         const speed = getMoodSpeed(agents.get(id)!.state.mood);
         
         if (CONFIG.logLevel === 'verbose') {
@@ -176,7 +177,7 @@ function createMetaAgent(id: string): Agent {
         };
       },
 
-      decide: async (input: any) => {
+      decide: async (input: unknown) => {
         if (CONFIG.logLevel === 'verbose') {
           console.log(`  🤔 [${id}] Deciding...`);
         }
@@ -201,19 +202,21 @@ function createMetaAgent(id: string): Agent {
         };
       },
 
-      act: async (input: any) => {
+      act: async (input: unknown) => {
+        const inp = input as { data: { module: string } };
         if (CONFIG.logLevel === 'verbose') {
-          console.log(`  ⚡ [${id}] Acting on: ${input.data.module}`);
+          console.log(`  ⚡ [${id}] Acting on: ${inp.data.module}`);
         }
 
-        // Simulate action with 80% success rate
-        const success = Math.random() > 0.2;
+        // Use crypto-safe random for simulation (RULE 2)
+        const randomVal = require('crypto').randomBytes(1)[0] / 255;
+        const success = randomVal > 0.2;
 
         // Emit action event for pets to observe
         bus.emit(`agent.${id}.action`, {
           source: id,
           type: 'action_executed',
-          module: input.data.module,
+          module: inp.data.module,
           success,
           timestamp: Date.now(),
         });
@@ -222,14 +225,15 @@ function createMetaAgent(id: string): Agent {
           success,
           confidence: 0.85,
           data: {
-            action: `Executed ${input.data.module}`,
+            action: `Executed ${inp.data.module}`,
             success,
             result: success ? 'optimization_applied' : 'optimization_failed',
           },
         };
       },
 
-      reflect: async (input: any) => {
+      reflect: async (input: unknown) => {
+        const inp = input as { data: { success: boolean } };
         if (CONFIG.logLevel === 'verbose') {
           console.log(`  💭 [${id}] Reflecting...`);
         }
@@ -238,7 +242,7 @@ function createMetaAgent(id: string): Agent {
         const oldMood = agent.state.mood;
 
         // Update mood based on success
-        if (input.data.success) {
+        if (inp.data.success) {
           agent.state.mood = 
             oldMood === 'dying' ? 'tired' :
             oldMood === 'tired' ? 'neutral' :
