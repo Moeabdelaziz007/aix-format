@@ -25,10 +25,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --ignore-scripts
 
       - name: Create .generated directory
         run: mkdir -p .generated
@@ -129,10 +129,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --ignore-scripts
 
       - name: Download health score artifact
         uses: actions/download-artifact@v4

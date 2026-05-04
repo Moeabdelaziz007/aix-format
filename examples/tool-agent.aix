@@ -1,5 +1,5 @@
 meta:
-  version: '1.0'
+  version: '1.0.0'
   id: did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440002
   name: Data Fetcher Bot
   description: AI agent specialized in fetching and integrating data from multiple APIs
@@ -118,7 +118,7 @@ apis:
   - name: stock_api
     base_url: https://www.alphavantage.co/query
     description: Alpha Vantage API for stock market data
-    version: '1.0'
+    version: '1.0.0'
     auth:
       type: api_key
       location: query
@@ -189,7 +189,7 @@ apis:
   - name: geocoding_api
     base_url: https://nominatim.openstreetmap.org
     description: OSM Nominatim for geocoding
-    version: '1.0'
+    version: '1.0.0'
     auth:
       type: none
     endpoints:

@@ -80,7 +80,7 @@ try {
   const rawContent = readFileSync(resolvedPath, 'utf8');
   
   // This will throw if structural validation fails
-  const agent = parser.parse(rawContent, filePath);
+  const agent = await parser.parse(rawContent, filePath);
 
   const additionalErrors = [];
 

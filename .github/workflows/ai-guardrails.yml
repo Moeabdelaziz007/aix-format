@@ -140,10 +140,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --ignore-scripts
 
       - name: NPM Audit (Moderate+ Severity for AI PRs)
         run: |
@@ -275,10 +275,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --ignore-scripts
 
       - name: Run core test suite
         run: npm test

@@ -1,5 +1,5 @@
 meta:
-  version: '1.0'
+  version: '1.0.0'
   id: did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440003
   name: Academic Research Assistant
   description: AI agent for academic research, literature review, and citation management
@@ -154,7 +154,7 @@ apis:
   - name: semantic_scholar
     base_url: https://api.semanticscholar.org/graph/v1
     description: Semantic Scholar API for academic papers
-    version: '1.0'
+    version: '1.0.0'
     auth:
       type: api_key
       location: header
@@ -193,7 +193,7 @@ apis:
   - name: crossref
     base_url: https://api.crossref.org
     description: CrossRef API for DOI resolution and metadata
-    version: '1.0'
+    version: '1.0.0'
     auth:
       type: none
     endpoints:
@@ -221,7 +221,7 @@ apis:
   - name: openalex
     base_url: https://api.openalex.org
     description: OpenAlex API for scholarly data
-    version: '1.0'
+    version: '1.0.0'
     auth:
       type: none
     endpoints:

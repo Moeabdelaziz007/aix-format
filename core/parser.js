@@ -521,6 +521,3 @@ export class AIXAgent {
 
 // ─── Plugin System Exports ────────────────────────────────────────────────────
 // Export plugin system for external use
-export { defaultRegistry, PluginRegistry };
-export { ValidationPlugin } from './validation-plugins.js';
-export * from './plugins/index.js';
