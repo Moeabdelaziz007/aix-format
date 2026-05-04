@@ -4,6 +4,7 @@
   "buildCommand": "cd apps/studio && pnpm install && pnpm build",
   "outputDirectory": "apps/studio/.next",
   "installCommand": "pnpm install",
+  "functions": {},
   "redirects": [
     {
       "source": "/(.*)",
