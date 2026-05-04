@@ -96,7 +96,6 @@ class TrustChainManager {
     this.chain.push(entry);
 
     // TODO: Persist to Redis/Database
-    console.log(`[TrustChain] ${action} by ${actor}`);
 
     return entry;
   }
@@ -126,14 +125,12 @@ class TrustChainManager {
 
       // Check if previousHash matches
       if (current.previousHash !== previous.hash) {
-        console.error(`[TrustChain] Integrity violation at index ${i}`);
         return false;
       }
 
       // Recompute hash and verify
       const recomputedHash = this.computeHash(current);
       if (current.hash !== recomputedHash) {
-        console.error(`[TrustChain] Hash mismatch at index ${i}`);
         return false;
       }
     }
@@ -198,7 +195,6 @@ class CircuitBreakerImpl {
       // Check if we should try half-open
       if (Date.now() - this.lastFailureTime > this.options.resetTimeout) {
         this.state = CircuitState.HALF_OPEN;
-        console.log(`[CircuitBreaker:${this.name}] Attempting HALF_OPEN`);
       } else {
         throw new Error(`Circuit breaker ${this.name} is OPEN`);
       }
@@ -221,7 +217,6 @@ class CircuitBreakerImpl {
       if (this.successCount >= 3) {
         this.state = CircuitState.CLOSED;
         this.successCount = 0;
-        console.log(`[CircuitBreaker:${this.name}] CLOSED`);
       }
     }
   }
@@ -232,7 +227,6 @@ class CircuitBreakerImpl {
 
     if (this.failureCount >= this.options.failureThreshold) {
       this.state = CircuitState.OPEN;
-      console.error(`[CircuitBreaker:${this.name}] OPEN after ${this.failureCount} failures`);
     }
   }
 
