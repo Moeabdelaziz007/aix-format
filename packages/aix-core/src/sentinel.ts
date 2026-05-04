@@ -1,5 +1,5 @@
 import { kv } from './storage/adapter';
-import { KEYS } from './storage/keys';
+import { KEYS, NS } from './storage/keys';
 import { getTrustChain } from './trust-chain';
 import { getBus } from './bus';
 
