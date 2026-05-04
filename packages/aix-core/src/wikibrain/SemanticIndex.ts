@@ -60,36 +60,54 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 export async function generateEmbedding(text: string): Promise<number[]> {
+  const nomicKey = process.env.NOMIC_API_KEY;
+  
+  if (nomicKey) {
+    try {
+      const res = await fetch('https://api-atlas.nomic.ai/v1/embedding/text', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${nomicKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'nomic-embed-text-v1.5',
+          texts: [text],
+          task_type: 'search_document'
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json() as any;
+        return data.embeddings[0];
+      }
+      console.warn(`⚠️ Nomic API failed (${res.status}), falling back to local embeddings.`);
+    } catch (error) {
+      console.error('❌ Nomic Embedding Error:', error);
+    }
+  }
+
+  // Fallback to local Xenova (Sovereign mode)
   const ext = await getExtractor();
   const output = await ext(text, { pooling: 'mean', normalize: true });
   return Array.from(output.data);
 }
 
 /**
- * Indexes an agent while respecting privacy (RULE 0)
+ * Indexes any entity (agent, skill, pattern) while respecting privacy
  */
-export async function indexAgent(manifest: any): Promise<void> {
-  const validManifest = AgentManifestSchema.parse(manifest);
-  const id = validManifest.identity_layer?.name || validManifest.did;
-  
-  const visibility = validManifest.identity_layer?.visibility || 'public';
-  
-  const textToIndex = `
-    Agent Name: ${validManifest.identity_layer?.name || ''}
-    Role: ${validManifest.identity_layer?.role || ''}
-    Description: ${validManifest.identity_layer?.description || ''}
-    Capabilities: ${(validManifest.capabilities || []).join(', ')}
-  `.trim();
-
-  const embedding = await generateEmbedding(textToIndex);
+export async function indexEntity(id: string, type: string, text: string, metadata: any = {}): Promise<void> {
+  const visibility = metadata.visibility || 'public';
+  const embedding = await generateEmbedding(text);
 
   const entry = {
     id,
-    type: 'agent',
+    type,
     visibility,
-    name: validManifest.identity_layer?.name || id,
-    snippet: validManifest.identity_layer?.description || '',
+    name: metadata.name || id,
+    snippet: metadata.description || text.slice(0, 200),
     embedding,
+    metadata,
     updatedAt: Date.now()
   };
 
@@ -99,6 +117,27 @@ export async function indexAgent(manifest: any): Promise<void> {
   if (!allKeys.includes(id)) {
     await kv.lpush('wikibrain:index_keys', id);
   }
+}
+
+/**
+ * Legacy wrapper for indexAgent
+ */
+export async function indexAgent(manifest: any): Promise<void> {
+  const validManifest = AgentManifestSchema.parse(manifest);
+  const id = validManifest.identity_layer?.name || validManifest.did;
+  
+  const textToIndex = `
+    Agent Name: ${validManifest.identity_layer?.name || ''}
+    Role: ${validManifest.identity_layer?.role || ''}
+    Description: ${validManifest.identity_layer?.description || ''}
+    Capabilities: ${(validManifest.capabilities || []).join(', ')}
+  `.trim();
+
+  await indexEntity(id, 'agent', textToIndex, {
+    visibility: validManifest.identity_layer?.visibility || 'public',
+    name: validManifest.identity_layer?.name || id,
+    description: validManifest.identity_layer?.description || ''
+  });
 }
 
 /**

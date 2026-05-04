@@ -18,9 +18,12 @@ export const TaskSchema = z.object({
   taskId: z.string().min(1),
   description: z.string().min(5),
   type: z.string().optional(),
-  complexity: z.enum(['simple', 'medium', 'complex']).default('medium'),
   maxSteps: z.number().int().positive().default(7),
   timeout: z.number().optional(),
+  expectedOutput: z.string().optional(),
+  priority: z.number().default(1),
+  complexity: z.number().min(0).max(1).default(0.5), // New: Pro Trick 1
+  metadata: z.record(z.any()).optional(),
 });
 
 export const ToolCallSchema = z.object({
@@ -120,7 +123,19 @@ export class AgentRuntimeEngine {
       const model = this.llm.model || 'unknown-model';
       this.runtime.model = model;
 
-      const result = await this.fullReActLoop(task);
+      let result: string;
+      try {
+        result = await this.fullReActLoop(task);
+      } catch (error) {
+        // Creative Pattern: Failure Recovery & Up-routing (Proactive Evolution)
+        if (model.includes('8b') && task.complexity > 0.4) {
+          await this.emitState('agent:escalating', `Task failed with 8B, escalating to 70B for complexity ${task.complexity}`);
+          this.llm.model = 'groq:llama-3.3-70b-versatile';
+          result = await this.fullReActLoop(task);
+        } else {
+          throw error;
+        }
+      }
 
       // RULE 4: Self Review
       await this.recordSelfReview(task, result);
@@ -138,7 +153,7 @@ export class AgentRuntimeEngine {
         result,
         steps: this.runtime.step,
         duration: Date.now() - startTime,
-        model,
+        model: this.llm.model,
         usedCache,
       };
 
@@ -146,7 +161,7 @@ export class AgentRuntimeEngine {
       await this.handleFailure(task, error);
       return {
         success: false,
-        error,
+        error: error instanceof Error ? error.message : String(error),
         steps: this.runtime.step,
         duration: Date.now() - startTime,
         model: this.runtime.model || 'unknown',

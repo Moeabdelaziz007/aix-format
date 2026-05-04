@@ -3,7 +3,7 @@ import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
 import { createHash } from 'crypto';
 import { getTrustChain } from './trust-chain';
-import { search as semanticSearch } from './wikibrain/SemanticIndex';
+import { search as semanticSearch, indexEntity } from './wikibrain/SemanticIndex';
 
 /**
  * AIX Sovereign Learning Engine (Hermes v2.1)
@@ -57,6 +57,14 @@ export async function recordSuccessfulProcedure(
   await kv.lpush(key, JSON.stringify(procedure));
   await kv.ltrim(key, 0, 49); // Keep top 50 patterns
 
+  // Index for Semantic Search (Pro Trick 2)
+  await indexEntity(
+    `skill:${agentId}:${auditHash}`,
+    'skill',
+    `Goal: ${goal}\nSteps: ${steps.length}`,
+    { agentId, goal, auditHash }
+  );
+
   return auditHash;
 }
 
@@ -94,15 +102,24 @@ export async function extractSkillFromFeedback(
 /**
  * Retrieves learned patterns with semantic relevance
  */
-export async function findRelevantProcedures(agentId: string, currentGoal: string): Promise<LearnedProcedure[]> {
-  const allProcedures = await getLearnedProcedures(agentId);
-  if (allProcedures.length === 0) return [];
+  // Pro Trick 2: Use Semantic Search instead of keyword filtering
+  const semanticResults = await semanticSearch(currentGoal, 3, { type: 'skill' });
+  
+  if (semanticResults.results.length === 0) {
+    // Fallback to keyword matching if no semantic results
+    return allProcedures.filter(p => 
+      p.goal.split(' ').some(word => currentGoal.toLowerCase().includes(word.toLowerCase()))
+    ).slice(0, 3);
+  }
 
-  // Sort by semantic similarity to current goal
-  // (In a high-scale env, we'd use a vector DB, for now we filter by goal keywords)
-  return allProcedures.filter(p => 
-    p.goal.split(' ').some(word => currentGoal.toLowerCase().includes(word.toLowerCase()))
-  ).slice(0, 3);
+  // Map semantic results back to procedures
+  const relevantProcedures: LearnedProcedure[] = [];
+  for (const res of semanticResults.results) {
+    const procedure = allProcedures.find(p => p.auditHash === (res as any).metadata?.auditHash);
+    if (procedure) relevantProcedures.push(procedure);
+  }
+
+  return relevantProcedures;
 }
 
 export async function getLearnedProcedures(agentId: string): Promise<LearnedProcedure[]> {

@@ -2,6 +2,7 @@ import { kv } from './storage/adapter';
 import { KEYS, NS } from './storage/keys';
 import { getTrustChain } from './trust-chain';
 import { getBus } from './bus';
+import { searchTavily } from './tools/search-tavily';
 
 /**
  * AXIOM Sentinel - The Codebase Self-Improvement Intelligence

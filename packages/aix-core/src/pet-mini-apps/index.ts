@@ -44,11 +44,11 @@ export interface PetMiniApp {
 // Export all pet mini apps
 export * from './chrono';
 export * from './volt';
-export * from './shade';
-export * from './bull';
-export * from './drop';
-export * from './sage';
-export * from './guardian';
-export * from './muse';
+// export * from './shade';
+// export * from './bull';
+// export * from './drop';
+// export * from './sage';
+// export * from './guardian';
+// export * from './muse';
 
 // Made with Moe Abdelaziz

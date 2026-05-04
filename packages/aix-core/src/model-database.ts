@@ -260,17 +260,33 @@ class ModelDatabaseImpl {
       
       // Groq Models
       {
-        id: 'llama-3.3-70b-versatile',
-        name: 'Llama 3.3 70B (Groq)',
+        id: 'groq:llama-3.1-8b-instant',
+        name: 'Groq Llama 3.1 8B Instant',
         provider: 'groq',
-        avgQuality: 0.88,
-        avgLatency: 300, // Near instant
-        costPer1kTokens: 0.00, // Free tier mostly
+        avgQuality: 0.75,
+        avgLatency: 200,
+        costPer1kTokens: 0.00005,
         maxTokens: 8192,
         supportsStreaming: true,
         supportsTools: true,
         totalCalls: 0,
         successRate: 0.99,
+        lastUsed: Date.now(),
+        qualityHistory: [],
+        latencyHistory: []
+      },
+      {
+        id: 'groq:llama-3.3-70b-versatile',
+        name: 'Groq Llama 3.3 70B Versatile',
+        provider: 'groq',
+        avgQuality: 0.92,
+        avgLatency: 600,
+        costPer1kTokens: 0.0006,
+        maxTokens: 8192,
+        supportsStreaming: true,
+        supportsTools: true,
+        totalCalls: 0,
+        successRate: 0.98,
         lastUsed: Date.now(),
         qualityHistory: [],
         latencyHistory: []
