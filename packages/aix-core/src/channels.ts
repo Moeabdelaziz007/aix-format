@@ -1,3 +1,4 @@
+import { randomBytes, randomInt } from 'crypto';
 import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
 
@@ -32,12 +33,12 @@ export class ChannelManager {
     
     // Simulate Telegram Managed Bots API Call
     // In production, this would call: https://api.telegram.org/bot<MANAGER_TOKEN>/createManagedBot
-    const botUsername = `${manifest.name.replace(/\s+/g, '_')}_${Math.random().toString(36).slice(2, 6)}_bot`;
+    const botUsername = `${manifest.name.replace(/\s+/g, '_')}_${randomBytes(2).toString('hex')}_bot`;
     
     const config: NonNullable<ChannelConfig['telegram']> = {
       username: botUsername,
       link: `https://t.me/${botUsername}`,
-      token: `t_enc_${Math.random().toString(36).slice(2, 20)}`, // Encrypted simulation
+      token: `t_enc_${randomBytes(16).toString('hex')}`, // Cryptographically secure token
       setupAt: Date.now()
     };
 
@@ -62,8 +63,8 @@ export class ChannelManager {
   static async setupWhatsApp(agentId: string): Promise<ChannelConfig['whatsapp']> {
     
     const config: NonNullable<ChannelConfig['whatsapp']> = {
-      phoneNumber: `+1555${Math.floor(1000000 + Math.random() * 9000000)}`,
-      waid: `waid_${Math.random().toString(36).slice(2, 10)}`,
+      phoneNumber: `+1555${randomInt(1000000, 9999999)}`,
+      waid: `waid_${randomBytes(4).toString('hex')}`,
       setupAt: Date.now()
     };
 

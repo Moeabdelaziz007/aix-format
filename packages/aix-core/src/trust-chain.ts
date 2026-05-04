@@ -7,6 +7,8 @@
 import { createHash } from 'crypto';
 import nacl from 'tweetnacl';
 import util from 'tweetnacl-util';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 
 export interface SignatureData {
   agentId: string;
@@ -25,18 +27,11 @@ export interface LineageRecord {
 
 /**
  * TrustChain class
+ * Persistent Meta-Cognitive Trust Layer
  */
 export class TrustChain {
-  private signatures: Map<string, SignatureData> = new Map();
-  private lineage: Map<string, LineageRecord> = new Map();
-  private verifiedAgents: Set<string> = new Set();
-
   /**
    * Verify signature using Ed25519 (nacl)
-   * @param agentId - Agent identifier
-   * @param data - Data that was signed
-   * @param signature - Hex-encoded signature
-   * @param publicKey - Hex-encoded Ed25519 public key
    */
   async verifySignature(
     agentId: string,
@@ -45,15 +40,12 @@ export class TrustChain {
     publicKey: string
   ): Promise<boolean> {
     try {
-      // Convert data to canonical string
       const dataString = typeof data === 'string' ? data : JSON.stringify(data);
       const message = util.decodeUTF8(dataString);
       
-      // Decode hex signature and public key
       const signatureBytes = Buffer.from(signature, 'hex');
       const publicKeyBytes = Buffer.from(publicKey, 'hex');
       
-      // Verify using nacl.sign.detached.verify()
       const isValid = nacl.sign.detached.verify(
         message,
         signatureBytes,
@@ -61,14 +53,21 @@ export class TrustChain {
       );
       
       if (isValid) {
-        this.signatures.set(agentId, {
+        const sigData: SignatureData = {
           agentId,
           data,
           signature,
           publicKey,
           timestamp: Date.now()
-        });
-        this.verifiedAgents.add(agentId);
+        };
+        
+        // Persist signature and verification status
+        await kv.set(`trust:sig:${agentId}`, sigData);
+        await kv.set(`trust:verified:${agentId}`, true);
+        
+        // Update Trust Score (Proactive improvement)
+        const currentScore = await kv.get<number>(KEYS.agentTrustScore(agentId)) || 0;
+        await kv.set(KEYS.agentTrustScore(agentId), Math.min(10, currentScore + 0.1));
       }
 
       return isValid;
@@ -82,58 +81,100 @@ export class TrustChain {
    * Record agent lineage
    */
   async recordLineage(agentId: string, parentId: string | null): Promise<void> {
+    const isVerified = await this.isVerified(agentId);
     const record: LineageRecord = {
       agentId,
       parentId,
       createdAt: Date.now(),
-      verified: this.verifiedAgents.has(agentId)
+      verified: isVerified
     };
 
-    this.lineage.set(agentId, record);
+    await kv.set(KEYS.lineageNode(agentId), record);
+    if (parentId) {
+      // Add to children list in Redis
+      const children = await kv.get<string[]>(KEYS.lineageChildren(parentId)) || [];
+      if (!children.includes(agentId)) {
+        children.push(agentId);
+        await kv.set(KEYS.lineageChildren(parentId), children);
+      }
+    }
   }
 
   /**
    * Get lineage for agent
    */
-  getLineage(agentId: string): LineageRecord | undefined {
-    return this.lineage.get(agentId);
+  async getLineage(agentId: string): Promise<LineageRecord | null> {
+    return await kv.get<LineageRecord>(KEYS.lineageNode(agentId));
   }
 
   /**
    * Get parent agent
    */
-  getParent(agentId: string): string | null {
-    const record = this.lineage.get(agentId);
+  async getParent(agentId: string): Promise<string | null> {
+    const record = await this.getLineage(agentId);
     return record?.parentId || null;
   }
 
   /**
    * Get children agents
    */
-  getChildren(agentId: string): string[] {
-    const children: string[] = [];
-    
-    for (const [childId, record] of this.lineage.entries()) {
-      if (record.parentId === agentId) {
-        children.push(childId);
-      }
-    }
-
-    return children;
+  async getChildren(agentId: string): Promise<string[]> {
+    return await kv.get<string[]>(KEYS.lineageChildren(agentId)) || [];
   }
 
   /**
    * Check if agent is verified
    */
-  isVerified(agentId: string): boolean {
-    return this.verifiedAgents.has(agentId);
+  async isVerified(agentId: string): Promise<boolean> {
+    return await kv.get<boolean>(`trust:verified:${agentId}`) || false;
   }
 
   /**
    * Get signature data
    */
-  getSignature(agentId: string): SignatureData | undefined {
-    return this.signatures.get(agentId);
+  async getSignature(agentId: string): Promise<SignatureData | null> {
+    return await kv.get<SignatureData>(`trust:sig:${agentId}`);
+  }
+
+  /**
+   * Append an action to the trust chain (RULE 3)
+   * Returns a unique auditHash for the action
+   */
+  async append(agentId: string, action: string, data: any): Promise<string> {
+    const timestamp = Date.now();
+    const prevAction = await kv.get<string>(`trust:last_action:${agentId}`) || 'genesis';
+    
+    // Create Audit Hash: SHA256(prevHash + agentId + action + data + timestamp)
+    const auditHash = this.generateHash({
+      prevAction,
+      agentId,
+      action,
+      data,
+      timestamp
+    });
+
+    const actionRecord = {
+      auditHash,
+      prevAction,
+      agentId,
+      action,
+      data,
+      timestamp
+    };
+
+    // Store the action and update the tail of the chain
+    await kv.set(`trust:action:${auditHash}`, actionRecord);
+    await kv.set(`trust:last_action:${agentId}`, auditHash);
+    
+    // Log to Pulse (Nervous System Bus)
+    await kv.set(KEYS.aixEvents(`trust:${agentId}`), {
+      type: 'TRUST_APPEND',
+      agentId,
+      action,
+      auditHash
+    });
+
+    return auditHash;
   }
 
   /**
@@ -151,19 +192,8 @@ export class TrustChain {
   async verifyPoW(agentId: string, nonce: number, difficulty: number): Promise<boolean> {
     const data = `${agentId}:${nonce}`;
     const hash = this.generateHash(data);
-    
-    // Check if hash starts with required number of zeros
     const prefix = '0'.repeat(difficulty);
     return hash.startsWith(prefix);
-  }
-
-  /**
-   * Reset trust chain state (for testing)
-   */
-  reset(): void {
-    this.signatures.clear();
-    this.lineage.clear();
-    this.verifiedAgents.clear();
   }
 }
 
@@ -186,10 +216,7 @@ export function getTrustChain(): TrustChain {
  * Reset trust chain instance (for testing)
  */
 export function resetTrustChain(): void {
-  if (trustChainInstance) {
-    trustChainInstance.reset();
-    trustChainInstance = null;
-  }
+  trustChainInstance = null;
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz
