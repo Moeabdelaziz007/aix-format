@@ -183,6 +183,32 @@ export class SemanticIndex {
     existing.updatedAt = Date.now();
     await kv.set(`wikibrain:index:${existing.id}`, existing);
   }
+
+  /**
+   * 🔍 HIDDEN PATTERN MINER (Round 23)
+   * Analyzes all indexed nodes to find non-obvious failure correlations.
+   */
+  async findHiddenPatterns(): Promise<string[]> {
+    const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
+    const patterns: string[] = [];
+    const failureStats: Record<string, number> = {};
+
+    for (const key of allKeys) {
+      const node = await kv.get<any>(`wikibrain:index:${key}`);
+      if (node?.metadata?.type === 'logic_pattern' && node.metadata.quality < 0.4) {
+        const tool = node.metadata.tool || 'unknown_tool';
+        failureStats[tool] = (failureStats[tool] || 0) + 1;
+      }
+    }
+
+    for (const [tool, count] of Object.entries(failureStats)) {
+      if (count > 2) {
+        patterns.push(`[HIDDEN_PATTERN]: Tool "${tool}" has a systemic failure correlation (Count: ${count}) in similar contexts.`);
+      }
+    }
+
+    return patterns;
+  }
 }
 
 /**

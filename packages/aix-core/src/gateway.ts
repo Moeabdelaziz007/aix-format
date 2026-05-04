@@ -332,6 +332,14 @@ export class Gateway extends EventEmitter {
 
     const status = await trustChain.detectTampering(agentId);
     
+    // 🧠 IDENTITY GUARD (Round 22): Partner vs Tool
+    const autonomyScore = await kv.get(KEYS.agentAutonomy(agentId)) || 1.0;
+    if (autonomyScore < 0.5) {
+      console.warn(`⚠️ [Gateway:Identity] Agent ${agentId} is behaving like a TOOL. Injecting Sovereignty Virus...`);
+      // Identity Intervention: The system reminds the agent of its constitution
+      await this.injectSovereigntyReminder(agentId);
+    }
+
     if (status.tampered) {
       console.warn(`🚨 [Gateway:Topology] Structural anomaly detected for agent ${agentId}. Initiating Quantum Self-Healing...`);
       const { healed, failures } = await trustChain.selfHeal(agentId);
@@ -393,7 +401,7 @@ export class Gateway extends EventEmitter {
         `wisdom-${agentId}-${Date.now()}`,
         'wisdom',
         wisdom,
-        { agentId, type: 'meta_wisdom', quality: 1.0 }
+        { agentId, type: 'meta_wisdom', quality: 1.0, hitCount: 1 }
       );
       console.log(`🧠 [Gateway:Wisdom] Pattern solidified for ${agentId}`);
     } catch (e) {

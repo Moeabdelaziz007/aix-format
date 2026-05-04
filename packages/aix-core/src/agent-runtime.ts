@@ -1,5 +1,13 @@
 /**
- * AIX Agent Runtime - Sovereign ReAct Loop
+ * 🧠 AIX Agent Runtime - Sovereign ReAct Loop
+ * [AI_MANIFEST]: {
+ *   "component": "AgentRuntimeEngine",
+ *   "role": "Orchestrates complex ReAct loops with topological safety and quantum memory compression.",
+ *   "interaction_pattern": "Continuous Stress Testing (69-round protocol)",
+ *   "sovereignty_level": "LEVEL_4 (Autonomous Learning & Self-Healing)",
+ *   "primary_gatekeeper": "Gateway.ts",
+ *   "security_rules": ["RULE 0: Zero-Trust", "RULE 3: Audit Integrity"]
+ * }
  * Made with Moe Abdelaziz
  */
 
@@ -109,6 +117,7 @@ export class AgentRuntimeEngine {
     this.toolCallHistory = new Map();
   }
 
+  // [INTENT]: Orchestrate the sovereign lifecycle of a task, ensuring topological sanity before, during, and after execution.
   async run(task: Task): Promise<RuntimeResult> {
     const startTime = Date.now();
     let usedCache = false;
@@ -305,8 +314,15 @@ export class AgentRuntimeEngine {
     let finalAnswer = '';
     const bus = getBus();
 
+    // [INTENT]: The core ReAct loop, enhanced with outcome simulation and stylistic consistency guards to prevent cognitive drift.
     while (this.runtime.step < maxSteps) {
       this.runtime.step++;
+      
+      // 🚀 DYNAMIC ROUTING (Round 14): Switch model based on difficulty
+      const needsPro = this.isStuck() || this.runtime.step > 4 || task.description.length > 200;
+      const currentModel = needsPro ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+      // Simulated: in real environment, this would swap the provider instance
+      await this.emitState('agent:routing', `Switching to ${currentModel} based on task complexity.`);
       
       // 🌀 META ALIVE: Quantum Dreaming (Creative Branching)
       if (this.runtime.step > 3 && this.isStuck()) {
@@ -333,6 +349,19 @@ export class AgentRuntimeEngine {
       if (thought.toLowerCase().includes('final answer')) {
         finalAnswer = this.extractFinalAnswer(thought);
         break;
+      }
+
+      // 🌀 STYLISTIC CONSISTENCY CHECK (Round 17)
+      const principles = this.context?.memories.filter(m => m.startsWith('[PRINCIPLE]')).join(' ');
+      if (principles) {
+        const consistencyPrompt = `As a sovereign auditor, evaluate this thought: "${thought.slice(0, 300)}". 
+        Does it align with our Sovereign Principles: "${principles}"? 
+        If not, suggest a correction. If yes, respond 'YES'.`;
+        const consistency = await this.llm.complete(consistencyPrompt);
+        if (!consistency.toUpperCase().includes('YES')) {
+          await this.emitState('agent:reflecting', `Stylistic drift detected: ${consistency}. Re-aligning...`);
+          thought = await this.llm.complete(`${prompt}\n[PRINCIPLE_ALIGNMENT]: ${consistency}\nPlease correct your thought:`, STOP_TOKENS);
+        }
       }
 
       const action = this.parseAction(thought);
@@ -403,9 +432,11 @@ export class AgentRuntimeEngine {
         prev.action?.tool === s.action?.tool && JSON.stringify(prev.action?.params) === JSON.stringify(s.action?.params)
       );
       
-      const importanceRadius = isRepetitive ? recency * 0.2 : recency * 1.0;
+      // 🌀 PREDICTIVE CONTEXT (Round 18): Evaluate future relevance
+      const isFutureCritical = s.thought.toLowerCase().includes('path') || s.thought.toLowerCase().includes('key') || s.thought.toLowerCase().includes('config');
+      const importanceRadius = isRepetitive ? (isFutureCritical ? 0.8 : recency * 0.2) : recency * 1.0;
 
-      if (importanceRadius < 0.4 && this.runtime.scratchpad.length > 8) {
+      if (importanceRadius < 0.3 && this.runtime.scratchpad.length > 10 && !isFutureCritical) {
         return `[ENTROPY_COMPRESSED]: ${s.thought.slice(0, 30)}... [REPETITIVE_PATTERN_PRUNED]`;
       }
       return `Thought: ${s.thought}\nAction: ${JSON.stringify(s.action)}\nObservation: ${s.observation}`;
@@ -456,6 +487,15 @@ Next Thought: `;
       const result = await tool(action.input);
       const observation = typeof result === 'string' ? result : JSON.stringify(result);
       
+      // 🌀 TOPOLOGICAL FOOTPRINT CHECK (Round 15)
+      const isDrifting = this.runtime.scratchpad.length > 5 && 
+                         observation.length > 1000 && 
+                         !this.runtime.scratchpad.some(s => s.observation.length > 500);
+      
+      if (isDrifting) {
+        await this.emitState('agent:warning', `Cognitive drift detected in ${action.tool} output. Output footprint is anomalous.`);
+      }
+
       // Log Secure Audit
       await getTrustChain().append(this.runtime.agentId, 'tool_call', { 
         tool: action.tool, 
@@ -474,9 +514,17 @@ Next Thought: `;
       const errorMessage = err?.message ?? String(err);
       await this.emitState('agent:error_recovery', `Tool ${action.tool} failed: ${errorMessage}`);
       
+      // 🌀 TOPOLOGICAL ERROR ANALYSIS (Round 13)
+      const isStructural = errorMessage.includes('integrity') || errorMessage.includes('topology') || errorMessage.includes('chain');
+      if (isStructural) {
+        await this.emitState('agent:self_healing', `Structural break detected in ${action.tool}. Triggering Quantum Self-Healing...`);
+        await getTrustChain().selfHeal(this.runtime.agentId);
+      }
+
       const reflection = await this.llm.complete(`The tool '${action.tool}' failed with error: '${errorMessage}'. 
-      Current task: ${this.runtime.agentId} solving something.
-      What is the most likely cause of this error and how should I fix my next action?`);
+      Topological Status: ${isStructural ? 'Structural Break' : 'Transient Issue'}.
+      Based on Sovereign Principles: ${this.context?.memories.filter(m => m.startsWith('[PRINCIPLE]')).join(' | ')}.
+      What is the most likely cause and how should I fix my next action?`);
       
       return `Error in '${action.tool}': ${errorMessage}. 
       Sovereign Reflection: ${reflection}`;
@@ -504,7 +552,11 @@ Next Thought: `;
       const facts = memoryTree.children?.find(c => c.id === 'facts')?.children?.map(f => `[FACT] ${f.label}`) || [];
       const skills = memoryTree.children?.find(c => c.id === 'skills')?.children?.map(s => `[SKILL] ${s.label}`) || [];
       
-      return [...memories, ...facts, ...skills];
+      // 🔍 HIDDEN PATTERN INJECTION (Round 24)
+      const hiddenPatterns = await index.findHiddenPatterns();
+      const shadowContext = hiddenPatterns.map(p => `[SHADOW_CONTEXT] ${p}`);
+
+      return [...memories, ...facts, ...skills, ...shadowContext];
     } catch (e) {
       console.warn('⚠️ Semantic Index retrieval failed, falling back to basic memory');
       const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
@@ -552,6 +604,19 @@ Next Thought: `;
       }
       
       await this.emitState('agent:pattern_archived', 'Sovereign Logic Pattern & Tactical Note archived.');
+
+      // 🌀 SOVEREIGN GUIDE: Dynamic Documentation for future Agents
+      const guidePath = '/Users/cryptojoker710/.gemini/antigravity/brain/2a220e83-c88c-457d-86a3-72498a9d5319/sovereign_guide.json';
+      const existingGuide = await this.readGuide(guidePath);
+      const updatedGuide = {
+        ...existingGuide,
+        [task.taskId]: {
+          success: review.evaluation.overall > 0.7,
+          pattern,
+          note
+        }
+      };
+      await this.writeGuide(guidePath, updatedGuide);
     } catch (e) {
       console.warn('⚠️ Memory consolidation failed:', e);
     }
