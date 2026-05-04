@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node 22
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10.23.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
