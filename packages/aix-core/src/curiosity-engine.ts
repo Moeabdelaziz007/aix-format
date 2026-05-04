@@ -292,6 +292,123 @@ export class CuriosityEngine {
 
     return combos.filter((c): c is SkillCombo => c !== null);
   }
+
+  /**
+   * E3.1: SUGGEST NEXT TASK - Proactive task suggestion BEFORE run()
+   * Analyzes agent's exploration history and suggests optimal next task
+   */
+  static async suggestNextTask(
+    agentId: string,
+    availableTasks: Array<{ id: string; description: string; difficulty: number }>
+  ): Promise<{
+    suggestedTask: string;
+    reason: string;
+    explorationValue: number;
+  } | null> {
+    const curiosityScore = await this.getCuriosityScore(agentId);
+    const recentExplorations = await this.getRecentExplorations(agentId, 20);
+    
+    if (availableTasks.length === 0) return null;
+
+    // Calculate exploration value for each task
+    const taskScores = availableTasks.map(task => {
+      // Higher score for unexplored task types
+      const exploredSimilar = recentExplorations.filter(e =>
+        e.context.action?.includes(task.description.split(' ')[0])
+      ).length;
+      
+      const explorationValue = Math.max(0, 100 - (exploredSimilar * 10));
+      const difficultyBonus = task.difficulty * 5; // Reward challenging tasks
+      
+      return {
+        taskId: task.id,
+        score: explorationValue + difficultyBonus,
+        explorationValue,
+      };
+    });
+
+    // Sort by score and pick best
+    const best = taskScores.sort((a, b) => b.score - a.score)[0];
+    
+    return {
+      suggestedTask: best.taskId,
+      reason: `High exploration value (${best.explorationValue}) - agent hasn't tried similar tasks recently`,
+      explorationValue: best.explorationValue,
+    };
+  }
+
+  /**
+   * E3.2: PREDICT FAILURE - Analyze history to predict task failure
+   * Returns failure probability and risk factors
+   */
+  static async predictFailure(
+    agentId: string,
+    taskDescription: string
+  ): Promise<{
+    failureProbability: number;
+    riskFactors: string[];
+    recommendation: string;
+  }> {
+    const recentExplorations = await this.getRecentExplorations(agentId, 50);
+    const curiosityScore = await this.getCuriosityScore(agentId);
+    
+    const riskFactors: string[] = [];
+    let failureProbability = 0.1; // Base 10%
+
+    // Risk Factor 1: Low curiosity score (not exploring enough)
+    if (curiosityScore < 50) {
+      failureProbability += 0.2;
+      riskFactors.push('Low curiosity score - agent may be stuck in local optimum');
+    }
+
+    // Risk Factor 2: Repetitive actions (not exploring)
+    const uniqueActions = new Set(recentExplorations.map(e => e.actionType));
+    if (uniqueActions.size < 3 && recentExplorations.length > 10) {
+      failureProbability += 0.15;
+      riskFactors.push('Repetitive behavior detected - limited action diversity');
+    }
+
+    // Risk Factor 3: No recent successful explorations
+    const recentSuccesses = recentExplorations.filter(e =>
+      e.actionType === 'UNEXPECTED_SUCCESS' || e.actionType === 'FOUND_PATTERN'
+    );
+    if (recentSuccesses.length === 0 && recentExplorations.length > 5) {
+      failureProbability += 0.1;
+      riskFactors.push('No recent exploration successes');
+    }
+
+    // Risk Factor 4: Task similarity to past failures
+    const taskWords = taskDescription.toLowerCase().split(/\s+/);
+    const failedExplorations = recentExplorations.filter(e =>
+      e.reward === 0 || e.context.failed === true
+    );
+    
+    const similarFailures = failedExplorations.filter(e => {
+      const contextStr = JSON.stringify(e.context).toLowerCase();
+      return taskWords.some(word => contextStr.includes(word));
+    });
+
+    if (similarFailures.length > 2) {
+      failureProbability += 0.25;
+      riskFactors.push(`${similarFailures.length} similar past failures detected`);
+    }
+
+    // Generate recommendation
+    let recommendation = 'Proceed with caution';
+    if (failureProbability > 0.6) {
+      recommendation = 'High risk - consider alternative approach or skip task';
+    } else if (failureProbability > 0.4) {
+      recommendation = 'Moderate risk - increase exploration before attempting';
+    } else if (failureProbability < 0.2) {
+      recommendation = 'Low risk - good opportunity for success';
+    }
+
+    return {
+      failureProbability: Math.min(1, failureProbability),
+      riskFactors,
+      recommendation,
+    };
+  }
 }
 
 // Made with Moe Abdelaziz

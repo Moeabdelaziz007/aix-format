@@ -96,6 +96,40 @@ export class Gateway extends EventEmitter {
     const startTime = Date.now();
     
     try {
+      // E3.3: PROACTIVE PRE-CHECK - Scan BEFORE execution
+      const proactiveScan = await AgentSelfReview.proactiveScan(agentId);
+      if (!proactiveScan.shouldProceed) {
+        this.emit('agent:blocked', {
+          agentId,
+          reason: 'Proactive scan failed',
+          warnings: proactiveScan.warnings
+        });
+        throw new Error(`Agent blocked: ${proactiveScan.warnings.join(', ')}`);
+      }
+
+      // Apply suggested mode if available
+      if (proactiveScan.suggestedMode) {
+        await kv.set(KEYS.agentCurrentMode(agentId), proactiveScan.suggestedMode);
+        this.emit('agent:mode:changed', {
+          agentId,
+          mode: proactiveScan.suggestedMode,
+          reason: 'Proactive scan recommendation'
+        });
+      }
+
+      // Predict failure probability
+      const taskDescription = typeof input === 'string' ? input : JSON.stringify(input);
+      const failurePrediction = await CuriosityEngine.predictFailure(agentId, taskDescription);
+      
+      if (failurePrediction.failureProbability > 0.7) {
+        this.emit('agent:high-risk', {
+          agentId,
+          probability: failurePrediction.failureProbability,
+          riskFactors: failurePrediction.riskFactors
+        });
+        console.warn(`[Gateway] High failure risk (${(failurePrediction.failureProbability * 100).toFixed(0)}%) for ${agentId}`);
+      }
+
       // Emit running event
       this.emit('agent:running', { agentId, input });
 

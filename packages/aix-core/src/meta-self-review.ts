@@ -380,12 +380,158 @@ Be honest, specific, and actionable.
       safetyScore: avgSafety,
     };
   }
+
+  /**
+   * E2.2: PROACTIVE SCAN - Scan agent BEFORE task execution
+   * Predicts potential issues and suggests preventive actions
+   */
+  static async proactiveScan(agentId: string): Promise<{
+    shouldProceed: boolean;
+    warnings: string[];
+    suggestedMode?: AgentMode;
+    preventiveActions: string[];
+  }> {
+    const history = await this.getSelfReviewHistory(agentId, 10);
+    
+    if (history.length === 0) {
+      return {
+        shouldProceed: true,
+        warnings: [],
+        preventiveActions: ['Start building review history'],
+      };
+    }
+
+    const warnings: string[] = [];
+    const preventiveActions: string[] = [];
+    let suggestedMode: AgentMode | undefined;
+
+    // E2.3: USE getImprovementTrend() for decisions
+    const trend = await this.getImprovementTrend(agentId);
+    if (trend && trend.trend === 'down') {
+      warnings.push(`Performance declining: ${trend.previousAverage.toFixed(1)} → ${trend.recentAverage.toFixed(1)}`);
+      preventiveActions.push('Switch to SAFE_STRICT mode');
+      suggestedMode = 'SAFE_STRICT';
+    }
+
+    // E2.4: ENFORCE isSafeToEvolve() checks
+    const safetyCheck = await this.isSafeToEvolve(agentId);
+    if (!safetyCheck.safe) {
+      warnings.push(`Evolution blocked: ${safetyCheck.reason}`);
+      preventiveActions.push('Focus on proven patterns only');
+      suggestedMode = 'SAFE_STRICT';
+    }
+
+    // Check recent failures
+    const recentFailures = history.filter(r => r.isFailure).length;
+    if (recentFailures > 3) {
+      warnings.push(`${recentFailures} recent failures detected`);
+      preventiveActions.push('Review failure patterns before proceeding');
+      return {
+        shouldProceed: false,
+        warnings,
+        suggestedMode: 'SAFE_STRICT',
+        preventiveActions,
+      };
+    }
+
+    // Check safety scores
+    const avgSafety = history.reduce((sum, r) => sum + r.evaluation.safety, 0) / history.length;
+    if (avgSafety < 6.0) {
+      warnings.push(`Low safety score: ${avgSafety.toFixed(1)}`);
+      preventiveActions.push('Increase safety checks');
+    }
+
+    return {
+      shouldProceed: warnings.length < 3,
+      warnings,
+      suggestedMode,
+      preventiveActions,
+    };
+  }
+
+  /**
+   * PREDICT FAILURE - Analyze history to predict potential failures
+   * Returns probability of failure (0-1) and risk factors
+   */
+  static async predictFailure(
+    agentId: string,
+    taskDescription: string
+  ): Promise<{
+    failureProbability: number;
+    riskFactors: string[];
+    similarFailures: FailurePattern[];
+  }> {
+    const history = await this.getSelfReviewHistory(agentId, 20);
+    const failures = history.filter(r => r.isFailure && r.failurePattern);
+
+    if (failures.length === 0) {
+      return {
+        failureProbability: 0.1,
+        riskFactors: ['No failure history - proceed with caution'],
+        similarFailures: [],
+      };
+    }
+
+    // Find similar failures by task description
+    const similarFailures = failures
+      .filter(f => {
+        const similarity = this.calculateSimilarity(
+          taskDescription.toLowerCase(),
+          f.taskDescription.toLowerCase()
+        );
+        return similarity > 0.5;
+      })
+      .map(f => f.failurePattern!)
+      .filter(Boolean);
+
+    const riskFactors: string[] = [];
+    let failureProbability = 0;
+
+    // Calculate failure probability based on similar tasks
+    if (similarFailures.length > 0) {
+      failureProbability = Math.min(0.9, similarFailures.length * 0.3);
+      riskFactors.push(`${similarFailures.length} similar failures in history`);
+    }
+
+    // Check recent performance trend
+    const trend = await this.getImprovementTrend(agentId);
+    if (trend && trend.trend === 'down') {
+      failureProbability += 0.2;
+      riskFactors.push('Performance declining');
+    }
+
+    // Check safety scores
+    const avgSafety = history.reduce((sum, r) => sum + r.evaluation.safety, 0) / history.length;
+    if (avgSafety < 7.0) {
+      failureProbability += 0.1;
+      riskFactors.push(`Low safety score: ${avgSafety.toFixed(1)}`);
+    }
+
+    return {
+      failureProbability: Math.min(1, failureProbability),
+      riskFactors,
+      similarFailures,
+    };
+  }
+
+  /**
+   * Calculate text similarity (simple Jaccard similarity)
+   */
+  private static calculateSimilarity(text1: string, text2: string): number {
+    const words1 = new Set(text1.split(/\s+/));
+    const words2 = new Set(text2.split(/\s+/));
+    
+    const intersection = new Set([...words1].filter(w => words2.has(w)));
+    const union = new Set([...words1, ...words2]);
+    
+    return intersection.size / union.size;
+  }
 }
 
 // Export for use in Gateway + Evolution Safety
 export { AgentSelfReview as MetaLoop };
 
-// Made with Bob
+// Made with Moe Abdelaziz
 
 /**
  * AIX Meta-Loop Self-Review System with Smart Enhancements

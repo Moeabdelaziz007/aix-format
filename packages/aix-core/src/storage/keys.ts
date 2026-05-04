@@ -140,7 +140,11 @@ export const KEYS = {
   lineageRecalled:    () => `aix:lineage:recalled`,
   agentLastActivity:  (agentId: string) => `agent:${agentId}:last_activity`,
   aixSwarmEdges:      () => `aix:swarm:edges`,
-  ghost:  (agentId: string)   => `agent:${agentId}:ghost`
+  ghost:  (agentId: string)   => `agent:${agentId}:ghost`,
+  
+  // Evolution Safety keys
+  agentEvolutionSnapshots: (agentId: string) => `agent:${agentId}:evolution_snapshots`,
+  agentEvolutionAuditLog: (agentId: string) => `agent:${agentId}:evolution_audit_log`
 };
 
 export const TTL = {
