@@ -30,7 +30,7 @@ jobs:
           cache-dependency-path: apps/studio/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --ignore-scripts
 
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -59,7 +59,7 @@ jobs:
         with:
           node-version: '22'
 
-      - run: npm install
+      - run: npm install --ignore-scripts
       - run: npm test --if-present
 
   # ─────────────────────────────────────────
