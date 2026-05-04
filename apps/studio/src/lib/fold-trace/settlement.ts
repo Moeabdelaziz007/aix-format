@@ -9,7 +9,7 @@
  * @module fold-trace-settlement
  */
 
-import { BondingCurve } from '@/packages/aix-core/src/economics/BondingCurve';
+import { BondingCurve } from '@aix/core/economics/BondingCurve';
 
 export interface FoldTraceRecord {
   agentId: string;
