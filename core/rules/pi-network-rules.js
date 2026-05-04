@@ -8,7 +8,7 @@ import { isValidSemver } from '../validation-utils.js';
 export const piNetworkRules = [
   {
     name: 'pi_network.app_id.required',
-    test: (data) => {
+    check: (data) => {
       const pi = data.pi_network;
       return !pi || !!pi.app_id;
     },
@@ -19,7 +19,7 @@ export const piNetworkRules = [
   
   {
     name: 'pi_network.environment.required',
-    test: (data) => {
+    check: (data) => {
       const pi = data.pi_network;
       return !pi || !!pi.environment;
     },
@@ -30,7 +30,7 @@ export const piNetworkRules = [
   
   {
     name: 'pi_network.environment.valid',
-    test: (data) => {
+    check: (data) => {
       const env = data.pi_network?.environment;
       if (!env) return true;
       return ['sandbox', 'production'].includes(env);
@@ -42,7 +42,7 @@ export const piNetworkRules = [
   
   {
     name: 'pi_network.sdk_version.format',
-    test: (data) => {
+    check: (data) => {
       const version = data.pi_network?.sdk_version;
       return !version || isValidSemver(version);
     },

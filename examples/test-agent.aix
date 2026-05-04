@@ -4,7 +4,7 @@ meta:
   version: "1.0.0"
   role: "Security Tester"
 identity_layer:
-  id: "did:axiom:test123"
+  id: "did:web:axiomid.app:test123"
   kyc_tier: 2
   verified: true
 skills:

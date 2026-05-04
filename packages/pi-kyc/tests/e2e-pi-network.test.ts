@@ -50,7 +50,7 @@ describe('Pi Network E2E Integration', () => {
       expect(result).toBeDefined();
       expect(result.identity_layer).toBeDefined();
       expect(result.kyc_proof).toBeDefined();
-      expect(result.identity_layer.id).toMatch(/^did:axiom:axiomid\.app:/);
+      expect(result.identity_layer.id).toMatch(/^did:web:axiomid.app:/);
     });
 
     it('should reject authentication with missing user.uid', () => {
@@ -137,7 +137,7 @@ describe('Pi Network E2E Integration', () => {
 
       const result = PiKycAdapter.generateIdentity(piAuthResult);
 
-      expect(result.identity_layer.id).toMatch(/^did:axiom:axiomid\.app:[a-f0-9]{32}$/);
+      expect(result.identity_layer.id).toMatch(/^did:web:axiomid.app:[a-f0-9]{32}$/);
       expect(result.identity_layer.authority).toBe('axiomid.app');
       expect(result.identity_layer.issuedAt).toBeDefined();
       expect(new Date(result.identity_layer.issuedAt).getTime()).toBeGreaterThan(0);

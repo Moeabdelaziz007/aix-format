@@ -26,7 +26,7 @@ export const metaRules = [
     name: 'meta-id-format',
     priority: 10,
     check: (data) => !data.meta?.id || isValidID(data.meta.id),
-    message: 'Invalid ID format. Must be a valid DID (did:axiom:* or did:web:*)'
+    message: 'Invalid ID format. Must be a valid DID (did:web:axiomid.app:* or did:web:*)'
   },
   {
     name: 'meta-timestamp',

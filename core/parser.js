@@ -309,7 +309,7 @@ export class AIXParser {
   }
 
   isValidID(id) {
-    const axiomRegex = /^did:axiom:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
+    const axiomRegex = /^did:web:axiomid\.app:[a-zA-Z0-9._\-]+$/i;
     const webRegex = /^did:web:[a-zA-Z0-9.\-]+(:[a-zA-Z0-9.\-]+)*$/i;
     return axiomRegex.test(id) || webRegex.test(id);
   }
@@ -456,8 +456,4 @@ export class AIXAgent {
   }
 }
 
-// ─── Plugin System Exports ────────────────────────────────────────────────────
 // Export plugin system for external use
-export { defaultRegistry, PluginRegistry };
-export { ValidationPlugin } from './validation-plugins.js';
-export * from './plugins/index.js';

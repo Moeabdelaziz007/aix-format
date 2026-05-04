@@ -2,7 +2,7 @@ const DEFAULT_SCHEMA_VERSION = 'aix/v1';
 
 export function generateDID(name, url) {
   const slug = (name || 'agent').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  return `did:axiom:axiomid.app:${slug}`;
+  return `did:web:axiomid.app:${slug}`;
 }
 
 export function fromA2A(agentCardJson = {}) {

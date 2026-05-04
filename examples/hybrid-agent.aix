@@ -1,6 +1,6 @@
 meta:
   version: '1.0'
-  id: did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440003
+  id: did:web:axiomid.app:550e8400-e29b-41d4-a716-446655440003
   name: Academic Research Assistant
   description: AI agent for academic research, literature review, and citation management
   created: '2026-01-12T12:00:00Z'
@@ -402,7 +402,7 @@ security:
     encryption_at_rest: true
     encryption_in_transit: true
 identity_layer:
-  id: did:axiom:axiomid.app:12345678-1234-4234-8234-1234567890ab
+  id: did:web:axiomid.app:12345678-1234-4234-8234-1234567890ab
   authority: axiomid.app
   issuedAt: '2026-04-27T01:41:47.192Z'
   publicKey:

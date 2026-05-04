@@ -28,9 +28,9 @@
     },
     "AxiomDID": {
       "type": "string",
-      "description": "Axiom Decentralized Identifier — did:axiom:axiomid.app:<id>",
-      "pattern": "^did:axiom:axiomid\\.app:[a-zA-Z0-9._\\-]+$",
-      "examples": ["did:axiom:axiomid.app:agent-xyz-001"]
+      "description": "Axiom Decentralized Identifier — did:web:axiomid.app:<id>",
+      "pattern": "^did:web:axiomid.app:axiomid\\.app:[a-zA-Z0-9._\\-]+$",
+      "examples": ["did:web:axiomid.app:agent-xyz-001"]
     },
     "PublicKey": {
       "type": "object",
@@ -163,7 +163,7 @@
         "id": {
           "type": "string",
           "description": "Unique identifier — UUID v4 or AxiomDID",
-          "examples": ["550e8400-e29b-41d4-a716-446655440000", "did:axiom:axiomid.app:agent-001"]
+          "examples": ["550e8400-e29b-41d4-a716-446655440000", "did:web:axiomid.app:agent-001"]
         },
         "name": { "type": "string", "minLength": 1, "maxLength": 100 },
         "description": { "type": "string" },

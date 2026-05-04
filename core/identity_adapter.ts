@@ -81,7 +81,7 @@ export class IdentityAdapter {
     const uidHash = crypto.createHash('sha256').update(`${uid}:${uidSalt}`).digest('hex').slice(0, 32);
 
     // 3. Build DID (Decentralized Identifier)
-    const didMethod = options.didMethod || 'did:axiom';
+    const didMethod = options.didMethod || 'did:web:axiomid.app';
     const didAuthority = options.didAuthority || 'axiomid.app';
     const did = `${didMethod}:${didAuthority}:${uidHash}`;
     

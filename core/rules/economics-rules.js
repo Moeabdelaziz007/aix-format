@@ -7,7 +7,7 @@ export const economicsRules = [
   // Pi Smart Contract
   {
     name: 'economics.pi_smart_contract.address.required',
-    test: (data) => {
+    check: (data) => {
       const psc = data.economics?.pi_smart_contract;
       return !psc || !!psc.address;
     },
@@ -18,7 +18,7 @@ export const economicsRules = [
   
   {
     name: 'economics.pi_smart_contract.network.valid',
-    test: (data) => {
+    check: (data) => {
       const network = data.economics?.pi_smart_contract?.network;
       if (!network) return true;
       return ['pi-mainnet', 'pi-testnet', 'sandbox'].includes(network);
@@ -31,7 +31,7 @@ export const economicsRules = [
   // Wallets
   {
     name: 'economics.wallets.type',
-    test: (data) => {
+    check: (data) => {
       const wallets = data.economics?.wallets;
       return !wallets || Array.isArray(wallets);
     },
@@ -42,7 +42,7 @@ export const economicsRules = [
   
   {
     name: 'economics.wallets.required_fields',
-    test: (data) => {
+    check: (data) => {
       const wallets = data.economics?.wallets;
       if (!wallets || !Array.isArray(wallets)) return true;
       return wallets.every(w => w.chain && w.address);
@@ -54,7 +54,7 @@ export const economicsRules = [
   // Payment Gateways
   {
     name: 'economics.payment_gateways.stripe_acp.merchant_id',
-    test: (data) => {
+    check: (data) => {
       const stripe = data.economics?.payment_gateways?.stripe_acp;
       return !stripe || !stripe.enabled || !!stripe.merchant_id;
     },
@@ -66,7 +66,7 @@ export const economicsRules = [
   
   {
     name: 'economics.payment_gateways.paypal_ap2.mandate_id',
-    test: (data) => {
+    check: (data) => {
       const paypal = data.economics?.payment_gateways?.paypal_ap2;
       return !paypal || !paypal.enabled || !!paypal.mandate_id;
     },
@@ -79,7 +79,7 @@ export const economicsRules = [
   // Delegation
   {
     name: 'economics.delegation.max_depth',
-    test: (data) => {
+    check: (data) => {
       const del = data.economics?.delegation;
       return !del || !del.allow_recursive || del.max_depth <= 5;
     },
@@ -91,7 +91,7 @@ export const economicsRules = [
   // Treasury
   {
     name: 'economics.treasury.flash_loan_arbitrage',
-    test: (data) => {
+    check: (data) => {
       const tre = data.economics?.treasury;
       if (!tre || !tre.flash_loan_arbitrage_enabled) return true;
       return !!data.security?.guardian_logic?.mempool_monitor;

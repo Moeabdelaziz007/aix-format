@@ -12,7 +12,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique decentralized identifier (DID) for the agent. Supports did:axiom, did:web, did:pi.",
+      "description": "Unique decentralized identifier (DID) for the agent. Supports did:web:axiomid.app, did:web, did:pi.",
       "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9._%\\-]+(:[a-zA-Z0-9._%\\-]+)*$"
     },
     "provider": {

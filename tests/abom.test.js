@@ -30,7 +30,7 @@ function parseWithABOM(abom) {
   // Call validateABOM directly to isolate ABOM logic
   parser.errors = [];
   parser.warnings = [];
-  parser.validateABOM(abom);
+  parser.validateStructure({ ...BASE, abom });
   return { errors: parser.errors, warnings: parser.warnings };
 }
 

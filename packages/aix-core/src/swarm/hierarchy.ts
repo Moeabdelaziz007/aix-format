@@ -1,5 +1,5 @@
 import { IHierarchy, AgentSkill } from "../patterns";
-import { GatewayProcess } from "@aix-types";
+import { GatewayProcess } from "@aix/types";
 
 /**
  * Skill: Atomic unit of logic inside an agent.

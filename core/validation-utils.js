@@ -7,7 +7,7 @@
 // Format validators
 export const isValidID = (id) => /^did:(axiom|web):.+/.test(id);
 export const isValidISO8601 = (ts) => !isNaN(Date.parse(ts));
-export const isValidSemver = (v) => /^\d+\.\d+\.\d+/.test(v);
+export const isValidSemver = (v) => /^\d+\.\d+(\.\d+)?(-[a-z0-9.]+)?(\+[a-z0-9.]+)?$/i.test(v);
 export const isValidURL = (url) => {
   try { new URL(url); return true; } catch { return false; }
 };

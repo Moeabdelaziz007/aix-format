@@ -1,5 +1,5 @@
 import { kv, KEYS } from './index';
-import { ArbitrageStrategy, Economics } from '@aix-types';
+import { ArbitrageStrategy, Economics } from '@aix/types';
 import { IStrategy } from './patterns';
 
 /**

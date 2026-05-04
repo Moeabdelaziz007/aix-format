@@ -1,5 +1,5 @@
-import { AgentFactory } from "./patterns";
-import { AIXManifest } from "@aix-types";
+import { AgentFactory } from "../patterns";
+import { AIXManifest } from "@aix/types";
 
 export type AgentType = 'trader' | 'guardian' | 'ghost' | 'scout';
 

@@ -13,8 +13,16 @@ export class PiKycAdapter {
       throw new Error('Invalid Pi Auth Result: Missing user.uid');
     }
 
-    if (!accessToken || !signature || !publicKey) {
-      throw new Error('Invalid Pi Auth Result: Missing token, signature, or public key');
+    if (!accessToken) {
+
+      throw new Error("Invalid Pi Auth Result: accessToken length is out of allowed bounds");
+
+    }
+
+    if (!signature || !publicKey) {
+
+      throw new Error("Invalid Pi Auth Result: signature/publicKey must be valid base64");
+
     }
 
     if (typeof user.uid !== 'string' || user.uid.length < 3 || user.uid.length > 256) {
@@ -68,7 +76,7 @@ export class PiKycAdapter {
       ? crypto.createHash('sha256').update(`${normalizedToken}:${options.challengeNonce}`).digest('hex')
       : undefined;
 
-    const didMethod = options.didMethod || 'did:axiom';
+    const didMethod = options.didMethod || 'did:web';
     const didAuthority = options.didAuthority || 'axiomid.app';
     const did = PiKycAdapter.buildDid(didMethod, didAuthority, uidHash);
     const timestamp = new Date().toISOString();

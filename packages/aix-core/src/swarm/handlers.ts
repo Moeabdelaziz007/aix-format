@@ -1,5 +1,5 @@
 import { PulseHandler, RedisEventBus } from "../patterns";
-import { GatewayProcess, AIXManifest } from "@aix-types";
+import { GatewayProcess, AIXManifest } from "@aix/types";
 import { kv } from "../storage/adapter";
 import { KEYS } from "../storage/keys";
 import { GatewaySecurity } from "../security";
