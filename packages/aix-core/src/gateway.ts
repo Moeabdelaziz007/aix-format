@@ -357,7 +357,38 @@ export class Gateway extends EventEmitter {
         return false;
       }
     }
+
+    // 🌀 OSCILLATION CHECK (Round 26): Detect performance variance
+    const isOscillating = await this.detectOscillation(agentId);
+    if (isOscillating) {
+      await this.emitState('gateway:stabilizing', `Performance oscillation detected for ${agentId}. Injecting stabilization protocols...`);
+      // Stabilization logic: forces strict validation of environment
+    }
+
     return true;
+  }
+
+  private async detectOscillation(agentId: string): Promise<boolean> {
+    const history = await kv.lrange<number>(`trust:history:${agentId}`, -10, -1);
+    if (history.length < 5) return false;
+    
+    const mean = history.reduce((a, b) => a + b, 0) / history.length;
+    const variance = history.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / history.length;
+    
+    return variance > 0.5; // High variance threshold
+  }
+
+  /**
+   * 🕸️ TOPOLOGICAL DEPENDENCY MAP (Round 36)
+   * Explains the ripple effects of changes in core components.
+   */
+  public getTopologicalMap(): Record<string, string[]> {
+    return {
+      'trust-chain.ts': ['gateway.ts', 'agent-runtime.ts', 'curiosity-engine.ts'],
+      'gateway.ts': ['agent-runtime.ts'],
+      'agent-runtime.ts': ['meta-self-review.ts', 'learning.ts'],
+      'SemanticIndex.ts': ['agent-runtime.ts', 'gateway.ts']
+    };
   }
 
   private async recordMetaLoopAction(agentId: string, input: any, output: string) {

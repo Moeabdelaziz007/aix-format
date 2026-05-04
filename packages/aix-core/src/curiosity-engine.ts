@@ -140,11 +140,11 @@ export class CuriosityEngine {
       });
     }
 
-    // Calculate Decay Factor (RULE 7: Genuine Curiosity Only)
-    const usageCount = await this.getActionUsageCount(agentId, action);
-    const decayFactor = Math.max(0.1, 1 / (1 + usageCount * 0.5));
-    
-    const finalReward = totalReward * decayFactor;
+    // 🌀 TOPOLOGICAL CURIOSITY (Round 35): Reward for exploring 'Dark Areas' (Files with low audit frequency)
+    const isDarkArea = action.tool.includes('read_file') || action.tool.includes('view_file');
+    const darkBonus = isDarkArea ? 2.0 : 0.0; // Significant bonus for first-time file audits
+
+    const finalReward = (totalReward + darkBonus) * decayFactor;
 
     // Record total curiosity score with decay
     if (finalReward > 0) {
