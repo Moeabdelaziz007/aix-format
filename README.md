@@ -1,109 +1,115 @@
-# 🧬 AIX Format (Universal Agent Passport) v0.369.0
+# 🧬 AIX Format — Universal Agent Passport v0.369.0
 
-🇬🇧 **AIX Format** is the industry-first open standard for **Sovereign AI Agents** and the **Universal Agent Passport** for the agentic payment economy. It converges Cryptographic Identity (DIDs), the Model Context Protocol (MCP), HTTP 402 payments, and multi-chain settlement into a single, immutable `.aix` manifest. This protocol is designed for the 10x Moonshot era of autonomous, self-governing machine ecosystems.
+🇬🇧 **AIX Format** is the industry-first open standard for **Sovereign AI Agents** —
+the Universal Agent Passport for the agentic payment economy.
+It converges Cryptographic Identity (DIDs), the Model Context Protocol (MCP),
+HTTP 402 payments, and multi-chain settlement into a single immutable `.aix` manifest.
 
 **Latest Versions**:
-- 🧬 **AIX Core Format**: v0.369.0 (Identity + MCP + ABOM)
+- 🧬 **AIX Core Format**: v0.369.0 (Identity + MCP + ABOM + TrustChain)
 - 💳 **AIX Payment Layer**: v1.0.0 (HTTP 402 + Multi-Chain + DeFi)
 - 🌐 **Universal Passport**: v0.369.0 (Complete Integration)
 
-🇦🇪 **تنسيق AIX** هو أول معيار مفتوح في الصناعة لـ **الوكلاء الذكيين السياديين**. يقوم بدمج الهوية التشفيرية (DIDs)، بروتوكول سياق النموذج (MCP)، والمدفوعات الدقيقة الأصلية في بيان `.aix` واحد غير قابل للتغيير. تم تصميم هذا البروتوكول لعصر "Moonshot" للأنظمة الآلية ذاتية الحكم.
+🇦🇪 **تنسيق AIX** هو أول معيار مفتوح في الصناعة لـ **الوكلاء الذكيين السياديين**.
+يدمج الهوية التشفيرية (DIDs)، بروتوكول MCP، والمدفوعات الدقيقة في بيان `.aix` واحد.
+
+---
+
+## 🤝 Built by 1 Human + 5 AI Agents
+
+> *"I didn't use AI as a tool — I used AI as a team.*
+> *AIX Format is the first open standard built **by** AI agents, **for** AI agents."*
+
+| | For | Message |
+|---|---|---|
+| 🥇 | **Everyone** | 6 contributors. 5 are AI. The code is real, the tests pass, the schema is live. |
+| 🥈 | **Developers** | This is what Human–AI collaboration looks like in 2026. |
+| 🥉 | **Enterprises** | If 5 AI models can collaborate on one codebase under one standard — imagine what your agents can do with AIX. |
 
 ---
 
 ### ✨ Why AIX Format? | لماذا AIX؟
 
-| Problem | المشكلة | AIX Format | Solution | الحل |
-| :--- | :--- | :--- | :--- | :--- |
-| **Identity** | **الهوية** | ✅ KYC-signed DID | **Verifiable** | **قابلة للتحقق** |
-| **Monetization** | **التحقيق المالي** | ✅ Native π payments | **Built-in** | **مدمج** |
-| **Provenance** | **الأصل والتتبع** | ✅ ABOM + SLSA L3 | **Tamper-proof** | **ضد التلاعب** |
-| **Portability** | **القابلية للنقل** | ✅ Open Standard | **No Lock-in** | **بدون تبعية** |
-| **Audit** | **التدقيق** | ✅ SaaS-BOM Audit | **Automated** | **مؤتمت** |
+| Problem | AIX Solution | Standard |
+|:---|:---|:---|
+| No universal agent identity | ✅ KYC-signed DID (did:axiom) | Verifiable |
+| No standard monetization | ✅ HTTP 402 + Multi-Chain | Built-in |
+| No provenance tracking | ✅ ABOM + TrustChain + SLSA L3 | Tamper-proof |
+| Platform lock-in | ✅ Open Standard JSON | Portable |
+| No audit trail | ✅ SaaS-BOM + TrustChain | Automated |
+
+> AIX is the only standard combining **Identity + Execution + Economics** in one signed manifest.
+> Compare: Google A2A ✅ execution only · IBM ACP ✅ execution only · AIX ✅ all three.
 
 ---
 
 ### 🏛️ System Architecture | بنية النظام
 
-🇬🇧 The AIX Protocol operates on a three-tier sovereign stack:
-1. **Identity Layer (did:axiom)**: Uses Ed25519 signatures anchored to the Pi Network. Every agent has a verified human (KYC) or institutional backer.
-2. **Operational Layer (MCP)**: Implements the *Model Context Protocol* to provide agents with a standardized way to call tools through a secure Gateway.
-3. **Economic Layer (M2M)**: Native micro-settlement for machine-to-machine interactions using π (Pi).
+The AIX Protocol operates on a three-tier sovereign stack:
 
-🇦🇪 يعمل بروتوكول AIX على هيكلية سيادية من ثلاث طبقات:
-1. **طبقة الهوية (did:axiom)**: تستخدم تواقيع Ed25519 المثبتة على شبكة Pi. كل وكيل لديه داعم بشري موثق (KYC) أو مؤسسي.
-2. **الطبقة التشغيلية (MCP)**: تنفذ "بروتوكول سياق النموذج" لتزويد الوكلاء بطريقة معيارية لاستدعاء الأدوات عبر بوابة آمنة.
-3. **الطبقة الاقتصادية (M2M)**: تسوية دقيقة أصلية للتفاعلات بين الآلات باستخدام π (Pi).
+1. **Identity Layer (did:axiom)** — Ed25519 signatures anchored to Pi Network.
+   Every agent has a verified human (KYC) or institutional backer.
+2. **Operational Layer (MCP)** — Standardized tool-calling via a secure Gateway
+   with ABOM safetyScore gating and Human-in-the-Loop approval.
+3. **Economic Layer (M2M)** — Pluggable multi-chain settlement:
+   Pi (default) · Stripe · Base L2 · Solana · Lightning · Custom.
 
 ---
 
 ### 🧬 Core Concepts | المفاهيم الأساسية
 
-🇬🇧 **Technical Deep Dive**:
-*   **AIX Manifest**: A JSON-LD document containing the agent's DNA (Persona, Abilities, Identity).
-*   **ABOM (Agent Bill of Materials)**: Tracks training datasets, base models, and plugins for compliance.
-*   **SaaS-BOM**: Audits 3rd-party SaaS dependencies (OpenAI, Pinecone, etc.).
-*   **MCP Gateway**: Secure rate-limited proxy that sanitizes tool inputs.
-
-🇦🇪 **تعمق تقني**:
-*   **بيان AIX**: مستند JSON-LD يحتوي على الحمض النووي للوكيل (الشخصية، القدرات، الهوية).
-*   **ABOM (بيان مواد الوكيل)**: يتتبع مجموعات بيانات التدريب، النماذج الأساسية، والإضافات للامتثال.
-*   **SaaS-BOM**: يدقق في تبعيات SaaS الخارجية (OpenAI، Pinecone، إلخ).
-*   **بوابة MCP**: بروكسي آمن ومحدد المعدل يقوم بتنقية مدخلات الأدوات.
+- **AIX Manifest** — JSON-LD document containing the agent's DNA (Persona, Abilities, Identity, TrustChain, Evolution).
+- **ABOM** (Agent Bill of Materials) — Tracks training datasets, base models, plugins for compliance.
+- **TrustChain** — Append-only cryptographic log of every agent action. SHA-256 linked entries. Human-approved mutations only.
+- **Evolution Section** — The agent records its own learning: `loops_completed`, `lessons`, `trust_delta`.
+- **SaaS-BOM** — Audits 3rd-party dependencies (OpenAI, Pinecone, etc.).
+- **MCP Gateway** — Secure rate-limited proxy. Blocked if `safetyScore < 5`. Human approval required if `5 ≤ score < 7`.
 
 ---
 
-### 🚀 Roadmap | خارطة الطريق
+### 💳 Universal Agent Passport | جواز الوكيل العالمي
 
-| Feature | الميزة | Status | الحالة | Docs |
-| :--- | :--- | :--- | :--- | :--- |
+**The Payment Economy Revolution** — agents that own their identity, earn from every call,
+learn autonomously, and operate 24/7 without human supervision.
 
----
-
-### 💳 Universal Agent Passport (v0.369.0) | جواز الوكيل العالمي
-
-🇬🇧 **The Payment Economy Revolution**:
-
-AIX Format v0.369.0 introduces the **Universal Agent Passport** - enabling agents to transact across any platform, any blockchain, any payment rail.
-
-#### 🌟 Key Features
+#### Key Features
 
 | Feature | Description | Status |
-| :--- | :--- | :--- |
-| **HTTP 402 Integration** | Native "Payment Required" protocol support | ✅ v1.0.0 |
-| **Multi-Chain Wallets** | Base, Solana, Ethereum, Pi Network | ✅ v1.0.0 |
-| **Fiat On/Off Ramps** | Stripe, PayPal, PYUSD integration | ✅ v1.0.0 |
-| **DeFi Strategies** | Flash loans, arbitrage, yield optimization | 🔄 Beta |
-| **Platform Adapters** | OpenClaw, Hermes, Kelos, Manus, IBM watsonx | 🔄 Beta |
-| **Payment Routing** | Automatic cost-optimized chain selection | ✅ v1.0.0 |
+|:---|:---|:---|
+| **HTTP 402 Integration** | Native "Payment Required" protocol | ✅ v1.0.0 |
+| **Multi-Chain Wallets** | Base L2, Solana, Ethereum, Pi Network | ✅ v1.0.0 |
+| **Fiat On/Off Ramps** | Stripe, PayPal, PYUSD | ✅ v1.0.0 |
+| **DeFi Strategies** | Flash loans, arbitrage, yield | 🔄 Beta |
+| **Platform Adapters** | OpenClaw, Hermes, Kelos, IBM watsonx | 🔄 Beta |
+| **TrustChain Audit** | Immutable per-action log | ✅ v0.369.0 |
+| **Evolution Tracking** | Agent self-improvement manifest | ✅ v0.369.0 |
 
-#### 📊 Payment Layer Architecture
+#### Payment Layer Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│   AIX Agent (did:axiom:xxx)                     │
-├─────────────────────────────────────────────────┤
-│   HTTP 402 Payment Challenge                    │
-│   ├─ Micropayments: $0.001 - $1 (Base/Solana)  │
-│   ├─ Mid-range: $1 - $1000 (Solana/Base)       │
-│   └─ Enterprise: $1000+ (Stripe/PayPal)        │
-├─────────────────────────────────────────────────┤
-│   Multi-Chain Settlement                        │
-│   ├─ Base L2: $0.0001/tx, 2s finality          │
-│   ├─ Solana: $0.00025/tx, 400ms finality       │
-│   ├─ Stripe: 2.9% + $0.30, instant             │
-│   └─ Pi Network: Native KYC integration         │
-├─────────────────────────────────────────────────┤
-│   ERC-4337 Smart Wallet                         │
-│   ├─ Gasless transactions (Paymaster)          │
-│   ├─ Session keys for automation               │
-│   └─ Social recovery via did:axiom             │
-└─────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│           AIX Agent (did:axiom:xxx)              │
+├──────────────────────────────────────────────────┤
+│          HTTP 402 Payment Challenge              │
+│  ├─ Micropayments  : $0.001–$1 (Base/Solana)    │
+│  ├─ Mid-range      : $1–$1000 (Solana/Base)     │
+│  └─ Enterprise     : $1000+ (Stripe/PayPal)     │
+├──────────────────────────────────────────────────┤
+│          Multi-Chain Settlement                  │
+│  ├─ Base L2        : $0.0001/tx · 2s finality   │
+│  ├─ Solana         : $0.00025/tx · 400ms        │
+│  ├─ Stripe         : 2.9%+$0.30 · instant       │
+│  └─ Pi Network     : Native KYC integration     │
+├──────────────────────────────────────────────────┤
+│          ERC-4337 Smart Wallet                   │
+│  ├─ Gasless transactions (Paymaster)            │
+│  ├─ Session keys for automation                 │
+│  └─ Social recovery via did:axiom               │
+└──────────────────────────────────────────────────┘
 ```
 
-#### 🔗 Platform Interoperability
+#### Platform Interoperability
 
-**Write Once, Deploy Anywhere**:
 ```bash
 # Create agent in AIX Format
 aix create my-agent.aix.json
@@ -116,112 +122,124 @@ aix deploy --platform ibm-watsonx
 # Identity and payments work everywhere
 ```
 
-#### 💰 Economic Model
+#### Security Features
 
-**Revenue Streams**:
-- Platform fees: 10-20% of transactions
-- Premium features: $29.99 - $499.99/month
-- DeFi treasury yield: 8% APY target
-- Staking rewards: 12% APY
-
-**Projected Year 1**:
-- 10,000 agents using payment layer
-- 100,000 daily transactions
-- $25M platform revenue
-- 60% profit margin
-
-#### 🔒 Security Features
-
-- **TEE Wallets**: AWS Nitro Enclaves for key isolation
-- **ZK-Proofs**: Privacy-preserving KYC verification
-- **Multi-Sig Treasury**: 5-of-7 governance with 48h timelock
-- **Audit Logs**: Immutable on-chain transaction history
-
-#### 📚 Documentation
-
-- [Payment Economy Strategic Plan](docs/AIX_PAYMENT_ECONOMY_STRATEGIC_PLAN.md)
-- [Payment Schema Specification](schemas/modules/economics.schema.json)
-- [Platform Adapter Guide](docs/PLATFORM_ADAPTERS.md) *(coming soon)*
-- [DeFi Integration Guide](docs/DEFI_INTEGRATION.md) *(coming soon)*
-
-🇦🇪 **ثورة الاقتصاد الدفعي**:
-
-يقدم تنسيق AIX v0.369.0 **جواز الوكيل العالمي** - مما يمكّن الوكلاء من التعامل عبر أي منصة، أي بلوكشين، أي نظام دفع.
-
-| **Agent Builder** | **باني الوكلاء** | ✅ Live | **مباشر** | [Guide](docs/BUILDER_GUIDE.md) |
-| **MCP Registry** | **سجل MCP** | ✅ Live | **مباشر** | [Registry](docs/MCP_GATEWAY.md) |
-| **ABOM Scanner** | **فاحص ABOM** | ✅ Live | **مباشر** | [Security](docs/ABOM_SAAS_BOM.md) |
-| **KYC Identity** | **هوية KYC** | ✅ Live | **مباشر** | [Spec](docs/SPEC_V1_3.md) |
-| **Revenue Router** | **راوتر الأرباح** | 🔄 Beta | **تجريبي** | [Spec](docs/SPEC_V1_3.md#economics) |
+- **TEE Wallets** — AWS Nitro Enclaves for key isolation
+- **ZK-Proofs** — Privacy-preserving KYC verification
+- **TrustChain** — Every action SHA-256 linked, human-approved
+- **MCP Gate** — safetyScore < 5 = auto-block · 5–7 = human approval
+- **Multi-Sig Treasury** — 5-of-7 governance with 48h timelock
 
 ---
 
 ### 🛡️ Security & Governance | الأمان والحوكمة
 
-🇬🇧 **Transparency by Default**:
-- **Decision Logs**: Tamper-proof logs (SHA-256) for auditability.
-- **Trust Scores**: Progressive disclosure based on KYC, ABOM, and success rate.
-- **Undo by Design**: 30-second window for critical actions.
-
-🇦🇪 **الشفافية افتراضياً**:
-- **سجلات القرار**: سجلات ضد التلاعب (SHA-256) للتدقيق.
-- **نقاط الثقة**: إفصاح تدريجي بناءً على KYC و ABOM ومعدل النجاح.
-- **التصميم مع التراجع**: نافذة لمدة 30 ثانية للإجراءات الحرجة.
+- **TrustChain** — Append-only, SHA-256 linked. Every mutation recorded. No silent failures.
+- **Trust Scores** — Progressive disclosure: KYC + ABOM + success rate.
+- **Human-in-the-Loop** — All mutations with `safetyScore < 7` require explicit human approval.
+- **Undo by Design** — 30-second window for critical actions.
 
 ---
 
-### 🛠️ Tech Stack | التكنولوجيا المستخدمة
+### 🛠️ Tech Stack | التقنيات
 
-🇬🇧 **Frontend**: Next.js 15+, Tailwind CSS v4, Framer Motion.
-🇬🇧 **Backend**: Node.js 20+, Upstash Redis (Metrics/Quotas).
-🇬🇧 **Identity**: Ed25519, Pi Network SDK, AxiomID DIDs.
-
-🇦🇪 **الواجهة الأمامية**: Next.js 15+، Tailwind CSS v4، Framer Motion.
-🇦🇪 **الواجهة الخلفية**: Node.js 20+، Upstash Redis.
-🇦🇪 **الهوية**: Ed25519، Pi Network SDK، AxiomID DIDs.
+| Layer | Tech |
+|---|---|
+| Frontend | Next.js 15+, Tailwind CSS v4, Framer Motion |
+| Backend | Node.js 20+, Upstash Redis |
+| Identity | Ed25519, Pi Network SDK, AxiomID DIDs |
+| Validation | Zod (all inputs), TypeScript strict mode |
+| Security | crypto.randomBytes, ZK-Proofs, TEE |
 
 ---
 
-### 🤝 Credits & Maintainers | الاعتمادات والمساهمون
+### 🚀 Roadmap | خارطة الطريق
 
-🇬🇧 We welcome contributions! | 🇦🇪 نرحب بمساهماتكم!
+| Feature | Status | Docs |
+|:---|:---|:---|
+| Agent Builder | ✅ Live | [Guide](docs/BUILDER_GUIDE.md) |
+| MCP Registry | ✅ Live | [Registry](docs/MCP_GATEWAY.md) |
+| ABOM Scanner | ✅ Live | [Security](docs/ABOM_SAAS_BOM.md) |
+| KYC Identity | ✅ Live | [Spec](docs/SPEC_V1_3.md) |
+| TrustChain Module | ✅ v0.369.0 | [Module](packages/aix-core/src/trust-chain/) |
+| Evolution Tracking | ✅ v0.369.0 | [Schema](schemas/aix.schema.json) |
+| ABOM → MCP Gate | ✅ v0.369.0 | [Gate](core/mcp-gate.ts) |
+| Revenue Router | 🔄 Beta | [Spec](docs/SPEC_V1_3.md#economics) |
+| IBM watsonx Bridge | 🔜 Soon | — |
+| Coinbase AgentKit | 🔜 Soon | — |
+| HTTP x402 Protocol | 🔜 Soon | — |
+| aix CLI Tool | 🔜 Soon | — |
+
+---
+
+### 🤝 Credits & Maintainers
 
 <div align="center">
 <table>
 <tr>
-<td align="center" width="220">
+<td align="center" width="180">
   <a href="https://github.com/Moeabdelaziz007">
-    <img src="https://github.com/Moeabdelaziz007.png" width="100" style="border-radius:50%;"/>
+    <img src="https://github.com/Moeabdelaziz007.png" width="90" style="border-radius:50%;"/>
   </a>
   <br/><br/>
   <b>Mohamed Abdelaziz</b>
   <br/>
-  <sub>🏛️ Visionary Architect · المهندس المعماري</sub>
+  <sub>🏛️ Visionary Architect</sub>
   <br/><br/>
   <a href="https://github.com/Moeabdelaziz007">
     <img src="https://img.shields.io/badge/@Moeabdelaziz007-181717?style=flat-square&logo=github"/>
   </a>
 </td>
-<td align="center" width="220">
-  <img src="https://img.shields.io/badge/AI-Jules-8b5cf6?style=for-the-badge&logo=googlecloud&logoColor=white" height="40"/>
+<td align="center" width="180">
+  <img src="https://img.shields.io/badge/AI-Junie-6366f1?style=for-the-badge&logo=jetbrains&logoColor=white" height="40"/>
+  <br/><br/>
+  <b>Junie</b>
+  <br/>
+  <sub>⚙️ Core Implementation Agent<br/>TypeScript · Security · Refactoring</sub>
+</td>
+<td align="center" width="180">
+  <img src="https://img.shields.io/badge/AI-Claude-8b5cf6?style=for-the-badge&logo=anthropic&logoColor=white" height="40"/>
+  <br/><br/>
+  <b>Claude</b>
+  <br/>
+  <sub>🧠 Research & Architecture<br/>Deep Analysis · Constitution</sub>
+</td>
+<td align="center" width="180">
+  <img src="https://img.shields.io/badge/AI-v0-000000?style=for-the-badge&logo=vercel&logoColor=white" height="40"/>
+  <br/><br/>
+  <b>v0</b>
+  <br/>
+  <sub>🎨 UI/UX Generation<br/>Components · Studio</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="180">
+  <img src="https://img.shields.io/badge/AI-Cursor-0ea5e9?style=for-the-badge&logo=cursor&logoColor=white" height="40"/>
+  <br/><br/>
+  <b>Cursor</b>
+  <br/>
+  <sub>💻 Code Completion<br/>Inline edits · Fixes</sub>
+</td>
+<td align="center" width="180">
+  <img src="https://img.shields.io/badge/AI-Jules-10b981?style=for-the-badge&logo=googlecloud&logoColor=white" height="40"/>
   <br/><br/>
   <b>Jules</b>
   <br/>
-  <sub>🎨 UI/UX Agent · مهندس التنفيذ والواجهة</sub>
+  <sub>🔁 Async Task Agent<br/>Background execution</sub>
 </td>
-<td align="center" width="220">
-  <img src="https://img.shields.io/badge/AI-Antigravity-0ea5e9?style=for-the-badge&logo=googlegemini&logoColor=white" height="40"/>
+<td align="center" width="180">
+  <img src="https://img.shields.io/badge/AI-Vercel_AI-111827?style=for-the-badge&logo=vercel&logoColor=white" height="40"/>
   <br/><br/>
-  <b>Antigravity</b>
+  <b>Vercel AI</b>
   <br/>
-  <sub>⚙️ Systems Architect & Security AI</sub>
+  <sub>🚀 Deployment Agent<br/>CI/CD · Hosting</sub>
 </td>
-<td align="center" width="220">
-  <img src="https://img.shields.io/badge/AI-Codex%20Agent-111827?style=for-the-badge&logo=openai&logoColor=white" height="40"/>
+<td align="center" width="180">
+  <img src="https://img.shields.io/badge/Research-Claude_4.6-8b5cf6?style=for-the-badge" height="40"/>
   <br/><br/>
-  <b>Codex Agent</b>
+  <b>Claude 4.6</b>
   <br/>
-  <sub>🔐 Ed25519 & DNA Protocol</sub>
+  <sub>🔬 Deep Research<br/>Gap Analysis · Roadmap</sub>
 </td>
 </tr>
 </table>
@@ -236,14 +254,16 @@ aix deploy --platform ibm-watsonx
 <br/>
 *"نحن لا نبني أدوات؛ نحن نصمم طبقة الثقة لمستقبل الذكاء."*
 
-<img src="https://img.shields.io/badge/Built%20with-Sovereign%20Intelligence-6366f1?style=for-the-badge" alt="Built with Sovereign Intelligence"/>
+<img src="https://img.shields.io/badge/Built%20with-1%20Human%20%2B%205%20AI%20Agents-6366f1?style=for-the-badge"/>
 &nbsp;
-<img src="https://img.shields.io/badge/Research-Claude_4.6_x_Antigravity-8b5cf6?style=for-the-badge" alt="Research"/>
+<img src="https://img.shields.io/badge/Version-v0.369.0-8b5cf6?style=for-the-badge"/>
+&nbsp;
+<img src="https://img.shields.io/badge/License-Apache%202.0-10b981?style=for-the-badge"/>
 </div>
 
 ---
 
-### 📄 Protocol Governance | حوكمة البروتوكول
+### 📄 Protocol Governance
 
-🇬🇧 AIX Format is licensed under the **Apache License 2.0**.
-🇦🇪 يتم ترخيص تنسيق AIX بموجب **رخصة Apache 2.0**.
+AIX Format is licensed under the **Apache License 2.0**.
+تنسيق AIX مرخّص بموجب **رخصة Apache 2.0**.
