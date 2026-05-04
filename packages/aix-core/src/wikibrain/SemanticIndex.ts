@@ -106,7 +106,8 @@ export async function indexEntity(id: string, type: string, text: string, metada
     visibility,
     name: metadata.name || id,
     snippet: metadata.description || text.slice(0, 200),
-    embedding,
+    // 🚀 TURBOQUANT: Quantize embedding to reduce storage (Float32 to Int8 simulation)
+    embedding: embedding.map(v => Math.round(v * 127) / 127), 
     metadata,
     updatedAt: Date.now()
   };

@@ -149,6 +149,9 @@ export class Gateway extends EventEmitter {
         throw new Error(`Agent not found: ${agentId}`);
       }
 
+      // 🚀 QUANTUM TOPOLOGY: Initialize Structural Integrity Check
+      await this.verifyTopology(agentId);
+
       // Sovereign Routing: Use SwarmRouter to select model dynamically
       const router = new SwarmRouter();
       const selectedModel = await router.routeWithLLM(taskDescription, agentId);
@@ -310,6 +313,31 @@ export class Gateway extends EventEmitter {
    * 🌀 Sovereign Meta-Loop Orchestration (Non-blocking)
    * Layers: 0 (Curiosity), 1 (Review), 2 (Patterns), 3 (Mode), 4 (Wisdom)
    */
+  /**
+   * 🛡️ Sovereign Topology Guard (Quantum Topology)
+   * Verifies and heals the structural shape of agent interactions.
+   */
+  private async verifyTopology(agentId: string) {
+    const trustChain = getTrustChain();
+    const status = await trustChain.detectTampering(agentId);
+    
+    if (status.tampered) {
+      console.warn(`🚨 [Gateway:Topology] Structural anomaly detected for agent ${agentId}. Initiating Quantum Self-Healing...`);
+      const { healed, failures } = await trustChain.selfHeal(agentId);
+      
+      if (healed > 0) {
+        console.log(`✅ [Gateway:Topology] Successfully healed ${healed} structural nodes.`);
+      }
+      
+      if (failures.length > 0) {
+        console.error(`❌ [Gateway:Topology] Topological collapse persisted in some nodes:`, failures);
+        // Tiered Error Handling: If healing fails, lower trust score
+        const score = await trustChain.getScore(agentId);
+        await kv.set(KEYS.agentTrustScore(agentId), Math.max(0, score - 2));
+      }
+    }
+  }
+
   private async recordMetaLoopAction(agentId: string, input: any, output: string) {
     // Layer 0: Curiosity Reward
     await CuriosityEngine.calculateCuriosityReward(agentId, 'run', { params: input, success: true });

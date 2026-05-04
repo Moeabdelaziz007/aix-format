@@ -14,6 +14,8 @@ import { CircuitBreakers } from '@/lib/security-core';
 import { searchTavily } from './tools/search-tavily';
 import { AgentSelfReview, SelfReviewRecord } from './meta-self-review';
 import { PetOrchestrator, getDynamicConstraints } from './pets';
+import * as LearningEngine from './learning';
+import { SemanticIndex } from './wikibrain/SemanticIndex';
 
 // RULE 1: Strict Schemas
 export const TaskSchema = z.object({
@@ -317,10 +319,16 @@ export class AgentRuntimeEngine {
         this.runtime.scratchpad.push({ thought: `Dreaming: ${dreams}`, action: null, observation: 'New strategies synthesized.' });
       }
 
-      const prompt = this.buildReActPrompt(task);
-      
-      const thought = await this.llm.complete(prompt, STOP_TOKENS);
-      await bus.emitEvent('agent:thought', this.runtime.agentId, { thought }, task.taskId);
+      // 🌀 TURBOQUANT: Anticipatory Reflection
+      // Before taking an action, the agent checks if it's about to repeat a failure pattern
+      const anticipatoryPrompt = `As a sovereign agent, look at your next thought: "${thought}". 
+      Based on your Wisdom (${this.context?.memories.length} entries), is there a risk of failure or a more efficient 'Turbo' path?`;
+      const anticipation = await this.llm.complete(anticipatoryPrompt);
+      if (anticipation.toLowerCase().includes('risk') || anticipation.toLowerCase().includes('caution')) {
+        await this.emitState('agent:anticipating', `Risk detected: ${anticipation}. Adjusting strategy...`);
+        // Recalculate thought with caution
+        thought = await this.llm.complete(`${prompt}\n[ANTICIPATION]: ${anticipation}\nRe-think for maximum success:`, STOP_TOKENS);
+      }
 
       if (thought.toLowerCase().includes('final answer')) {
         finalAnswer = this.extractFinalAnswer(thought);
@@ -332,6 +340,16 @@ export class AgentRuntimeEngine {
         // Resilient fallback: Try to recover or provide final thought
         if (this.runtime.step === maxSteps) {
           finalAnswer = thought;
+        } else {
+          // Sovereign recovery: if no action found, ask the agent to re-think specifically for action
+          await this.emitState('agent:recovering', 'No clear action found, forcing action extraction...');
+          const recoveryThought = await this.llm.complete(`${prompt}\n\nPlease provide your next Action in JSON format: {"tool": "...", "input": {...}}`);
+          const recoveredAction = this.parseAction(recoveryThought);
+          if (recoveredAction) {
+            this.runtime.scratchpad.push({ thought: 'Recovered Action Strategy', action: recoveredAction, observation: 'Processing...' });
+            const obs = await this.executeAction(recoveredAction);
+            this.runtime.scratchpad[this.runtime.scratchpad.length - 1].observation = obs;
+          }
         }
         continue;
       }
@@ -362,7 +380,27 @@ export class AgentRuntimeEngine {
   }
 
   private buildReActPrompt(task: Task): string {
-    return `Task: ${task.description}\nContext: ${this.context?.memories.join('. ')}\n\nAvailable Tools: ${Object.keys(this.tools).join(', ')}\n\nSteps:\n${this.runtime.scratchpad.map(s => `Thought: ${s.thought}\nAction: ${JSON.stringify(s.action)}\nObservation: ${s.observation}`).join('\n')}\nThought: `;
+    // 🚀 TURBOQUANT: PolarContext Compression (Simulated)
+    // We prioritize memory based on "Importance Radius" (Recency + Relevance)
+    const polarMemory = this.runtime.scratchpad.map((s, i) => {
+      const recency = i / this.runtime.scratchpad.length;
+      const relevance = s.observation.length > 0 ? 1.0 : 0.5; // Simple relevance proxy
+      const importanceRadius = recency * relevance;
+
+      if (importanceRadius < 0.3 && this.runtime.scratchpad.length > 5) {
+        // High compression for low-importance 'outer shell' memories
+        return `[POLAR_COMPRESSED]: ${s.thought.slice(0, 50)}... -> Outcome: ${s.observation.slice(0, 50)}...`;
+      }
+      return `Thought: ${s.thought}\nAction: ${JSON.stringify(s.action)}\nObservation: ${s.observation}`;
+    }).join('\n');
+
+    return `Task: ${task.description}
+Sovereign Wisdom: ${this.context?.memories.join(' | ')}
+
+[RECURSIVE_CHAIN]: 
+${polarMemory}
+
+Next Thought: `;
   }
 
   private parseAction(thought: string): ToolCall | null {
@@ -383,11 +421,34 @@ export class AgentRuntimeEngine {
 
   private async executeAction(action: ToolCall): Promise<string> {
     const tool = this.tools[action.tool];
-    if (!tool) return `Tool "${action.tool}" not found.`;
+    if (!tool) return `Tool "${action.tool}" not found. Available tools: ${Object.keys(this.tools).join(', ')}`;
+    
     try {
-      return await tool(action.input);
+      // 🛡️ Sovereign Guardrail: Tool Circuit Breaker
+      if (CircuitBreakers.isBroken(action.tool)) {
+        return `Error: Circuit breaker tripped for tool "${action.tool}". Please use an alternative approach.`;
+      }
+
+      const result = await tool(action.input);
+      const observation = typeof result === 'string' ? result : JSON.stringify(result);
+      
+      // 🌀 METACOGNITIVE CHECK: Is this observation useful?
+      if (observation.toLowerCase().includes('error') || observation.length < 5) {
+        await this.emitState('agent:reflecting', `Tool ${action.tool} returned limited output, reflecting on alternative path...`);
+      }
+      
+      return observation;
     } catch (err: any) {
-      return `Error: ${err?.message ?? String(err)}`;
+      // 🌀 ERROR RECOVERY: Don't just return error, return error + guidance
+      const errorMessage = err?.message ?? String(err);
+      await this.emitState('agent:error_recovery', `Tool ${action.tool} failed: ${errorMessage}`);
+      
+      const reflection = await this.llm.complete(`The tool '${action.tool}' failed with error: '${errorMessage}'. 
+      Current task: ${this.runtime.agentId} solving something.
+      What is the most likely cause of this error and how should I fix my next action?`);
+      
+      return `Error in '${action.tool}': ${errorMessage}. 
+      Sovereign Reflection: ${reflection}`;
     }
   }
 
@@ -417,6 +478,33 @@ export class AgentRuntimeEngine {
       console.warn('⚠️ Semantic Index retrieval failed, falling back to basic memory');
       const memoryTree = await ReadableMemory.getMemoryTree(this.runtime.agentId);
       return memoryTree.children?.find(c => c.id === 'facts')?.children?.map(f => f.label) || [];
+    }
+  }
+
+  private async consolidateMemory(task: Task, result: string, review: SelfReviewRecord): Promise<void> {
+    try {
+      await this.emitState('agent:consolidating', 'Consolidating experience into long-term wisdom...');
+      
+      // 🚀 TURBOQUANT: Tiered Memory Compression
+      // We don't just summarize; we extract the "Mathematical/Logic Pattern" of the success
+      const logicPatternPrompt = `Extract the core logic-pattern from this execution. 
+      Task: ${task.description}
+      Steps taken: ${this.runtime.step}
+      Success Logic: (Why did this work in the fewest steps?)
+      Express as a reusable sovereign pattern.`;
+      
+      const pattern = await this.llm.complete(logicPatternPrompt);
+      
+      const index = new (await import('./wikibrain/SemanticIndex')).SemanticIndex();
+      await index.index(
+        `pattern-${this.runtime.agentId}-${Date.now()}`,
+        'pattern',
+        pattern,
+        { agentId: this.runtime.agentId, taskId: task.taskId, type: 'logic_pattern', quality: review.evaluation.overall }
+      );
+      await this.emitState('agent:pattern_archived', 'Sovereign Logic Pattern archived.');
+    } catch (e) {
+      console.warn('⚠️ Memory consolidation failed:', e);
     }
   }
 

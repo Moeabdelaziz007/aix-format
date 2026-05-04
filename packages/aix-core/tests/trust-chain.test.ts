@@ -36,7 +36,8 @@ describe('Trust Chain', () => {
         expect.stringContaining('trust:action:'),
         expect.objectContaining({
           agentId: 'agent_1',
-          action: 'TEST_ACTION'
+          action: 'TEST_ACTION',
+          topologySignature: expect.any(String)
         })
       );
     });
@@ -107,6 +108,46 @@ describe('Trust Chain', () => {
 
       expect(result.tampered).toBe(false);
       spy.mockRestore();
+    });
+  });
+
+  describe('selfHeal', () => {
+    it('should heal a structural break if topology is intact', async () => {
+      const actions: any[] = [
+        { auditHash: 'hash2', prevAction: 'WRONG_HASH', agentId: 'a1', action: 'act2', data: {}, timestamp: 200, topologySignature: 'top2' },
+        { auditHash: 'hash1', prevAction: 'genesis', agentId: 'a1', action: 'act1', data: {}, timestamp: 100, topologySignature: 'top1' }
+      ];
+
+      vi.mocked(kv.get)
+        .mockResolvedValueOnce('hash2') // last_action
+        .mockResolvedValueOnce(actions[0]) // action:hash2
+        .mockResolvedValueOnce(actions[1]); // action:hash1
+
+      // Mock topology check to pass for 'act2:a1'
+      const topoHash = createHash('md5').update('act2:a1').digest('hex');
+      actions[0].topologySignature = topoHash;
+
+      const result = await trustChain.selfHeal('a1');
+
+      expect(result.healed).toBe(1);
+      expect(actions[0].prevAction).toBe('hash1');
+    });
+
+    it('should not heal if topology is also corrupted', async () => {
+      const actions: any[] = [
+        { auditHash: 'hash2', prevAction: 'WRONG_HASH', agentId: 'a1', action: 'act2', data: {}, timestamp: 200, topologySignature: 'CORRUPT_TOP' },
+        { auditHash: 'hash1', prevAction: 'genesis', agentId: 'a1', action: 'act1', data: {}, timestamp: 100, topologySignature: 'top1' }
+      ];
+
+      vi.mocked(kv.get)
+        .mockResolvedValueOnce('hash2')
+        .mockResolvedValueOnce(actions[0])
+        .mockResolvedValueOnce(actions[1]);
+
+      const result = await trustChain.selfHeal('a1');
+
+      expect(result.healed).toBe(0);
+      expect(result.failures.length).toBeGreaterThan(0);
     });
   });
 });

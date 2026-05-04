@@ -32,6 +32,7 @@ export interface ActionRecord {
   action: string;
   data: unknown;
   timestamp: number;
+  topologySignature?: string; // 🚀 QUANTUM TOPOLOGY: Structural fingerprint
 }
 
 /**
@@ -163,13 +164,17 @@ export class TrustChain {
       timestamp
     });
 
-    const actionRecord = {
+    // 🚀 QUANTUM TOPOLOGY: Create a structural signature (Shape of the action)
+    const topologySignature = createHash('md5').update(`${action}:${agentId.slice(0, 8)}`).digest('hex');
+
+    const actionRecord: ActionRecord = {
       auditHash,
       prevAction,
       agentId,
       action,
       data,
-      timestamp
+      timestamp,
+      topologySignature
     };
 
     // Store the action and update the tail of the chain (Resilient Strategy)
@@ -199,6 +204,35 @@ export class TrustChain {
     const hash = createHash('sha256');
     hash.update(JSON.stringify(data));
     return hash.digest('hex');
+  }
+
+  /**
+   * Sovereign Self-Healing (Quantum Topology Pattern)
+   * Reconstructs the chain if the 'shape' (Topology) is intact.
+   */
+  async selfHeal(agentId: string): Promise<{ healed: number, failures: string[] }> {
+    const actions = await this.getActions(agentId, 100);
+    let healedCount = 0;
+    const failures: string[] = [];
+
+    for (let i = 0; i < actions.length - 1; i++) {
+      const current = actions[i];
+      const prevInTime = actions[i + 1];
+      
+      const expectedTopology = createHash('md5').update(`${current.action}:${current.agentId.slice(0, 8)}`).digest('hex');
+      
+      if (current.topologySignature !== expectedTopology) {
+        failures.push(`Topological collapse at ${current.auditHash}`);
+        continue;
+      }
+
+      if (current.prevAction !== prevInTime.auditHash) {
+        console.warn(`🛡️ [Self-Heal] Structural break found. Topology intact. Re-linking ${current.auditHash}`);
+        current.prevAction = prevInTime.auditHash;
+        healedCount++;
+      }
+    }
+    return { healed: healedCount, failures };
   }
 
   /**

@@ -125,13 +125,23 @@ export class SwarmRouter {
             let selectedModel = 'llama-3.1-8b-instant'; // Default small
             let qualityThreshold = 0.5;
 
-            // Connect to Living Gateway Mood if agentId provided
+            // 🚀 TURBOQUANT: Performance-Aware Routing
+            // Fetch recent performance patterns to adjust qualityThreshold
             if (agentId) {
-                const { getDynamicConstraints } = await import('./pets');
-                const constraints = await getDynamicConstraints(agentId);
-                qualityThreshold = constraints.qualityThreshold;
-                
-                console.log(`[SwarmRouter:Life] Agent ${agentId} Quality Threshold τ: ${qualityThreshold}`);
+                try {
+                    const { ReadableMemory } = await import('./memory-readable');
+                    const memoryTree = await ReadableMemory.getMemoryTree(agentId);
+                    const skills = memoryTree.children?.find(c => c.id === 'skills')?.children || [];
+                    
+                    // Simple Quantization: If average skill successCount is high, we can use cheaper models
+                    const avgSuccess = skills.reduce((acc, s) => acc + (s.metadata?.successCount || 0), 0) / (skills.length || 1);
+                    if (avgSuccess > 5 && qualityThreshold > 0.5) {
+                        console.log(`[SwarmRouter:TurboQuant] High competence (${avgSuccess.toFixed(1)}) detected, optimizing for efficiency.`);
+                        qualityThreshold -= 0.1; // Optimization: competent agents need less powerful models
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Performance-aware routing failed, using default mood threshold');
+                }
             }
 
             const lowerTask = taskDescription.toLowerCase();
