@@ -116,7 +116,7 @@ export function validateEnv(): ValidationResult {
         productionRequirements.parse(process.env);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          error.errors.forEach((err: any) => {
+          error.issues.forEach((err: any) => {
             errors.push(`[PRODUCTION] ${err.path.join('.')}: ${err.message}`);
           });
         }
@@ -128,7 +128,7 @@ export function validateEnv(): ValidationResult {
         stagingRequirements.parse(process.env);
       } catch (error) {
         if (error instanceof z.ZodError) {
-          error.errors.forEach((err: any) => {
+          error.issues.forEach((err: any) => {
             warnings.push(`[STAGING] ${err.path.join('.')}: ${err.message}`);
           });
         }
@@ -165,7 +165,7 @@ export function validateEnv(): ValidationResult {
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err: any) => {
+      error.issues.forEach((err: any) => {
         errors.push(`${err.path.join('.')}: ${err.message}`);
       });
     } else {

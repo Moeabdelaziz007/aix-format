@@ -30,7 +30,7 @@ This policy establishes a **strict feature freeze** to address critical producti
 5. **Documentation** - Technical docs, runbooks, guides
 6. **Refactoring** - Code quality improvements (no new features)
 7. **Infrastructure** - Core systems (Gateway, Bus, TrustChain)
-8. **3 Core Paths** - Agent Lifecycle, Trust & Security, Developer Experience
+8. **4 Core Paths** - Agent Lifecycle, Trust & Security, Developer Experience, Evolution Safety
 
 ### ❌ PROHIBITED During Freeze
 
@@ -83,7 +83,8 @@ If you believe a feature is **critical** and cannot wait:
 
 ### Week 3-4: Core Path 1 - Agent Lifecycle
 - Implement execution engine
-- Write 20+ integration tests
+- Expand existing tests with edge/failure/latency cases
+- Write 20+ integration tests (focus on concurrency & recovery)
 - Load test (1000 agents, 10k req/min)
 - Performance benchmarks (<100ms p95)
 
@@ -91,15 +92,25 @@ If you believe a feature is **critical** and cannot wait:
 - Integrate trust-chain with gateway
 - Add signature verification middleware
 - Implement PoW difficulty validation
-- Write 15+ security tests
+- Expand security tests with attack scenarios
+- Write 15+ security tests (injection, replay, timing attacks)
 - Penetration testing
 
 ### Week 3-4: Core Path 3 - Developer Experience
 - Add local testing mode
 - Implement hot-reload for AIX files
 - Add deployment CLI
-- Write 10+ DX tests
+- Expand DX tests with error handling
+- Write 10+ DX tests (setup failures, config errors)
 - User testing with 5 developers
+
+### Week 3-4: Core Path 4 - Evolution Safety
+- Implement evolution rollback mechanism
+- Add code validation before auto-apply
+- Create evolution audit log (track all changes)
+- Expand evolution tests with corruption scenarios
+- Write 15+ evolution safety tests (rollback, validation, audit)
+- Test self-modification edge cases
 
 ### Week 5-6: Selective Expansion
 - Choose 1 additional feature to complete
@@ -130,7 +141,7 @@ If you believe a feature is **critical** and cannot wait:
 - ✅ **Security**: Pass external security audit
 - ✅ **Stability**: 99.9% uptime for 2 weeks
 - ✅ **Documentation**: Complete technical docs
-- ✅ **3 Core Paths**: 100% complete with tests
+- ✅ **4 Core Paths**: 100% complete with tests
 
 ### Current Status (Week 1)
 
@@ -140,7 +151,7 @@ If you believe a feature is **critical** and cannot wait:
 | Performance (p95) | Unknown | <100ms | 🔴 |
 | Load Capacity | Unknown | 10k users | 🔴 |
 | Security Audit | Not done | Pass | 🔴 |
-| Core Paths | 0/3 | 3/3 | 🔴 |
+| Core Paths | 0/4 | 4/4 | 🔴 |
 | Feature Completion | 10-60% | 100% | 🔴 |
 
 ---
@@ -150,7 +161,7 @@ If you believe a feature is **critical** and cannot wait:
 ### Weekly Reviews
 
 Every Friday at 3 PM:
-1. Review progress on 3 Core Paths
+1. Review progress on 4 Core Paths
 2. Assess test coverage improvements
 3. Review security findings
 4. Update this document
@@ -171,6 +182,8 @@ Focus on:
 | Date | Change | Reason |
 |------|--------|--------|
 | 2026-05-04 | Policy created | Address feature sprawl |
+| 2026-05-04 | Added Core Path 4 (Evolution Safety) | Protect self-modifying systems |
+| 2026-05-04 | Expanded test strategy (edge/failure/latency) | Improve coverage depth vs breadth |
 | TBD | Policy updated | Weekly review |
 
 ---
