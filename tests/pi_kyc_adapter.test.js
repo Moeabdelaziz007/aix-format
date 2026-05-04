@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { PiKycAdapter } from '../core/pi_kyc_adapter.js';
+import { PiKycAdapter } from '../core/pi_kyc_adapter';
 import { AIXParser } from '../core/parser.js';
 import nacl from 'tweetnacl';
 import naclUtil from 'tweetnacl-util';
