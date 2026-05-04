@@ -1,6 +1,6 @@
 /**
  * Queue Manager for Bulk Operations
- * 
+ *
  * Provides job queue management using Bull/BullMQ for:
  * - Bulk agent deployment
  * - Job prioritization
@@ -8,6 +8,8 @@
  * - Failure retry logic
  * - Cleanup handlers
  */
+
+import { secureJobId } from './security-core';
 
 import { kv, KEYS } from './redis';
 
@@ -78,7 +80,7 @@ export class QueueManager {
     data: T,
     options: JobOptions = {}
   ): Promise<Job<T>> {
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const jobId = secureJobId();
     
     const job: Job<T> = {
       id: jobId,

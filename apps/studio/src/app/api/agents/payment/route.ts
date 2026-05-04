@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { securePaymentId, secureTransactionHash, TrustChain } from '@/lib/security-core';
+import { z } from 'zod';
 
 /**
  * Agent Payment Router
  * POST /api/agents/payment
- * 
+ *
  * Routes payments for agent task execution via Pi Network
+ * SECURITY: Uses crypto.randomBytes for all IDs (RULE 2)
  */
 
 interface PaymentRequest {
@@ -57,8 +60,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate payment ID
-    const paymentId = `pay-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate payment ID (SECURE)
+    const paymentId = securePaymentId();
     
     // Process payment based on method
     let result: PaymentResponse;
@@ -128,7 +131,15 @@ async function processPiNetworkPayment(params: {
 
   // Mock successful payment
   // TODO: Replace with real Pi Network SDK integration
-  const transactionHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+  const transactionHash = secureTransactionHash();
+  
+  // Log to TrustChain (RULE 3)
+  TrustChain.append('payment.pi_network', params.userId, {
+    paymentId: params.paymentId,
+    agentId: params.agentId,
+    amount: params.amount,
+    transactionHash,
+  });
   
   return {
     success: true,
@@ -252,4 +263,4 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz
