@@ -10,11 +10,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'agents array required' }, { status: 400 });
     }
 
-    const { aix } = await import('@/../../packages/aix-core/src/index');
+    const { aix } = await import('@aix-core');
 
     const result = await aix.swarm(agents, { pattern, dryRun, aggregator });
     return NextResponse.json(result);
   } catch (err: unknown) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const error = err as Error;
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -43,6 +43,9 @@ export {
   type BusSubscription
 } from './bus';
 
+// AIX - Main API function
+export { aix, type AixOptions, type AixResult, type SwarmPattern, type AixSwarmOptions } from './aix';
+
 /**
  * Initialize all core components
  */
@@ -80,4 +83,4 @@ export async function resetCore() {
   resetBus();
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz + AI Team (Junie, Claude, v0, Cursor, Jules, Vercel AI)

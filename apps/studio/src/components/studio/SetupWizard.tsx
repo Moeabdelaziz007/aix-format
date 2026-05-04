@@ -156,7 +156,7 @@ export function SetupWizard() {
                 <h3 className="text-lg font-bold text-white mb-1">Define Agent DNA</h3>
                 <p className="text-[var(--color-on-surface-variant)] text-xs">Tell us what your agent does, or upload an existing .aix file.</p>
               </div>
-              <div className="mb-6 py-6 bg-[var(--color-surface-container-low)] rounded-2xl border border-[var(var(--color-border))]">
+              <div className="mb-6 py-6 bg-[var(--color-surface-container-low)] rounded-2xl border border-[var(--color-border)]">
                 <VoiceOrb onTranscript={handleVoiceCommand} isProcessing={isProcessingVoice} />
                 {voiceCommand && !isProcessingVoice && (
                   <div className="mt-4 px-6 text-center">
@@ -165,14 +165,14 @@ export function SetupWizard() {
                 )}
               </div>
               <div className="flex items-center gap-4 mb-6">
-                <div className="h-[1px] flex-1 bg-[var(var(--color-border))]" />
+                <div className="h-[1px] flex-1 bg-[var(--color-border)]" />
                 <span className="text-xs font-medium text-[var(--color-on-surface-variant)] uppercase">OR UPLOAD</span>
-                <div className="h-[1px] flex-1 bg-[var(var(--color-border))]" />
+                <div className="h-[1px] flex-1 bg-[var(--color-border)]" />
               </div>
               <div
                 className={cn(
                   "flex-1 relative rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-colors duration-200 p-6 text-center cursor-pointer",
-                  dragActive ? "border-[var(--color-primary)] bg-[rgba(0,219,233,0.05)]" : "border-[var(var(--color-border))] hover:border-[var(--color-on-surface-variant)]"
+                  dragActive ? "border-[var(--color-primary)] bg-[rgba(0,219,233,0.05)]" : "border-[var(--color-border)] hover:border-[var(--color-on-surface-variant)]"
                 )}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}

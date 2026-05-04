@@ -11,11 +11,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Dynamic import — keeps bundle small, only loads when called
-    const { aix } = await import('@/../../packages/aix-core/src/index');
+    const { aix } = await import('@aix-core');
 
     const result = await aix(agentId, task, { tools: tools ?? {} });
     return NextResponse.json(result);
   } catch (err: unknown) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const error = err as Error;
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

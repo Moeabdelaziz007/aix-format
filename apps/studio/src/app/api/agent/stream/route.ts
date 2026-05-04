@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     return new Response('task param required', { status: 400 });
   }
 
-  const { aix } = await import('@/../../packages/aix-core/src/index');
+  const { aix } = await import('@aix-core');
 
   const encoder = new TextEncoder();
   const stream  = new ReadableStream({
@@ -22,7 +22,8 @@ export async function GET(req: NextRequest) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
         }
       } catch (err: unknown) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'ERROR', message: err.message })}\n\n`));
+        const error = err as Error;
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'ERROR', message: error.message })}\n\n`));
       } finally {
         controller.close();
       }

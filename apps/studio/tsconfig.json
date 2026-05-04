@@ -24,7 +24,9 @@
       "@/hooks/*": ["./src/hooks/*"],
       "@/sections/*": ["./src/sections/*"],
       "@/design-system/*": ["./src/design-system/*"],
-      "@/constants/*": ["./src/constants/*"]
+      "@/constants/*": ["./src/constants/*"],
+      "@aix-core": ["../../packages/aix-core/src/index.ts"],
+      "@aix-core/*": ["../../packages/aix-core/src/*"]
     },
     "target": "ES2017",
     "forceConsistentCasingInFileNames": true
@@ -43,4 +45,4 @@
   ]
 }
 
-// Made with Bob
+// Made with Moe Abdelaziz + AI Team
