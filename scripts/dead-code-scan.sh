@@ -235,7 +235,7 @@ calculate_usage_score() {
         "$PROJECT_ROOT" 2>/dev/null | wc -l || echo 0)
     
     # Calculate total score
-    local total=$((direct_imports + dynamic_imports + schema_refs + doc_refs))
+    local total=$(( $(echo "$direct_imports" | head -n1 || echo 0) + $(echo "$dynamic_imports" | head -n1 || echo 0) + $(echo "$schema_refs" | head -n1 || echo 0) + $(echo "$doc_refs" | head -n1 || echo 0) ))
     
     echo "$total:$direct_imports:$dynamic_imports:$schema_refs:$doc_refs"
 }
@@ -300,13 +300,13 @@ classify_severity() {
     local is_burst="$3"
     
     # CRITICAL: >90 days with zero usage
-    if [ "$age_days" -ge "$CRITICAL_DAYS" ] && [ "$usage_total" -eq 0 ]; then
+    if [ "${age_days:-0}" -ge "$CRITICAL_DAYS" ] && [ "${usage_total:-0}" -eq 0 ]; then
         echo "CRITICAL"
         return
     fi
     
     # HIGH: <2 usage locations or burst commit with low usage
-    if [ "$usage_total" -lt "$HIGH_RISK_USAGE" ] || [ "$is_burst" = "true" ] && [ "$usage_total" -lt 5 ]; then
+    if [ "${usage_total:-0}" -lt "$HIGH_RISK_USAGE" ] || { [ "$is_burst" = "true" ] && [ "${usage_total:-0}" -lt 5 ]; }; then
         echo "HIGH"
         return
     fi
@@ -413,8 +413,8 @@ EOF
         --arg name "$export_name" \
         --arg type "$export_type" \
         --arg file "$export_file" \
-        --argjson age "$age_days" \
-        --argjson usage "$usage_total" \
+        --argjson age "${age_days:-0}" \
+        --argjson usage "${usage_total:-0}" \
         --arg breakdown "$usage_breakdown" \
         --arg action "$action" \
         --arg burst "$is_burst" \
