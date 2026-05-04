@@ -39,4 +39,23 @@ describe('BlackBox Logs Security', () => {
     const isValid = verifyLogEntry(entry, pubPem);
     assert.strictEqual(isValid, false);
   });
+
+  it('should fail verification if public key is not ed25519', () => {
+    const { publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const rsaPubPem = publicKey.export({ type: 'spki', format: 'pem' });
+
+    const entry = signLogEntry('read_file', { path: '/etc/passwd' }, privPem);
+    const isValid = verifyLogEntry(entry, rsaPubPem);
+    assert.strictEqual(isValid, false);
+  });
+
+  it('should throw error if private key for signing is not ed25519', () => {
+    const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const rsaPrivPem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+
+    assert.throws(
+      () => signLogEntry('read_file', { path: '/etc/passwd' }, rsaPrivPem),
+      /Invalid private key type: rsa. Expected ed25519/
+    );
+  });
 });
