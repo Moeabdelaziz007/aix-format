@@ -6,7 +6,7 @@ import { validateSovereignManifest } from '@/lib/protocol-validator';
  * AIX Voice Wizard - Manifest Generation Endpoint
  * POST /api/voice-wizard/generate-manifest
  * 
- * Converts conversational data into a validated AIX v1.3.0 manifest
+ * Converts conversational data into a validated AIX v0.369.0 manifest
  */
 export async function POST(req: Request) {
   try {

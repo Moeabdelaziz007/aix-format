@@ -31,7 +31,7 @@ export function validateSovereignManifest(manifest: any): ValidationResult {
 
   // 2. Identity Layer (Sovereign Requirement)
   if (!manifest.identity_layer) {
-    errors.push("Missing 'identity_layer' (Required for AIX v1.3.0)");
+    errors.push("Missing 'identity_layer' (Required for AIX v0.369.0)");
   } else {
     if (!manifest.identity_layer.id) errors.push("identity_layer.id (DID) is required");
     if (!manifest.identity_layer.id.startsWith("did:")) {

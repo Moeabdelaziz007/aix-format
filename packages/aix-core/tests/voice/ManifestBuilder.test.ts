@@ -29,7 +29,7 @@ describe('ManifestBuilder', () => {
   });
 
   describe('Manifest Generation', () => {
-    it('should generate a valid AIX v1.3.0 manifest', () => {
+    it('should generate a valid AIX v0.369.0 manifest', () => {
       const builder = new ManifestBuilder(baseData);
       const manifest = builder.build();
 

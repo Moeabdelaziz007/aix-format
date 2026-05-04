@@ -5,11 +5,11 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
 /**
- * AIX v1.3.0 Official Schema Validation Test
+ * AIX v0.369.0 Official Schema Validation Test
  * Ensures that any .aix.json manifest complies with the frozen protocol spec.
  */
 
-test('Official Schema Validation: AIX v1.3.0', async (t) => {
+test('Official Schema Validation: AIX v0.369.0', async (t) => {
   const ajv = new Ajv({ allErrors: true, strict: false });
   addFormats(ajv);
 
@@ -43,7 +43,7 @@ test('Official Schema Validation: AIX v1.3.0', async (t) => {
         console.error(`Validation Failed for ${sample}:`, JSON.stringify(validate.errors, null, 2));
       }
       
-      assert.strictEqual(valid, true, `Manifest ${sample} must be valid according to the AIX v1.3.0 schema.`);
+      assert.strictEqual(valid, true, `Manifest ${sample} must be valid according to the AIX v0.369.0 schema.`);
     });
   }
 

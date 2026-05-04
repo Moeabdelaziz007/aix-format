@@ -4,7 +4,7 @@ import path from 'path';
 
 /**
  * GET /api/spec
- * Serves the canonical AIX v1.3.0 JSON Schema.
+ * Serves the canonical AIX v0.369.0 JSON Schema.
  */
 export async function GET(req: NextRequest) {
   try {

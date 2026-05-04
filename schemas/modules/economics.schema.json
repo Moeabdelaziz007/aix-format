@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://axiomid.app/schemas/modules/economics.schema.json",
-  "title": "AIX Economics Module v1.3.0",
+  "title": "AIX Economics Module v0.369.0",
   "description": "Multi-chain settlement and revenue routing for sovereign AI agents.",
   "type": "object",
   "required": ["settlement", "pricing_model"],

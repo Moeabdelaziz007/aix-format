@@ -54,7 +54,7 @@ export {
 } from './swarm';
 export type { PulseRequest, AgentType } from './swarm';
 
-// Philosophical Engines (v1.4.0)
+// Philosophical Engines (v0.369.0)
 export { CuriosityEngine } from './curiosity-engine';
 export { ExpectationEngine } from './expectation-engine';
 export { FailureLearning } from './failure-learning';

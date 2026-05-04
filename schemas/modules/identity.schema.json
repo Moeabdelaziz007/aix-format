@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://axiomid.app/schemas/modules/identity.schema.json",
-  "title": "AIX Identity Module v1.3.0",
+  "title": "AIX Identity Module v0.369.0",
   "description": "Provider-agnostic identity layer with support for Pi Network, WorldID, and AxiomID.",
   "type": "object",
   "required": [
