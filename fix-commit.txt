@@ -1,0 +1,6 @@
+ci: update actions and node version to 22
+
+- Bump actions/checkout and actions/setup-node to v4.
+- Setup pnpm before setting up Node.js so that actions/setup-node@v4 can cache pnpm dependencies properly.
+- Replaced npm install and npm ci with pnpm install in all workflows to use the correct workspace package manager.
+- Point setup-node cache to pnpm.
