@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { CircuitBreaker, CircuitState as CentralCircuitState } from './security/circuit-breaker';
+import { GroqProvider } from './llm-provider';
+import { getTrustChain } from './trust-chain';
 
 // 1. Zod Schemas for Validation
 export const TaskDescriptorSchema = z.object({
@@ -26,171 +29,18 @@ export const AgentExecutionPlanSchema = z.object({
 });
 export type AgentExecutionPlan = z.infer<typeof AgentExecutionPlanSchema>;
 
-// Circuit Breaker States
-export type CircuitState = 'closed' | 'open' | 'half-open';
-
-/**
- * RouterMetrics tracks performance and health metrics
- * Mirrors Go's RouterMetrics struct
- */
-export class RouterMetrics {
-    public tasksRouted: number = 0;
-    public tasksFailed: number = 0;
-    public breakerTrips: number = 0;
-    public recoveries: number = 0;
-    public activeAgents: number = 0;
-
-    public toJSON() {
-        return {
-            tasksRouted: this.tasksRouted,
-            tasksFailed: this.tasksFailed,
-            breakerTrips: this.breakerTrips,
-            recoveries: this.recoveries,
-            activeAgents: this.activeAgents,
-        };
-    }
-}
-
-/**
- * CircuitBreaker implements the circuit breaker pattern
- * Mirrors Go's CircuitBreaker with exact same thresholds and behavior
- *
- * States:
- * - Closed: Normal operation, requests pass through
- * - Open: Failures exceeded threshold, requests blocked
- * - Half-Open: Testing if system recovered, limited requests allowed
- */
-export class CircuitBreaker {
-    private failureThreshold: number;
-    private successThreshold: number;
-    private failureCount: number = 0;
-    private successCount: number = 0;
-    private lastFailure: Date | null = null;
-    private openDuration: number; // milliseconds
-    private state: CircuitState = 'closed';
-
-    constructor(
-        failureThreshold: number = 5,
-        successThreshold: number = 3,
-        openDurationMs: number = 30000 // 30 seconds
-    ) {
-        this.failureThreshold = failureThreshold;
-        this.successThreshold = successThreshold;
-        this.openDuration = openDurationMs;
-    }
-
-    /**
-     * Record a failure and potentially trip the breaker
-     * Mirrors Go's RecordFailure() method
-     */
-    public recordFailure(metrics: RouterMetrics | null = null): void {
-        this.failureCount++;
-        this.successCount = 0;
-
-        if (metrics) {
-            metrics.tasksFailed++;
-        }
-
-        if (this.state === 'half-open' || this.failureCount >= this.failureThreshold) {
-            const prevState = this.state;
-            this.state = 'open';
-            this.lastFailure = new Date();
-
-            if (metrics) {
-                metrics.breakerTrips++;
-            }
-
-            console.log(
-                `[CircuitBreaker] ${prevState} -> OPEN (Failures: ${this.failureCount}, Total Trips: ${metrics?.breakerTrips ?? 0})`
-            );
-        }
-    }
-
-    /**
-     * Record a success and potentially close the breaker
-     * Mirrors Go's RecordSuccess() method
-     */
-    public recordSuccess(metrics: RouterMetrics | null = null): void {
-        if (metrics) {
-            metrics.tasksRouted++;
-        }
-
-        if (this.state === 'half-open') {
-            this.successCount++;
-            if (this.successCount >= this.successThreshold) {
-                this.state = 'closed';
-                this.failureCount = 0;
-                this.successCount = 0;
-
-                if (metrics) {
-                    metrics.recoveries++;
-                }
-
-            }
-        } else if (this.state === 'closed') {
-            this.failureCount = 0;
-        }
-    }
-
-    /**
-     * Check if requests are allowed through the breaker
-     * Mirrors Go's IsAllowed() method
-     */
-    public isAllowed(): boolean {
-        if (this.state === 'closed') {
-            return true;
-        }
-        if (this.state === 'open') {
-            if (this.lastFailure && Date.now() - this.lastFailure.getTime() > this.openDuration) {
-                return true;
-            }
-            return false;
-        }
-        return true; // half-open allows probing
-    }
-
-    /**
-     * Check state and transition to half-open if ready
-     * Mirrors Go's CheckAndProbe() method
-     */
-    public checkAndProbe(): boolean {
-        if (this.state === 'closed') {
-            return true;
-        }
-        if (this.state === 'open') {
-            if (this.lastFailure && Date.now() - this.lastFailure.getTime() > this.openDuration) {
-                this.state = 'half-open';
-                return true;
-            }
-            return false;
-        }
-        return true; // already half-open
-    }
-
-    public getState(): CircuitState {
-        return this.state;
-    }
-
-    public getFailureCount(): number {
-        return this.failureCount;
-    }
-
-    public getSuccessCount(): number {
-        return this.successCount;
-    }
-}
-
 // 2. SwarmRouter Implementation
 export class SwarmRouter {
     private agents: Map<string, AgentNode> = new Map();
     private deadLetterQueue: TaskDescriptor[] = [];
     private breaker: CircuitBreaker;
-    private metrics: RouterMetrics;
 
     constructor() {
-        // Initialize with same values as Go: failureThreshold=5, successThreshold=3, openDuration=30s
-        this.breaker = new CircuitBreaker(5, 3, 30000);
-        this.metrics = new RouterMetrics();
+        this.breaker = new CircuitBreaker({
+            name: 'SwarmRouter',
+            failureThreshold: 3,
+            recoveryTimeout: 9000
+        });
     }
 
     /**
@@ -204,7 +54,6 @@ export class SwarmRouter {
         }
 
         this.agents.set(validated.id, validated);
-        this.metrics.activeAgents = this.agents.size;
 
         console.log(
             `[SwarmRouter] Registered agent: ${validated.id} (role: ${validated.role}, trust: ${validated.trustLevel})`
@@ -217,14 +66,6 @@ export class SwarmRouter {
      * Mirrors Go's RouteTask() method with circuit breaker integration
      */
     public routeTask(taskInput: unknown): AgentExecutionPlan {
-        // Check and Probe Circuit Breaker
-        if (!this.breaker.checkAndProbe()) {
-            this.breaker.recordFailure(this.metrics);
-            throw new Error(
-                `routing service is currently unavailable: circuit breaker is in ${this.breaker.getState()} state`
-            );
-        }
-
         const task = TaskDescriptorSchema.parse(taskInput);
 
         if (task.requiredCapabilities.length === 0) {
@@ -250,66 +91,65 @@ export class SwarmRouter {
             }
 
             if (hasAllRequired) {
-                // Final Score = (Average Capability Weight) * (Trust Level Multiplier) * Priority Boost
                 const avgCapScore = rawScore / task.requiredCapabilities.length;
                 const finalScore = avgCapScore * (agent.trustLevel * 0.2) + task.priority * 0.1;
                 candidates.push({ agentId: agent.id, score: finalScore });
             }
         }
 
-        // Error Discrimination: Missing capabilities vs infrastructure failure
         if (candidates.length === 0) {
-            if (this.agents.size === 0) {
-                // Infrastructure failure - record breaker failure
-                this.breaker.recordFailure(this.metrics);
-                throw new Error('infrastructure failure: no agents registered in the swarm');
-            }
-
-            // Task mismatch - don't record breaker failure to avoid false positives
-            throw new Error(
-                `task mismatch: no suitable agent found for task ${task.id} with capabilities [${task.requiredCapabilities.join(', ')}]`
-            );
+            throw new Error(`task mismatch: no suitable agent found for task ${task.id}`);
         }
 
-        // Sort descending by score
         candidates.sort((a, b) => b.score - a.score);
-
-        // Limit fallback chain to 3 agents (matching Go implementation)
         const fallbackChain = candidates.slice(1, 4).map(c => c.agentId);
 
-        const plan: AgentExecutionPlan = {
+        return {
             taskId: task.id,
             primaryAgentId: candidates[0].agentId,
             fallbackChain,
             score: candidates[0].score,
         };
+    }
 
-        // Record success in circuit breaker
-        this.breaker.recordSuccess(this.metrics);
+    /**
+     * Intelligent Routing with LLM decision making
+     * 🌀 RULE 5: Meta-Loop active layers
+     */
+    public async routeWithLLM(taskDescription: string): Promise<string> {
+        return this.breaker.execute(async () => {
+            const apiKey = process.env.GROQ_API_KEY;
+            if (!apiKey) throw new Error('GROQ_API_KEY missing');
 
-        console.log(
-            `[SwarmRouter] Routed task ${task.id} to agent ${plan.primaryAgentId} (score: ${plan.score.toFixed(2)}, fallbacks: ${fallbackChain.length})`
-        );
+            const lowerTask = taskDescription.toLowerCase();
+            let selectedModel = 'llama-3.1-8b-instant'; // Default small
+            
+            // Routing Logic
+            if (lowerTask.includes('analyze') || lowerTask.includes('code')) {
+                selectedModel = 'llama-3.3-70b-versatile';
+            }
 
-        return plan;
+            const llm = new GroqProvider(apiKey, selectedModel);
+            
+            // Log decision to TrustChain (RULE 3)
+            const trustChain = getTrustChain();
+            await trustChain.append('ROUTING_DECISION', 'swarm-router', {
+                task: taskDescription,
+                model: selectedModel,
+                timestamp: Date.now()
+            });
+
+            return selectedModel;
+        });
     }
 
     public getDeadLetterQueue(): TaskDescriptor[] {
         return this.deadLetterQueue;
     }
 
-    public getMetrics(): RouterMetrics {
-        return this.metrics;
-    }
-
-    public getCircuitBreakerState(): CircuitState {
+    public getCircuitBreakerState(): CentralCircuitState {
         return this.breaker.getState();
     }
-
-    /**
-     * Expose breaker for testing purposes
-     */
-    public getCircuitBreaker(): CircuitBreaker {
-        return this.breaker;
-    }
 }
+
+// Made with Moe Abdelaziz
