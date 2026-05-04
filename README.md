@@ -1,17 +1,14 @@
 # 🧬 AIX Format — Universal Agent Passport v0.369.0
 
-🇬🇧 **AIX Format** is the industry-first open standard for **Sovereign AI Agents** —
-the Universal Agent Passport for the agentic payment economy.
-It converges Cryptographic Identity (DIDs), the Model Context Protocol (MCP),
-HTTP 402 payments, and multi-chain settlement into a single immutable `.aix` manifest.
+ Vision
+“If your laptop dies or your cloud vendor disappears, your agents should not.
+AIX is the USB stick for agentic work — a portable, signed manifest that lets any compliant runtime rehydrate the same agent with the same identity, economics, and evolution history.”
 
-**Latest Versions**:
-- 🧬 **AIX Core Format**: v0.369.0 (Identity + MCP + ABOM + TrustChain)
-- 💳 **AIX Payment Layer**: v1.0.0 (HTTP 402 + Multi-Chain + DeFi)
-- 🌐 **Universal Passport**: v0.369.0 (Complete Integration)
+ الرؤية
+“لو جهازك وقع، أو الـ platform اختفت، وكيلك ماينتهيش معاها.
+AIX هو فلاشـة الوكلاء: ملف واحد موقَّع يشيل هوية الوكيل، اقتصاده، وتاريخه التطوري، وتقدر تشغّله على أي نظام يدعم معيار AIX.”
 
-🇦🇪 **تنسيق AIX** هو أول معيار مفتوح في الصناعة لـ **الوكلاء الذكيين السياديين**.
-يدمج الهوية التشفيرية (DIDs)، بروتوكول MCP، والمدفوعات الدقيقة في بيان `.aix` واحد.
+
 
 ---
 
