@@ -1,14 +1,18 @@
 /**
  * Trust Chain
  * Handles signature verification and agent lineage tracking
+ * SECURITY: Uses nacl.sign.detached.verify() for real Ed25519 signatures (RULE 3)
  */
 
 import { createHash } from 'crypto';
+import nacl from 'tweetnacl';
+import util from 'tweetnacl-util';
 
 export interface SignatureData {
   agentId: string;
   data: any;
   signature: string;
+  publicKey: string;  // Ed25519 public key (hex)
   timestamp: number;
 }
 
@@ -28,24 +32,50 @@ export class TrustChain {
   private verifiedAgents: Set<string> = new Set();
 
   /**
-   * Verify signature
+   * Verify signature using Ed25519 (nacl)
+   * @param agentId - Agent identifier
+   * @param data - Data that was signed
+   * @param signature - Hex-encoded signature
+   * @param publicKey - Hex-encoded Ed25519 public key
    */
-  async verifySignature(agentId: string, data: any, signature: string): Promise<boolean> {
-    // Simple signature verification (mock implementation)
-    // In production, use proper crypto verification
-    const isValid = signature.startsWith('valid-');
-    
-    if (isValid) {
-      this.signatures.set(agentId, {
-        agentId,
-        data,
-        signature,
-        timestamp: Date.now()
-      });
-      this.verifiedAgents.add(agentId);
-    }
+  async verifySignature(
+    agentId: string,
+    data: any,
+    signature: string,
+    publicKey: string
+  ): Promise<boolean> {
+    try {
+      // Convert data to canonical string
+      const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+      const message = util.decodeUTF8(dataString);
+      
+      // Decode hex signature and public key
+      const signatureBytes = Buffer.from(signature, 'hex');
+      const publicKeyBytes = Buffer.from(publicKey, 'hex');
+      
+      // Verify using nacl.sign.detached.verify()
+      const isValid = nacl.sign.detached.verify(
+        message,
+        signatureBytes,
+        publicKeyBytes
+      );
+      
+      if (isValid) {
+        this.signatures.set(agentId, {
+          agentId,
+          data,
+          signature,
+          publicKey,
+          timestamp: Date.now()
+        });
+        this.verifiedAgents.add(agentId);
+      }
 
-    return isValid;
+      return isValid;
+    } catch (error) {
+      console.error('[TrustChain] Signature verification failed:', error);
+      return false;
+    }
   }
 
   /**
