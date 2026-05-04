@@ -89,6 +89,10 @@ export const KEYS = {
   bus: (ring: string, event: string) => `${NS.BUS}${ring}:${event}`,
   busQueue: (ring: string) => `${NS.BUS}${ring}:queue`,
   busBacklog: () => `${NS.BUS}backlog`,
+  
+  // Rate limiting keys
+  rate: (key: string) => `${NS.RATE}${key}`,
+  rateLimit: (identifier: string) => `${NS.RATE}limit:${identifier}`,
 } as const;
 
 /**
