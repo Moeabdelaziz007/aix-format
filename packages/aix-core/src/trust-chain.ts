@@ -8,7 +8,7 @@ import { createHash } from 'crypto';
 import nacl from 'tweetnacl';
 import util from 'tweetnacl-util';
 import { kv } from './storage/adapter';
-import { KEYS } from './storage/keys';
+import { KEYS, NS } from './storage/keys';
 
 export interface SignatureData {
   agentId: string;

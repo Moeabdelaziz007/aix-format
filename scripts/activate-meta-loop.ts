@@ -23,6 +23,17 @@ import meta, {
   PET_WATCH_RING,
   AgentState,
 } from '../packages/aix-core/src/meta';
+import { GroqProvider, LangfuseProvider } from '../packages/aix-core/src/llm-provider';
+
+// 🧠 PRO STACK INITIALIZATION
+const rawLlm = new GroqProvider(process.env.GROQ_API_KEY || '');
+const llm = process.env.LANGFUSE_PUBLIC_KEY 
+  ? new LangfuseProvider(rawLlm, {
+      publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+      secretKey: process.env.LANGFUSE_SECRET_KEY!,
+      baseUrl: process.env.LANGFUSE_HOST
+    })
+  : rawLlm;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONFIGURATION
