@@ -36,7 +36,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -202,7 +203,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
