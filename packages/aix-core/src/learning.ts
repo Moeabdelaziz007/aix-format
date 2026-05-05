@@ -129,7 +129,9 @@ export async function getLearnedProcedures(agentId: string): Promise<LearnedProc
 export async function getFeedbackSkills(agentId: string): Promise<any[]> {
   const hashes = await kv.smembers<string>(KEYS.agentSkills(agentId));
   if (!hashes.length) return [];
-  const skills = await Promise.all(hashes.map(h => kv.get(KEYS.agentSkillDetail(agentId, h))));
+  
+  const keys = hashes.map(h => KEYS.agentSkillDetail(agentId, h));
+  const skills = await kv.mget<any[]>(...keys);
   return skills.filter(s => s !== null);
 }
 

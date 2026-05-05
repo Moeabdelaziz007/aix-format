@@ -34,6 +34,35 @@ export function verifySignature(
   }
 }
 
+export function generateKeyPair(): { publicKey: string; privateKey: string } {
+  const pair = nacl.sign.keyPair();
+  return {
+    publicKey: Buffer.from(pair.publicKey).toString('hex'),
+    privateKey: Buffer.from(pair.secretKey).toString('hex')
+  };
+}
+
+export function signData(data: unknown, privateKey: string): string {
+  const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+  const message = util.decodeUTF8(dataString);
+  const privateKeyBytes = Buffer.from(privateKey, 'hex');
+  
+  if (privateKeyBytes.length !== 64) {
+    throw new Error('Invalid private key length: expected 64 bytes for Ed25519');
+  }
+  
+  const signature = nacl.sign.detached(message, privateKeyBytes);
+  return Buffer.from(signature).toString('hex');
+}
+
+export function ensureEd25519Key(key: string, type: 'public' | 'private'): void {
+  const bytes = Buffer.from(key, 'hex');
+  const expectedLength = type === 'public' ? 32 : 64;
+  if (bytes.length !== expectedLength) {
+    throw new Error(`Expected ed25519 ${type} key of length ${expectedLength} bytes`);
+  }
+}
+
 export function generateTopologySignature(
   action: string, 
   agentId: string, 

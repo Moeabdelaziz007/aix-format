@@ -2,6 +2,7 @@ import { pipeline } from '@xenova/transformers';
 import { z } from 'zod';
 import { kv } from '../storage/adapter';
 import { KEYS } from '../storage/keys';
+import { SovereignEntity } from '../base';
 
 /**
  * WikiBrain Semantic Index - Sovereign Knowledge Engine
@@ -100,78 +101,97 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   return Array.from(output.data);
 }
 
-/**
- * Indexes any entity (agent, skill, pattern) while respecting privacy
- */
-export async function indexEntity(id: string, type: string, text: string, metadata: any = {}): Promise<void> {
-  const visibility = metadata.visibility || 'public';
-  const embedding = await generateEmbedding(text);
+// 2. SwarmRouter Implementation (Refactored to Sovereign)
+export class SemanticIndex extends SovereignEntity {
+  private static extractor: any = null;
 
-    // 🚀 TURBOQUANT: Topological Merging
-    // Search for existing entry with same type and similar name/content to merge
+  constructor() {
+    super('SemanticIndex');
+  }
+
+  private async getExtractor() {
+    if (!SemanticIndex.extractor) {
+      SemanticIndex.extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+    }
+    return SemanticIndex.extractor;
+  }
+
+  public async generateEmbedding(text: string): Promise<number[]> {
+    const nomicKey = process.env.NOMIC_API_KEY;
+    if (nomicKey) {
+      try {
+        const res = await fetch('https://api-atlas.nomic.ai/v1/embedding/text', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${nomicKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'nomic-embed-text-v1.5', texts: [text], task_type: 'search_document' })
+        });
+        if (res.ok) {
+          const data = await res.json() as any;
+          return data.embeddings[0];
+        }
+      } catch (e) { console.error('Nomic Error:', e); }
+    }
+    const ext = await this.getExtractor();
+    const output = await ext(text, { pooling: 'mean', normalize: true });
+    return Array.from(output.data);
+  }
+
+  async index(id: string, type: string, text: string, metadata: any = {}): Promise<void> {
+    const visibility = metadata.visibility || 'public';
+    
     const existing = await this.findTopologicalTwin(type, metadata.name || id);
     if (existing) {
-      console.log(`🌀 [SemanticIndex] Merging into Topological Twin: ${existing.id}`);
-      return this.mergeWithTwin(existing, text, metadata);
+      await this.emitState('index:merge', `Merging topological twin for ${id}`);
+      await this.mergeWithTwin(existing, text, metadata);
+      return;
     }
 
+    const embedding = await this.generateEmbedding(text);
     const entry = {
-      id,
-      type,
-      visibility,
+      id, type, visibility,
       name: metadata.name || id,
       snippet: metadata.description || text.slice(0, 200),
-      embedding: new Float32Array(embedding), // Real TurboQuant structure
+      embedding: Array.isArray(embedding) ? embedding : Array.from(embedding),
       metadata,
       updatedAt: Date.now()
     };
 
-  await kv.set(`wikibrain:index:${id}`, entry);
-
-  const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
-  if (!allKeys.includes(id)) {
-    await kv.lpush('wikibrain:index_keys', id);
-  }
-}
-
-/**
- * Legacy wrapper for indexAgent
- */
-export async function indexAgent(manifest: any): Promise<void> {
-  const validManifest = AgentManifestSchema.parse(manifest);
-  const id = validManifest.identity_layer?.name || validManifest.did;
-  
-  const textToIndex = `
-    Agent Name: ${validManifest.identity_layer?.name || ''}
-    Role: ${validManifest.identity_layer?.role || ''}
-    Description: ${validManifest.identity_layer?.description || ''}
-    Capabilities: ${(validManifest.capabilities || []).join(', ')}
-  `.trim();
-
-  await indexEntity(id, 'agent', textToIndex, {
-    visibility: validManifest.identity_layer?.visibility || 'public',
-    name: validManifest.identity_layer?.name || id,
-    description: validManifest.identity_layer?.description || ''
-  });
-}
-
-export class SemanticIndex {
-  async search(query: string, options: { limit?: number, filter?: SearchFilter } = {}): Promise<{ text: string, score: number }[]> {
-    const { results } = await search(query, options.limit || 5, options.filter);
-    return results.map(r => ({
-      text: r.snippet || r.name,
-      score: r.score
-    }));
+    await kv.set(`wikibrain:index:${id}`, entry);
+    const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
+    if (!allKeys.includes(id)) await kv.lpush('wikibrain:index_keys', id);
+    
+    await this.emitState('index:success', `Indexed ${type}:${id}`);
   }
 
-  async index(id: string, type: string, text: string, metadata: any = {}): Promise<void> {
-    const existing = await this.findTopologicalTwin(type, metadata.name || id);
-    if (existing) {
-      console.log(`🌀 [SemanticIndex] Merging into Topological Twin: ${existing.id}`);
-      await this.mergeWithTwin(existing, text, metadata);
-      return;
+  async search(query: string, topK: number = 5, filterInput?: SearchFilter): Promise<SemanticResult[]> {
+    const filter = SearchFilterSchema.parse(filterInput || {});
+    const queryEmbedding = await this.generateEmbedding(query);
+    const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
+    const results: SemanticResult[] = [];
+
+    for (const key of allKeys) {
+      const existing = await kv.get<any>(`wikibrain:index:${key}`);
+      if (existing && existing.embedding) {
+        if (existing.visibility === 'private' && !filter.includePrivate) continue;
+        if (filter.type && existing.type !== filter.type) continue;
+
+        const score = this.cosineSimilarity(queryEmbedding, existing.embedding);
+        if (score > 0.3) {
+          results.push({ id: existing.id, type: existing.type, name: existing.name, score, snippet: existing.snippet });
+        }
+      }
     }
-    await indexEntity(id, type, text, metadata);
+    return results.sort((a, b) => b.score - a.score).slice(0, topK);
+  }
+
+  private cosineSimilarity(a: number[], b: number[]): number {
+    let dotProduct = 0, normA = 0, normB = 0;
+    for (let i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+    return normA === 0 || normB === 0 ? 0 : dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 
   private async findTopologicalTwin(type: string, name: string): Promise<any | null> {
@@ -189,72 +209,11 @@ export class SemanticIndex {
     existing.updatedAt = Date.now();
     await kv.set(`wikibrain:index:${existing.id}`, existing);
   }
-
-  /**
-   * 🔍 HIDDEN PATTERN MINER (Round 23)
-   * Analyzes all indexed nodes to find non-obvious failure correlations.
-   */
-  async findHiddenPatterns(): Promise<string[]> {
-    const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
-    const patterns: string[] = [];
-    const failureStats: Record<string, number> = {};
-
-    for (const key of allKeys) {
-      const node = await kv.get<any>(`wikibrain:index:${key}`);
-      if (node?.metadata?.type === 'logic_pattern' && node.metadata.quality < 0.4) {
-        const tool = node.metadata.tool || 'unknown_tool';
-        failureStats[tool] = (failureStats[tool] || 0) + 1;
-      }
-    }
-
-    for (const [tool, count] of Object.entries(failureStats)) {
-      if (count > 2) {
-        patterns.push(`[HIDDEN_PATTERN]: Tool "${tool}" has a systemic failure correlation (Count: ${count}) in similar contexts.`);
-      }
-    }
-
-    return patterns;
-  }
 }
 
-/**
- * Sovereign Search - Filters results based on visibility and trust
- */
-export async function search(query: string, topK: number, filterInput?: SearchFilter): Promise<{ results: SemanticResult[], queryEmbedding: number[], searchTimeMs: number }> {
-  const start = Date.now();
-  const filter = SearchFilterSchema.parse(filterInput || {});
-  const queryEmbedding = await generateEmbedding(query);
-
-  const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
-  const results: SemanticResult[] = [];
-
-  for (const key of allKeys) {
-    const existing = await kv.get<any>(`wikibrain:index:${key}`);
-    if (existing && existing.embedding) {
-      // RULE 0: Privacy Check
-      if (existing.visibility === 'private' && !filter.includePrivate) continue;
-      if (filter.type && existing.type !== filter.type) continue;
-
-      const score = cosineSimilarity(queryEmbedding, existing.embedding);
-      if (score > 0.3) {
-        results.push({
-          id: existing.id,
-          type: existing.type,
-          name: existing.name,
-          score,
-          snippet: existing.snippet
-        });
-      }
-    }
-  }
-
-  results.sort((a, b) => b.score - a.score);
-
-  return {
-    results: results.slice(0, topK),
-    queryEmbedding,
-    searchTimeMs: Date.now() - start
-  };
-}
+// Global instances for backward compatibility if needed, but preferred to use SemanticIndex class
+export const semanticIndex = new SemanticIndex();
+export const indexEntity = (id: string, type: string, text: string, meta?: any) => semanticIndex.index(id, type, text, meta);
+export const search = (q: string, k: number, f?: any) => semanticIndex.search(q, k, f);
 
 // Made with Moe Abdelaziz
