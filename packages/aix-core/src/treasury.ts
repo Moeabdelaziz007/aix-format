@@ -38,10 +38,11 @@ export class SovereignTreasury {
 
     // 2. Publish to Pulse (Rust Event Store)
     await this.rust.eventStore.publish({
-      id: crypto.randomUUID(),
+      type: 'TreasuryEvent',
       agent_id: event.agentId,
-      event_type: `treasury:${event.type}`,
-      payload: JSON.stringify(event),
+      event_type: event.type,
+      amount: event.amount,
+      currency: event.currency,
       timestamp: event.timestamp,
     });
 

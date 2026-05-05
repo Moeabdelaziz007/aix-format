@@ -9,7 +9,14 @@ import { health } from './health';
 import { AgentSelfReview } from './brain';
 import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm-provider';
 import { SovereignEntity } from './base';
-import { Task, TaskSchema, RuntimeResult, ScratchEntry, SelfReviewRecordSchema } from './domain';
+import { 
+  Task, 
+  TaskSchema, 
+  RuntimeResult, 
+  ScratchEntry, 
+  SelfReviewRecord,
+  SelfReviewRecordSchema 
+} from './domain';
 import crypto from 'crypto';
 
 export { type Task, type RuntimeResult };
@@ -58,14 +65,16 @@ export class AgentRuntimeEngine extends SovereignEntity {
         success: true,
         result: finalOutput,
         steps: this.step,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
+        scratchpad: this.scratchpad
       };
     } catch (e) {
       return {
         success: false,
         error: e instanceof Error ? e.message : 'Unknown error',
         steps: this.step,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
+        scratchpad: this.scratchpad
       };
     }
   }

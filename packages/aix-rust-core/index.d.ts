@@ -53,6 +53,22 @@ export type BusEvent =
       duration_ms: number;
       success: boolean;
       timestamp: number;
+    }
+  | {
+      type: 'TreasuryEvent';
+      agent_id: string;
+      event_type: string;
+      amount: number;
+      currency: string;
+      timestamp: number;
+    }
+  | {
+      type: 'IdentityEvent';
+      agent_id: string;
+      user_id: string;
+      action: string;
+      status: string;
+      timestamp: number;
     };
 
 // ============================================================================

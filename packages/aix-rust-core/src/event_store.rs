@@ -44,6 +44,20 @@ pub enum BusEvent {
         success: bool,
         timestamp: u64,
     },
+    TreasuryEvent {
+        agent_id: String,
+        event_type: String,
+        amount: f64,
+        currency: String,
+        timestamp: u64,
+    },
+    IdentityEvent {
+        agent_id: String,
+        user_id: String,
+        action: String,
+        status: String,
+        timestamp: u64,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -63,7 +77,9 @@ impl BusEvent {
             | BusEvent::SkillExtracted { agent_id, .. }
             | BusEvent::SecurityAlert { agent_id, .. }
             | BusEvent::TrustUpdated { agent_id, .. }
-            | BusEvent::SkillExecuted { agent_id, .. } => agent_id,
+            | BusEvent::SkillExecuted { agent_id, .. }
+            | BusEvent::TreasuryEvent { agent_id, .. }
+            | BusEvent::IdentityEvent { agent_id, .. } => agent_id,
         }
     }
 
@@ -75,7 +91,9 @@ impl BusEvent {
             | BusEvent::SkillExtracted { timestamp, .. }
             | BusEvent::SecurityAlert { timestamp, .. }
             | BusEvent::TrustUpdated { timestamp, .. }
-            | BusEvent::SkillExecuted { timestamp, .. } => *timestamp,
+            | BusEvent::SkillExecuted { timestamp, .. }
+            | BusEvent::TreasuryEvent { timestamp, .. }
+            | BusEvent::IdentityEvent { timestamp, .. } => *timestamp,
         }
     }
 
@@ -94,6 +112,8 @@ impl BusEvent {
             BusEvent::SecurityAlert { .. } => "SecurityAlert",
             BusEvent::TrustUpdated { .. } => "TrustUpdated",
             BusEvent::SkillExecuted { .. } => "SkillExecuted",
+            BusEvent::TreasuryEvent { .. } => "TreasuryEvent",
+            BusEvent::IdentityEvent { .. } => "IdentityEvent",
         }
     }
 }

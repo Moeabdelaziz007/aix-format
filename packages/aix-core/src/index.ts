@@ -1,7 +1,7 @@
-**
+/**
  * 🌌 AIX Core - The Sovereign Entrance
-  * Made with Moe Abdelaziz
-    */
+ * Made with Moe Abdelaziz
+ */
 
 export * from './storage';
 export * from './health';

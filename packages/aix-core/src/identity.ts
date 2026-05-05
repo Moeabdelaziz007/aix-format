@@ -60,6 +60,16 @@ export class IdentityService {
     // Reward user in TrustChain for completing KYC
     try {
       await this.rust.trustChain.reward(`user:${userId}`, 100, 'KYC_COMPLETED', 'identity');
+      
+      // Publish to Pulse
+      await this.rust.eventStore.publish({
+        type: 'IdentityEvent',
+        agent_id: `user:${userId}`,
+        user_id: userId,
+        action: 'kyc_update',
+        status: level,
+        timestamp: status.timestamp
+      });
     } catch { /* Fallback */ }
   }
 }

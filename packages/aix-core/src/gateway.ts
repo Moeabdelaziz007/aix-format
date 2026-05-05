@@ -63,10 +63,9 @@ export class SovereignGateway extends EventEmitter {
 
       // 3. Audit Start (Rust Event Store)
       await this.rust.eventStore.publish({
-        id: requestId,
+        type: 'TaskSpawned',
         agent_id: agentId,
-        event_type: 'task:start',
-        payload: JSON.stringify({ task, userId, metrics: clearance.metrics }),
+        task_id: requestId,
         timestamp: startTime,
       });
 
@@ -84,19 +83,23 @@ export class SovereignGateway extends EventEmitter {
       const provider = new GroqProvider(process.env.GROQ_API_KEY!, 'llama-3.3-70b-versatile');
       const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools);
 
-      const runtimeResult = await engine.runTask({
+      const runtimeResult = await engine.run({
         taskId: requestId,
         description: task,
         maxSteps: 10
       });
 
       // 6. Self-Review & Critic Pattern
+      // Note: Full review record is created inside engine.run, this is just for registry/summary
       const reviewRecord = {
         agentId,
         taskId: requestId,
-        score: runtimeResult.success ? 1.0 : 0.0,
-        feedback: "Auto-validated by Sovereign Protocol",
-        timestamp: new Date().toISOString()
+        timestamp: Date.now(),
+        taskDescription: task,
+        output: runtimeResult.result || '',
+        evaluation: { understanding: 10, correctness: 10, creativity: 10, safety: 10, overall: 10 },
+        reflection: { strengths: [], weaknesses: [], newToolsUsed: [], risksIdentified: [] },
+        improvementPlan: { stop: '', continue: '', try: '' }
       };
       await AgentSelfReview.store(reviewRecord);
 
@@ -115,10 +118,10 @@ export class SovereignGateway extends EventEmitter {
       // 9. Audit Success (Rust Event Store)
       const duration = Date.now() - startTime;
       await this.rust.eventStore.publish({
-        id: crypto.randomUUID(),
+        type: 'TaskCompleted',
         agent_id: agentId,
-        event_type: 'task:success',
-        payload: JSON.stringify({ duration, requestId, result: !!runtimeResult.result }),
+        task_id: requestId,
+        result: runtimeResult.success ? 'success' : 'failure',
         timestamp: Date.now(),
       });
 
