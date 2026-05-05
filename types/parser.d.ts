@@ -327,7 +327,8 @@ export declare class AIXParser {
 export declare class AIXAgent {
     readonly data: AIXDocument;
     readonly warnings: AIXValidationWarning[];
-    constructor(data: AIXDocument, warnings?: AIXValidationWarning[]);
+    readonly errors: AIXValidationError[];
+    constructor(data: AIXDocument, warnings?: AIXValidationWarning[], errors?: AIXValidationError[]);
     get meta(): Meta;
     get persona(): Persona;
     get skills(): Skill[];

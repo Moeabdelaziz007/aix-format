@@ -106,7 +106,7 @@ export class AIXParser {
     }
 
     // Create agent object
-    return new AIXAgent(data, this.warnings);
+    return new AIXAgent(data, this.warnings, this.errors);
   }
 
   /**
@@ -402,12 +402,12 @@ export class AIXParser {
  * AIXAgent - Represents a parsed AIX agent
  */
 export class AIXAgent {
-  constructor(data, warnings = []) {
+  constructor(data, warnings = [], errors = []) {
     this.data = data;
     this.warnings = warnings;
     // FIX: AIXAgent needs its own errors array for standalone validation calls
     // (e.g. validateLiveVoice called outside of AIXParser context)
-    this.errors = [];
+    this.errors = errors;
   }
 
   get meta() { return this.data.meta; }
