@@ -101,6 +101,8 @@ export async function extractSkillFromFeedback(
 /**
  * Retrieves learned patterns with semantic relevance
  */
+export async function getRelevantProcedures(agentId: string, currentGoal: string, allProcedures: any[]): Promise<any[]> {
+  const { search: semanticSearch } = await import('./wikibrain/SemanticIndex');
   // Pro Trick 2: Use Semantic Search instead of keyword filtering
   const semanticResults = await semanticSearch(currentGoal, 3, { type: 'skill' });
   

@@ -1,95 +1,28 @@
 /**
  * AIX Core - Main Entry Point
- * Exports all core components for the 4-Ring Bus Architecture
+ * Unified Sovereign Architecture.
+ * Made with Moe Abdelaziz
  */
 
-// Gateway - Central orchestration
-export {
-  Gateway,
-  getGateway,
-  resetGateway,
-  type AgentAction,
-  type ActionResult,
-  type SpawnConfig,
-  type SpawnResult,
-  type PaymentResult
-} from './gateway';
-
-// ExpectationEngine - Task monitoring
-export {
-  ExpectationEngine,
-  getExpectationEngine,
-  resetExpectationEngine,
-  type Expectation
-} from './expectation-engine';
-
-// TrustChain - Signature verification
-export {
-  TrustChain,
-  getTrustChain,
-  resetTrustChain,
-  type SignatureData,
-  type LineageRecord
-} from './trust-chain';
-
-// Bus - 4-Ring event bus
-export {
-  Bus,
-  getBus,
-  resetBus,
-  waitForEvent,
-  type BusEvent,
-  type BusEventType,
-  type BusSubscription
-} from './bus';
-
-// AIX - Main API function
-export { aix, type AixOptions, type AixResult, type SwarmPattern, type AixSwarmOptions } from './aix';
-
-// Sentinel - Self-improvement engine
-export { AxiomSentinel, sentinel } from './sentinel';
+export * from './gateway';
+export * from './health';
+export * from './brain';
+export * from './curiosity';
+export * from './swarm';
+export * from './storage';
+export * from './infra';
 
 /**
  * Initialize all core components
- * Made with Moe Abdelaziz
  */
 export async function initializeCore() {
-  const { getGateway } = await import('./gateway');
-  const { getExpectationEngine } = await import('./expectation-engine');
-  const { getTrustChain } = await import('./trust-chain');
-  const { getBus } = await import('./bus');
-  const { sentinel } = await import('./sentinel');
-
-  const gateway = getGateway();
-  const expectationEngine = getExpectationEngine();
-  const trustChain = getTrustChain();
-  const bus = getBus();
+  const gateway = (await import('./gateway')).getGateway();
+  const { StorageOrchestrator } = await import('./storage');
   
-  // Start the self-improvement watcher
-  await sentinel.start();
+  // Verify storage connection
+  await StorageOrchestrator.getInstance().healthCheck();
 
-  return {
-    gateway,
-    expectationEngine,
-    trustChain,
-    bus,
-    sentinel
-  };
+  return { gateway };
 }
 
-/**
- * Reset all core components (for testing)
- */
-export async function resetCore() {
-  const { resetGateway } = await import('./gateway');
-  const { resetExpectationEngine } = await import('./expectation-engine');
-  const { resetTrustChain } = await import('./trust-chain');
-  const { resetBus } = await import('./bus');
-
-  resetGateway();
-  resetExpectationEngine();
-  resetTrustChain();
-  resetBus();
-}
-
-// Built with Moe Abdelaziz — AIX Sovereign Infrastructure v2.1
+// Built with Moe Abdelaziz — AIX Sovereign Infrastructure v2.2

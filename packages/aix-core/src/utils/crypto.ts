@@ -83,3 +83,16 @@ export function verifyPoW(
   const hash = generateHash(payload);
   return hash.startsWith('0'.repeat(difficulty));
 }
+
+/**
+ * Calculates Shannon Entropy of a string to measure information density.
+ */
+export function shannonEntropy(str: string): number {
+  if (!str) return 0;
+  const freq: Record<string, number> = {};
+  for (const c of str) freq[c] = (freq[c] || 0) + 1;
+  return -Object.values(freq).reduce((sum, f) => {
+    const p = f / str.length;
+    return sum + p * Math.log2(p);
+  }, 0);
+}
