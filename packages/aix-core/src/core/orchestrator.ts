@@ -1,6 +1,6 @@
 import { bus, RINGS } from './bus';
-import { SovereignHintSystem as AgentHints } from '../memory/hints';
-import { AIXNavigator as StructuralNavigator } from '../navigation/navigator';
+import { AgentHints } from '../memory/hints';
+import { StructuralNavigator } from '../navigation/navigator';
 import { StorageOrchestrator } from '../memory/storage';
 import { SovereignHealthService } from '../health';
 

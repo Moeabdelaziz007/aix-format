@@ -3,7 +3,7 @@ import { health } from './health';
 import { CuriosityEngine } from './curiosity';
 import { archiveWisdom, AgentSelfReview } from './brain';
 import { AgentRuntimeEngine } from './agent-runtime';
-import { LLMProvider } from './llm';
+import { GroqProvider } from './llm';
 import { mcpGate } from './mcp-gate';
 import { SovereignEconomics } from './economics';
 import { getHarness } from './harness.config';
@@ -83,7 +83,7 @@ export class SovereignGateway extends EventEmitter {
 
       // 5. Runtime Execution (Task Flow)
       // Note: In a real prod env, provider/model would come from agent manifest
-      const provider = new LLMProvider(process.env.GROQ_API_KEY || '', 'llama-3.3-70b-versatile');
+      const provider = new GroqProvider(process.env.GROQ_API_KEY || '', 'llama-3.3-70b-versatile');
       const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools as any);
 
       const runtimeResult = await engine.run({

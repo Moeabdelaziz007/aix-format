@@ -1,5 +1,5 @@
 import { MemoryPublisher } from '../memory/publishEvent';
-import { bus, RINGS } from '../core/bus';
+import { bus, RINGS, BusEvent } from '../core/bus';
 
 /**
  * 🧪 AIX RESONANCE TEST (E2E)
@@ -10,7 +10,7 @@ async function runTest() {
   console.log('🧪 Starting E2E Resonance Test...');
 
   // 1. Listen for the pulse on the TS side (to verify publishing)
-  bus.subscribe(RINGS.MIND, (pulse) => {
+  bus.subscribe(RINGS.MIND, (pulse: BusEvent) => {
     if (pulse.type === 'QUANTUM_BURST') {
       console.log('✅ TS Bus: Received QUANTUM_BURST pulse.');
     }

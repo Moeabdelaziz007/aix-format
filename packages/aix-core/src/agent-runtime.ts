@@ -138,7 +138,8 @@ export class AgentRuntimeEngine extends SovereignEntity {
         steps: this.step,
         duration: Date.now() - startTime,
         lifecycle: this.lifecycleStages,
-        scratchpad: this.scratchpad
+        scratchpad: this.scratchpad,
+        artifacts: []
       };
     }
   }

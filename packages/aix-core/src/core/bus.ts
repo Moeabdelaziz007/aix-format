@@ -72,6 +72,15 @@ export class Bus extends EventEmitter {
 
     return fullEvent.id;
   }
+
+  /**
+   * 📡 Pulse Subscription (Sovereign Resonance)
+   */
+  public subscribe(ring: number, callback: (event: any) => void) {
+    this.on('pulse', (event: any) => {
+      if (event.ring === ring) callback(event);
+    });
+  }
 }
 
 export const bus = Bus.getInstance();

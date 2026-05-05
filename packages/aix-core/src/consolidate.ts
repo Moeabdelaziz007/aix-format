@@ -1,4 +1,4 @@
-import { SovereignBreadcrumbs as Breadcrumbs } from './memory/breadcrumbs';
+import { Breadcrumbs } from './memory/breadcrumbs';
 import * as path from 'path';
 
 /**
@@ -24,7 +24,7 @@ async function consolidate() {
   await Breadcrumbs.autoInfect(filesToInfect, agentId, insight);
   
   // 🔬 Simulation: Testing Self-Healing & Risk Engine
-  const Navigator = (await import('./navigation/navigator')).AIXNavigator;
+  const Navigator = (await import('./navigation/navigator')).StructuralNavigator;
   const Orchestrator = (await import('./core/orchestrator')).AIXOrchestrator;
 
   console.log('🧪 Testing Structural Foresight...');
