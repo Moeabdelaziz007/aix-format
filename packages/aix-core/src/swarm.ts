@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { kv, KEYS } from './storage';
 import { CircuitBreaker } from './infra';
-import { getTrustChain } from './trust-chain';
+import { health } from './health';
 
 /**
  * 🐝 SOVEREIGN_SWARM

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CircuitBreaker } from './security/circuit-breaker';
+import { CircuitBreaker } from './infra';
 
 /**
  * AIX LLM Provider — The Sovereign Standard
