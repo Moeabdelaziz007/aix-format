@@ -60,8 +60,8 @@ export class Bus extends EventEmitter {
     pipeline.lpush(this.globalPulseKey, fullEvent);
     pipeline.ltrim(this.globalPulseKey, 0, this.maxPulseEvents - 1);
     
-    // Publish for real-time Go/Rust listeners
-    pipeline.publish(`aix:ring:${fullEvent.ring}`, JSON.stringify(fullEvent));
+    // Publish for real-time Go/Rust listeners (Aligned with AIX_TOPOLOGY_SCHEMA v1.0)
+    pipeline.publish(`aix:ring:${fullEvent.ring}:${fullEvent.type}`, JSON.stringify(fullEvent));
     
     await pipeline.exec();
 

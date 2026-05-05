@@ -14,3 +14,13 @@
 ### 📡 TOPOLOGY
 The Swarm is the central nervous system. It connects the Engine (Go) to the Brain (TS).
 Refer to [AIX_TOPOLOGY_SCHEMA.md](../docs/AIX_TOPOLOGY_SCHEMA.md) for data formats.
+
+### 🥧 PI NETWORK INTEGRATION
+- All external bridges must reside in `packages/aix-core/src/network/`.
+- Prioritize **AxiomID** as the primary identity, with Pi UID as a secondary mapping.
+- Every Pi transaction must be logged in the **TrustChain**.
+
+### 🧹 CODE QUALITY & HOUSEKEEPING
+- **No Legacy**: `.bak` and `.tmp` files are strictly forbidden.
+- **Branching**: Use `agent/name-task` or `fix/issue-id`.
+- **Merge Criteria**: All PRs must have 100% test coverage for new logic.
