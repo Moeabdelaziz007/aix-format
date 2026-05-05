@@ -22,8 +22,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node 22
         uses: actions/setup-node@v4
@@ -105,6 +103,6 @@ jobs:
           if grep -r "from \"\.\.\./\.\.\./\.\.\./\.\.\./core" apps/studio/src --include="*.ts" --include="*.tsx"; then
             echo "ERROR: Found cross-package imports using relative paths into core/."
             echo "Use @/lib/* aliases instead (local copies live in apps/studio/src/lib/)."
-            exit 1
+            false
           fi
           echo "✅ No broken cross-package imports found."

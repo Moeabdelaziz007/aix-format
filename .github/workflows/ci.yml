@@ -11,9 +11,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ─────────────────────────────────────────
-  # 1. TypeScript + Build (matches Vercel Node 24)
-  # ─────────────────────────────────────────
   build:
     name: ⚙️ TypeScript + Build Check
     runs-on: ubuntu-latest
@@ -22,34 +19,23 @@ jobs:
         working-directory: apps/studio
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'pnpm'
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: TypeScript check
         run: pnpm exec tsc --noEmit
-
       - name: Build
         run: pnpm run build
         env:
           NODE_ENV: production
-
       - name: Security audit (blocking on high/critical)
         run: pnpm audit --audit-level=high
         continue-on-error: false
 
-  # ─────────────────────────────────────────
-  # 2. Core package tests
-  # ─────────────────────────────────────────
   test:
     name: 🧪 Core Package Tests
     runs-on: ubuntu-latest
@@ -58,52 +44,44 @@ jobs:
         working-directory: packages/aix-core
     steps:
       - uses: actions/checkout@v4
-
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
+          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm test --if-present
 
-  # ─────────────────────────────────────────
-  # 3. Deploy to Vercel — only on main push
-  # ─────────────────────────────────────────
   deploy:
     name: 🚀 Deploy to Vercel
     needs: [build, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: production
-
     steps:
       - uses: actions/checkout@v4
-
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
+          cache: 'pnpm'
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
-
       - name: Pull Vercel Environment
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
       - name: Build for Vercel
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
       - name: Deploy prebuilt to Vercel
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
       - name: Smoke Test
         run: |
           sleep 15
