@@ -1,0 +1,40 @@
+src/agent-runtime.ts(33,18): error TS2300: Duplicate identifier 'AgentResult'.
+src/agent-runtime.ts(64,13): error TS2300: Duplicate identifier 'AgentResult'.
+src/agent-runtime.ts(108,71): error TS2353: Object literal may only specify known properties, and 'input' does not exist in type 'ToolCall'.
+src/agent-runtime.ts(141,9): error TS2353: Object literal may only specify known properties, and 'result' does not exist in type 'AgentResult'.
+src/agent-runtime.ts(147,7): error TS2739: Type '{ success: boolean; steps: number; duration: number; lifecycle: string[]; scratchpad: unknown[]; result?: string | undefined; error?: string | undefined; }' is missing the following properties from type 'AgentResult': output, artifacts, evaluation
+src/agent-runtime.ts(153,9): error TS2353: Object literal may only specify known properties, and 'error' does not exist in type 'AgentResult'.
+src/agent-runtime.ts(186,54): error TS2345: Argument of type '{ tool: string; input: Record<string, unknown>; }' is not assignable to parameter of type 'ToolCall'.
+  Property 'params' is missing in type '{ tool: string; input: Record<string, unknown>; }' but required in type 'ToolCall'.
+src/consolidate.ts(1,29): error TS2307: Cannot find module './breadcrumbs' or its corresponding type declarations.
+src/consolidate.ts(27,35): error TS2307: Cannot find module './navigator' or its corresponding type declarations.
+src/consolidate.ts(28,38): error TS2307: Cannot find module './orchestrator' or its corresponding type declarations.
+src/core/bus.ts(4,20): error TS2307: Cannot find module './storage' or its corresponding type declarations.
+src/core/config.ts(12,12): error TS2554: Expected 2-3 arguments, but got 1.
+src/core/orchestrator.ts(2,28): error TS2307: Cannot find module './hints' or its corresponding type declarations.
+src/core/orchestrator.ts(3,37): error TS2307: Cannot find module './navigator' or its corresponding type declarations.
+src/core/orchestrator.ts(4,37): error TS2307: Cannot find module './storage' or its corresponding type declarations.
+src/core/orchestrator.ts(57,35): error TS7006: Parameter 'acc' implicitly has an 'any' type.
+src/core/orchestrator.ts(57,40): error TS7006: Parameter 'h' implicitly has an 'any' type.
+src/core/orchestrator.ts(58,39): error TS7006: Parameter 'h' implicitly has an 'any' type.
+src/gateway.ts(6,44): error TS2307: Cannot find module './llm-provider' or its corresponding type declarations.
+src/gateway.ts(102,31): error TS2339: Property 'result' does not exist on type 'AgentResult'.
+src/gateway.ts(117,50): error TS2339: Property 'result' does not exist on type 'AgentResult'.
+src/gateway.ts(118,88): error TS2339: Property 'result' does not exist on type 'AgentResult'.
+src/gateway.ts(134,31): error TS2339: Property 'result' does not exist on type 'AgentResult'.
+src/memory/breadcrumbs.ts(2,28): error TS2307: Cannot find module './bus' or its corresponding type declarations.
+src/memory/hints.ts(2,22): error TS2307: Cannot find module '../../../core/storage/keys' or its corresponding type declarations.
+src/memory/hints.ts(4,28): error TS2307: Cannot find module './bus' or its corresponding type declarations.
+src/navigation/navigator.ts(1,29): error TS2307: Cannot find module './breadcrumbs' or its corresponding type declarations.
+src/tests/architectural/react-loop.test.ts(25,19): error TS2339: Property 'result' does not exist on type 'AgentResult'.
+src/tests/architectural/react-loop.test.ts(26,19): error TS2339: Property 'steps' does not exist on type 'AgentResult'.
+src/tests/architectural/react-loop.test.ts(27,19): error TS2339: Property 'lifecycle' does not exist on type 'AgentResult'.
+src/tests/architectural/react-loop.test.ts(28,19): error TS2339: Property 'lifecycle' does not exist on type 'AgentResult'.
+src/tests/architectural/react-loop.test.ts(29,19): error TS2339: Property 'lifecycle' does not exist on type 'AgentResult'.
+src/tests/architectural/react-loop.test.ts(56,19): error TS2339: Property 'steps' does not exist on type 'AgentResult'.
+src/tests/resonance-test.ts(13,7): error TS2339: Property 'subscribe' does not exist on type 'Bus'.
+src/tests/resonance-test.ts(13,30): error TS7006: Parameter 'pulse' implicitly has an 'any' type.
+src/wikibrain/SemanticIndex.ts(6,20): error TS2307: Cannot find module '../storage' or its corresponding type declarations.
+src/wikibrain/SemanticIndex.ts(92,30): error TS7006: Parameter 'k' implicitly has an 'any' type.
+src/wikibrain/SemanticIndex.ts(123,30): error TS7006: Parameter 'k' implicitly has an 'any' type.
+src/wikibrain/wisdom-extractor.ts(7,20): error TS2307: Cannot find module '../storage' or its corresponding type declarations.

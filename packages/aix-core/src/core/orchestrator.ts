@@ -1,7 +1,8 @@
 import { bus, RINGS } from './bus';
-import { AgentHints } from './hints';
-import { StructuralNavigator } from './navigator';
-import { StorageOrchestrator } from './storage';
+import { SovereignHintSystem as AgentHints } from '../memory/hints';
+import { AIXNavigator as StructuralNavigator } from '../navigation/navigator';
+import { StorageOrchestrator } from '../memory/storage';
+import { SovereignHealthService } from '../health';
 
 /**
  * 🌌 AIX Sovereign Orchestrator (v1.0)
@@ -54,8 +55,8 @@ export class AIXOrchestrator {
     const hints = await AgentHints.getHints(filePath);
     if (hints.length === 0) return 3; // Neutral risk for new areas
 
-    const avgLoad = hints.reduce((acc, h) => acc + h.epistemicLoad, 0) / hints.length;
-    const failureHints = hints.filter(h => h.content.toLowerCase().includes('fail') || h.type === 'warning').length;
+    const avgLoad = hints.reduce((acc: number, h: { epistemicLoad: number }) => acc + h.epistemicLoad, 0) / hints.length;
+    const failureHints = hints.filter((h: { content: string, type: string }) => h.content.toLowerCase().includes('fail') || h.type === 'warning').length;
     
     return Math.min(10, avgLoad + (failureHints * 2));
   }

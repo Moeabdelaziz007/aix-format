@@ -23,33 +23,6 @@ export const AgentTaskSchema = z.object({
   maxSteps: z.number().int().positive().default(7),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
-
-export interface ScratchpadEntry {
-  thought: string;
-  action: string | null;
-  observation: string;
-}
-
-export interface AgentResult {
-  success: boolean;
-  output: string;
-  artifacts: string[];
-  evaluation: {
-    understanding: number;
-    correctness: number;
-    overall: number;
-  };
-}
-
-export interface AgentRuntime {
-  agentId: string;
-  agentName: string;
-  taskId: string;
-  step: number;
-  scratchpad: ScratchpadEntry[];
-  status: 'INIT' | 'VALIDATE' | 'PLAN' | 'EXECUTE' | 'STORE' | 'AUDIT';
-  startTime: number;
-}
 export type AgentTask = z.infer<typeof AgentTaskSchema>;
 
 export const AgentResultSchema = z.object({
@@ -60,6 +33,14 @@ export const AgentResultSchema = z.object({
   duration: z.number(),
   lifecycle: z.array(z.string()),
   scratchpad: z.array(z.unknown()),
+  artifacts: z.array(z.string()).default([]),
+  evaluation: z.object({
+    understanding: z.number(),
+    correctness: z.number(),
+    creativity: z.number(),
+    safety: z.number(),
+    overall: z.number()
+  }).optional(),
 });
 export type AgentResult = z.infer<typeof AgentResultSchema>;
 
@@ -78,6 +59,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
   private scratchpad: ScratchEntry[] = [];
   private step = 0;
   private lifecycleStages: string[] = [];
+  private lastEvaluation?: AgentResult['evaluation'];
 
   constructor(
     private agentId: string,
@@ -105,7 +87,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
 
       // 2. VALIDATE (mcp-gate)
       this.recordStage('VALIDATE');
-      await MCPGate.checkClearance(this.agentId, { tool: 'agent:run', input: { taskId: task.taskId } });
+      await MCPGate.checkClearance(this.agentId, { tool: 'agent:run', params: { taskId: task.taskId } });
 
       // 3. PLAN (llm-provider)
       this.recordStage('PLAN');
@@ -142,7 +124,9 @@ export class AgentRuntimeEngine extends SovereignEntity {
         steps: this.step,
         duration: Date.now() - startTime,
         lifecycle: this.lifecycleStages,
-        scratchpad: this.scratchpad
+        scratchpad: this.scratchpad,
+        artifacts: [],
+        evaluation: this.lastEvaluation
       };
       return AgentResultSchema.parse(result);
 
@@ -183,7 +167,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
           // FIX: SafeActionSchema replaces z.any() — prevents prompt injection
           const action: SafeAction = SafeActionSchema.parse(actionJson);
 
-          await MCPGate.checkClearance(this.agentId, action);
+          await MCPGate.checkClearance(this.agentId, { tool: action.tool, params: action.input });
 
           const tool = this.tools[action.tool];
           const rawObs = tool
@@ -252,6 +236,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
         reflection: parsed.reflection ?? { strengths: [], weaknesses: [], newToolsUsed: [], risksIdentified: [] },
         improvementPlan: parsed.improvementPlan ?? { stop: '', continue: '', try: '' }
       };
+      this.lastEvaluation = record.evaluation;
       await AgentSelfReview.store(record);
     } catch {
       // Non-critical: storage failure doesn't break agent
