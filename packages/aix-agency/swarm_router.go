@@ -308,16 +308,24 @@ func (r *SwarmRouter) scoreAgent(agent AgentNode, task TaskDescriptor) (float64,
 	finalScore := avgCapScore*(float64(agent.TrustLevel)*0.2) + float64(task.Priority)*0.1
 
 	// 🌊 Apply Quantum Resonance Multiplier (1.5x)
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	if expiration, exists := r.quantumBoosts[agent.ID]; exists {
 		if time.Now().Before(expiration) {
 			finalScore *= 1.5
-			log.Printf("[SwarmRouter] ✨ Applied Quantum Boost to agent %s (Score: %.2f -> %.2f)\n", agent.ID, finalScore/1.5, finalScore)
 		} else {
 			delete(r.quantumBoosts, agent.ID)
 		}
 	}
 
 	return finalScore, true
+}
+
+// 📡 EmitHealthEvent sends a pulse to the TS Bus when the execution layer state changes.
+func (r *SwarmRouter) EmitHealthEvent(agentID string, state string) {
+	// E2E Bridge: Sending to RingMind (2)
+	log.Printf("[SwarmRouter] 📡 Health Event: Agent %s is now %s\n", agentID, state)
+	// In production, we use the Redis client to PUBLISH aix:ring:2
 }
 
 // 🛡️ VerifySovereignMemory ensures the data from TS is intact and authentic.

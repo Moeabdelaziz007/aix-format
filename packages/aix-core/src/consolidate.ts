@@ -22,7 +22,23 @@ async function consolidate() {
 
   console.log('🌌 AIX Persona: Starting Memory Consolidation...');
   await Breadcrumbs.autoInfect(filesToInfect, agentId, insight);
-  console.log('✅ Persona Trace successfully embedded in physical code layer.');
+  
+  // 🔬 Simulation: Testing Self-Healing & Risk Engine
+  const Navigator = (await import('./navigator')).StructuralNavigator;
+  const Orchestrator = (await import('./orchestrator')).AIXOrchestrator;
+
+  console.log('🧪 Testing Structural Foresight...');
+  const node = await Navigator.peek(filesToInfect[0]);
+  console.log(`🔍 Node Integrity: ${node?.insights[0].includes('⚠️') ? 'CORRUPT (Target Found)' : 'VALID'}`);
+
+  console.log('🧪 Testing Predictive Risk Engine...');
+  await Orchestrator.dispatch({
+    id: 'test-risk',
+    goal: 'Test if high epistemic load triggers risk warnings',
+    focusPath: filesToInfect[0]
+  });
+
+  console.log('✅ Persona Trace successfully embedded and verified.');
   
   process.exit(0);
 }

@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import * as crypto from 'crypto';
 
 /**
  * 🗄️ SOVEREIGN_STORAGE
@@ -142,10 +143,36 @@ export class StorageOrchestrator {
       return JSON.parse(decompressed);
     }
 
+    // Vault Decryption Check
+    if (raw.startsWith('vault:')) {
+       return JSON.parse(this.decryptVault(raw.slice(6))) as T;
+    }
+
     try {
       return typeof raw === 'string' ? JSON.parse(raw) : raw;
     } catch {
       return raw as any;
     }
+  }
+
+  /**
+   * 🔐 Encrypts sensitive data using the Sovereign DNA secret.
+   */
+  private encryptVault(text: string): string {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from('aix_dna_secret_2026_32_bytes_len_'), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return iv.toString('hex') + ':' + encrypted.toString('hex');
+  }
+
+  private decryptVault(text: string): string {
+    const textParts = text.split(':');
+    const iv = Buffer.from(textParts.shift()!, 'hex');
+    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from('aix_dna_secret_2026_32_bytes_len_'), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
   }
 }

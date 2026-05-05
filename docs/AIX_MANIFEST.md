@@ -1,5 +1,5 @@
 # ╔══════════════════════════════════════════════════════════════════╗
-# ║          CLAUDE MANIFEST — AIX v1.3 — TRIPLE THREAT STACK       ║
+# ║          AIX MANIFEST — AIX v1.3 — TRIPLE THREAT STACK       ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 ## 🏗️ Architecture: The Triple Threat Stack
