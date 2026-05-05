@@ -35,149 +35,116 @@ function toSetOptions(options?: StorageOptions): SetCommandOptions | undefined {
   return opts as SetCommandOptions;
 }
 
-class UpstashRedisAdapter implements StorageAdapter {
-  private client: Redis;
-  private isConnected: boolean = false;
-  private readonly RETRY_BASE_DELAY_MS = 100; // Base delay for exponential backoff
+class LocalFileAdapter implements StorageAdapter {
+  private baseDir = '/Users/cryptojoker710/Desktop/aix-format/.storage';
+  private fs: any;
+  private path: any;
 
   constructor() {
-    const url = process.env.UPSTASH_REDIS_REST_URL;
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-    if (!url || !token) {
-      this.client = new Redis({ url: 'http://localhost', token: 'mock' });
-      this.isConnected = false;
-    } else {
-      this.client = new Redis({ url, token });
-      this.isConnected = true;
+    this.fs = require('fs');
+    this.path = require('path');
+    if (!this.fs.existsSync(this.baseDir)) {
+      this.fs.mkdirSync(this.baseDir, { recursive: true });
     }
   }
 
-  private checkConnection() {
-    if (!this.isConnected) {
-      throw new Error('[Storage] Connection not initialized. Check environment variables.');
-    }
-  }
-
-  private async withRetry<T>(operation: () => Promise<T>, label: string, key: string, retries: number = 2): Promise<T | null> {
-    let attempt = 0;
-    while (attempt <= retries) {
-      try {
-        this.checkConnection();
-        return await operation();
-      } catch (error) {
-        attempt++;
-        if (attempt > retries) {
-          return null;
-        }
-        await new Promise(resolve => setTimeout(resolve, this.RETRY_BASE_DELAY_MS * attempt));
-      }
-    }
-    return null;
+  private getPath(key: string) {
+    const safeKey = key.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    return this.path.join(this.baseDir, `${safeKey}.json`);
   }
 
   async get<T>(key: string): Promise<T | null> {
-    return this.withRetry(() => this.client.get<T>(key), 'GET', key);
+    const p = this.getPath(key);
+    if (!this.fs.existsSync(p)) return null;
+    try {
+      return JSON.parse(this.fs.readFileSync(p, 'utf8'));
+    } catch { return null; }
   }
 
-  async set(key: string, value: unknown, options?: StorageOptions): Promise<void> {
-    const upstashOpts = toSetOptions(options);
-    const success = await this.withRetry(async () => {
-      if (upstashOpts) {
-        await this.client.set(key, value, upstashOpts);
-      } else {
-        await this.client.set(key, value);
-      }
-      return true;
-    }, 'SET', key);
-
-    if (!success) {
-      throw new Error('[Storage] Persistent write failed - connection timeout');
-    }
+  async set(key: string, value: any): Promise<void> {
+    this.fs.writeFileSync(this.getPath(key), JSON.stringify(value), 'utf8');
   }
 
   async del(key: string | string[]): Promise<void> {
-    try {
-      this.checkConnection();
-      await this.client.del(...(Array.isArray(key) ? key : [key]));
-    } catch (error) {
-      console.error('[Storage] DEL operation failed:', error instanceof Error ? error.message : 'Unknown error');
-      throw error;
-    }
+    const keys = Array.isArray(key) ? key : [key];
+    keys.forEach(k => {
+      const p = this.getPath(k);
+      if (this.fs.existsSync(p)) this.fs.unlinkSync(p);
+    });
   }
 
   async incr(key: string): Promise<number> {
-    try {
-      this.checkConnection();
-      return await this.client.incr(key);
-    } catch (error) {
-      throw error;
-    }
+    const val = (await this.get<number>(key) || 0) + 1;
+    await this.set(key, val);
+    return val;
   }
 
   async decr(key: string): Promise<number> {
-    try {
-      this.checkConnection();
-      return await this.client.decr(key);
-    } catch (error) {
-      throw error;
-    }
+    const val = (await this.get<number>(key) || 0) - 1;
+    await this.set(key, val);
+    return val;
   }
 
-  async expire(key: string, seconds: number): Promise<void> {
-    try {
-      this.checkConnection();
-      await this.client.expire(key, seconds);
-    } catch (error) {
-      console.error('[Storage] EXPIRE operation failed:', error instanceof Error ? error.message : 'Unknown error');
-      throw error;
-    }
+  async expire() {}
+  async exists(key: string) { return this.fs.existsSync(this.getPath(key)); }
+  async lpush(key: string, value: any) {
+    const list = await this.get<any[]>(key) || [];
+    list.unshift(value);
+    await this.set(key, list);
+    return list.length;
   }
-
-  async exists(key: string): Promise<boolean> {
-    try {
-      this.checkConnection();
-      const count = await this.client.exists(key);
-      return count > 0;
-    } catch (error) {
-      return false;
-    }
+  async lrange<T>(key: string, start: number, stop: number) {
+    const list = await this.get<T[]>(key) || [];
+    return list.slice(start, stop === -1 ? undefined : stop + 1);
   }
-
-  async lpush(key: string, value: any): Promise<number> {
-    return this.withRetry(() => this.client.lpush(key, value), 'LPUSH', key) as any;
+  async ltrim(key: string, start: number, stop: number) {
+    const list = await this.get<any[]>(key) || [];
+    await this.set(key, list.slice(start, stop === -1 ? undefined : stop + 1));
   }
-
-  async lrange<T>(key: string, start: number, stop: number): Promise<T[]> {
-    return (await this.withRetry(() => this.client.lrange<T>(key, start, stop), 'LRANGE', key)) || [];
+  async sadd(key: string, ...members: any[]) {
+    const set = new Set(await this.get<any[]>(key) || []);
+    members.forEach(m => set.add(m));
+    await this.set(key, Array.from(set));
+    return set.size;
   }
-
-  async ltrim(key: string, start: number, stop: number): Promise<void> {
-    await this.withRetry(() => this.client.ltrim(key, start, stop), 'LTRIM', key);
+  async srem(key: string, ...members: any[]) {
+    const set = new Set(await this.get<any[]>(key) || []);
+    members.forEach(m => set.delete(m));
+    await this.set(key, Array.from(set));
+    return set.size;
   }
-
-  async sadd(key: string, ...members: any[]): Promise<number> {
-    const result = await this.withRetry(() => this.client.sadd(key, ...(members as [any, ...any[]])), 'SADD', key);
-    // Safe integer conversion - Redis returns integers within safe range
-    return typeof result === 'number' ? result : Number(result) || 0;
-  }
-
-  async srem(key: string, ...members: any[]): Promise<number> {
-    const result = await this.withRetry(() => this.client.srem(key, ...(members as [any, ...any[]])), 'SREM', key);
-    // Safe integer conversion - Redis returns integers within safe range
-    return typeof result === 'number' ? result : Number(result) || 0;
-  }
-
-  async smembers<T = any>(key: string): Promise<T[]> {
-    const result = await this.withRetry(() => this.client.smembers(key), 'SMEMBERS', key);
-    return (result as T[]) || [];
-  }
-
-  async mget<T = any>(...keys: string[]): Promise<(T | null)[]> {
-    if (keys.length === 0) return [];
-    const result = await this.withRetry(() => this.client.mget(...keys), 'MGET', keys[0]);
-    return (result as (T | null)[]) || keys.map(() => null);
-  }
+  async smembers<T>(key: string) { return await this.get<T[]>(key) || []; }
+  async mget<T>(...keys: string[]) { return Promise.all(keys.map(k => this.get<T>(k))); }
 }
 
-export const kv = new UpstashRedisAdapter();
+class StorageOrchestrator implements StorageAdapter {
+  private redis: UpstashRedisAdapter;
+  private local: LocalFileAdapter;
+
+  constructor() {
+    this.redis = new UpstashRedisAdapter();
+    this.local = new LocalFileAdapter();
+  }
+
+  private get active(): StorageAdapter {
+    // @ts-ignore
+    return this.redis.isConnected ? this.redis : this.local;
+  }
+
+  get<T>(key: string) { return this.active.get<T>(key); }
+  set(key: string, value: any, options?: StorageOptions) { return this.active.set(key, value, options); }
+  del(key: string | string[]) { return this.active.del(key); }
+  incr(key: string) { return this.active.incr(key); }
+  decr(key: string) { return this.active.decr(key); }
+  expire(key: string, seconds: number) { return this.active.expire(key, seconds); }
+  exists(key: string) { return this.active.exists(key); }
+  lpush(key: string, value: any) { return this.active.lpush(key, value); }
+  lrange<T>(key: string, start: number, stop: number) { return this.active.lrange<T>(key, start, stop); }
+  ltrim(key: string, start: number, stop: number) { return this.active.ltrim(key, start, stop); }
+  sadd(key: string, ...members: any[]) { return this.active.sadd(key, ...members); }
+  srem(key: string, ...members: any[]) { return this.active.srem(key, ...members); }
+  smembers<T>(key: string) { return this.active.smembers<T>(key); }
+  mget<T>(...keys: string[]) { return this.active.mget<T>(...keys); }
+}
+
+export const kv = new StorageOrchestrator();

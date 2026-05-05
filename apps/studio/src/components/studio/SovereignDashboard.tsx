@@ -85,22 +85,18 @@ export const SovereignDashboard = () => {
           </div>
         </motion.div>
 
-        {/* ⚙️ Gearbox Card */}
+        {/* 🌀 Rounds Card */}
         <motion.div 
           whileHover={{ scale: 1.02 }}
           className="bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10"
         >
-          <h2 className="text-white/60 text-xs font-bold uppercase mb-4">Operational Gear</h2>
-          <div className="flex gap-2 mt-4">
-             {['TURBO', 'SOVEREIGN'].map(g => (
-               <button 
-                 key={g}
-                 onClick={() => setGear(g as any)}
-                 className={`flex-1 py-4 rounded-2xl font-bold text-xs transition-all ${gear === g ? 'bg-white text-black' : 'bg-white/5 text-white/40'}`}
-               >
-                 {g}
-               </button>
-             ))}
+          <h2 className="text-white/60 text-xs font-bold uppercase mb-4">Sovereign Rounds</h2>
+          <div className="flex items-baseline gap-2">
+            <span className="text-6xl font-black text-[#ff3e00]">{data.currentRound || 0}</span>
+            <span className="text-white/20 font-bold">/ 69</span>
+          </div>
+          <div className="text-[10px] text-white/40 mt-4 uppercase tracking-widest font-mono">
+            Protocol: Sovereign Stress Test 
           </div>
         </motion.div>
 

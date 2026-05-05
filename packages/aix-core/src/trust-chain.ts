@@ -249,11 +249,16 @@ export class TrustChain {
   /**
    * Verify proof of work (PoW)
    */
-  async verifyPoW(agentId: string, nonce: number, difficulty: number): Promise<boolean> {
-    const data = `${agentId}:${nonce}`;
-    const hash = this.generateHash(data);
+  async verifyPoW(agentId: string, nonce: number, difficulty: number, data: string): Promise<boolean> {
+    const payload = `${agentId}:${nonce}:${data}`;
+    const hash = createHash('sha256').update(payload).digest('hex');
     const prefix = '0'.repeat(difficulty);
-    return hash.startsWith(prefix);
+    const isValid = hash.startsWith(prefix);
+    
+    if (isValid) {
+      console.log(`✅ [TrustChain:PoW] Verified challenge (Diff: ${difficulty}) for ${agentId}`);
+    }
+    return isValid;
   }
 
   /**

@@ -16,15 +16,20 @@ export async function GET(req: NextRequest) {
   // Real health calculation based on topology score and recent trust chain events
   const health = topologyStatus.score;
   
-  // Simulation of pulling from TrustChain (Real implementation would use getTrustChain().getRecentEvents())
-  const auditTrail = [
-    { time: new Date().toLocaleTimeString(), event: 'TOPOLOGY_SCAN_COMPLETED', level: health === 100 ? 'success' : 'warning' },
-    { time: new Date().toLocaleTimeString(), event: `SHA256_HASH: ${topologyStatus.hash.slice(0, 8)}...`, level: 'info' }
-  ];
+  const trustChain = (await import('../../../../../../packages/aix-core/src/trust-chain')).getTrustChain();
+  const actions = await trustChain.getActions('SOV-AGENT-001', 50);
+  const currentRound = actions.filter(a => a.action.startsWith('SOV_ROUND_COMPLETE')).length;
+
+  const auditTrail = actions.map(a => ({
+    time: new Date(a.timestamp).toLocaleTimeString(),
+    event: a.action,
+    level: a.action.includes('ERROR') ? 'warning' : 'success'
+  }));
 
   return NextResponse.json({
     health,
     gear: gateway.getSovereignGear('general'),
+    currentRound,
     auditTrail,
     timestamp: new Date().toISOString()
   });

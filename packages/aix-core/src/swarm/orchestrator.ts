@@ -22,10 +22,14 @@ export class PulseOrchestrator {
    * 📡 PREDICTIVE SWARM RADAR (Round 56)
    * Scans for cognitive drift before pulse execution.
    */
-  public predictSwarmFailure(manifest: AIXManifest): boolean {
+  public async predictSwarmFailure(manifest: AIXManifest): Promise<boolean> {
     if (!manifest.topological_integrity) return true; // High risk if missing integrity
-    // Logic to compare current hash with expected
-    return false; 
+    
+    const gateway = new Gateway();
+    const topology = await gateway.verifyTopology(manifest.did);
+    
+    // If structural integrity score < 90, predict failure
+    return topology.score < 90;
   }
 
   async executePulse(process: GatewayProcess, manifest: AIXManifest) {

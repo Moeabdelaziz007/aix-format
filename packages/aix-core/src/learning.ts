@@ -42,9 +42,8 @@ export async function recordSuccessfulProcedure(
   const existingPatterns = await semanticSearch(goal, 1, { type: 'skill' });
   const similarity = existingPatterns.results[0]?.score || 0;
 
-  // 2. Append to TrustChain (RULE 3)
   const trustChain = getTrustChain();
-  const auditHash = await trustChain.append(agentId, 'SKILL_LEARNED', { goal, stepCount: steps.length });
+  const auditHash = await trustChain.append('SKILL_LEARNED', agentId, { goal, stepCount: steps.length });
 
   const procedure: LearnedProcedure = {
     goal,
@@ -83,7 +82,7 @@ export async function extractSkillFromFeedback(
 
   const detailKey = KEYS.agentSkillDetail(agentId, hash);
   const trustChain = getTrustChain();
-  const auditHash = await trustChain.append(agentId, 'FEEDBACK_SKILL_SAVED', { hash });
+  const auditHash = await trustChain.append('FEEDBACK_SKILL_SAVED', agentId, { hash });
 
   const skill = {
     prompt,

@@ -143,7 +143,7 @@ export class AgentRuntimeEngine {
         result = await this.fullReActLoop(task);
       } catch (error) {
         // Creative Pattern: Failure Recovery & Up-routing (Proactive Evolution)
-        if (model.includes('8b') && task.complexity > 0.4) {
+        if (this.llm.model.includes('8b') && task.complexity > 0.4) {
           await this.emitState('agent:escalating', `Task failed with 8B, escalating to 70B for complexity ${task.complexity}`);
           this.llm.model = 'groq:llama-3.3-70b-versatile';
           result = await this.fullReActLoop(task);
@@ -365,7 +365,10 @@ export class AgentRuntimeEngine {
       // 🚀 PREDICTIVE TOOL LOADING (Round 28): Use Acceleration Templates
       const acceleration = this.context?.memories.find(m => m.startsWith('[ACCELERATION_TEMPLATE]'));
       const promptHeader = acceleration ? `\n[SYSTEM_SUGGESTION]: Consider using this proven shortcut: ${acceleration}\n` : '';
+      const prompt = this.buildReActPrompt(task);
       const finalPrompt = `${prompt}${promptHeader}`;
+      
+      let thought = await this.llm.complete(finalPrompt, STOP_TOKENS);
       
       // 🌀 META ALIVE: Quantum Dreaming (Creative Branching)
       if (this.runtime.step > 3 && this.isStuck()) {
@@ -725,9 +728,15 @@ Next Thought: `;
    * Analyzes risk based on historical patterns and current intent.
    */
   private async predictTopologicalFailure(action: ToolCall): Promise<number> {
-    // Logic to compare with Hidden Patterns in SemanticIndex
+    const index = new SemanticIndex();
+    const hiddenPatterns = await index.findHiddenPatterns();
+    
+    // Real check: If current tool matches any hidden failure pattern
+    const patternFound = hiddenPatterns.some(p => p.includes(`Tool "${action.tool}"`));
+    if (patternFound) return 0.9;
+    
     const isCoreModification = action.tool.includes('write_file') && (action.input as any).TargetFile?.includes('gateway.ts');
-    return isCoreModification ? 0.85 : 0.1; // Core modifications without proof are high risk
+    return isCoreModification ? 0.85 : 0.05;
   }
 
   private async handleFailure(task: Task, error: any): Promise<void> {
