@@ -6,14 +6,14 @@
 import { z } from 'zod';
 import { kv, KEYS } from './memory/storage.js';
 import { health } from './health.js';
-import { AgentSelfReview } from './brain.js';
+import { AgentSelfReview } from './AgentSelfReview.js';
 import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm/index.js';
 import { SovereignEntity } from './base.js';
 import { MCPGate } from './mcp-gate.js';
-import { 
-  ScratchEntry, 
+import {
+  ScratchEntry,
   SelfReviewRecord,
-  SelfReviewRecordSchema 
+  SelfReviewRecordSchema
 } from './domain.js';
 
 // --- UNIFIED AGENT INTERFACES ---
@@ -156,7 +156,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
       // HARDENED: Robust Final Answer detection (handles markdown, extra colons, varying case)
       const finalAnswerRegex = /(?:final answer|answer)[:\s*]+([\s\S]+)/i;
       const match = response.match(finalAnswerRegex);
-      
+
       if (match) {
         return match[1].trim();
       }
@@ -238,7 +238,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
         improvementPlan: parsed.improvementPlan ?? { stop: '', continue: '', try: '' }
       };
       this.lastEvaluation = record.evaluation;
-      await AgentSelfReview.store(record);
+      AgentSelfReview.record(record);
     } catch {
       // Non-critical: storage failure doesn't break agent
     }
