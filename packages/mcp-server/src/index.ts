@@ -128,10 +128,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (name === "verify_abom_compliance") {
       const manifestPath = args?.manifestPath as string;
       const content = await fs.readFile(path.resolve(manifestPath), "utf-8");
-      const manifest = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
+      let manifest;
+      try {
+        manifest = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content);
+      } catch (e: any) {
+        throw new Error('Invalid format: ' + e.message);
+      }
       const abom = (manifest as any).abom;
       const traces = (manifest as any).black_box?.traces || [];
-      const isCompliant = abom && traces.length > 0 && traces.every((t: any) => t.signature);
+      const isCompliant = !!(abom && traces.length > 0 && traces.every((t: any) => t.signature));
 
       return {
         content: [
