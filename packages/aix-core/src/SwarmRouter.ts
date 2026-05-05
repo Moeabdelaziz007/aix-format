@@ -1,7 +1,8 @@
-import { z } from 'zod';
-import { CircuitBreaker, CircuitState as CentralCircuitState } from './security/circuit-breaker';
 import { GroqProvider } from './llm-provider';
 import { getTrustChain } from './trust-chain';
+import { SovereignEntity } from './base';
+import { kv } from './storage/adapter';
+import { KEYS } from './storage/keys';
 
 // 1. Zod Schemas for Validation
 export const TaskDescriptorSchema = z.object({
@@ -30,12 +31,13 @@ export const AgentExecutionPlanSchema = z.object({
 export type AgentExecutionPlan = z.infer<typeof AgentExecutionPlanSchema>;
 
 // 2. SwarmRouter Implementation
-export class SwarmRouter {
+export class SwarmRouter extends SovereignEntity {
     private agents: Map<string, AgentNode> = new Map();
     private deadLetterQueue: TaskDescriptor[] = [];
     private breaker: CircuitBreaker;
 
     constructor() {
+        super('SwarmRouter');
         this.breaker = new CircuitBreaker({
             name: 'SwarmRouter',
             failureThreshold: 3,
@@ -122,46 +124,22 @@ export class SwarmRouter {
             const apiKey = process.env.GROQ_API_KEY;
             if (!apiKey) throw new Error('GROQ_API_KEY missing');
 
-            let selectedModel = 'llama-3.1-8b-instant'; // Default small
-            let qualityThreshold = 0.5;
-
-            // 🚀 TURBOQUANT: Performance-Aware Routing
-            // Fetch recent performance patterns to adjust qualityThreshold
-            if (agentId) {
-                try {
-                    const { ReadableMemory } = await import('./memory-readable');
-                    const memoryTree = await ReadableMemory.getMemoryTree(agentId);
-                    const skills = memoryTree.children?.find(c => c.id === 'skills')?.children || [];
-                    
-                    // Simple Quantization: If average skill successCount is high, we can use cheaper models
-                    const avgSuccess = skills.reduce((acc, s) => acc + (s.metadata?.successCount || 0), 0) / (skills.length || 1);
-                    if (avgSuccess > 5 && qualityThreshold > 0.5) {
-                        console.log(`[SwarmRouter:TurboQuant] High competence (${avgSuccess.toFixed(1)}) detected, optimizing for efficiency.`);
-                        qualityThreshold -= 0.1; // Optimization: competent agents need less powerful models
-                    }
-                } catch (e) {
-                    console.warn('⚠️ Performance-aware routing failed, using default mood threshold');
-                }
-            }
-
-            const lowerTask = taskDescription.toLowerCase();
+            let selectedModel = 'llama-3.1-8b-instant';
             
-            // Living Routing Logic based on τ
-            if (qualityThreshold >= 0.7 || lowerTask.includes('analyze') || lowerTask.includes('code')) {
+            // 🚀 TURBOQUANT: Dynamic Complexity Routing
+            const complexity = taskDescription.length > 100 || /analyze|code|complex|reason/i.test(taskDescription) ? 0.8 : 0.3;
+            
+            if (complexity >= 0.7) {
                 selectedModel = 'llama-3.3-70b-versatile';
-            } else if (qualityThreshold <= 0.2) {
-                selectedModel = 'llama-3.1-8b-instant'; // Forced economy mode
             }
 
-            const llm = new GroqProvider(apiKey, selectedModel);
-            
-            // Log decision to TrustChain (RULE 3)
-            const trustChain = getTrustChain();
-            await trustChain.append('ROUTING_DECISION', agentId || 'swarm-router', {
-                task: taskDescription,
+            await this.emitState('router:decision', `Routing task to ${selectedModel} based on complexity ${complexity}`);
+
+            // Log to TrustChain (RULE 3)
+            await getTrustChain().append('ROUTING_DECISION', agentId || 'swarm-router', {
+                task: taskDescription.slice(0, 100),
                 model: selectedModel,
-                qualityThreshold,
-                timestamp: Date.now()
+                complexity
             });
 
             return selectedModel;

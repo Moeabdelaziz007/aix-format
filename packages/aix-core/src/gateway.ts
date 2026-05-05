@@ -471,6 +471,11 @@ export class Gateway extends EventEmitter {
    * ⚙️ SOVEREIGN GEARBOX (Round 49)
    * Decides operational speed vs security depth.
    */
+  public getSovereignGear(taskType: string): 'SOVEREIGN' | 'TURBO' {
+    const sensitiveTasks = ['security', 'audit', 'payment', 'credentials'];
+    return sensitiveTasks.some(t => taskType.toLowerCase().includes(t)) ? 'SOVEREIGN' : 'TURBO';
+  }
+
   /**
    * 🩹 SOVEREIGN SELF-HEALING (Round 53)
    * Monitors and repairs critical sovereign paths.
@@ -513,10 +518,6 @@ export class Gateway extends EventEmitter {
 
   private validateSignature(sig: string, publicKey: string, data: any): boolean {
     return cryptoVerify(data, sig, publicKey);
-  }
-    const sensitiveTasks = ['security', 'audit', 'payment', 'credentials'];
-    return sensitiveTasks.some(t => taskType.toLowerCase().includes(t)) ? 'SOVEREIGN' : 'TURBO';
-  }
 
   private async archiveWisdom(agentId: string, input: any, output: string) {
     try {

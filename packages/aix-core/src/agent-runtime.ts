@@ -14,11 +14,8 @@
 import { z } from 'zod';
 import { kv } from './storage/adapter';
 import { KEYS } from './storage/keys';
-import { getBus } from './bus';
 import { getTrustChain } from './trust-chain';
-import { ReadableMemory } from './memory-readable';
 import { AgentRuntimeConfig, LLMProvider, ToolRegistry } from './llm-provider';
-import { CircuitBreakers } from '@/lib/security-core';
 import { searchTavily } from './tools/search-tavily';
 import { AgentSelfReview, SelfReviewRecord } from './meta-self-review';
 import { PetOrchestrator, getDynamicConstraints } from './pets';
