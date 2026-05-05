@@ -34,7 +34,7 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Check if required files exist
-GO_FILE="swarm_router.go"
+GO_FILE="packages/aix-agency/swarm_router.go"
 TS_FILE="packages/aix-core/src/SwarmRouter.ts"
 TEST_FILE="tests/swarm-router-sync.test.ts"
 
