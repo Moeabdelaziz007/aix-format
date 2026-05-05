@@ -180,10 +180,12 @@ export class WatcherAgent {
     let flaggedCount = 0;
     let condemnedCount = 0;
 
-    for (const key of scoreKeys) {
-      const agentId = key.replace('watcher:', '');
-      const verdict = await this.getVerdict(agentId);
-      
+    const verdicts = await Promise.all(scoreKeys.map(k => {
+      const agentId = k.replace('watcher:', '');
+      return this.getVerdict(agentId);
+    }));
+
+    for (const verdict of verdicts) {
       totalScore += verdict.score;
       totalKarma += verdict.karma;
       

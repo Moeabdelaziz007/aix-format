@@ -22,6 +22,7 @@ export interface PulseEvent {
 
 export class PulseEngine {
   private static GLOBAL_PULSE_KEY = 'aix:pulse:global';
+  private static listeners: ((event: PulseEvent) => void | Promise<void>)[] = [];
 
   /**
    * Records a live event to the global pulse stream.
@@ -34,9 +35,27 @@ export class PulseEngine {
     };
 
     // Push to global list, keep last 100 events
-    await kv.lpush(this.GLOBAL_PULSE_KEY, fullEvent);
-    await kv.ltrim(this.GLOBAL_PULSE_KEY, 0, 99);
+    // Proactive: Use fire-and-forget for persistence to avoid blocking the main flow
+    kv.lpush(this.GLOBAL_PULSE_KEY, fullEvent).then(() => {
+        kv.ltrim(this.GLOBAL_PULSE_KEY, 0, 99);
+    });
 
+    // Notify listeners asynchronously
+    this.listeners.forEach(l => {
+        try {
+            const res = l(fullEvent);
+            if (res instanceof Promise) res.catch(e => console.error(`[Pulse:Listener] Error:`, e));
+        } catch (e) {
+            console.error(`[Pulse:Listener] Error:`, e);
+        }
+    });
+  }
+
+  /**
+   * Register a listener for all pulse events.
+   */
+  static onEvent(handler: (event: PulseEvent) => void | Promise<void>): void {
+    this.listeners.push(handler);
   }
 
   /**

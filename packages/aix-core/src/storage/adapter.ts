@@ -131,7 +131,10 @@ class StorageOrchestrator implements StorageAdapter {
     return this.redis.isConnected ? this.redis : this.local;
   }
 
-  private compress(value: any): any {
+  private compress(key: string, value: any): any {
+    // Skip compression for small, high-frequency keys
+    if (key.includes('pulse') || key.includes('bus')) return value;
+
     const str = JSON.stringify(value);
     if (str.length > 2048) {
       const compressed = gzipSync(Buffer.from(str)).toString('base64');
@@ -141,8 +144,8 @@ class StorageOrchestrator implements StorageAdapter {
   }
 
   private decompress(value: any): any {
-    if (value && typeof value === 'object' && value.__compressed) {
-      const decompressed = gunzipSync(Buffer.from(value.data, 'base64')).toString();
+    if (value && typeof value === 'object' && (value as any).__compressed) {
+      const decompressed = gunzipSync(Buffer.from((value as any).data, 'base64')).toString();
       return JSON.parse(decompressed);
     }
     return value;
@@ -154,7 +157,7 @@ class StorageOrchestrator implements StorageAdapter {
   }
 
   async set(key: string, value: any, options?: StorageOptions) {
-    const finalValue = this.compress(value);
+    const finalValue = this.compress(key, value);
     return this.active.set(key, finalValue, options);
   }
 
@@ -165,7 +168,7 @@ class StorageOrchestrator implements StorageAdapter {
   async exists(key: string) { return this.active.exists(key); }
   
   async lpush(key: string, value: any) { 
-    return this.active.lpush(key, this.compress(value)); 
+    return this.active.lpush(key, this.compress(key, value)); 
   }
   
   async lrange<T>(key: string, start: number, stop: number) {
@@ -174,7 +177,9 @@ class StorageOrchestrator implements StorageAdapter {
   }
 
   async ltrim(key: string, start: number, stop: number) { return this.active.ltrim(key, start, stop); }
-  async sadd(key: string, ...members: any[]) { return this.active.sadd(key, ...members.map(m => this.compress(m))); }
+  async sadd(key: string, ...members: any[]) { 
+    return this.active.sadd(key, ...members.map(m => this.compress(key, m))); 
+  }
   async srem(key: string, ...members: any[]) { return this.active.srem(key, ...members); }
   async smembers<T>(key: string) { 
     const data = await this.active.smembers<any>(key);

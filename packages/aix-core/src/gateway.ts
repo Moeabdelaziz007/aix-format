@@ -518,6 +518,7 @@ export class Gateway extends EventEmitter {
 
   private validateSignature(sig: string, publicKey: string, data: any): boolean {
     return cryptoVerify(data, sig, publicKey);
+  }
 
   private async archiveWisdom(agentId: string, input: any, output: string) {
     try {
