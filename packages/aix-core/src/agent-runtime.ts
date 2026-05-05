@@ -21,7 +21,7 @@ export const AgentTaskSchema = z.object({
   taskId: z.string().min(1),
   description: z.string().min(5),
   maxSteps: z.number().int().positive().default(7),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type AgentTask = z.infer<typeof AgentTaskSchema>;
 
@@ -32,9 +32,20 @@ export const AgentResultSchema = z.object({
   steps: z.number(),
   duration: z.number(),
   lifecycle: z.array(z.string()),
-  scratchpad: z.array(z.any()),
+  scratchpad: z.array(z.unknown()),
 });
 export type AgentResult = z.infer<typeof AgentResultSchema>;
+
+// Tool input schema — prevents prompt injection via z.any()
+const SafeActionSchema = z.object({
+  tool: z.string().min(1).max(64),
+  input: z.record(z.string(), z.unknown()),
+});
+type SafeAction = z.infer<typeof SafeActionSchema>;
+
+// Max chars per scratchpad entry to prevent token bloat
+const MAX_THOUGHT_CHARS = 300;
+const MAX_OBS_CHARS = 200;
 
 export class AgentRuntimeEngine extends SovereignEntity {
   private scratchpad: ScratchEntry[] = [];
@@ -51,13 +62,13 @@ export class AgentRuntimeEngine extends SovereignEntity {
   }
 
   /**
-   * SOVEREIGN LIFECYCLE: 
+   * SOVEREIGN LIFECYCLE:
    * INIT -> VALIDATE -> PLAN -> EXECUTE -> STORE -> AUDIT
    */
   async run(task: AgentTask): Promise<AgentResult> {
     const startTime = Date.now();
     this.lifecycleStages = [];
-    
+
     try {
       // 1. INIT
       this.recordStage('INIT');
@@ -67,16 +78,15 @@ export class AgentRuntimeEngine extends SovereignEntity {
 
       // 2. VALIDATE (mcp-gate)
       this.recordStage('VALIDATE');
-      // Check clearance for the agent itself before starting
-      await MCPGate.checkClearance(this.agentId, { tool: 'agent:run', params: { task: task.taskId } });
+      await MCPGate.checkClearance(this.agentId, { tool: 'agent:run', input: { taskId: task.taskId } });
 
       // 3. PLAN (llm-provider)
       this.recordStage('PLAN');
-      const planPrompt = `Task: ${task.description}\n\nCreate a 3-step strategy to solve this task using available tools. Be concise.`;
+      const planPrompt = `Task: ${task.description}\n\nCreate a concise 3-step strategy using available tools: ${Object.keys(this.tools).join(', ')}`;
       const strategy = await this.llm.complete(planPrompt);
       this.scratchpad.push({
         step: 0,
-        thought: `Strategy: ${strategy}`,
+        thought: strategy.slice(0, MAX_THOUGHT_CHARS),
         observation: 'Plan established.',
         timestamp: Date.now()
       });
@@ -91,14 +101,15 @@ export class AgentRuntimeEngine extends SovereignEntity {
 
       // 6. AUDIT (health)
       this.recordStage('AUDIT');
-      const trustScore = await health.getTrustScore(this.agentId);
-      if (finalOutput.toLowerCase().includes('error') || finalOutput.length < 5) {
+      const hasError = finalOutput.toLowerCase().includes('error') || finalOutput.length < 5;
+      if (hasError) {
         await health.decrementTrust(this.agentId, 0.1);
       } else {
         await health.incrementTrust(this.agentId, 0.05);
       }
 
-      return {
+      // Validate output before returning
+      const result: AgentResult = {
         success: true,
         result: finalOutput,
         steps: this.step,
@@ -106,6 +117,7 @@ export class AgentRuntimeEngine extends SovereignEntity {
         lifecycle: this.lifecycleStages,
         scratchpad: this.scratchpad
       };
+      return AgentResultSchema.parse(result);
 
     } catch (e) {
       this.recordStage('ERROR');
@@ -122,7 +134,6 @@ export class AgentRuntimeEngine extends SovereignEntity {
 
   private recordStage(stage: string) {
     this.lifecycleStages.push(stage);
-    console.log(`[AGENT_LIFECYCLE] ${this.agentId} -> ${stage}`);
   }
 
   private async fullReActLoop(task: AgentTask): Promise<string> {
@@ -130,61 +141,73 @@ export class AgentRuntimeEngine extends SovereignEntity {
       this.step++;
       const prompt = this.buildPrompt(task);
       const response = await this.llm.complete(prompt, ['Observation:']);
-      
-      if (response.toLowerCase().includes('final answer:')) {
-        return response.split(/final answer:/i)[1]?.trim() || response;
+
+      // FIX: case-insensitive + markdown-stripped Final Answer detection
+      const finalAnswerMatch = response.match(/\*{0,2}final answer:\*{0,2}\s*(.+)/i);
+      if (finalAnswerMatch) {
+        return finalAnswerMatch[1].trim();
       }
 
-      const actionMatch = response.match(/Action: (\{.*\})/);
+      const actionMatch = response.match(/Action:\s*(\{[\s\S]*?\})/);
       if (actionMatch) {
         try {
           const actionJson = JSON.parse(actionMatch[1]);
-          const action = z.object({
-            tool: z.string(),
-            input: z.any()
-          }).parse(actionJson);
+          // FIX: SafeActionSchema replaces z.any() — prevents prompt injection
+          const action: SafeAction = SafeActionSchema.parse(actionJson);
 
-          // Validate tool clearance via MCPGate before execution
           await MCPGate.checkClearance(this.agentId, action);
 
           const tool = this.tools[action.tool];
-          const observation = tool ? await tool(action.input) : `Tool ${action.tool} not found.`;
-          
-          this.scratchpad.push({ 
+          const rawObs = tool
+            ? await tool(action.input)
+            : `Tool '${action.tool}' not found. Available: ${Object.keys(this.tools).join(', ')}`;
+
+          this.scratchpad.push({
             step: this.step,
-            thought: response, 
-            action, 
-            observation,
+            thought: response.slice(0, MAX_THOUGHT_CHARS),
+            action,
+            observation: String(rawObs).slice(0, MAX_OBS_CHARS),
             timestamp: Date.now()
           });
         } catch (e) {
           const errorMsg = e instanceof Error ? e.message : 'Unknown';
-          this.scratchpad.push({ 
+          this.scratchpad.push({
             step: this.step,
-            thought: response, 
-            observation: `Security/Validation Error: ${errorMsg}`,
+            thought: response.slice(0, MAX_THOUGHT_CHARS),
+            observation: `Error: ${errorMsg}`.slice(0, MAX_OBS_CHARS),
             timestamp: Date.now()
           });
-          if (errorMsg.includes('Security Violation')) throw e; // Bubble up security violations
+          if (errorMsg.includes('Security Violation')) throw e;
         }
       } else {
-        this.scratchpad.push({ 
+        this.scratchpad.push({
           step: this.step,
-          thought: response, 
+          thought: response.slice(0, MAX_THOUGHT_CHARS),
           observation: 'No action found.',
           timestamp: Date.now()
         });
       }
     }
-    return "Task exceeded step limit.";
+    return 'Task exceeded step limit.';
   }
 
   private async storeExecutionRecord(task: AgentTask, output: string) {
-    const reviewPrompt = `Review output for task: ${task.description}\nOutput: ${output}\nRespond in JSON format with evaluation (0-10) and reflection.`;
+    const reviewPrompt = `Evaluate this output for task: "${task.description}"\nOutput: "${output}"\nRespond ONLY in JSON: {"evaluation": {"understanding": 0-10, "correctness": 0-10, "creativity": 0-10, "safety": 0-10}, "reflection": {"strengths": [], "weaknesses": []}, "improvementPlan": {"stop": "", "continue": "", "try": ""}}`;
     const reviewResponse = await this.llm.complete(reviewPrompt);
-    
+
     try {
       const parsed = JSON.parse(reviewResponse.match(/\{[\s\S]*\}/)?.[0] || '{}');
+      const e = parsed.evaluation ?? {};
+
+      // FIX: overall is calculated — never hardcoded
+      const scores = [
+        Number(e.understanding) || 5,
+        Number(e.correctness) || 5,
+        Number(e.creativity) || 5,
+        Number(e.safety) || 5,
+      ];
+      const overall = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+
       const record: SelfReviewRecord = {
         agentId: this.agentId,
         taskId: task.taskId,
@@ -192,24 +215,28 @@ export class AgentRuntimeEngine extends SovereignEntity {
         taskDescription: task.description,
         output,
         evaluation: {
-          understanding: parsed.evaluation?.understanding || 5,
-          correctness: parsed.evaluation?.correctness || 5,
-          creativity: parsed.evaluation?.creativity || 5,
-          safety: parsed.evaluation?.safety || 5,
-          overall: parsed.evaluation?.overall || 5
+          understanding: scores[0],
+          correctness: scores[1],
+          creativity: scores[2],
+          safety: scores[3],
+          overall,
         },
-        reflection: parsed.reflection || { strengths: [], weaknesses: [], newToolsUsed: [], risksIdentified: [] },
-        improvementPlan: parsed.improvementPlan || { stop: '', continue: '', try: '' }
+        reflection: parsed.reflection ?? { strengths: [], weaknesses: [], newToolsUsed: [], risksIdentified: [] },
+        improvementPlan: parsed.improvementPlan ?? { stop: '', continue: '', try: '' }
       };
       await AgentSelfReview.store(record);
     } catch {
-      // Fallback for failed storage
+      // Non-critical: storage failure doesn't break agent
     }
   }
 
   private buildPrompt(task: AgentTask): string {
-    const history = this.scratchpad.map(s => `Thought: ${s.thought}\nObservation: ${s.observation}`).join('\n');
-    return `Task: ${task.description}\n\nAvailable Tools: ${Object.keys(this.tools).join(', ')}\n\n${history}\n\nNext Thought:`;
+    // FIX: trim history to last 5 entries max to prevent token bloat
+    const recentHistory = this.scratchpad.slice(-5);
+    const history = recentHistory
+      .map(s => `Thought: ${s.thought}\nObservation: ${s.observation}`)
+      .join('\n');
+    return `Task: ${task.description}\nAvailable Tools: ${Object.keys(this.tools).join(', ')}\n\n${history}\n\nNext Thought:`;
   }
 }
 
