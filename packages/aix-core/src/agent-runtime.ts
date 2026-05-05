@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { kv, KEYS } from './storage';
+import { kv, KEYS } from './memory/storage';
 import { health } from './health';
 import { AgentSelfReview } from './brain';
 import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm';
@@ -23,6 +23,33 @@ export const AgentTaskSchema = z.object({
   maxSteps: z.number().int().positive().default(7),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
+
+export interface ScratchpadEntry {
+  thought: string;
+  action: string | null;
+  observation: string;
+}
+
+export interface AgentResult {
+  success: boolean;
+  output: string;
+  artifacts: string[];
+  evaluation: {
+    understanding: number;
+    correctness: number;
+    overall: number;
+  };
+}
+
+export interface AgentRuntime {
+  agentId: string;
+  agentName: string;
+  taskId: string;
+  step: number;
+  scratchpad: ScratchpadEntry[];
+  status: 'INIT' | 'VALIDATE' | 'PLAN' | 'EXECUTE' | 'STORE' | 'AUDIT';
+  startTime: number;
+}
 export type AgentTask = z.infer<typeof AgentTaskSchema>;
 
 export const AgentResultSchema = z.object({

@@ -1,4 +1,4 @@
-import { kv, KEYS } from './storage';
+import { kv, KEYS } from './memory/storage';
 import { generateHash, verifySignature as cryptoVerify } from './infra';
 import { getRustBridge } from '@aix/rust-core/src/bridge';
 import { createHash } from 'crypto';
