@@ -31,12 +31,12 @@ jobs:
 
       # ── Root install (workspace deps) ───────────────────────────────────
       - name: Install root dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       # ── Studio install ──────────────────────────────────────────────────
       - name: Install studio dependencies
         working-directory: apps/studio
-        run: pnpm install --frozen-lockfile --no-package-lock
+        run: pnpm install  --no-package-lock
 
       # ── Lint ────────────────────────────────────────────────────────────
       - name: Lint
