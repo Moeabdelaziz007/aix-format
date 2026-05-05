@@ -1,4 +1,4 @@
-import { Breadcrumbs } from './breadcrumbs';
+import { SovereignBreadcrumbs as Breadcrumbs } from './memory/breadcrumbs';
 import * as path from 'path';
 
 /**
@@ -14,9 +14,9 @@ async function consolidate() {
   
   const filesToInfect = [
     'packages/aix-agency/swarm_router.go',
-    'packages/aix-core/src/storage.ts',
-    'packages/aix-core/src/bus.ts',
-    'packages/aix-core/src/hints.ts',
+    'packages/aix-core/src/memory/storage.ts',
+    'packages/aix-core/src/core/bus.ts',
+    'packages/aix-core/src/memory/hints.ts',
     'CONSTITUTION.md'
   ].map(f => path.resolve(process.cwd(), f));
 
@@ -24,8 +24,8 @@ async function consolidate() {
   await Breadcrumbs.autoInfect(filesToInfect, agentId, insight);
   
   // 🔬 Simulation: Testing Self-Healing & Risk Engine
-  const Navigator = (await import('./navigator')).StructuralNavigator;
-  const Orchestrator = (await import('./orchestrator')).AIXOrchestrator;
+  const Navigator = (await import('./navigation/navigator')).AIXNavigator;
+  const Orchestrator = (await import('./core/orchestrator')).AIXOrchestrator;
 
   console.log('🧪 Testing Structural Foresight...');
   const node = await Navigator.peek(filesToInfect[0]);

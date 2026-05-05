@@ -3,7 +3,7 @@ import { health } from './health';
 import { CuriosityEngine } from './curiosity';
 import { archiveWisdom, AgentSelfReview } from './brain';
 import { AgentRuntimeEngine } from './agent-runtime';
-import { GroqProvider, ToolRegistry } from './llm-provider';
+import { LLMProvider } from './llm';
 import { mcpGate } from './mcp-gate';
 import { SovereignEconomics } from './economics';
 import { getHarness } from './harness.config';
@@ -83,8 +83,8 @@ export class SovereignGateway extends EventEmitter {
 
       // 5. Runtime Execution (Task Flow)
       // Note: In a real prod env, provider/model would come from agent manifest
-      const provider = new GroqProvider(process.env.GROQ_API_KEY || '', 'llama-3.3-70b-versatile');
-      const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools as ToolRegistry);
+      const provider = new LLMProvider(process.env.GROQ_API_KEY || '', 'llama-3.3-70b-versatile');
+      const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools as any);
 
       const runtimeResult = await engine.run({
         taskId: requestId,
@@ -120,6 +120,7 @@ export class SovereignGateway extends EventEmitter {
 
       // 9. Audit Success (Rust Event Store)
       const duration = Date.now() - startTime;
+      const summary = `Agent finished task ${runtimeResult.success ? 'successfully' : 'with error'}. Output length: ${runtimeResult.result?.length ?? 0}`;
       await this.rust.eventStore.publish(BusEventSchema.parse({
         type: 'TaskCompleted',
         agent_id: agentId,

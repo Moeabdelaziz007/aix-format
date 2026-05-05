@@ -4,7 +4,7 @@
  * Made with Moe Abdelaziz
  */
 
-import { kv } from '../storage';
+import { kv } from '../memory/storage';
 import { SemanticIndex } from './SemanticIndex';
 
 export class WisdomExtractor {

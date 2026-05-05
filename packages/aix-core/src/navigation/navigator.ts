@@ -1,4 +1,4 @@
-import { Breadcrumbs } from './breadcrumbs';
+import { SovereignBreadcrumbs } from '../memory/breadcrumbs';
 import * as path from 'path';
 
 /**

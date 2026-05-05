@@ -1,5 +1,5 @@
 import { kv } from './storage';
-import { bus, RINGS } from './bus';
+import { bus, RINGS } from '../core/bus';
 import { randomBytes, createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';

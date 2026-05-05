@@ -3,7 +3,7 @@
 
 import { pipeline } from '@xenova/transformers';
 import { z } from 'zod';
-import { kv } from '../storage';
+import { kv } from '../memory/storage';
 import { SovereignEntity } from '../base';
 
 // RULE 1: Strict Schemas
@@ -89,7 +89,7 @@ export class SemanticIndex extends SovereignEntity {
     const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
     
     // 🚀 [SPEED]: Use mget for O(1) fetch of all candidates
-    const keys = allKeys.map(k => `wikibrain:index:${k}`);
+    const keys = allKeys.map((k: string) => `wikibrain:index:${k}`);
     const candidates = await kv.mget<any>(...keys);
     
     const results: SemanticResult[] = [];
@@ -120,7 +120,7 @@ export class SemanticIndex extends SovereignEntity {
 
   private async findTopologicalTwin(type: string, name: string): Promise<any | null> {
     const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
-    const keys = allKeys.map(k => `wikibrain:index:${k}`);
+    const keys = allKeys.map((k: string) => `wikibrain:index:${k}`);
     const candidates = await kv.mget<any>(...keys);
     
     for (const existing of candidates) {

@@ -36,7 +36,8 @@ export const KEYS = {
   integrityHash: (file: string) => `integrity:hash:${file}`,
   
   // Brain & Learning
-
+  fileHint: (file: string) => `brain:hint:${file}`,
+  constitution: () => 'brain:constitution',
   
   // Execution
   aixActionResult: (agentId: string) => `aix:action:result:${agentId}`,
