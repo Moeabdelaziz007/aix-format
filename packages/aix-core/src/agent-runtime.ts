@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 /**
  * 🧠 AIX Agent Runtime - Sovereign ReAct Loop
  * [AI_MANIFEST]: {
@@ -46,12 +48,19 @@ export const ToolCallSchema = z.object({
 export type Task = z.infer<typeof TaskSchema>;
 export type ToolCall = z.infer<typeof ToolCallSchema>;
 
+export interface ScratchpadEntry {
+  thought: string;
+  action: ToolCall | null;
+  observation: string;
+}
+
 export interface AgentRuntime {
   agentId: string;
   agentName: string;
   taskId: string;
   step: number;
-  scratchpad: any[];
+  scratchpad: ScratchpadEntry[];
+  notes: string[];
   mood: string;
   status: 'thinking' | 'running' | 'done' | 'failed';
   startTime: number;
@@ -110,6 +119,7 @@ export class AgentRuntimeEngine {
       taskId: task.taskId,
       step: 0,
       scratchpad: [],
+      notes: [],
       mood: 'curious',
       status: 'thinking',
       startTime: Date.now(),
@@ -249,6 +259,11 @@ export class AgentRuntimeEngine {
 
       // RULE 3: TrustChain (Fixed argument order)
       const trustChain = getTrustChain();
+      await trustChain.append('agent-runtime', 'TASK_COMPLETED', {
+        agentId: this.runtime.agentId,
+        taskId: task.taskId,
+        steps: this.runtime.step,
+        score: reviewRecord.evaluation.overall
       });
 
       // 🌀 TRUTH SYNTHESIS (Round 34): Final check to merge external research with internal code audit
@@ -649,7 +664,10 @@ Next Thought: `;
       }
 
       // 🌀 SOVEREIGN GUIDE: Dynamic Documentation for future Agents
-      const guidePath = '/Users/cryptojoker710/.gemini/antigravity/brain/2a220e83-c88c-457d-86a3-72498a9d5319/sovereign_guide.json';
+      const guidePath = path.join(
+      process.env.BRAIN_PATH || path.join(process.cwd(), '.brain'),
+      'sovereign_guide.json'
+    );
       const existingGuide = await this.readGuide(guidePath);
       const updatedGuide = {
         ...existingGuide,
@@ -673,6 +691,25 @@ Next Thought: `;
   private async handleFailure(task: Task, error: any): Promise<void> {
     this.runtime.status = 'failed';
     await this.emitState('agent:error', `Task failed: ${error?.message || 'Unknown error'}`);
+  }
+
+  private async readGuide(filePath: string): Promise<Record<string, any>> {
+    try {
+      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      const raw = await fs.readFile(filePath, 'utf-8');
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+
+  private async writeGuide(filePath: string, data: Record<string, any>): Promise<void> {
+    try {
+      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    } catch (e) {
+      console.warn('⚠️ Could not write sovereign guide:', e);
+    }
   }
 }
 

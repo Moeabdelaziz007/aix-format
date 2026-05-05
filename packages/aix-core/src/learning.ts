@@ -120,7 +120,6 @@ export async function extractSkillFromFeedback(
   }
 
   return relevantProcedures;
-}
 
 export async function getLearnedProcedures(agentId: string): Promise<LearnedProcedure[]> {
   const data = await kv.lrange<string>(KEYS.memSkill(agentId), 0, -1);
