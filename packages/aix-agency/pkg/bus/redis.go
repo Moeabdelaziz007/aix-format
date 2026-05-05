@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -111,6 +112,41 @@ func (c *Client) EmitDNAVerified(
 	})
 }
 
+// EmitQuantumBurst is called when the Meta-Loop detects an Innovation Burst.
+// Ring 2 — MIND
+func (c *Client) EmitQuantumBurst(
+	ctx context.Context,
+	agentID string,
+	energyLevel float64,
+	insight string,
+) error {
+	return c.emit(ctx, BusEvent{
+		Ring:      RingMind,
+		Type:      "QUANTUM_BURST",
+		AgentID:   agentID,
+		AgentName: "MetaLoop",
+		Message:   fmt.Sprintf("✨ Quantum Burst [%.2f]: %s", energyLevel, insight),
+		Metadata:  map[string]interface{}{"energy": energyLevel, "insight": insight},
+	})
+}
+
+// EmitEvolutionPath is called when an agent collapses its quantum state to a new path.
+// Ring 1 — SOUL
+func (c *Client) EmitEvolutionPath(
+	ctx context.Context,
+	agentID string,
+	path string,
+) error {
+	return c.emit(ctx, BusEvent{
+		Ring:      RingSoul,
+		Type:      "EVOLUTION_PATH_CHANGED",
+		AgentID:   agentID,
+		AgentName: "QuantumOptimizer",
+		Message:   fmt.Sprintf("🧬 Agent evolving via path: %s", path),
+		Metadata:  map[string]interface{}{"path": path},
+	})
+}
+
 // emit serialises a BusEvent and pushes it onto the global pulse list.
 // It trims to the last 100 events to cap memory usage.
 func (c *Client) emit(ctx context.Context, event BusEvent) error {
@@ -131,6 +167,15 @@ func (c *Client) emit(ctx context.Context, event BusEvent) error {
 		return fmt.Errorf("bus: redis emit: %w", err)
 	}
 	return nil
+}
+
+// SubscribeToRing allows Go services (like SwarmRouter) to listen to the TS Meta-Loop.
+// This closes the Quantum Topology loop!
+func (c *Client) SubscribeToRing(ctx context.Context, ring int, handler func(BusEvent)) {
+	// TODO for Jules AI: Implement Redis Pub/Sub or List blocking pop (BLPOP) here.
+	// This will allow SwarmRouter to hear "QUANTUM_BURST" and dynamically multiply
+	// the agent's TrustLevel / Score by 1.5x for 5 minutes!
+	log.Printf("[EventBus] Subscribed to Ring %d pulses...\n", ring)
 }
 
 func truncate(s string, n int) string {

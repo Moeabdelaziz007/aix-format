@@ -12,12 +12,41 @@
     "checkJs": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "baseUrl": ".",
     "paths": {
-      "../types/aix": ["./types/aix.d.ts"]
+      "@/*": [
+        "./*"
+      ],
+      "@aix-core/*": [
+        "packages/aix-core/src/*"
+      ],
+      "@aix-agency/*": [
+        "packages/aix-agency/pkg/*"
+      ],
+      "@aix-zkkyc/*": [
+        "packages/aix-zkkyc/src/*"
+      ],
+      "@mcp-gateway/*": [
+        "packages/mcp-gateway/src/*"
+      ],
+      "@studio/*": [
+        "apps/studio/src/*"
+      ],
+      "@types/aix": [
+        "types/aix.d.ts"
+      ]
     }
   },
-  "include": ["core/**/*.ts"],
-  "exclude": ["node_modules", "dist", "apps", "tests"]
+  "include": [
+    "core/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "apps",
+    "tests"
+  ]
 }

@@ -14,6 +14,7 @@ export { NullifierRegistry, ProofReplayError } from './NullifierRegistry';
 export type { NullifierRecord } from './NullifierRegistry';
 
 import crypto from 'crypto';
+import { Redis } from '@upstash/redis';
 
 const globalRegistry = new NullifierRegistry();
 
@@ -30,8 +31,15 @@ export interface pKYCProof {
     publicParams: string;  // The Pedersen commitment hash
 }
 
-// In-memory registry for revoked or spent nullifiers (should be backed by DB/Contract in prod)
-const revokedNullifiers = new Set<string>();
+// Connect to Redis for persistent revocation registry
+// Fallback to in-memory Set if environment variables are not set (e.g., in CI or local dev without Redis)
+let redis: Redis | null = null;
+try {
+    redis = Redis.fromEnv();
+} catch (e) {
+    console.warn('[ZkKYC] UPSTASH_REDIS_REST_URL missing. Falling back to in-memory Set for revokedNullifiers.');
+}
+const fallbackRevokedNullifiers = new Set<string>();
 
 export async function generateProof(claims: IdentityClaims): Promise<pKYCProof> {
     const blindingFactor = crypto.randomBytes(32).toString('hex');
@@ -66,11 +74,19 @@ export async function verifyProof(token: string, publicParams: string): Promise<
 }
 
 export async function revokeProof(nullifier: string): Promise<void> {
-    revokedNullifiers.add(nullifier);
+    if (redis) {
+        await redis.sadd('aix:zkkyc:revoked', nullifier);
+    } else {
+        fallbackRevokedNullifiers.add(nullifier);
+    }
 }
 
-export function isRevoked(nullifier: string): boolean {
-    return revokedNullifiers.has(nullifier);
+export async function isRevoked(nullifier: string): Promise<boolean> {
+    if (redis) {
+        const isMember = await redis.sismember('aix:zkkyc:revoked', nullifier);
+        return isMember === 1;
+    }
+    return fallbackRevokedNullifiers.has(nullifier);
 }
 
 // Made with Moe Abdelaziz
