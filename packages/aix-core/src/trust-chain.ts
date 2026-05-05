@@ -282,7 +282,8 @@ export class TrustChain {
       }
       return true;
     } catch (e) {
-      return true; // Fallback for environments without FS access
+      console.error(`🚨 [Integrity:System] CRITICAL: System is BLIND to integrity checks. Denying by default (Zero-Trust).`);
+      return false; 
     }
   }
 

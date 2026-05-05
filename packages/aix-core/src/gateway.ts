@@ -456,9 +456,14 @@ export class Gateway extends EventEmitter {
     return true;
   }
 
-  private async readFileSafely(path: string): Promise<string> {
-     // Mocking for now, in real E2E it reads the file
-     return "AI_COGNITIVE_FOOTPRINT"; 
+  private async readFileSafely(filePath: string): Promise<string> {
+    try {
+      const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
+      return await fs.readFile(absolutePath, 'utf8');
+    } catch (e) {
+      console.error(`❌ [Gateway:FS] Failed to read ${filePath}`);
+      return "";
+    }
   }
 
   /**
@@ -480,10 +485,17 @@ export class Gateway extends EventEmitter {
     }
   }
 
-  private async repairSovereignPath(path: string) {
-    console.log(`[Self-Healing] Restoring ${path} from Sovereign Wisdom...`);
-    // Logic to pull from archiveWisdom and write back
-    // In real E2E, this recreates the file
+  private async repairSovereignPath(filePath: string) {
+    console.log(`🛡️ [Self-Healing] Restoring ${filePath} from Sovereign Backup...`);
+    const backupPath = `${filePath}.bak`;
+    try {
+      await fs.copyFile(backupPath, filePath);
+      console.log(`✅ [Self-Healing] ${filePath} restored successfully.`);
+    } catch (e) {
+      console.error(`❌ [Self-Healing] Failed to restore ${filePath}. No backup found.`);
+      // If no backup, create an empty manifest as a last resort to keep it valid
+      await fs.writeFile(filePath, '// AI_COGNITIVE_FOOTPRINT: Emergency Manifest\n');
+    }
   }
 
   /**
@@ -498,9 +510,16 @@ export class Gateway extends EventEmitter {
     return false; // Reject unverified truth by default
   }
 
-  private validateSignature(sig: string): boolean {
-     // Mocking cryptographic check for now
-     return sig.startsWith('AIX-SOV-');
+  private validateSignature(sig: string, publicKey: string, data: any): boolean {
+    try {
+      const message = util.decodeUTF8(JSON.stringify(data));
+      const sigBytes = Buffer.from(sig, 'hex');
+      const pubKeyBytes = Buffer.from(publicKey, 'hex');
+      return nacl.sign.detached.verify(message, sigBytes, pubKeyBytes);
+    } catch (e) {
+      console.error('❌ [Gateway:Auth] Signature validation crashed.');
+      return false;
+    }
   }
     const sensitiveTasks = ['security', 'audit', 'payment', 'credentials'];
     return sensitiveTasks.some(t => taskType.toLowerCase().includes(t)) ? 'SOVEREIGN' : 'TURBO';

@@ -247,8 +247,12 @@ export class AgentRuntimeEngine {
       // Trigger Pet Sync (Life)
       await PetOrchestrator.sync(this.runtime.agentId, { level: 1 }, { status: 'done' });
 
-      // RULE 3: TrustChain (Fixed argument order)
+      // RULE 3: TrustChain (Final Recording)
       const trustChain = getTrustChain();
+      await trustChain.append('AGENT_RUNTIME_COMPLETE', this.runtime.agentId, {
+        taskId: this.runtime.taskId,
+        success: true,
+        overallScore: reviewRecord.evaluation.overall
       });
 
       // 🌀 TRUTH SYNTHESIS (Round 34): Final check to merge external research with internal code audit
@@ -350,11 +354,13 @@ export class AgentRuntimeEngine {
     while (this.runtime.step < maxSteps) {
       this.runtime.step++;
       
-      // 🚀 DYNAMIC ROUTING (Round 14): Switch model based on difficulty
+      // 🚀 DYNAMIC ROUTING (Round 14): Real Model Swapping
       const needsPro = this.isStuck() || this.runtime.step > 4 || task.description.length > 200;
-      const currentModel = needsPro ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
-      // Simulated: in real environment, this would swap the provider instance
-      await this.emitState('agent:routing', `Switching to ${currentModel} based on task complexity.`);
+      if (needsPro && this.llm.model.includes('flash')) {
+        await this.emitState('agent:routing', `Task complexity rising. Hot-swapping LLM to Pro...`);
+        // Real Swap: Adjusting the model on the provider instance
+        this.llm.model = 'gemini-1.5-pro'; 
+      }
 
       // 🚀 PREDICTIVE TOOL LOADING (Round 28): Use Acceleration Templates
       const acceleration = this.context?.memories.find(m => m.startsWith('[ACCELERATION_TEMPLATE]'));
