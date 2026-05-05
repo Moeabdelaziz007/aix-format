@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis';
 import type { SetCommandOptions } from '@upstash/redis';
+import { gzipSync, gunzipSync } from 'zlib';
 
 export interface StorageOptions {
   ex?: number; // Expiry in seconds
@@ -118,7 +119,7 @@ class LocalFileAdapter implements StorageAdapter {
 }
 
 class StorageOrchestrator implements StorageAdapter {
-  private redis: UpstashRedisAdapter;
+  private redis: any;
   private local: LocalFileAdapter;
 
   constructor() {
@@ -127,24 +128,62 @@ class StorageOrchestrator implements StorageAdapter {
   }
 
   private get active(): StorageAdapter {
-    // @ts-ignore
     return this.redis.isConnected ? this.redis : this.local;
   }
 
-  get<T>(key: string) { return this.active.get<T>(key); }
-  set(key: string, value: any, options?: StorageOptions) { return this.active.set(key, value, options); }
-  del(key: string | string[]) { return this.active.del(key); }
-  incr(key: string) { return this.active.incr(key); }
-  decr(key: string) { return this.active.decr(key); }
-  expire(key: string, seconds: number) { return this.active.expire(key, seconds); }
-  exists(key: string) { return this.active.exists(key); }
-  lpush(key: string, value: any) { return this.active.lpush(key, value); }
-  lrange<T>(key: string, start: number, stop: number) { return this.active.lrange<T>(key, start, stop); }
-  ltrim(key: string, start: number, stop: number) { return this.active.ltrim(key, start, stop); }
-  sadd(key: string, ...members: any[]) { return this.active.sadd(key, ...members); }
-  srem(key: string, ...members: any[]) { return this.active.srem(key, ...members); }
-  smembers<T>(key: string) { return this.active.smembers<T>(key); }
-  mget<T>(...keys: string[]) { return this.active.mget<T>(...keys); }
+  private compress(value: any): any {
+    const str = JSON.stringify(value);
+    if (str.length > 2048) {
+      const compressed = gzipSync(Buffer.from(str)).toString('base64');
+      return { __compressed: true, data: compressed };
+    }
+    return value;
+  }
+
+  private decompress(value: any): any {
+    if (value && typeof value === 'object' && value.__compressed) {
+      const decompressed = gunzipSync(Buffer.from(value.data, 'base64')).toString();
+      return JSON.parse(decompressed);
+    }
+    return value;
+  }
+
+  async get<T>(key: string): Promise<T | null> {
+    const val = await this.active.get<any>(key);
+    return this.decompress(val) as T;
+  }
+
+  async set(key: string, value: any, options?: StorageOptions) {
+    const finalValue = this.compress(value);
+    return this.active.set(key, finalValue, options);
+  }
+
+  async del(key: string | string[]) { return this.active.del(key); }
+  async incr(key: string) { return this.active.incr(key); }
+  async decr(key: string) { return this.active.decr(key); }
+  async expire(key: string, seconds: number) { return this.active.expire(key, seconds); }
+  async exists(key: string) { return this.active.exists(key); }
+  
+  async lpush(key: string, value: any) { 
+    return this.active.lpush(key, this.compress(value)); 
+  }
+  
+  async lrange<T>(key: string, start: number, stop: number) {
+    const data = await this.active.lrange<any>(key, start, stop);
+    return data.map(d => this.decompress(d)) as T[];
+  }
+
+  async ltrim(key: string, start: number, stop: number) { return this.active.ltrim(key, start, stop); }
+  async sadd(key: string, ...members: any[]) { return this.active.sadd(key, ...members.map(m => this.compress(m))); }
+  async srem(key: string, ...members: any[]) { return this.active.srem(key, ...members); }
+  async smembers<T>(key: string) { 
+    const data = await this.active.smembers<any>(key);
+    return data.map(d => this.decompress(d)) as T[];
+  }
+  async mget<T>(...keys: string[]) {
+    const data = await this.active.mget<any>(...keys);
+    return data.map(d => this.decompress(d)) as (T | null)[];
+  }
 }
 
 export const kv = new StorageOrchestrator();

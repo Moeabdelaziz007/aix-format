@@ -264,6 +264,31 @@ input, button, textarea, select   { font: inherit; color: inherit; }
   animation:           gradient-x 3s ease infinite;
 }
 
+/* 💎 [UI_POLISH]: Sovereign Badge System */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  background-color: var(--background-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.badge-primary {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
 /* ─── Sovereign Masterpiece Tokens ─────────────────────────────────────────── */
 @keyframes float-up {
   from { transform: translateY(0); }
