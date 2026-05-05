@@ -19,7 +19,13 @@ export interface KycStatus {
 }
 
 export class IdentityService {
-  private rust = getRustBridge();
+  private _rust: any = null;
+  private get rust() {
+    if (!this._rust) {
+      try { this._rust = getRustBridge(); } catch(e) { return null; }
+    }
+    return this._rust;
+  }
 
   /**
    * Fetches KYC status for a user.

@@ -35,7 +35,13 @@ export type AgentNode = z.infer<typeof AgentNodeSchema>;
 export class SwarmRouter {
     private agents: Map<string, AgentNode> = new Map();
     private breaker: CircuitBreaker;
-    private rust = getRustBridge();
+    private _rust: any = null;
+    private get rust() {
+      if (!this._rust) {
+        try { this._rust = getRustBridge(); } catch(e) { return null; }
+      }
+      return this._rust;
+    }
 
     constructor() {
         this.breaker = new CircuitBreaker({

@@ -5,7 +5,13 @@ import { getRustBridge } from '@aix/rust-core/src/bridge.js';
 export * from './trust-chain.js';
 
 export class SovereignSecurityService {
-  private rust = getRustBridge();
+  private _rust: any = null;
+  private get rust() {
+    if (!this._rust) {
+      try { this._rust = getRustBridge(); } catch(e) { return null; }
+    }
+    return this._rust;
+  }
 
   /**
    * Scans a manifest for security risks and returns a report.

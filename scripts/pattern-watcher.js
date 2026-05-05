@@ -36,6 +36,16 @@ if (statSync('apps/studio').isDirectory()) {
         errors.push(`❌ CRITICAL: Prohibited Web2 Auth found in ${path}. AIX is a Web3 Sovereign Protocol. Use Pi KYC Web3 Modals and Ed25519 Signatures.`);
         foundProhibitedAuth = true;
       }
+
+      // RULE 2: crypto.randomBytes over Math.random
+      if (content.includes('Math.random()') && !path.includes('test')) {
+        errors.push(`❌ RULE 2 VIOLATION: Math.random() found in ${path}. Security First! Use crypto.randomBytes() for all randoms and payments.`);
+      }
+
+      // RULE 4 & 7: AgentSelfReview & CuriosityEngine enforcement
+      if (content.includes('async run(') && !content.includes('AgentSelfReview.record')) {
+        findings.push(`⚠️ RULE 4 WARNING: run() method found without AgentSelfReview.record() in ${path}. CuriosityEngine is starving!`);
+      }
     }
   });
 }
@@ -77,11 +87,11 @@ try {
 try {
   const parserContent = readFileSync('core/parser.js', 'utf8');
   if (parserContent.includes('persistence') && parserContent.includes('validateMemory')) {
-      findings.push('⚠️ Memory Classification Advice: The term "persistence" was found near memory validation. Remember that AIX agent memory strictly permits only Episodic, Semantic, and Procedural types.');
+    findings.push('⚠️ Memory Classification Advice: The term "persistence" was found near memory validation. Remember that AIX agent memory strictly permits only Episodic, Semantic, and Procedural types.');
   } else {
-      findings.push('✅ Architecture: Memory classification follows strict Episodic, Semantic, Procedural constraints.');
+    findings.push('✅ Architecture: Memory classification follows strict Episodic, Semantic, Procedural constraints.');
   }
-} catch (e) {}
+} catch (e) { }
 
 // Output Results
 console.log('--- PATTERN ANALYSIS REPORT ---\n');

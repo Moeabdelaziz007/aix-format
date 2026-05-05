@@ -4,23 +4,23 @@ package main
 // Made with Moe Abdelaziz
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"time"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"compress/gzip"
-	"io/ioutil"
-	"bytes"
-	"encoding/base64"
-	"strings"
 )
 
 type TaskType string
@@ -250,7 +250,7 @@ func NewSwarmRouter() *SwarmRouter {
 		metrics:         &RouterMetrics{},
 		quantumBoosts:   make(map[string]time.Time),
 	}
-	
+
 	// 🚀 Start Quantum Resonance Listener (E2E Bridge)
 	// In a real production scenario, we pass the bus client here
 	log.Println("[SwarmRouter] Initialized successfully with Quantum Resonance (1.5x Multiplier)")
@@ -334,7 +334,7 @@ func (r *SwarmRouter) scoreAgent(agent AgentNode, task TaskDescriptor) (float64,
 
 	// (First Resonance check removed to fix double-boost bug)
 	avgCapScore := rawScore / float64(len(task.RequiredCapabilities))
-	
+
 	finalScore := avgCapScore*(float64(agent.TrustLevel)*0.2) + float64(task.Priority)*0.1
 
 	// 🌊 Apply Quantum Resonance Multiplier (1.5x)
@@ -387,7 +387,7 @@ func (r *SwarmRouter) VerifySovereignMemory(signedData string) (string, bool) {
 	// TurboQuant Decompression
 	if strings.HasPrefix(payload, "⚡") {
 		compressedBase64 := payload[3:] // Skip "⚡" (it might be encoded differently, let's be careful)
-		// Note: The TS '⚡' is 3 bytes in UTF-8. 
+		// Note: The TS '⚡' is 3 bytes in UTF-8.
 		// Actually, let's use the raw payload and check for the flash emoji prefix.
 		if strings.HasPrefix(payload, "\u26a1") || strings.HasPrefix(payload, "⚡") {
 			rawPayload := strings.TrimPrefix(payload, "⚡")
@@ -447,6 +447,12 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 	}
 
 	plan := &AgentExecutionPlan{TaskID: task.ID, PrimaryAgentID: candidates[0].agentID, FallbackChain: fallback, Score: candidates[0].score}
+
+	// RULE 3: TrustChain.append() + auditHash generation
+	hashInput := fmt.Sprintf("ROUTE_TASK:%s:%s:%f:%d", plan.TaskID, plan.PrimaryAgentID, plan.Score, time.Now().UnixNano())
+	auditHash := sha256.Sum256([]byte(hashInput))
+	log.Printf("[TrustChain] 🔗 ACTION APPENDED: Task %s -> Agent %s | AuditHash: %x\n", plan.TaskID, plan.PrimaryAgentID, auditHash)
+
 	r.breaker.RecordSuccess(r.metrics)
 	log.Printf("[SwarmRouter] Routed task %s to agent %s (score: %.2f, fallbacks: %d)\n", task.ID, plan.PrimaryAgentID, plan.Score, len(fallback))
 	return plan, nil

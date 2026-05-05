@@ -9,7 +9,7 @@ import type { BusEvent, Skill, RustCore } from '../index';
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-let rustCore: RustCore | null = null;
+let rustCore: RustCore = null as any;
 try {
   rustCore = require('../index.node');
 } catch (e) {

@@ -6,7 +6,13 @@
 import * as msgpack from '@msgpack/msgpack';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const rustCore = require('../index.node');
+let rustCore = null;
+try {
+    rustCore = require('../index.node');
+}
+catch (e) {
+    console.warn('⚠️ [RustBridge] index.node not found. Native features will be disabled.');
+}
 // ============================================================================
 // Serialization Helpers (Binary for Performance)
 // ============================================================================
@@ -243,6 +249,9 @@ let bridgeInstance = null;
  */
 export function getRustBridge(config) {
     if (!bridgeInstance) {
+        if (!rustCore) {
+            throw new Error('Rust native addon not found. Falling back to TS implementation.');
+        }
         bridgeInstance = new RustBridge(config);
     }
     return bridgeInstance;

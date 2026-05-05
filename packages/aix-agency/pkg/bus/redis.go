@@ -147,6 +147,42 @@ func (c *Client) EmitEvolutionPath(
 	})
 }
 
+// EmitTrustChainAudit logs an immutable action footprint with auditHash
+// Ring 0 — GENESIS (RULE 3)
+func (c *Client) EmitTrustChainAudit(
+	ctx context.Context,
+	agentID string,
+	action string,
+	auditHash string,
+) error {
+	return c.emit(ctx, BusEvent{
+		Ring:      RingGenesis,
+		Type:      "TRUST_CHAIN_APPEND",
+		AgentID:   agentID,
+		AgentName: "TrustChain",
+		Message:   fmt.Sprintf("🔗 Action [%s] secured. Audit Hash: %s", action, auditHash),
+		Metadata:  map[string]interface{}{"action": action, "auditHash": auditHash},
+	})
+}
+
+// EmitAgentSelfReview feeds the CuriosityEngine after a run loop
+// Ring 2 — MIND (RULE 4 & 7)
+func (c *Client) EmitAgentSelfReview(
+	ctx context.Context,
+	agentID string,
+	selfScore float64,
+	insights string,
+) error {
+	return c.emit(ctx, BusEvent{
+		Ring:      RingMind,
+		Type:      "AGENT_SELF_REVIEW",
+		AgentID:   agentID,
+		AgentName: "CuriosityEngine",
+		Message:   fmt.Sprintf("🧠 Agent %s completed self-review. Score: %.2f | Insight: %s", agentID, selfScore, insights),
+		Metadata:  map[string]interface{}{"selfScore": selfScore, "insights": insights},
+	})
+}
+
 // emit serialises a BusEvent and pushes it onto the global pulse list.
 // It trims to the last 100 events to cap memory usage.
 func (c *Client) emit(ctx context.Context, event BusEvent) error {
