@@ -1,0 +1,53 @@
+name: 🌀 Sovereign Pulse (Evolution Cycle)
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+  workflow_dispatch: # Manual trigger
+    inputs:
+      forced:
+        description: 'Force evolution bypass cool-down'
+        required: false
+        default: 'false'
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/checkout@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g pnpm@9.15.0
+          pnpm install
+
+      - name: Run Sovereign Pulse
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          NOMIC_API_KEY: ${{ secrets.NOMIC_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          LANGFUSE_HOST: ${{ secrets.LANGFUSE_HOST }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          # Trigger the pulse/evolution script
+          # Assuming there's a script in packages/aix-core or a CLI tool
+          # For now, we simulate the run via a node script
+          node -e "
+            const { getGateway } = require('./packages/aix-core/dist/gateway');
+            const gateway = getGateway();
+            gateway.run('sovereign-pulse', { 
+              mode: 'evolution', 
+              forced: ${{ github.event.inputs.forced || 'false' }} 
+            }).then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); });
+          "

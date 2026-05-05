@@ -25,6 +25,8 @@ import { FailureLearning } from './wikibrain/failure-learning';
 import { SwarmRouter } from './SwarmRouter';
 import { GroqProvider } from './llm-provider';
 import { generateHash, verifySignature as cryptoVerify } from './utils/crypto';
+import { Langfuse } from 'langfuse';
+import { Octokit } from '@octokit/rest';
 
 export interface AgentAction {
   agentId: string;
@@ -67,12 +69,26 @@ export interface PaymentResult {
 export class Gateway extends EventEmitter {
   private actionHandlers: Map<string, (params: any, mood?: string) => Promise<any>>;
   private agents: Map<string, any>;
+  private langfuse?: Langfuse;
+  private octokit?: Octokit;
 
   constructor() {
     super();
     this.actionHandlers = new Map();
     this.agents = new Map();
     this.registerDefaultHandlers();
+    
+    if (process.env.LANGFUSE_PUBLIC_KEY) {
+      this.langfuse = new Langfuse({
+        publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+        secretKey: process.env.LANGFUSE_SECRET_KEY,
+        baseUrl: process.env.LANGFUSE_HOST || 'https://cloud.langfuse.com'
+      });
+    }
+
+    if (process.env.GITHUB_TOKEN) {
+      this.octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    }
   }
 
   /**
@@ -108,6 +124,25 @@ export class Gateway extends EventEmitter {
    */
   async run(agentId: string, input: any): Promise<any> {
     const startTime = Date.now();
+    
+    // 🧬 [CONDITIONAL EVOLUTION]: Save API calls, stay sovereign
+    const lastRun = await kv.get<number>(KEYS.agentLastActivity(agentId)) || 0;
+    const hoursSince = (Date.now() - lastRun) / 3600000;
+    const forcedRun = input?.forced || input?.mode === 'evolution';
+    
+    if (hoursSince < 6 && !forcedRun) {
+      console.log(`[Gateway] Skipping evolution/task for ${agentId} - Last run was ${hoursSince.toFixed(2)}h ago.`);
+      return { success: true, skipped: true, reason: 'Cool-down period active (6h)' };
+    }
+    
+    // Update last activity immediately to prevent race conditions
+    await kv.set(KEYS.agentLastActivity(agentId), Date.now());
+
+    const trace = this.langfuse?.trace({
+      name: `agent-run-${agentId}`,
+      userId: agentId,
+      metadata: { inputType: typeof input, forced: !!forcedRun }
+    });
     
     try {
       // RULE 1: MCP Gate Check
@@ -207,9 +242,11 @@ export class Gateway extends EventEmitter {
       // Emit completed event
       this.emit('agent:completed', { agentId, result });
 
+      trace?.update({ output: result });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      trace?.update({ output: { error: errorMessage }, level: 'ERROR' });
       
       // 🌀 FAILURE LEARNING: Record failure pattern
       await FailureLearning.learn(agentId, 'unknown', errorMessage, { input });
@@ -449,9 +486,17 @@ export class Gateway extends EventEmitter {
     if (output.length > 50) {
       await this.archiveWisdom(agentId, input, output);
     }
+
+    // 🚀 [PR #107+]: Periodic Wisdom Extraction from TrustChain
+    const actionCount = await kv.incr(`wisdom:counter:${agentId}`);
+    if (actionCount % 5 === 0) {
+        const { WisdomExtractor } = await import('./wikibrain/wisdom-extractor');
+        WisdomExtractor.extract(agentId).catch(e => 
+            console.error(`[Gateway:Wisdom] Extraction failed:`, e)
+        );
+    }
     
     console.log(`[Gateway:MetaLoop] Curiosity Reward (${curiosityReward.toFixed(2)}) applied to Trust for ${agentId}`);
-  }
   }
 
   /**
@@ -541,17 +586,43 @@ export class Gateway extends EventEmitter {
       const index = new (await import('./wikibrain/SemanticIndex')).SemanticIndex();
       const inputStr = typeof input === 'object' ? JSON.stringify(input) : String(input);
       
-      const wisdom = `Sovereign Pattern [${agentId}]: Input(${inputStr.slice(0, 40)}) -> Strategy(${output.slice(0, 60)})`;
+      const wisdomSnippet = `Sovereign Pattern [${agentId}]: Input(${inputStr.slice(0, 40)}) -> Strategy(${output.slice(0, 60)})`;
       
       await index.index(
         `wisdom-${agentId}-${Date.now()}`,
         'wisdom',
-        wisdom,
+        wisdomSnippet,
         { agentId, type: 'meta_wisdom', quality: 1.0, hitCount: 1 }
       );
+
+      // 🐙 [OCTOKIT]: The repo writes its own history
+      if (this.octokit && process.env.GITHUB_REPOSITORY) {
+        const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+        const path = 'CHRONICLES.md';
+        
+        let content = '';
+        let sha: string | undefined;
+        
+        try {
+          const { data } = await this.octokit.repos.getContent({ owner, repo, path }) as any;
+          content = Buffer.from(data.content, 'base64').toString();
+          sha = data.sha;
+        } catch (e) { /* File might not exist yet */ }
+
+        const newEntry = `\n### 🛡️ Sovereign Evolution [${new Date().toISOString()}]\n**Agent:** ${agentId}\n**Pattern:** ${wisdomSnippet}\n---\n`;
+        const updatedContent = content + newEntry;
+
+        await this.octokit.repos.createOrUpdateFileContents({
+          owner, repo, path,
+          message: `🛰️ [Gateway] New Wisdom Pattern: ${agentId}`,
+          content: Buffer.from(updatedContent).toString('base64'),
+          sha
+        });
+      }
+
       console.log(`🧠 [Gateway:Wisdom] Pattern solidified for ${agentId}`);
     } catch (e) {
-      console.warn('⚠️ [Gateway] Wisdom archiving skipped (Offline/Internal).');
+      console.warn('⚠️ [Gateway] Wisdom archiving skipped or failed:', e instanceof Error ? e.message : 'Unknown error');
     }
   }
 

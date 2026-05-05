@@ -24,6 +24,7 @@ export interface StorageAdapter {
   srem(key: string, ...members: any[]): Promise<number>;
   smembers<T>(key: string): Promise<T[]>;
   mget<T>(...keys: string[]): Promise<(T | null)[]>;
+  keys(pattern: string): Promise<string[]>;
 }
 
 function toSetOptions(options?: StorageOptions): SetCommandOptions | undefined {
@@ -115,7 +116,118 @@ class LocalFileAdapter implements StorageAdapter {
     return set.size;
   }
   async smembers<T>(key: string) { return await this.get<T[]>(key) || []; }
-  async mget<T>(...keys: string[]) { return Promise.all(keys.map(k => this.get<T>(k))); }
+  async mget<T>(...keys: string[]) {
+    return Promise.all(keys.map(k => this.get<T>(k)));
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    const files = this.fs.readdirSync(this.baseDir);
+    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+    return files
+      .map((f: string) => f.replace(/\.json$/, ''))
+      .filter((f: string) => regex.test(f));
+  }
+}
+
+class UpstashRedisAdapter implements StorageAdapter {
+  private client: Redis;
+  public isConnected: boolean = false;
+
+  constructor() {
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    if (url && token) {
+      this.client = new Redis({ url, token });
+      this.isConnected = true;
+    } else {
+      // Rule 0: Security/Reliability - No silent failure with mocks
+      this.client = new Redis({ url: 'http://missing-redis-config', token: 'missing' });
+      this.isConnected = false;
+    }
+  }
+
+  async get<T>(key: string): Promise<T | null> {
+    if (!this.isConnected) return null;
+    return this.client.get<T>(key);
+  }
+
+  async set(key: string, value: any, options?: StorageOptions): Promise<void> {
+    if (!this.isConnected) return;
+    const upstashOpts = toSetOptions(options);
+    if (upstashOpts) {
+      await this.client.set(key, value, upstashOpts);
+    } else {
+      await this.client.set(key, value);
+    }
+  }
+
+  async del(key: string | string[]): Promise<void> {
+    if (!this.isConnected) return;
+    const keys = Array.isArray(key) ? key : [key];
+    await this.client.del(...keys);
+  }
+
+  async incr(key: string): Promise<number> {
+    if (!this.isConnected) return 0;
+    return this.client.incr(key);
+  }
+
+  async decr(key: string): Promise<number> {
+    if (!this.isConnected) return 0;
+    return this.client.decr(key);
+  }
+
+  async expire(key: string, seconds: number): Promise<void> {
+    if (!this.isConnected) return;
+    await this.client.expire(key, seconds);
+  }
+
+  async exists(key: string): Promise<boolean> {
+    if (!this.isConnected) return false;
+    const count = await this.client.exists(key);
+    return count > 0;
+  }
+
+  async lpush(key: string, value: any): Promise<number> {
+    if (!this.isConnected) return 0;
+    return this.client.lpush(key, value);
+  }
+
+  async lrange<T>(key: string, start: number, stop: number): Promise<T[]> {
+    if (!this.isConnected) return [];
+    return this.client.lrange<T>(key, start, stop);
+  }
+
+  async ltrim(key: string, start: number, stop: number): Promise<void> {
+    if (!this.isConnected) return;
+    await this.client.ltrim(key, start, stop);
+  }
+
+  async sadd(key: string, ...members: any[]): Promise<number> {
+    if (!this.isConnected) return 0;
+    return this.client.sadd(key, ...members);
+  }
+
+  async srem(key: string, ...members: any[]): Promise<number> {
+    if (!this.isConnected) return 0;
+    return this.client.srem(key, ...members);
+  }
+
+  async smembers<T>(key: string): Promise<T[]> {
+    if (!this.isConnected) return [];
+    return this.client.smembers(key);
+  }
+
+  async mget<T>(...keys: string[]): Promise<(T | null)[]> {
+    if (!this.isConnected || keys.length === 0) return Array(keys.length).fill(null);
+    return this.client.mget<T[]>(...keys);
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    if (!this.isConnected) return [];
+    return this.client.keys(pattern);
+  }
 }
 
 class StorageOrchestrator implements StorageAdapter {
@@ -188,6 +300,10 @@ class StorageOrchestrator implements StorageAdapter {
   async mget<T>(...keys: string[]) {
     const data = await this.active.mget<any>(...keys);
     return data.map(d => this.decompress(d)) as (T | null)[];
+  }
+
+  async keys(pattern: string) {
+    return this.active.keys(pattern);
   }
 }
 

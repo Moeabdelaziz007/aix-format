@@ -116,7 +116,8 @@ class SelfHealingStorageAdapter implements StorageAdapter {
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
     if (!url || !token) {
-      this.client = new Redis({ url: 'http://localhost', token: 'mock' });
+      // Rule 0: Security/Reliability - Fail fast, no mocks in production-ready core
+      this.client = new Redis({ url: 'http://missing-config', token: 'missing' });
       this.isConnected = false;
     } else {
       this.client = new Redis({ url, token });

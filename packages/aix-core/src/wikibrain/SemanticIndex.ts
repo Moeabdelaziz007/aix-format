@@ -120,8 +120,10 @@ export class SemanticIndex extends SovereignEntity {
 
   private async findTopologicalTwin(type: string, name: string): Promise<any | null> {
     const allKeys = await kv.lrange<string>('wikibrain:index_keys', 0, -1);
-    for (const key of allKeys) {
-      const existing = await kv.get<any>(`wikibrain:index:${key}`);
+    const keys = allKeys.map(k => `wikibrain:index:${k}`);
+    const candidates = await kv.mget<any>(...keys);
+    
+    for (const existing of candidates) {
       if (existing && existing.type === type && existing.name === name) return existing;
     }
     return null;
