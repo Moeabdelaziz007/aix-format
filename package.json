@@ -36,7 +36,7 @@
     "dead-code:report": "cat .generated/dead-code-report.md",
     "health-score": "vite-node scripts/health-score.ts",
     "health-score:report": "cat .generated/health-score.json",
-    "health:check": "vite-node scripts/self-heal.ts",
+    "health:check": "vite-node scripts/health-score.ts && node scripts/health-trend.js",
     "health:fix": "node scripts/auto-issue-generator.js",
     "health:full": "npm run health:check && npm run health:fix",
     "health:report": "cat .generated/HEALTH_REPORT.md"

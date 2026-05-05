@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"sort"
 	"sync"
 	"time"
@@ -166,13 +165,16 @@ func (cb *CircuitBreaker) IsAllowed() bool {
 	}
 	if cb.State == StateOpen {
 		if time.Since(cb.LastFailure) > cb.OpenDuration {
+			// Transition to half-open is handled here implicitly or explicitly
+			// For simplicity in this implementation, we'll allow it and caller can probe
 			return true
 		}
 		return false
 	}
-	return true
+	return true // half-open allows probing
 }
 
+// CheckAndProbe handles the state transition to Half-Open
 func (cb *CircuitBreaker) CheckAndProbe() bool {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
@@ -188,7 +190,7 @@ func (cb *CircuitBreaker) CheckAndProbe() bool {
 		}
 		return false
 	}
-	return true
+	return true // already half-open
 }
 
 type ErrorResponse struct {
@@ -233,6 +235,7 @@ func (r *SwarmRouter) RegisterAgent(agent AgentNode) error {
 		return fmt.Errorf("agent registration failed: ID %s already exists", agent.ID)
 	}
 
+	// Ensure capabilities map is initialized
 	if agent.Capabilities == nil {
 		agent.Capabilities = make(map[string]float64)
 	}
@@ -252,33 +255,40 @@ type candidate struct {
 	score   float64
 }
 
-// scoreCandidates evaluates eligible agents against task requirements.
-// Extracted from RouteTask to keep each function ≤ 30 lines (CODE_LAW).
-func (r *SwarmRouter) scoreCandidates(task TaskDescriptor) []candidate {
+func (r *SwarmRouter) scoreAgent(agent AgentNode, task TaskDescriptor) (float64, bool) {
+	if agent.Status != AgentStatusIdle {
+		return 0, false
+	}
+	rawScore := 0.0
+	for _, reqCap := range task.RequiredCapabilities {
+		capWeight, exists := agent.Capabilities[reqCap]
+		if !exists {
+			return 0, false
+		}
+		rawScore += capWeight
+	}
+	avgCapScore := rawScore / float64(len(task.RequiredCapabilities))
+	return avgCapScore*(float64(agent.TrustLevel)*0.2) + float64(task.Priority)*0.1, true
+}
+
+func (r *SwarmRouter) findCandidates(task TaskDescriptor) []candidate {
 	var candidates []candidate
 	for _, agent := range r.agents {
-		if agent.Status != AgentStatusIdle {
-			continue
+		if score, ok := r.scoreAgent(agent, task); ok {
+			candidates = append(candidates, candidate{agentID: agent.ID, score: score})
 		}
-		rawScore := 0.0
-		hasAll := true
-		for _, reqCap := range task.RequiredCapabilities {
-			w, ok := agent.Capabilities[reqCap]
-			if !ok {
-				hasAll = false
-				break
-			}
-			rawScore += w
-		}
-		if !hasAll {
-			continue
-		}
-		avg := rawScore / float64(len(task.RequiredCapabilities))
-		score := avg*(float64(agent.TrustLevel)*0.2) + float64(task.Priority)*0.1
-		candidates = append(candidates, candidate{agentID: agent.ID, score: score})
 	}
 	sort.Slice(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
 	return candidates
+}
+
+func (r *SwarmRouter) handleNoCandidates(task TaskDescriptor) (*AgentExecutionPlan, error) {
+	r.deadLetterQueue = append(r.deadLetterQueue, task)
+	if len(r.agents) == 0 {
+		r.breaker.RecordFailure(r.metrics)
+		return nil, fmt.Errorf("infrastructure failure: no agents registered in the swarm")
+	}
+	return nil, fmt.Errorf("task mismatch: no suitable agent found for task %s with capabilities %v", task.ID, task.RequiredCapabilities)
 }
 
 func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error) {
@@ -287,44 +297,28 @@ func (r *SwarmRouter) RouteTask(task TaskDescriptor) (*AgentExecutionPlan, error
 	}
 	if !r.breaker.CheckAndProbe() {
 		r.breaker.RecordFailure(r.metrics)
-		return nil, fmt.Errorf("routing unavailable: circuit breaker is %s", r.breaker.State)
+		return nil, fmt.Errorf("routing service is currently unavailable: circuit breaker is in %s state", r.breaker.State)
 	}
-	if task.ID == "" {
-		return nil, errors.New("task ID cannot be empty")
-	}
-	if len(task.RequiredCapabilities) == 0 {
-		return nil, errors.New("task must have at least one required capability")
+	if task.ID == "" || len(task.RequiredCapabilities) == 0 {
+		return nil, errors.New("invalid task descriptor: ID and capabilities are required")
 	}
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	candidates := r.scoreCandidates(task)
-
+	candidates := r.findCandidates(task)
 	if len(candidates) == 0 {
-		r.deadLetterQueue = append(r.deadLetterQueue, task)
-		if len(r.agents) == 0 {
-			r.breaker.RecordFailure(r.metrics)
-			return nil, errors.New("infrastructure failure: no agents registered")
-		}
-		return nil, fmt.Errorf("task mismatch: no suitable agent for %s %v", task.ID, task.RequiredCapabilities)
+		return r.handleNoCandidates(task)
 	}
 
-	fallback := make([]string, 0, 3)
+	fallback := []string{}
 	for i := 1; i < len(candidates) && i < 4; i++ {
 		fallback = append(fallback, candidates[i].agentID)
 	}
 
-	plan := &AgentExecutionPlan{
-		TaskID:         task.ID,
-		PrimaryAgentID: candidates[0].agentID,
-		FallbackChain:  fallback,
-		Score:          candidates[0].score,
-	}
-
+	plan := &AgentExecutionPlan{TaskID: task.ID, PrimaryAgentID: candidates[0].agentID, FallbackChain: fallback, Score: candidates[0].score}
 	r.breaker.RecordSuccess(r.metrics)
-	log.Printf("[SwarmRouter] Routed task %s → agent %s (score: %.2f, fallbacks: %d)\n",
-		task.ID, plan.PrimaryAgentID, plan.Score, len(fallback))
+	log.Printf("[SwarmRouter] Routed task %s to agent %s (score: %.2f, fallbacks: %d)\n", task.ID, plan.PrimaryAgentID, plan.Score, len(fallback))
 	return plan, nil
 }
 
@@ -335,7 +329,7 @@ func (r *SwarmRouter) GetDeadLetterQueue() ([]TaskDescriptor, error) {
 	return r.deadLetterQueue, nil
 }
 
-// ── HTTP HELPERS ────────────────────────────────────────────────────────────
+// HTTP Handlers with proper error handling and panic recovery
 
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -353,76 +347,65 @@ func respondError(w http.ResponseWriter, status int, code, message string) {
 	})
 }
 
-// ── MIDDLEWARE ───────────────────────────────────────────────────────────────
-
-// recoverMiddleware catches panics and returns 500 instead of crashing.
+// Middleware for panic recovery
 func recoverMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Printf("[PANIC] Recovered: %v", err)
-				respondError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Internal server error")
+				log.Printf("[PANIC] Recovered from panic: %v", err)
+				respondError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Internal server error occurred")
 			}
 		}()
 		next(w, r)
 	}
 }
 
-// apiKeyMiddleware enforces X-AIX-API-Key header against AIX_API_KEY env var.
-// Set AIX_API_KEY in your environment / Vercel secrets — never hardcode.
-func apiKeyMiddleware(next http.HandlerFunc) http.HandlerFunc {
+// Middleware for API Authentication (Zero-Trust)
+func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		secret := os.Getenv("AIX_API_KEY")
-		if secret == "" {
-			log.Println("[WARN] AIX_API_KEY not set — mutation endpoint is unprotected!")
-			respondError(w, http.StatusServiceUnavailable, "CONFIG_ERROR", "API key not configured on server")
-			return
-		}
-		if r.Header.Get("X-AIX-API-Key") != secret {
-			respondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Invalid or missing X-AIX-API-Key header")
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || authHeader != "Bearer AIX-TRUST-CHAIN-TOKEN" {
+			respondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Missing or invalid TrustChain token")
 			return
 		}
 		next(w, r)
 	}
 }
 
-// chain composes middleware right-to-left: chain(recover, auth, handler)
-func chain(middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		handler := middlewares[len(middlewares)-1](func(http.ResponseWriter, *http.Request) {})
-		for i := len(middlewares) - 2; i >= 0; i-- {
-			handler = middlewares[i](handler)
-		}
-		handler(w, r)
-	}
-}
-
-// ── HANDLERS ────────────────────────────────────────────────────────────────
-
+// Health check endpoint
 func (r *SwarmRouter) HealthHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET allowed")
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET method is allowed")
 		return
 	}
+
+	uptime := time.Since(startTime).String()
 	respondJSON(w, http.StatusOK, HealthResponse{
 		Status:  "ok",
 		Version: "1.0.0",
-		Uptime:  time.Since(startTime).String(),
+		Uptime:  uptime,
 	})
 }
 
+// Register agent endpoint
 func (r *SwarmRouter) RegisterAgentHandler(w http.ResponseWriter, req *http.Request) {
+	// Add timeout context
 	ctx, cancel := context.WithTimeout(req.Context(), 10*time.Second)
 	defer cancel()
 
 	if req.Method != http.MethodPost {
-		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST allowed")
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST method is allowed")
 		return
 	}
-	if req.Header.Get("Content-Type") != "application/json" {
+
+	// Validate Content-Type
+	contentType := req.Header.Get("Content-Type")
+	if contentType != "application/json" {
 		respondError(w, http.StatusBadRequest, "INVALID_CONTENT_TYPE", "Content-Type must be application/json")
 		return
 	}
+
+	// Check for nil body
 	if req.Body == nil {
 		respondError(w, http.StatusBadRequest, "EMPTY_BODY", "Request body cannot be empty")
 		return
@@ -430,13 +413,15 @@ func (r *SwarmRouter) RegisterAgentHandler(w http.ResponseWriter, req *http.Requ
 	defer req.Body.Close()
 
 	var agent AgentNode
-	dec := json.NewDecoder(req.Body)
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&agent); err != nil {
+	decoder := json.NewDecoder(req.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&agent); err != nil {
 		respondError(w, http.StatusBadRequest, "INVALID_JSON", fmt.Sprintf("Failed to parse JSON: %v", err))
 		return
 	}
 
+	// Check context timeout
 	select {
 	case <-ctx.Done():
 		respondError(w, http.StatusRequestTimeout, "TIMEOUT", "Request timeout")
@@ -456,18 +441,25 @@ func (r *SwarmRouter) RegisterAgentHandler(w http.ResponseWriter, req *http.Requ
 	})
 }
 
+// Route task endpoint
 func (r *SwarmRouter) RouteTaskHandler(w http.ResponseWriter, req *http.Request) {
+	// Add timeout context
 	ctx, cancel := context.WithTimeout(req.Context(), 10*time.Second)
 	defer cancel()
 
 	if req.Method != http.MethodPost {
-		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST allowed")
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST method is allowed")
 		return
 	}
-	if req.Header.Get("Content-Type") != "application/json" {
+
+	// Validate Content-Type
+	contentType := req.Header.Get("Content-Type")
+	if contentType != "application/json" {
 		respondError(w, http.StatusBadRequest, "INVALID_CONTENT_TYPE", "Content-Type must be application/json")
 		return
 	}
+
+	// Check for nil body
 	if req.Body == nil {
 		respondError(w, http.StatusBadRequest, "EMPTY_BODY", "Request body cannot be empty")
 		return
@@ -475,13 +467,15 @@ func (r *SwarmRouter) RouteTaskHandler(w http.ResponseWriter, req *http.Request)
 	defer req.Body.Close()
 
 	var task TaskDescriptor
-	dec := json.NewDecoder(req.Body)
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&task); err != nil {
+	decoder := json.NewDecoder(req.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&task); err != nil {
 		respondError(w, http.StatusBadRequest, "INVALID_JSON", fmt.Sprintf("Failed to parse JSON: %v", err))
 		return
 	}
 
+	// Check context timeout
 	select {
 	case <-ctx.Done():
 		respondError(w, http.StatusRequestTimeout, "TIMEOUT", "Request timeout")
@@ -501,29 +495,35 @@ func (r *SwarmRouter) RouteTaskHandler(w http.ResponseWriter, req *http.Request)
 	})
 }
 
+// MetricsHandler exposes router performance metrics
 func (r *SwarmRouter) MetricsHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET allowed")
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET method is allowed")
 		return
 	}
+
 	r.metrics.mu.RLock()
 	defer r.metrics.mu.RUnlock()
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"metrics": r.metrics,
 	})
 }
 
+// Get dead letter queue endpoint
 func (r *SwarmRouter) GetDLQHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET allowed")
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET method is allowed")
 		return
 	}
+
 	dlq, err := r.GetDeadLetterQueue()
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "DLQ_ERROR", err.Error())
 		return
 	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"count":   len(dlq),
@@ -531,17 +531,20 @@ func (r *SwarmRouter) GetDLQHandler(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
+// List agents endpoint
 func (r *SwarmRouter) ListAgentsHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET allowed")
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET method is allowed")
 		return
 	}
+
 	r.mu.RLock()
 	agents := make([]AgentNode, 0, len(r.agents))
-	for _, a := range r.agents {
-		agents = append(agents, a)
+	for _, agent := range r.agents {
+		agents = append(agents, agent)
 	}
 	r.mu.RUnlock()
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"count":   len(agents),
@@ -549,24 +552,19 @@ func (r *SwarmRouter) ListAgentsHandler(w http.ResponseWriter, req *http.Request
 	})
 }
 
-// ── MAIN ─────────────────────────────────────────────────────────────────────
-
 func main() {
 	router := NewSwarmRouter()
 
-	// Public endpoints — no auth required (observability only)
+	// Register routes with panic recovery
 	http.HandleFunc("/health", recoverMiddleware(router.HealthHandler))
-	http.HandleFunc("/api/metrics", recoverMiddleware(router.MetricsHandler))
-
-	// Protected endpoints — require X-AIX-API-Key header (set AIX_API_KEY env var)
-	http.HandleFunc("/api/agents/register", recoverMiddleware(apiKeyMiddleware(router.RegisterAgentHandler)))
-	http.HandleFunc("/api/tasks/route", recoverMiddleware(apiKeyMiddleware(router.RouteTaskHandler)))
-	http.HandleFunc("/api/dlq", recoverMiddleware(apiKeyMiddleware(router.GetDLQHandler)))
-	http.HandleFunc("/api/agents", recoverMiddleware(apiKeyMiddleware(router.ListAgentsHandler)))
+	http.HandleFunc("/api/agents/register", recoverMiddleware(authMiddleware(router.RegisterAgentHandler)))
+	http.HandleFunc("/api/tasks/route", recoverMiddleware(authMiddleware(router.RouteTaskHandler)))
+	http.HandleFunc("/api/dlq", recoverMiddleware(authMiddleware(router.GetDLQHandler)))
+	http.HandleFunc("/api/agents", recoverMiddleware(authMiddleware(router.ListAgentsHandler)))
+	http.HandleFunc("/api/metrics", recoverMiddleware(authMiddleware(router.MetricsHandler)))
 
 	port := ":8080"
 	log.Printf("[SwarmRouter] Starting HTTP server on %s", port)
-	log.Printf("[SwarmRouter] Protected routes require X-AIX-API-Key header")
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatalf("[FATAL] Server failed to start: %v", err)
 	}

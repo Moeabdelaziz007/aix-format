@@ -1,9 +1,0 @@
-
- RUN  v4.1.5 /Users/cryptojoker710/Desktop/aix-format/packages
-
-No test files found, exiting with code 1
-
-filter: packages/aix-core/src/mcp-gate.test.ts
-include: tests/**/*.test.js, index.test.ts, packages/**/*.test.ts
-exclude:  **/node_modules/**, **/.git/**
-
