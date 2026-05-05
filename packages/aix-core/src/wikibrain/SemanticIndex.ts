@@ -25,11 +25,18 @@ export const SearchFilterSchema = z.object({
 
 export const AgentManifestSchema = z.object({
   did: z.string(),
+  // 🌀 [ARABIC_SOVEREIGNTY]: هوية الوكيل التوبولوجية
   identity_layer: z.object({
     name: z.string().optional(),
     role: z.string().optional(),
     description: z.string().optional(),
     visibility: z.enum(['public', 'private', 'sovereign']).default('public'),
+  }).optional(),
+  // 🛡️ [TOPOLOGICAL_GUARD]: برهان النزاهة الهيكلية
+  topological_integrity: z.object({
+    hash: z.string(),
+    verified_at: z.string(),
+    sovereign_tier: z.number().default(1)
   }).optional(),
   capabilities: z.array(z.string()).optional(),
   skills: z.array(z.any()).optional(),

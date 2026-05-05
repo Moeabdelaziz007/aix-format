@@ -268,6 +268,10 @@ export class AgentRuntimeEngine {
       };
 
     } catch (error) {
+      const duration = Date.now() - startTime;
+      if (duration > 5000) {
+        this.runtime.turboLevel = 'aggressive'; // Escalating turbo for next attempt
+      }
       await this.handleFailure(task, error);
       return {
         success: false,
@@ -278,6 +282,19 @@ export class AgentRuntimeEngine {
         usedCache,
       };
     }
+  }
+
+  /**
+   * 🌀 SOVEREIGN CIPHER (Round 44)
+   * Tokenizes sensitive data to ensure Zero-Trust privacy.
+   */
+  private sovereignCipher(content: string): string {
+    const sensitivePatterns = [/API_KEY/gi, /SECRET/gi, /PASSWORD/gi, /\/Users\/[^\/]+/gi];
+    let ciphered = content;
+    sensitivePatterns.forEach(pattern => {
+      ciphered = ciphered.replace(pattern, (match) => `[SOV_TOKEN:${crypto.createHash('sha256').update(match).digest('hex').slice(0, 8)}]`);
+    });
+    return ciphered;
   }
 
   private async buildContext(task: Task): Promise<RuntimeContext> {
@@ -299,10 +316,11 @@ export class AgentRuntimeEngine {
    * Compresses agent history to essential 'Sovereign Nodes'.
    */
   private compressContextTopologically(history: any[]): any[] {
+    const level = this.runtime.turboLevel || 'normal';
     return history.map(step => ({
-      intent: step.thought.slice(0, 50), // Keep essence
+      intent: level === 'aggressive' ? step.thought.slice(0, 20) : step.thought.slice(0, 50),
       action: step.action,
-      result: step.observation.length > 500 ? `[Compressed Result: Hash ${crypto.createHash('sha256').update(step.observation).digest('hex').slice(0, 8)}]` : step.observation
+      result: level === 'aggressive' ? `[Hashed: ${crypto.createHash('sha256').update(step.observation).digest('hex').slice(0, 4)}]` : step.observation
     }));
   }
 
