@@ -12,6 +12,7 @@ export * from './harness.config';
 export * from './economics';
 export * from './treasury';
 export * from './registry';
+export * from './identity';
 export * from './gateway';
 export * from './agent-runtime';
 export * from './llm-provider';

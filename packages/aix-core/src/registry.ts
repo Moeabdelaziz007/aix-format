@@ -90,6 +90,35 @@ export class AgentRegistry {
 
     return manifests.filter(Boolean);
   }
+
+  /**
+   * Updates an existing agent.
+   */
+  async updateAgent(did: string, body: any) {
+    const existing = await this.getAgent(did);
+    if (!existing) throw new Error('Agent not found');
+
+    const updated = { ...existing, ...body, did };
+    await kv.set(KEYS.registry(did), updated);
+    
+    // Update marketplace cache
+    await kv.set(`marketplace:agent:${did}`, {
+      did,
+      name: updated.meta?.name || 'Unnamed Agent',
+      role: updated.persona?.role || 'Sovereign Agent',
+      timestamp: Date.now()
+    });
+
+    return updated;
+  }
+
+  /**
+   * Removes an agent from the registry.
+   */
+  async deleteAgent(did: string) {
+    await kv.del(KEYS.registry(did));
+    await kv.del(`marketplace:agent:${did}`);
+  }
 }
 
 export const registry = new AgentRegistry();

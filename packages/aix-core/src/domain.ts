@@ -11,6 +11,43 @@ import { z } from 'zod';
 export const ISODateSchema = z.string().datetime();
 export type ISODate = z.infer<typeof ISODateSchema>;
 
+// --- CORE AGENT CONTRACTS ---
+export const AgentManifestSchema = z.object({
+  id: z.string(),
+  meta: z.object({
+    name: z.string(),
+    format_version: z.string(),
+    tags: z.array(z.string()).optional()
+  }),
+  persona: z.object({
+    role: z.string(),
+    system_prompt: z.string().optional()
+  }).optional(),
+  abom: z.object({
+    spec_version: z.string(),
+    security: z.object({
+      trust_tier: z.enum(['verified', 'community', 'unverified', 'revoked'])
+    })
+  }).optional(),
+  identity_layer: z.object({
+    id: z.string(),
+    verification: z.object({
+      status: z.string(),
+      method: z.string().optional()
+    }).optional()
+  }).optional()
+});
+export type AgentManifest = z.infer<typeof AgentManifestSchema>;
+
+export const DeploymentSchema = z.object({
+  agentId: z.string(),
+  status: z.enum(['pending', 'deploying', 'deployed', 'failed']),
+  deployedAt: z.string().optional(),
+  endpointUrl: z.string().optional(),
+  mcpUrl: z.string().optional(),
+});
+export type Deployment = z.infer<typeof DeploymentSchema>;
+
 // --- AGENT RUNTIME CONTRACTS ---
 export const TaskSchema = z.object({
   taskId: z.string().min(1),
