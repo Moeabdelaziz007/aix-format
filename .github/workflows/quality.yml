@@ -15,6 +15,5 @@ jobs:
         continue-on-error: true  # report but don't block
       - name: Upload dead code report
         uses: actions/upload-artifact@v4
-        with:
           name: dead-code-report
           path: dead-code-report.txt

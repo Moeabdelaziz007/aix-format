@@ -10,15 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+
       - uses: pnpm/action-setup@v4
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
           node-version: '22'
-          cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
+
       - name: Run Pattern Analysis
         run: node scripts/pattern-watcher.js

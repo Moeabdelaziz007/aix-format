@@ -13,16 +13,14 @@ jobs:
     steps:
       - name: 📥 Checkout Sovereign Code
         uses: actions/checkout@v4
-        with:
+
+      - uses: pnpm/action-setup@v4
           fetch-depth: 0
 
       - name: 🟢 Setup Node.js (High-Speed Runtime)
-        uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
+        uses: actions/setup-node@v4
           node-version: 20
-          cache: "pnpm"
+          cache: 'npm'
 
       - name: 📦 Install Dependencies
         run: pnpm install
@@ -41,7 +39,7 @@ jobs:
 
       - name: 🏥 Self-Heal & Report
         if: always()
-        run: pnpm run health:check
+        run: npm run health:check
         
       - name: 📬 Commit Lessons Learned
         if: always()

@@ -1,184 +1,60 @@
-"use client";
+'use client';
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Mic, X, Loader2, Volume2, Sparkles, CheckCircle2 } from "lucide-react";
-import { useVoiceWizard } from "@/hooks/useVoiceWizard";
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mic, MicOff, Settings, Sparkles } from 'lucide-react';
 
-import { Card } from "@/components/ui/card";
+const Card = ({ children, className }: any) => (
+  <div className={`bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden ${className}`}>
+    {children}
+  </div>
+);
 
-/**
- * AIX Voice Setup Wizard UI
- * A premium, interactive overlay for conversational agent creation.
- */
-export function VoiceWizard({ 
-  onClose, 
-  onComplete,
-  onDeploy 
-}: { 
-  onClose: () => void;
-  onComplete: (manifest: any) => void;
-  onDeploy: (manifest: any) => void;
-}) {
-  const { 
-    handleVoiceTurn, 
-    isListening, 
-    isSpeaking, 
-    isProcessing,
-    manifest, 
-    messages 
-  } = useVoiceWizard();
-
-  const lastMessage = messages[messages.length - 1];
+export function VoiceWizard() {
+  const [isListening, setIsListening] = React.useState(false);
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 "
+      className="max-w-2xl mx-auto"
     >
-      <Card className="relative w-full max-w-2xl overflow-hidden border-zinc-800 bg-zinc-950/90 ">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">Sovereign Wizard</h2>
-              <p className="text-sm text-zinc-400">Describe your agent to get started</p>
-            </div>
+      <Card className="p-8">
+        <div className="flex flex-col items-center text-center space-y-8">
+          <div className="relative">
+            <motion.div
+              animate={{ scale: isListening ? [1, 1.2, 1] : 1 }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className={`w-24 h-24 rounded-full flex items-center justify-center ${isListening ? 'bg-indigo-500 shadow-[0_0_40px_rgba(79,70,229,0.4)]' : 'bg-zinc-800'}`}
+            >
+              {isListening ? <Mic size={40} className="text-white" /> : <MicOff size={40} className="text-white/40" />}
+            </motion.div>
           </div>
-          <button className="button" variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
-            <X className="w-5 h-5" />
-          </button>
+
+          <div>
+            <h3 className="text-2xl font-bold text-white">Agent Voice Configuration</h3>
+            <p className="text-zinc-500 mt-2">Speak to your agent to calibrate the VLA response latency.</p>
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => setIsListening(!isListening)}
+              className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all"
+            >
+              {isListening ? 'Stop Calibration' : 'Start Calibration'}
+            </button>
+            <button className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all">
+              <Settings size={24} className="text-white/60" />
+            </button>
+          </div>
         </div>
 
-        {/* Content Area */}
-        <div className="p-8 space-y-8 min-h-[400px] flex flex-col items-center justify-center">
-          <AnimatePresence mode="wait">
-            {!manifest ? (
-              <motion.div
-                key="chat"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="w-full text-center space-y-6"
-              >
-                {/* Visualizer / Pulse */}
-                <div className="relative flex items-center justify-center h-48">
-                  <AnimatePresence>
-                    {(isListening || isSpeaking) && (
-                      <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1.5, opacity: 1 }}
-                        exit={{ scale: 0.8, opacity: 0 }}
-                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                        className={`absolute w-32 h-32 rounded-full blur-3xl ${
-                          isListening ? "bg-red-500/20" : "bg-blue-500/20"
-                        }`}
-                      />
-                    )}
-                  </AnimatePresence>
-                  
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-colors duration-500  ${
-                      isListening 
-                        ? "bg-red-500 text-white /50"
-                        : isSpeaking
-                        ? "bg-blue-500 text-white /50"
-                        : "bg-zinc-900 text-zinc-400 border border-zinc-800"
-                    }`}
-                    onMouseDown={handleVoiceTurn}
-                  >
-                    {isListening ? (
-                      <Mic className="w-10 h-10 animate-pulse" />
-                    ) : isProcessing ? (
-                      <Loader2 className="w-10 h-10 animate-spin" />
-                    ) : isSpeaking ? (
-                      <Volume2 className="w-10 h-10" />
-                    ) : (
-                      <Mic className="w-10 h-10" />
-                    )}
-                  </motion.div>
-                </div>
-
-                {/* Status & Last Message */}
-                <div className="space-y-4 max-w-md mx-auto">
-                  <span className="badge" variant="outline" className={`${
-                    isListening ? "border-red-500 text-red-500 bg-red-500/5" :
-                    isProcessing ? "border-purple-500 text-purple-500 bg-purple-500/5" :
-                    isSpeaking ? "border-blue-500 text-blue-500 bg-blue-500/5" :
-                    "border-zinc-800 text-zinc-500"
-                  }`}>
-                    {isListening ? "LISTENING..." : 
-                     isProcessing ? "THINKING..." :
-                     isSpeaking ? "WIZARD SPEAKING..." : 
-                     "HOLD TO TALK"}
-                  </span>
-                  
-                  <p className="text-lg text-white font-medium leading-relaxed">
-                    {lastMessage?.role === 'assistant' 
-                      ? lastMessage.content 
-                      : lastMessage?.role === 'user'
-                      ? `"${lastMessage.content}"`
-                      : "Hi! I'm your AIX Architect. What kind of agent should we build today?"}
-                  </p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="complete"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="w-full text-center space-y-6"
-              >
-                <div className="flex justify-center">
-                  <div className="w-20 h-20 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center border border-green-500/20">
-                    <CheckCircle2 className="w-10 h-10" />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-bold text-white">Manifest Ready!</h3>
-                  <p className="text-zinc-400">I've generated a draft for "{manifest.meta?.name}".</p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-left max-h-[200px] overflow-auto scrollbar-hide">
-                  <pre className="text-xs text-zinc-500 font-mono">
-                    {JSON.stringify(manifest, null, 2)}
-                  </pre>
-                </div>
-
-                <div className="flex gap-4">
-                  <button className="button"
-                    variant="outline" 
-                    className="flex-1 border-zinc-800 hover:bg-zinc-900"
-                    onClick={() => onComplete(manifest)}
-                  >
-                    Edit Details
-                  </button>
-                  <button className="button"
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                    onClick={() => onDeploy(manifest)}
-                  >
-                    Deploy Agent
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Footer Hint */}
-        <div className="p-4 border-t border-zinc-800/50 bg-zinc-900/50 text-center">
+        <div className="p-4 border-t border-zinc-800/50 bg-zinc-900/50 text-center mt-8">
           <p className="text-[10px] uppercase tracking-widest text-zinc-500">
             Powered by Groq Whisper & Gemini 2.0 Flash
           </p>
         </div>
-      </div>
+      </Card>
     </motion.div>
   );
 }

@@ -17,17 +17,18 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+          node-version: '20'
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          pnpm install -g pnpm@9.15.0
+          pnpm install
 
       - name: Run Sovereign Pulse
         env:
@@ -42,6 +43,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
+          # Trigger the pulse/evolution script
+          # Assuming there's a script in packages/aix-core or a CLI tool
+          # For now, we simulate the run via a node script
           node -e "
             const { getGateway } = require('./packages/aix-core/dist/gateway');
             const gateway = getGateway();

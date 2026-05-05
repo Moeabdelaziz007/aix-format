@@ -48,13 +48,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
-        with:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'npm'
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
@@ -104,6 +103,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
 
       - name: Check Tailwind v4 baseline in globals.css
         run: |
@@ -184,7 +185,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
+
+      - uses: pnpm/action-setup@v4
           fetch-depth: 0
 
       - name: Detect AI origin in Studio PR

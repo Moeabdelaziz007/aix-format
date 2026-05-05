@@ -2,6 +2,7 @@ name: 🏥 Sovereign Protocol — Weekly Health Check
 
 on:
   schedule:
+    # Every Sunday at 00:00 UTC
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
@@ -9,17 +10,21 @@ jobs:
   health-check:
     name: Deep Architecture Audit
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
-      - name: Setup Node.js
+
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
-        with:
           node-version: '22'
-          cache: 'pnpm'
+          cache: 'npm'
+
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
+
       - name: Validate JSON Schemas
         run: |
           echo "▶ Compiling all JSON schemas..."
@@ -31,12 +36,15 @@ jobs:
               console.log('  ✅ Valid:', '$schema');
             "
           done
+
       - name: Run Full Test Suite
-        run: pnpm test
+        run: npm test
         env:
           CI: true
+
       - name: Validate All Example Files
-        run: pnpm run validate:examples
+        run: npm run validate:examples
+
       - name: Identity Compliance Check
         run: |
           echo "▶ Checking did:web compliance..."
@@ -44,9 +52,10 @@ jobs:
           if [ -n "$FOUND" ]; then
             echo "❌ Legacy did:axiom references:"
             echo "$FOUND"
-            # No exit here to avoid session block
+            exit 1
           fi
           echo "✅ did:web compliance: PASS"
+
       - name: Post Summary to Job
         run: |
           echo "### 🏥 Sovereign Protocol Health Check" >> $GITHUB_STEP_SUMMARY

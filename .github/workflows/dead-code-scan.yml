@@ -4,11 +4,6 @@
 
 name: Dead Code Scan
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-
 on:
   pull_request:
     paths:
@@ -32,7 +27,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
           fetch-depth: 0  # Full history for git log analysis
 
       - name: Install ripgrep
@@ -54,7 +48,6 @@ jobs:
       - name: Upload Markdown Report
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: dead-code-report-md
           path: .generated/dead-code-report.md
           retention-days: 30
@@ -62,7 +55,6 @@ jobs:
       - name: Upload JSON Report
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: dead-code-report-json
           path: .generated/dead-code-report.json
           retention-days: 90
@@ -70,7 +62,6 @@ jobs:
       - name: Comment PR with Report
         if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
-        with:
           script: |
             const fs = require('fs');
             const reportPath = '.generated/dead-code-report.md';
@@ -117,7 +108,6 @@ jobs:
       - name: Create Weekly Issue
         if: github.event_name == 'schedule'
         uses: actions/github-script@v7
-        with:
           script: |
             const fs = require('fs');
             const reportPath = '.generated/dead-code-report.md';
@@ -153,13 +143,12 @@ jobs:
         run: |
           echo "❌ CRITICAL orphaned exports detected!"
           echo "Review the report and remove dead code before merging."
-          # No exit 1 here to avoid session block, but in real CI it would fail.
-          false
+          exit 1
 
       - name: Success Summary
         if: steps.scan.outputs.scan_failed != 'true'
         run: |
           echo "✅ No critical dead code issues found"
-          # cat .generated/dead-code-report.md | head -20
+          cat .generated/dead-code-report.md | head -20
 
 # Made with Moe Abdelaziz

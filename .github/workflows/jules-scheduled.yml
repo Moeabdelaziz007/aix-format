@@ -30,19 +30,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
-        with:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
           node-version: '22'
-          cache: "pnpm"
+          cache: 'npm'
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Run Core Tests
-        run: pnpm test
+        run: npm test
         env:
           CI: true
 
@@ -58,7 +57,7 @@ jobs:
           done
 
       - name: Validate All Examples
-        run: pnpm run validate:examples
+        run: npm run validate:examples
 
       - name: Identity Compliance Check
         run: |
@@ -96,13 +95,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
-        with:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
           node-version: '22'
-          cache: "pnpm"
+          cache: 'npm'
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
@@ -161,13 +159,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
-        with:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
           node-version: '22'
-          cache: "pnpm"
+          cache: 'npm'
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
