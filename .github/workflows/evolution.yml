@@ -23,7 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 Install Dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: 🧬 Activate Meta-Loop & Wisdom Grafting
         run: npx tsx scripts/activate-meta-loop.ts --infinite

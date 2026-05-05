@@ -56,7 +56,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: TypeScript type check (Studio)
         run: npm --prefix apps/studio exec tsc --noEmit

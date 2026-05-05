@@ -35,7 +35,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Backup committed types/parser.d.ts
         run: cp types/parser.d.ts types/parser.d.ts.committed
