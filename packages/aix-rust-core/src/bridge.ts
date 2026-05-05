@@ -7,8 +7,14 @@
 import * as msgpack from '@msgpack/msgpack';
 import type { BusEvent, Skill, RustCore } from '../index';
 
-// Load native module
-const rustCore: RustCore = require('../index.node');
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+let rustCore: RustCore | null = null;
+try {
+  rustCore = require('../index.node');
+} catch (e) {
+  console.warn('⚠️ [RustBridge] index.node not found. Native features will be disabled.');
+}
 
 // ============================================================================
 // Serialization Helpers (Binary for Performance)
@@ -323,6 +329,9 @@ export function getRustBridge(config?: {
   embeddingDim?: number;
 }): RustBridge {
   if (!bridgeInstance) {
+    if (!rustCore) {
+      throw new Error('Rust native addon not found. Falling back to TS implementation.');
+    }
     bridgeInstance = new RustBridge(config);
   }
   return bridgeInstance;

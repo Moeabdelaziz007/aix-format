@@ -4,7 +4,8 @@
  * Provides high-level TypeScript API with automatic batching and serialization.
  */
 import * as msgpack from '@msgpack/msgpack';
-// Load native module
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const rustCore = require('../index.node');
 // ============================================================================
 // Serialization Helpers (Binary for Performance)

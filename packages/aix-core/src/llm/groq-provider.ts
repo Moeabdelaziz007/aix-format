@@ -52,7 +52,7 @@ export class GroqProvider implements LLMProvider {
         });
       } catch (err) {
         lastError = err;
-        console.warn(`⚠️ [Groq] Attempt ${attempt + 1} failed: ${err.message}. Retrying...`);
+        console.warn(`⚠️ [Groq] Attempt ${attempt + 1} failed: ${(err as Error).message}. Retrying...`);
         await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500));
       }
     }

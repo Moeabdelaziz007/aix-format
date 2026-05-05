@@ -16,6 +16,10 @@ export declare const NS: {
     readonly PAYMENT: "payment:";
     readonly EXECUTION: "execution:";
     readonly BUS: "bus:";
+    readonly RATE: "rate:";
+    readonly HINTS: "hints:";
+    readonly GRAPH: "graph:";
+    readonly TIER1: "tier1:";
 };
 /**
  * Key generation functions
@@ -26,6 +30,17 @@ export declare const KEYS: {
     readonly agentConfig: (id: string) => string;
     readonly agentState: (id: string) => string;
     readonly agentMetrics: (id: string) => string;
+    readonly agentExplorationHistory: (id: string) => string;
+    readonly agentExplorations: (id: string) => string;
+    readonly agentCuriosityScore: (id: string) => string;
+    readonly agentSkillCombos: (id: string) => string;
+    readonly agentSkillCombo: (id: string, hash: string) => string;
+    readonly agentActionCount: (id: string, action: string) => string;
+    readonly agentSelfReview: (id: string, taskId: string) => string;
+    readonly agentSelfReviewHistory: (id: string) => string;
+    readonly agentFailurePatterns: (id: string) => string;
+    readonly agentCurrentMode: (id: string) => string;
+    readonly agentExplorationRate: (id: string) => string;
     readonly aix: (key: string) => string;
     readonly aixManifest: (agentId: string) => string;
     readonly aixSkills: (agentId: string) => string;
@@ -52,6 +67,13 @@ export declare const KEYS: {
     readonly bus: (ring: string, event: string) => string;
     readonly busQueue: (ring: string) => string;
     readonly busBacklog: () => string;
+    readonly rate: (key: string) => string;
+    readonly rateLimit: (identifier: string) => string;
+    readonly fileHint: (filePath: string) => string;
+    readonly dependencyNode: (nodeId: string) => string;
+    readonly structuralMap: (scope: string) => string;
+    readonly constitution: () => string;
+    readonly specializedKnowledge: (agentRole: string) => string;
 };
 /**
  * Key pattern validation

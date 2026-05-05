@@ -1,6 +1,6 @@
 import { AbomScanner } from '../scanner.js';
 import { ValidationResult, AgentManifest, BusEventSchema } from '../domain.js';
-import { getRustBridge } from '@aix/rust-core/src/bridge';
+import { getRustBridge } from '@aix/rust-core/src/bridge.js';
 
 export * from './trust-chain.js';
 
