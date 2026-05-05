@@ -18,14 +18,16 @@ export * from './infra';
 export * from './mcp-gate';
 export * from './swarm';
 export * from './scanner';
+export * from './validation';
+export * from './domain';
 export { getRustBridge } from '../../aix-rust-core/src/bridge';
 
-import { Gateway } from './gateway';
-let gatewayInstance: Gateway | null = null;
+import { SovereignGateway } from './gateway';
+let gatewayInstance: SovereignGateway | null = null;
 
-export function getGateway(config?: any): Gateway {
+export function getGateway(config?: any): SovereignGateway {
   if (!gatewayInstance) {
-    gatewayInstance = new Gateway(config);
+    gatewayInstance = new SovereignGateway(config);
   }
   return gatewayInstance;
 }

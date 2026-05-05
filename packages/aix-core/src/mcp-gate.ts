@@ -40,7 +40,16 @@ export class MCPGate {
       throw new Error(`[Security Violation] Malicious patterns detected in tool parameters: ${sanitization.blockedPatterns.join(', ')}`);
     }
 
-    // 3. Quota Enforcement (Anti-DDoS)
+    // 3. ABOM Manifest Check (Integrity)
+    const registryData = await kv.get(`agent:${agentId}`);
+    if (registryData) {
+      const report = await AbomScanner.scan(registryData);
+      if (!report.valid && report.riskScore > 70) {
+        throw new Error(`[Security Violation] Agent manifest failed ABOM scan (Risk: ${report.riskScore})`);
+      }
+    }
+
+    // 4. Quota Enforcement (Anti-DDoS)
     await this.enforceQuotas(agentId, toolCall.tool);
 
     console.log(`🛡️ [MCP_GATE] Clearance Granted for ${agentId} -> ${toolCall.tool} (Trust: ${trustScore.toFixed(1)})`);

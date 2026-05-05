@@ -78,4 +78,49 @@ export class StorageOrchestrator {
       return true;
     } catch { return false; }
   }
+
+  /**
+   * Saves a payload with optional compression for large data.
+   */
+  async save<T>(key: string, data: T, options: { compress?: boolean; ttl?: number } = {}): Promise<void> {
+    const json = JSON.stringify(data);
+    let finalValue: string | Buffer = json;
+    let isCompressed = false;
+
+    // Threshold: 10KB
+    if (options.compress || json.length > 10240) {
+      const zlib = await import('zlib');
+      finalValue = zlib.gzipSync(json).toString('base64');
+      isCompressed = true;
+    }
+
+    const payload = isCompressed ? `__gz__${finalValue}` : json;
+    
+    if (options.ttl) {
+      await kv.set(key, payload, { ex: options.ttl });
+    } else {
+      await kv.set(key, payload);
+    }
+  }
+
+  /**
+   * Loads a payload and handles decompression if needed.
+   */
+  async load<T>(key: string): Promise<T | null> {
+    const raw = await kv.get<string>(key);
+    if (!raw) return null;
+
+    if (raw.startsWith('__gz__')) {
+      const zlib = await import('zlib');
+      const base64 = raw.slice(6);
+      const decompressed = zlib.gunzipSync(Buffer.from(base64, 'base64')).toString();
+      return JSON.parse(decompressed);
+    }
+
+    try {
+      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch {
+      return raw as any;
+    }
+  }
 }

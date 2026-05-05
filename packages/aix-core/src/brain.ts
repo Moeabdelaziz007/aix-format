@@ -21,6 +21,19 @@ export class AgentSelfReview {
     const raw = await kv.lrange<string>(KEYS.agentSelfReviewHistory(agentId), 0, limit - 1);
     return raw.map(r => JSON.parse(r));
   }
+
+  /**
+   * Distills wisdom from a high-quality self-review.
+   */
+  static async distill(record: SelfReviewRecord, task: string, result: string): Promise<boolean> {
+    const WISDOM_THRESHOLD = 0.85;
+    if (record.score >= WISDOM_THRESHOLD) {
+      console.log(`✨ [Brain] High quality review (${record.score}). Distilling wisdom...`);
+      await archiveWisdom(record.agentId, task, result);
+      return true;
+    }
+    return false;
+  }
 }
 
 export interface LearnedProcedure {

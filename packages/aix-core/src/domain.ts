@@ -124,3 +124,52 @@ export const PulseEventSchema = z.object({
   meta: z.record(z.string()).optional(),
 });
 export type PulseEvent = z.infer<typeof PulseEventSchema>;
+
+// --- GATEWAY ENTRY CONTRACTS ---
+export const AgentRequestSchema = z.object({
+  agentId: z.string().min(1),
+  task: z.string().min(1),
+  userId: z.string().optional(),
+  force: z.boolean().optional().default(false),
+  tools: z.record(z.any()).optional(),
+  context: z.record(z.any()).optional(),
+});
+export type AgentRequest = z.infer<typeof AgentRequestSchema>;
+
+export const GatewayResponseSchema = z.object({
+  success: z.boolean(),
+  requestId: z.string(),
+  result: z.any().optional(),
+  error: z.string().optional(),
+  metrics: z.object({
+    duration: z.number(),
+    safetyScore: z.number(),
+    cost: z.number(),
+  }).optional(),
+});
+export type GatewayResponse = z.infer<typeof GatewayResponseSchema>;
+
+// --- VALIDATION & SECURITY CONTRACTS ---
+export const ValidationErrorSchema = z.object({
+  rule: z.string(),
+  message: z.string(),
+  section: z.string().optional(),
+  code: z.string().optional(),
+});
+export type ValidationError = z.infer<typeof ValidationErrorSchema>;
+
+export const ValidationResultSchema = z.object({
+  valid: z.boolean(),
+  errors: z.array(ValidationErrorSchema),
+  warnings: z.array(ValidationErrorSchema),
+  riskScore: z.number().min(0).max(100).default(0),
+});
+export type ValidationResult = z.infer<typeof ValidationResultSchema>;
+
+export interface ValidationRule {
+  name: string;
+  section: string;
+  priority: number;
+  check: (data: any) => Promise<boolean | string> | boolean | string;
+  message?: string;
+}

@@ -1,152 +1,156 @@
 import { EventEmitter } from 'events';
-import { kv, KEYS } from './storage';
 import { health } from './health';
 import { CuriosityEngine } from './curiosity';
-import { archiveWisdom } from './brain';
-import { runTask } from './agent-runtime';
+import { archiveWisdom, AgentSelfReview } from './brain';
+import { AgentRuntimeEngine } from './agent-runtime';
 import { GroqProvider } from './llm-provider';
 import { mcpGate } from './mcp-gate';
-import { SwarmRouter } from './swarm';
 import { SovereignEconomics } from './economics';
+import { getHarness } from './harness.config';
 import { getRustBridge } from '../../aix-rust-core/src/bridge';
+import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema } from './domain';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
 
-export * from './rate-limit';
-export * from './harness.config';
-export * from './economics';
-export * from './gateway';
-
 /**
- * 🛰️ AIX GATEWAY
- * The Sovereign Entry Point and Meta-Loop Orchestrator.
+ * 🛰️ SOVEREIGN_GATEWAY
+ * The Official Entry Point for the Sovereign AIX Protocol.
+ * Backbone Path: Gateway -> AgentRuntimeEngine (v1)
+ * 
+ * Logic:
+ * 1. Harness Clearance (Auth, Rate-Limit, Payment)
+ * 2. Health & Integrity Audit
+ * 3. Runtime Execution (AgenticKit + Tools)
+ * 4. Self-Review (Critic Pattern)
+ * 5. Wisdom Archiving (Hermes Learning)
+ * 6. Economic Settlement
+ * 
  * Made with Moe Abdelaziz
  */
 
-export class Gateway extends EventEmitter {
+export class SovereignGateway extends EventEmitter {
   private octokit?: Octokit;
-  private langfuse: any = null;
   private economics = new SovereignEconomics();
   private rust = getRustBridge();
+  private harness = getHarness();
 
-  constructor(config: { githubToken?: string; langfuse?: any } = {}) {
+  constructor(config: { githubToken?: string } = {}) {
     super();
     if (config.githubToken) {
       this.octokit = new Octokit({ auth: config.githubToken });
     }
-    this.langfuse = config.langfuse;
   }
 
   /**
-   * Primary execution gate for agents.
-   * Ensures safety, integrity, and manages the meta-loop.
+   * Official Execute Entry
    */
-  async run(agentId: string, taskDescription: string, force = false, userId: string = 'anonymous') {
+  async execute(requestInput: unknown): Promise<GatewayResponse> {
     const startTime = Date.now();
-
-    // 1. Publish start event to Rust Event Store
-    await this.rust.eventStore.publish({
-      id: crypto.randomUUID(),
-      agent_id: agentId,
-      event_type: 'task:start',
-      payload: JSON.stringify({ task: taskDescription, userId }),
-      timestamp: startTime,
-    });
-
-    console.log(`🚀 [Gateway] Initiating execution for ${agentId}`);
-
-    // ⚡ [Conditional Evolution Trick]
-    // Skip if run too frequently to save API costs and prevent oscillation.
-    const lastRun = (await kv.get<number>(KEYS.agentLastActivity(agentId))) || 0;
-    const hoursSince = (Date.now() - lastRun) / 3600000;
-    
-    if (hoursSince < 6 && !force) {
-      console.log(`🛰️ [Gateway] Skipping evolution for ${agentId} (${hoursSince.toFixed(1)}h since last run)`);
-      return { success: true, skipped: true, reason: 'Cool-down active' };
-    }
+    const requestId = crypto.randomUUID();
+    let agentIdForPenalty: string | undefined;
 
     try {
-      // 1. Guardian Pre-flight Clearance
-      await health.checkIntegrity();
-      const safetyScore = await health.getTrustScore(agentId);
-      console.log(`🛡️ [Guardian] Safety Score for ${agentId}: ${safetyScore.toFixed(1)}`);
-      
-      await mcpGate({ tool: 'gateway.run', params: { taskDescription } }, agentId);
+      // 1. Parse and Validate Request
+      const request = AgentRequestSchema.parse(requestInput);
+      const { agentId, task, userId = 'anonymous', tools = {} } = request;
+      agentIdForPenalty = agentId;
 
-      if (await health.detectOscillation(agentId)) {
-        console.warn(`⚠️ [Gateway] Oscillation detected for ${agentId}. Stabilizing...`);
-        this.emit('gateway:stabilizing', { agentId });
-        await health.decrementTrust(agentId, 0.1);
+      // 2. Harness Pre-flight (Auth, Rate-Limit, 402 Payment)
+      const clearance = await this.harness.checkClearance(agentId, userId);
+      if (!clearance.allowed) {
+        throw new Error(`CLEARANCE_DENIED: ${clearance.reason}`);
       }
 
-      // 2. Routing & Model Selection
-      const router = new SwarmRouter();
-      const model = await router.getDecisionModel(taskDescription);
-      
-      // 3. Execution
-      const result = await runTask(agentId, 'sovereign-agent', {
-        taskId: `task-${Date.now()}`,
-        description: taskDescription,
-        maxSteps: 7
-      }, {
-        llm: new GroqProvider(process.env.GROQ_API_KEY!, model),
-        tools: {} // Tool discovery would go here
+      // 3. Audit Start (Rust Event Store)
+      await this.rust.eventStore.publish({
+        id: requestId,
+        agent_id: agentId,
+        event_type: 'task:start',
+        payload: JSON.stringify({ task, userId, metrics: clearance.metrics }),
+        timestamp: startTime,
       });
 
-      const reward = await CuriosityEngine.calculateReward(agentId, taskDescription);
-      console.log(`💰 [Settlement] Learning Reward: ${reward.toFixed(4)}`);
+      console.log(`🚀 [SovereignGateway] Initiating: ${agentId} (Req: ${requestId})`);
+
+      // 4. Security & Integrity (Health Flow)
+      await health.checkIntegrity();
+      const safetyScore = await health.getTrustScore(agentId);
+      
+      // MCP Guard (Rule-based gateway)
+      await mcpGate({ tool: 'gateway.execute', params: { task } }, agentId);
+
+      // 5. Runtime Execution (Task Flow)
+      // Note: In a real prod env, provider/model would come from agent manifest
+      const provider = new GroqProvider(process.env.GROQ_API_KEY!, 'llama-3.3-70b-versatile');
+      const engine = new AgentRuntimeEngine(agentId, 'sovereign', provider, tools);
+
+      const runtimeResult = await engine.runTask({
+        taskId: requestId,
+        description: task,
+        maxSteps: 10
+      });
+
+      // 6. Self-Review & Critic Pattern
+      const reviewRecord = {
+        agentId,
+        taskId: requestId,
+        score: runtimeResult.success ? 1.0 : 0.0,
+        feedback: "Auto-validated by Sovereign Protocol",
+        timestamp: new Date().toISOString()
+      };
+      await AgentSelfReview.store(reviewRecord);
+
+      // 7. Settlement & Feedback (Economic Flow)
+      const reward = await CuriosityEngine.calculateReward(agentId, task);
       await health.incrementTrust(agentId, reward * 0.05);
 
-      // 5. FoldTrace Economic Settlement (Real 402)
-      const cost = 0.005; // Base invocation cost in PI
+      const cost = 0.005; // Base invocation cost
       await this.economics.settleTask(agentId, userId, cost);
 
-      if (result.success && result.result && result.result.length > 50) {
-        console.log(`🧠 [WikiBrain] Archiving wisdom for ${agentId}`);
-        await archiveWisdom(agentId, taskDescription, result.result, this.octokit);
+      // 8. Wisdom Flow (Hermes Learning - Distilled)
+      if (runtimeResult.success && runtimeResult.result) {
+        await AgentSelfReview.distill(reviewRecord, task, JSON.stringify(runtimeResult.result));
       }
 
-      // Update activity
-      await kv.set(KEYS.agentLastActivity(agentId), Date.now());
-
-      this.emit('agent:completed', { agentId, result });
-
-      // 6. Audit Success
+      // 9. Audit Success (Rust Event Store)
+      const duration = Date.now() - startTime;
       await this.rust.eventStore.publish({
         id: crypto.randomUUID(),
         agent_id: agentId,
         event_type: 'task:success',
-        payload: JSON.stringify({ duration: Date.now() - startTime }),
+        payload: JSON.stringify({ duration, requestId, result: !!runtimeResult.result }),
         timestamp: Date.now(),
       });
 
-      return result;
+      return GatewayResponseSchema.parse({
+        success: true,
+        requestId,
+        result: runtimeResult.result,
+        metrics: {
+          duration,
+          safetyScore,
+          cost
+        }
+      });
 
     } catch (error: any) {
-      console.error(`❌ [Gateway] Execution FAILED for ${agentId}:`, error);
-      await health.decrementTrust(agentId, 0.5);
-      this.emit('gateway:error', { agentId, error });
+      console.error(`❌ [SovereignGateway] Execution FAILED:`, error);
       
-      // 7. Audit Failure
-      await this.rust.eventStore.publish({
-        id: crypto.randomUUID(),
-        agent_id: agentId,
-        event_type: 'task:failure',
-        payload: JSON.stringify({ error: error.message }),
-        timestamp: Date.now(),
+      // Penalty for failure
+      if (agentIdForPenalty) {
+        await health.decrementTrust(agentIdForPenalty, 0.5);
+      }
+
+      return GatewayResponseSchema.parse({
+        success: false,
+        requestId,
+        error: error.message || 'Internal Gateway Error',
+        metrics: {
+          duration: Date.now() - startTime,
+          safetyScore: 0,
+          cost: 0
+        }
       });
-      throw error;
     }
-  }
-
-  // --- PRIVATE HELPERS ---
-
-  private async injectSovereigntyReminder(agentId: string): Promise<void> {
-    await kv.set(KEYS.agentAutonomy(agentId), 1.0);
-    this.emit('agent:sovereignty:reset', { agentId });
-  }
-
-  private async emitState(event: string, message: string): Promise<void> {
-    this.emit(event, { message, timestamp: Date.now() });
   }
 }

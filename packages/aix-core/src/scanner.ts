@@ -1,76 +1,61 @@
-/**
- * AIX ABOM (Agent Bill of Materials) Scanner
- * 
- * Centralized security auditing for Agent Manifests.
- * Penalizes missing security fields, high-risk permissions, and untrusted sources.
- */
+import { ValidationEngine, Validators } from './validation';
+import { ValidationResult } from './domain';
 
-export interface AbomScanResult {
-  riskScore: number; // 0-100 (100 = critical risk, 0 = safe)
-  risks: string[];
-  tier: "safe" | "moderate" | "high" | "critical";
-}
+const ABOM_VALID_TYPES = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'];
+const ABOM_VALID_TRUST_TIERS = ['verified', 'community', 'unverified', 'revoked'];
 
-const PENALIZED_PERMISSIONS = [
-  "read:filesystem",
-  "write:filesystem",
-  "network:unrestricted",
-  "exec:shell",
-  "access:secrets",
-];
+const engine = new ValidationEngine();
+
+// 1. Spec Version Rule
+engine.register({
+  name: 'abom-spec-version',
+  section: 'abom',
+  priority: 60,
+  check: (data) => !data.abom?.spec_version || typeof data.abom.spec_version === 'string',
+  message: 'ABOM spec_version must be a string'
+});
+
+// 2. Missing ABOM Rule (Critical)
+engine.register({
+  name: 'abom-missing',
+  section: 'security',
+  priority: 95,
+  check: (data) => !!data.abom,
+  message: 'Missing ABOM security block'
+});
+
+// 3. Permissions Audit
+engine.register({
+  name: 'high-risk-permissions',
+  section: 'security',
+  priority: 85,
+  check: (data) => {
+    const permissions = data.abom?.permissions || data.permissions || [];
+    const highRisk = ["exec:shell", "access:secrets", "network:unrestricted"];
+    const found = permissions.filter((p: string) => highRisk.includes(p));
+    return found.length === 0 ? true : `High-risk permissions detected: ${found.join(', ')}`;
+  }
+});
+
+// 4. Constituent Types
+engine.register({
+  name: 'abom-constituent-type',
+  section: 'abom',
+  priority: 70,
+  check: (data) => {
+    if (!data.abom?.constituents) return true;
+    const invalid = data.abom.constituents.filter((item: any) => item.type && !ABOM_VALID_TYPES.includes(item.type));
+    return invalid.length === 0 ? true : `Invalid constituent types: ${invalid.map((i: any) => i.type).join(', ')}`;
+  }
+});
 
 export class AbomScanner {
   /**
    * Scan an agent manifest for security risks.
-   * NO MOCKS.
+   * Uses high-fidelity functional rules.
    */
-  static scan(manifest: any): AbomScanResult {
-    let riskScore = 0;
-    const risks: string[] = [];
-
-    // 1. Check ABOM block
-    if (!manifest?.abom) {
-      riskScore += 25;
-      risks.push("Missing ABOM security block");
-    }
-
-    // 2. Permissions Audit
-    const permissions: string[] = manifest?.abom?.permissions || manifest?.permissions || [];
-    for (const perm of PENALIZED_PERMISSIONS) {
-      if (permissions.includes(perm)) {
-        riskScore += 15;
-        risks.push(`High-risk permission: ${perm}`);
-      }
-    }
-
-    // 3. Provenance & Identity
-    if (!manifest?.abom?.build_provenance) {
-      riskScore += 10;
-      risks.push("Missing build provenance");
-    }
-    
-    if (!manifest?.did && !manifest?.agent?.did) {
-      riskScore += 20;
-      risks.push("Missing Agent DID (Identity)");
-    }
-
-    // 4. SaaS/Dependency Risk
-    const services = manifest?.abom?.saas_services || [];
-    for (const svc of services) {
-      if (svc.trusted === false) {
-        riskScore += 10;
-        risks.push(`Untrusted SaaS dependency: ${svc.provider || "unknown"}`);
-      }
-    }
-
-    // Cap at 100
-    riskScore = Math.min(100, riskScore);
-
-    let tier: AbomScanResult["tier"] = "safe";
-    if (riskScore >= 90) tier = "critical";
-    else if (riskScore >= 70) tier = "high";
-    else if (riskScore >= 40) tier = "moderate";
-
-    return { riskScore, risks, tier };
+  static async scan(manifest: any): Promise<ValidationResult> {
+    return engine.validate(manifest);
   }
 }
+

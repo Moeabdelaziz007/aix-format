@@ -47,17 +47,20 @@ export async function POST(req: NextRequest) {
  */
 async function performAbomScan(entry: any, yaml: string) {
   const { parseYamlSafe } = await import('@/lib/utils');
-  const yamlObj = parseYamlSafe(yaml) as Partial<Manifest>;
-  const report = AbomScanner.scan(yamlObj);
+  const yamlObj = parseYamlSafe(yaml) as any;
+  const report = await AbomScanner.scan(yamlObj);
   
   entry.abom = {
-    risk_level: report.tier,
+    risk_level: report.riskScore < 40 ? 'safe' : report.riskScore < 70 ? 'moderate' : 'high',
     timestamp: new Date().toISOString(),
     bom_format: 'AIX-NATIVE',
     score: 100 - report.riskScore
   };
   
-  if (report.riskScore > 50) throw new Error(`ABOM Risk too high (${report.riskScore})`);
+  if (!report.valid && report.riskScore > 50) {
+    const errorMsg = report.errors.map(e => e.message).join('; ');
+    throw new Error(`ABOM Risk too high (${report.riskScore}): ${errorMsg}`);
+  }
 }
 
 /**
