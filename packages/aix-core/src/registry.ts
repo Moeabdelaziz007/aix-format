@@ -1,4 +1,4 @@
-import { kv, KEYS } from './storage';
+import { kv, KEYS } from './memory/storage';
 import { AbomScanner } from './scanner';
 import { ValidationResult } from './domain';
 import { nanoid } from 'nanoid';

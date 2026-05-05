@@ -3,7 +3,7 @@
  * Made with Moe Abdelaziz
  */
 
-export * from './storage';
+export * from './memory/storage';
 export * from './health';
 export * from './brain';
 export * from './curiosity';

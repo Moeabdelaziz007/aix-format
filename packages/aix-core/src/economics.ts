@@ -1,4 +1,4 @@
-import { kv, KEYS } from './storage';
+import { kv, KEYS } from './memory/storage';
 import { z } from 'zod';
 
 /**

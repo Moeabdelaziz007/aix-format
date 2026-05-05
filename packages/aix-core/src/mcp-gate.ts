@@ -9,7 +9,7 @@
 
 import { health } from './health';
 import { AbomScanner } from './scanner';
-import { kv } from './storage';
+import { kv } from './memory/storage';
 
 export interface SanitizationResult {
   safe: boolean;

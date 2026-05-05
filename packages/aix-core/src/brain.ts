@@ -1,4 +1,4 @@
-import { kv, KEYS } from './storage';
+import { kv, KEYS } from './memory/storage';
 import { generateHash } from './infra';
 import { Octokit } from '@octokit/rest';
 

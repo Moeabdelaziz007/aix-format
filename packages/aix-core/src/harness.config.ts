@@ -1,6 +1,6 @@
 import { SovereignHealthService } from './health';
 import { AIXTokenBucket, RATE_LIMITS } from './rate-limit';
-import { kv } from './storage';
+import { kv } from './memory/storage';
 
 /**
  * AIX Sovereign Harness Config & Entry Point
