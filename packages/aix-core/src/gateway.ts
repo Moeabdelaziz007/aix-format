@@ -478,8 +478,21 @@ export class Gateway extends EventEmitter {
     // In real E2E, this recreates the file
   }
 
-  private async checkPath(path: string): Promise<boolean> {
-     return true; // Simplified for logic check
+  /**
+   * 🛡️ TRUTH PROVENANCE ENGINE (Round 59)
+   * Verifies the origin and integrity of incoming knowledge.
+   */
+  public verifyTruthProvenance(input: any): boolean {
+    // 🌀 [ARABIC_SOVEREIGNTY]: التحقق من مصدر الحقيقة ونزاهة البيانات
+    if (typeof input === 'object' && input.sovereign_signature) {
+       return this.validateSignature(input.sovereign_signature);
+    }
+    return false; // Reject unverified truth by default
+  }
+
+  private validateSignature(sig: string): boolean {
+     // Mocking cryptographic check for now
+     return sig.startsWith('AIX-SOV-');
   }
     const sensitiveTasks = ['security', 'audit', 'payment', 'credentials'];
     return sensitiveTasks.some(t => taskType.toLowerCase().includes(t)) ? 'SOVEREIGN' : 'TURBO';

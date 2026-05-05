@@ -43,16 +43,15 @@ export class PulseOrchestrator {
     };
 
     try {
-      const finalRequest = await this.chain.handle(request);
-      
-      // Emit event (Observer Pattern)
-      AgentEventBus.getInstance().emit('pulse:success', {
-        agentId: process.agentId,
-        yield: finalRequest.results.economics?.yield
-      });
-
-      return finalRequest;
+      return await this.chain.handle(request);
     } catch (error: any) {
+      // 🩹 [SELF_HEALING]: If failed in TURBO, try once in SOVEREIGN
+      if (gear === 'TURBO' && error.message.includes('SOVEREIGN_ALARM')) {
+        console.log('🔄 [Self-Healing] Shifting to SOVEREIGN gear for retry...');
+        request.sovereignGear = 'SOVEREIGN';
+        return await this.chain.handle(request);
+      }
+
       AgentEventBus.getInstance().emit('pulse:error', {
         agentId: process.agentId,
         error: error.message

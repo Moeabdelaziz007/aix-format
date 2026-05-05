@@ -11,11 +11,18 @@ import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { SovereignDashboard } from "@/components/studio/SovereignDashboard";
 
 function HomeContent() {
   return (
     <div className="min-h-screen bg-[var(--color-background)] font-[family-name:var(--font-manrope)]">
       <Navbar />
+      
+      {/* 🦅 [SOVEREIGN_CENTERPIECE]: The Heart of AIX-Format */}
+      <div className="max-w-7xl mx-auto px-8 pt-8">
+         <SovereignDashboard />
+      </div>
+
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20">
         <main className="flex flex-col gap-12 row-start-2 items-center sm:items-start w-full max-w-6xl">
           <div className="flex flex-col md:flex-row items-center justify-between w-full gap-8">

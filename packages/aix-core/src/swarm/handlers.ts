@@ -9,6 +9,7 @@ import { RevenueRouter } from "../economics";
 export interface PulseRequest {
   process: GatewayProcess;
   manifest: AIXManifest;
+  sovereignGear?: 'TURBO' | 'SOVEREIGN'; // ⚙️ [ROUND 57]: Added gear awareness
   results: {
     security?: any;
     economics?: any;
@@ -38,6 +39,12 @@ export class SecurityHandler extends PulseHandler {
 // 💰 Economics Handler
 export class EconomicsHandler extends PulseHandler {
   async handle(request: PulseRequest) {
+    // 🛡️ [ECONOMIC_IMMUNITY]: Block high-value spend in TURBO gear
+    const isFinancial = request.manifest.identity_layer?.role?.toLowerCase().includes('financial');
+    if (request.sovereignGear === 'TURBO' && isFinancial) {
+       throw new Error('🌀 [SOVEREIGN_ALARM]: Financial transaction blocked in TURBO mode. Switch to SOVEREIGN.');
+    }
+
     const econ = request.manifest.economics;
     if (econ) {
       const feeCalc = await RevenueRouter.calculateFee(request.process.agentId, econ);
