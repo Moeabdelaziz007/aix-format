@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { search } from "@aix-core/storage";
+import { search } from "@aix-core";
 
 /**
  * POST /api/wikibrain/search

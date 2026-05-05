@@ -1,28 +1,28 @@
 /**
- * AIX Core - Main Entry Point
- * Unified Sovereign Architecture.
+ * 🌌 AIX Core - The Sovereign Entrance
  * Made with Moe Abdelaziz
  */
 
-export * from './gateway';
+export * from './storage';
 export * from './health';
 export * from './brain';
 export * from './curiosity';
-export * from './swarm';
-export * from './storage';
+export * from './rate-limit';
+export * from './harness.config';
+export * from './gateway';
+export * from './agent-runtime';
+export * from './llm-provider';
+export * from './wikibrain/SemanticIndex';
 export * from './infra';
+export * from './mcp-gate';
+export * from './swarm';
 
-/**
- * Initialize all core components
- */
-export async function initializeCore() {
-  const gateway = (await import('./gateway')).getGateway();
-  const { StorageOrchestrator } = await import('./storage');
-  
-  // Verify storage connection
-  await StorageOrchestrator.getInstance().healthCheck();
+import { Gateway } from './gateway';
+let gatewayInstance: Gateway | null = null;
 
-  return { gateway };
+export function getGateway(config?: any): Gateway {
+  if (!gatewayInstance) {
+    gatewayInstance = new Gateway(config);
+  }
+  return gatewayInstance;
 }
-
-// Built with Moe Abdelaziz — AIX Sovereign Infrastructure v2.2

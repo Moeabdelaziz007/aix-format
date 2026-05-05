@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRegistry, indexAgent } from "@aix-core/storage";
+import { indexAgent } from "@aix-core";
+import { SovereignHealthService } from "@aix-core/health";
 
 /**
  * POST /api/wikibrain/reindex
@@ -8,7 +9,8 @@ import { getRegistry, indexAgent } from "@aix-core/storage";
 export async function POST(req: NextRequest) {
   try {
     // In a real scenario, check admin privileges here.
-    const agents = await getRegistry();
+    const health = new SovereignHealthService();
+    const agents = await health.getRegistry();
     let indexed = 0;
 
     for (const agent of agents) {

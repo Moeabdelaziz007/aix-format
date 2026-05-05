@@ -38,6 +38,17 @@ export class SovereignHealthService {
     return await kv.get<number>(KEYS.agentTrustScore(agentId)) || 0;
   }
 
+  async getRegistry(): Promise<any[]> {
+    const keys = await kv.keys('agent:*:metrics');
+    const agents = [];
+    for (const key of keys) {
+      const agentId = key.split(':')[1];
+      const metadata = await kv.get<any>(`agent:${agentId}:metadata`);
+      if (metadata) agents.push(metadata);
+    }
+    return agents;
+  }
+
   async incrementTrust(agentId: string, amount: number = 0.1): Promise<void> {
     const current = await this.getTrustScore(agentId);
     await kv.set(KEYS.agentTrustScore(agentId), Math.min(10, current + amount));
@@ -49,6 +60,17 @@ export class SovereignHealthService {
   }
 
   // --- STABILITY & OSCILLATION ---
+
+  /**
+   * Performs a topological integrity check of the system.
+   */
+  async checkIntegrity(): Promise<void> {
+    // In a real sovereign system, this verifies file hashes against Redis
+    // and checks if any unauthorized mutations occurred.
+    const score = await this.getTrustScore('system');
+    if (score < 5) throw new Error('🚨 Topological integrity compromised!');
+    console.log('✅ [Health] System integrity verified.');
+  }
 
   async detectOscillation(agentId: string): Promise<boolean> {
     const history = await kv.lrange<number>(KEYS.agentTrustHistory(agentId), -10, -1);

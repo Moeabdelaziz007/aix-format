@@ -1,8 +1,8 @@
 # 🏥 AIX Self-Healing System Report
  
- **Generated:** 2026-05-04T17:35:30.651Z  
+ **Generated:** 2026-05-05T05:40:27.274Z  
  **Overall Status:** ❌ FAILING  
- **Summary:** 1 passed, 1 warnings, 2 failures
+ **Summary:** 0 passed, 1 warnings, 3 failures
  
  ---
  
@@ -22,17 +22,25 @@
 
 ---
 
-### ✅ TypeScript
+### ❌ TypeScript
 
-**Status:** PASS
-**Message:** No type errors
+**Status:** FAIL
+**Message:** 1 type errors found
+
+**Details:**
+```
+core/rate-limit-adapter.ts(1,33): error TS2307: Cannot find module '../packages/aix-core/src/storage/adapter' or its corresponding type declarations.
+
+```
+
+**Fix Command:** `npx tsc --noEmit`
 
 ---
 
 ### ❌ Test Suite
 
 **Status:** FAIL
-**Message:** 259 passed, 365 failed
+**Message:** 110 passed, 72 failed
 
 **Fix Command:** `npm test`
 
@@ -47,7 +55,8 @@
 
 ## 🔧 Recommended Actions
 
-1. **Test Suite:** `npm test`
+1. **TypeScript:** `npx tsc --noEmit`
+2. **Test Suite:** `npm test`
 
 ---
 

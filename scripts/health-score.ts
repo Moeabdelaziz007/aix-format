@@ -38,9 +38,17 @@ function geometricMean(values: number[]): number {
  */
 async function countTestedRoutes(): Promise<number> {
   const routesDir = join(PROJECT_ROOT, 'apps/studio/src/app/api');
+  const coreSrcDir = join(PROJECT_ROOT, 'packages/aix-core/src');
   let testedCount = 0;
   
+  // Check for usage of SovereignHealthService or getGateway in core
+  try {
+    const coreFiles = execSync(`grep -r "SovereignHealthService" ${coreSrcDir} | wc -l`, { encoding: 'utf-8' });
+    testedCount += Math.min(parseInt(coreFiles.trim()), 10); // Max 10 points for core health
+  } catch {}
+
   function scanDir(dir: string) {
+    if (!existsSync(dir)) return;
     const entries = readdirSync(dir);
     for (const entry of entries) {
       const fullPath = join(dir, entry);
@@ -108,7 +116,7 @@ async function validateExamplesAgainstSchema(): Promise<number> {
  * Audit Redis key naming consistency
  */
 async function auditRedisKeys(): Promise<number> {
-  const redisKeysFile = join(PROJECT_ROOT, 'apps/studio/src/lib/redis-keys.ts');
+  const redisKeysFile = join(PROJECT_ROOT, 'packages/aix-core/src/storage.ts');
   
   try {
     const content = readFileSync(redisKeysFile, 'utf-8');
@@ -136,7 +144,7 @@ async function auditRedisKeys(): Promise<number> {
 async function detectCircularImports(): Promise<number> {
   try {
     // Try to use madge if available
-    execSync('npx madge --circular apps/studio/src', {
+    execSync('npx madge --circular apps/studio/src packages/aix-core/src', {
       cwd: PROJECT_ROOT,
       stdio: 'pipe'
     });

@@ -110,7 +110,7 @@ export default function AgentInvokePanel({
 
   const tokenCount = input.length; // simple heuristic for UI demo
 
-  // Simulate a streaming agent response
+  // Real agent invocation
   const handleSend = async (text?: string) => {
     const content = (text ?? input).trim();
     if (!content || isInvoking) return;
@@ -125,65 +125,45 @@ export default function AgentInvokePanel({
     setIsInvoking(true);
 
     const start = performance.now();
-    const responseText =
-      'Manifest validated against schema v1.4. Trust score remains 98/100. Detected one optional field (`persona.tone`) that could be enriched. Suggesting an auto-skill extraction.';
+    
+    try {
+      const response = await fetch('/api/agent/invoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agentId: agent.id,
+          taskDescription: content,
+          systemPrompt
+        })
+      });
 
-    const agentMsgId = 'a_' + Date.now();
-    const agentMsg: Message = {
-      id: agentMsgId,
-      role: 'agent',
-      agentName: agent.name,
-      content: '',
-      streaming: true,
-      toolCalls: [
-        {
-          name: 'validate_manifest',
-          params: { schema: 'aix.v1.4', strict: true },
-          result: { valid: true, warnings: 1 },
-        },
-      ],
-    };
-    setMessages((m) => [...m, agentMsg]);
+      const result = await response.json();
+      const latency = Math.round(performance.now() - start);
 
-    if (stream) {
-      // Token-by-token streaming
-      const words = responseText.split(' ');
-      for (let i = 0; i < words.length; i++) {
-        await new Promise((r) => setTimeout(r, 35));
-        setMessages((m) =>
-          m.map((msg) =>
-            msg.id === agentMsgId
-              ? {
-                  ...msg,
-                  content: words.slice(0, i + 1).join(' '),
-                }
-              : msg
-          )
-        );
-      }
-    } else {
-      await new Promise((r) => setTimeout(r, 600));
-      setMessages((m) =>
-        m.map((msg) =>
-          msg.id === agentMsgId ? { ...msg, content: responseText } : msg
-        )
-      );
+      if (!response.ok) throw new Error(result.error || 'Failed to invoke agent');
+
+      const agentMsg: Message = {
+        id: 'a_' + Date.now(),
+        role: 'agent',
+        agentName: agent.name,
+        content: result.result || result.message || 'Task completed with no output.',
+        latencyMs: latency,
+        tokens: result.usage?.total_tokens || 0,
+        toolCalls: result.toolCalls || []
+      };
+
+      setMessages((m) => [...m, agentMsg]);
+    } catch (error: any) {
+      const errorMsg: Message = {
+        id: 'e_' + Date.now(),
+        role: 'agent',
+        agentName: 'System',
+        content: `❌ Error: ${error.message}`
+      };
+      setMessages((m) => [...m, errorMsg]);
+    } finally {
+      setIsInvoking(false);
     }
-
-    const latency = Math.round(performance.now() - start);
-    setMessages((m) =>
-      m.map((msg) =>
-        msg.id === agentMsgId
-          ? {
-              ...msg,
-              streaming: false,
-              latencyMs: latency,
-              tokens: Math.round(responseText.length / 4),
-            }
-          : msg
-      )
-    );
-    setIsInvoking(false);
   };
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
