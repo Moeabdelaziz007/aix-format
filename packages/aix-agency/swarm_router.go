@@ -1,5 +1,8 @@
 package main
 
+// @aix-hint: ring-2-swarm.md | Logic for swarm routing and pulse emission.
+// Made with Moe Abdelaziz
+
 import (
 	"context"
 	"encoding/json"
@@ -69,6 +72,19 @@ type SwarmRouter struct {
 	quantumBoosts   map[string]time.Time // AgentID -> Expiration
 }
 
+// 🧹 CleanupBoosts removes expired quantum resonance boosts to prevent memory leaks.
+func (r *SwarmRouter) CleanupBoosts() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	now := time.Now()
+	for id, exp := range r.quantumBoosts {
+		if now.After(exp) {
+			delete(r.quantumBoosts, id)
+			log.Printf("[Stability] 🧹 Cleaned up expired boost for agent %s\n", id)
+		}
+	}
+}
+
 type RouterMetrics struct {
 	mu           sync.RWMutex
 	TasksRouted  int64 `json:"tasks_routed"`
@@ -85,6 +101,16 @@ const (
 	StateOpen     CircuitState = "open"
 	StateHalfOpen CircuitState = "half-open"
 )
+
+// AIXMemoryEvent matches docs/MEMORY_PROTOCOL.md
+type AIXMemoryEvent struct {
+	Ring      int                    `json:"ring"`
+	Lang      string                 `json:"lang"`
+	AgentID   string                 `json:"agentId"`
+	EventType string                 `json:"eventType"`
+	Payload   map[string]interface{} `json:"payload"`
+	Timestamp int64                  `json:"timestamp"`
+}
 
 type CircuitBreaker struct {
 	mu               sync.RWMutex
@@ -231,6 +257,35 @@ func NewSwarmRouter() *SwarmRouter {
 	return r
 }
 
+// 📡 ListenForResonance starts a background loop to catch QUANTUM_BURST events.
+func (r *SwarmRouter) ListenForResonance(ctx context.Context) {
+	if !r.ResonanceEnabled {
+		log.Printf("[LTM] 💤 Resonance disabled by flag.\n")
+		return
+	}
+
+	pubsub := r.bus.Redis.Subscribe(ctx, "aix:ring:2:QUANTUM_BURST")
+	defer pubsub.Close()
+
+	log.Printf("[LTM] 📡 Listening for Quantum Resonance pulses...\n")
+
+	for {
+		msg, err := pubsub.ReceiveMessage(ctx)
+		if err != nil {
+			return
+		}
+
+		var event AIXMemoryEvent
+		if err := json.Unmarshal([]byte(msg.Payload), &event); err == nil {
+			r.mu.Lock()
+			// Apply 1.5x boost for 60 seconds
+			r.quantumBoosts[event.AgentID] = time.Now().Add(60 * time.Second)
+			r.mu.Unlock()
+			log.Printf("[LTM] ⚡ Quantum Resonance Detected from Agent %s!\n", event.AgentID)
+		}
+	}
+}
+
 func (r *SwarmRouter) StartResonanceListener(ctx context.Context, busClient interface {
 	SubscribeToRing(ctx context.Context, ring int, handler func(any))
 }) {
@@ -303,6 +358,14 @@ func (r *SwarmRouter) scoreAgent(agent AgentNode, task TaskDescriptor) (float64,
 		}
 		rawScore += capWeight
 	}
+
+	// 🔬 Quantum Resonance Multiplier (AIX-369)
+	r.mu.RLock()
+	if exp, ok := r.quantumBoosts[agent.ID]; ok && time.Now().Before(exp) {
+		rawScore *= 1.5
+		log.Printf("[LTM] ⚡ Applying 1.5x Quantum Boost to agent %s\n", agent.ID)
+	}
+	r.mu.RUnlock()
 	avgCapScore := rawScore / float64(len(task.RequiredCapabilities))
 	
 	finalScore := avgCapScore*(float64(agent.TrustLevel)*0.2) + float64(task.Priority)*0.1
@@ -329,12 +392,15 @@ func (r *SwarmRouter) EmitHealthEvent(agentID string, state string) {
 }
 
 // 🛡️ VerifySovereignMemory ensures the data from TS is intact and authentic.
+// Implementation follows AIX_TOPOLOGY_SCHEMA v1.0
 func (r *SwarmRouter) VerifySovereignMemory(signedData string) (string, bool) {
 	if !strings.HasPrefix(signedData, "sig:") {
+		log.Printf("[Stability] ⚠️ Rejecting unsigned memory pulse.\n")
 		return "", false
 	}
 	parts := strings.SplitN(signedData, ":", 3)
 	if len(parts) < 3 {
+		log.Printf("[Stability] ⚠️ Malformed signed payload.\n")
 		return "", false
 	}
 

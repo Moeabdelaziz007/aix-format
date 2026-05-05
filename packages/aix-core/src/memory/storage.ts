@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis';
 import * as crypto from 'crypto';
+import { AIX_CONFIG } from './config';
 
 /**
  * 🗄️ SOVEREIGN_STORAGE
@@ -89,8 +90,8 @@ export class StorageOrchestrator {
     let isCompressed = false;
 
     // 🔬 TurboQuant Logic (arXiv 2026)
-    // Threshold: 5KB for intelligent compression
-    if (options.compress || json.length > 5120) {
+    // Threshold: Use centralized AIX_CONFIG
+    if (options.compress || json.length > AIX_CONFIG.MEMORY.TURBOQUANT_THRESHOLD) {
       const zlib = await import('zlib');
       // Using level 6 for optimal speed/compression balance
       finalValue = zlib.gzipSync(json, { level: 6 }).toString('base64');
@@ -100,15 +101,14 @@ export class StorageOrchestrator {
     const payload = isCompressed ? `⚡${finalValue}` : json;
     
     // 🔐 Sovereign Signature (Cross-Language Integrity)
-    const crypto = await import('crypto');
-    const signature = crypto.createHmac('sha256', 'aix_dna_secret_2026')
+    const signature = crypto.createHmac('sha256', AIX_CONFIG.SECURITY.DNA_SECRET)
       .update(payload)
       .digest('hex');
 
     const signedPayload = `sig:${signature}:${payload}`;
     
     // Tiered TTL Management
-    const ttl = options.ttl || 3600; // Default 1 hour
+    const ttl = options.ttl || AIX_CONFIG.MEMORY.DEFAULT_TTL;
     await kv.set(key, signedPayload, { ex: ttl });
   }
 

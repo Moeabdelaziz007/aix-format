@@ -1,3 +1,4 @@
+// @aix-hint: ring-1-zkkyc.md | Soul Ring: Identity and Zero-Knowledge Logic.
 /**
  * @aix-format/aix-zkkyc
  * 

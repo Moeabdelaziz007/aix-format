@@ -28,6 +28,24 @@ export class StructuralNavigator {
   }
 
   /**
+   * 🔍 ScanHints: Discovers physical breadcrumbs in the file content.
+   * Matches: // @aix-hint: <filename> | <description>
+   */
+  static async scanHints(filePath: string): Promise<{ hintFile: string; description: string } | null> {
+    const fs = await import('fs');
+    const content = fs.readFileSync(path.resolve(filePath), 'utf8');
+    const match = content.match(/\/\/ @aix-hint: ([\w\-.]+) \| (.*)/);
+    
+    if (match) {
+      return {
+        hintFile: match[1],
+        description: match[2]
+      };
+    }
+    return null;
+  }
+
+  /**
    * Peeks into a file to understand its "Spiritual Connection" to other parts of the system.
    */
   static async peek(filePath: string): Promise<CodeNode | null> {

@@ -1,3 +1,5 @@
+// @aix-hint: ring-0-rust.md | Genesis Ring: Immutable DNA and Security logic.
+// @aix-hint: ring-0-rust.md | Genesis Ring: Immutable DNA and Security.
 use sha2::{Sha256, Digest};
 use std::fs;
 use std::path::Path;

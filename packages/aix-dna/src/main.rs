@@ -1,3 +1,5 @@
+// @aix-hint: ring-0-rust.md | Genesis Ring: Immutable DNA and Security logic.
+// @aix-hint: ring-0-rust.md | Genesis Ring: Immutable DNA and Security.
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 use aix_dna::{sign_dna, verify_dna};
