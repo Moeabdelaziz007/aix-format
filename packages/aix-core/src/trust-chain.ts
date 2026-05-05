@@ -4,11 +4,15 @@
  * SECURITY: Uses nacl.sign.detached.verify() for real Ed25519 signatures (RULE 3)
  */
 
-import { createHash } from 'crypto';
-import nacl from 'tweetnacl';
-import util from 'tweetnacl-util';
 import { kv } from './storage/adapter';
 import { KEYS, NS } from './storage/keys';
+import { 
+  generateHash, 
+  verifySignature as cryptoVerify, 
+  generateTopologySignature,
+  verifyPoW as cryptoPoW 
+} from './utils/crypto';
+import { createHash } from 'crypto';
 
 export interface SignatureData {
   agentId: string;
@@ -50,42 +54,25 @@ export class TrustChain {
     signature: string,
     publicKey: string
   ): Promise<boolean> {
-    try {
-      const dataString = typeof data === 'string' ? data : JSON.stringify(data);
-      const message = util.decodeUTF8(dataString);
+    const isValid = cryptoVerify(data, signature, publicKey);
+    
+    if (isValid) {
+      const sigData: SignatureData = {
+        agentId,
+        data,
+        signature,
+        publicKey,
+        timestamp: Date.now()
+      };
       
-      const signatureBytes = Buffer.from(signature, 'hex');
-      const publicKeyBytes = Buffer.from(publicKey, 'hex');
+      await kv.set(`trust:sig:${agentId}`, sigData);
+      await kv.set(`trust:verified:${agentId}`, true);
       
-      const isValid = nacl.sign.detached.verify(
-        message,
-        signatureBytes,
-        publicKeyBytes
-      );
-      
-      if (isValid) {
-        const sigData: SignatureData = {
-          agentId,
-          data,
-          signature,
-          publicKey,
-          timestamp: Date.now()
-        };
-        
-        // Persist signature and verification status
-        await kv.set(`trust:sig:${agentId}`, sigData);
-        await kv.set(`trust:verified:${agentId}`, true);
-        
-        // Update Trust Score (Proactive improvement)
-        const currentScore = await kv.get<number>(KEYS.agentTrustScore(agentId)) || 0;
-        await kv.set(KEYS.agentTrustScore(agentId), Math.min(10, currentScore + 0.1));
-      }
-
-      return isValid;
-    } catch (error) {
-      console.error('[TrustChain] Signature verification failed:', error);
-      return false;
+      const currentScore = await kv.get<number>(KEYS.agentTrustScore(agentId)) || 0;
+      await kv.set(KEYS.agentTrustScore(agentId), Math.min(10, currentScore + 0.1));
     }
+
+    return isValid;
   }
 
   /**
@@ -250,15 +237,7 @@ export class TrustChain {
    * Verify proof of work (PoW)
    */
   async verifyPoW(agentId: string, nonce: number, difficulty: number, data: string): Promise<boolean> {
-    const payload = `${agentId}:${nonce}:${data}`;
-    const hash = createHash('sha256').update(payload).digest('hex');
-    const prefix = '0'.repeat(difficulty);
-    const isValid = hash.startsWith(prefix);
-    
-    if (isValid) {
-      console.log(`✅ [TrustChain:PoW] Verified challenge (Diff: ${difficulty}) for ${agentId}`);
-    }
-    return isValid;
+    return cryptoPoW(agentId, nonce, difficulty, data);
   }
 
   /**

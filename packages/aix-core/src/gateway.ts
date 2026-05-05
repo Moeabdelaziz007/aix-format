@@ -24,6 +24,7 @@ import { getTrustChain } from './trust-chain';
 import { FailureLearning } from './wikibrain/failure-learning';
 import { SwarmRouter } from './SwarmRouter';
 import { GroqProvider } from './llm-provider';
+import { generateHash, verifySignature as cryptoVerify } from './utils/crypto';
 
 export interface AgentAction {
   agentId: string;
@@ -511,15 +512,7 @@ export class Gateway extends EventEmitter {
   }
 
   private validateSignature(sig: string, publicKey: string, data: any): boolean {
-    try {
-      const message = util.decodeUTF8(JSON.stringify(data));
-      const sigBytes = Buffer.from(sig, 'hex');
-      const pubKeyBytes = Buffer.from(publicKey, 'hex');
-      return nacl.sign.detached.verify(message, sigBytes, pubKeyBytes);
-    } catch (e) {
-      console.error('❌ [Gateway:Auth] Signature validation crashed.');
-      return false;
-    }
+    return cryptoVerify(data, sig, publicKey);
   }
     const sensitiveTasks = ['security', 'audit', 'payment', 'credentials'];
     return sensitiveTasks.some(t => taskType.toLowerCase().includes(t)) ? 'SOVEREIGN' : 'TURBO';

@@ -24,6 +24,7 @@ import { AgentSelfReview, SelfReviewRecord } from './meta-self-review';
 import { PetOrchestrator, getDynamicConstraints } from './pets';
 import * as LearningEngine from './learning';
 import { SemanticIndex } from './wikibrain/SemanticIndex';
+import { SovereignEntity } from './base';
 
 // RULE 1: Strict Schemas
 export const TaskSchema = z.object({
@@ -77,7 +78,7 @@ export interface RuntimeResult {
 
 const STOP_TOKENS = ['Observation:', 'Thought:'];
 
-export class AgentRuntimeEngine {
+export class AgentRuntimeEngine extends SovereignEntity {
   private runtime: AgentRuntime;
   private toolCallHistory: Map<string, number>;
   private context: RuntimeContext | null = null;
@@ -90,6 +91,7 @@ export class AgentRuntimeEngine {
     task: Task,
     config: AgentRuntimeConfig
   ) {
+    super(`${agentId}:${agentName}`);
     TaskSchema.parse(task);
     
     this.llm = config.llm;
