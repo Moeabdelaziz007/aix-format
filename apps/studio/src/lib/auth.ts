@@ -10,12 +10,18 @@
  */
 
 import { NextRequest } from 'next/server';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { z } from 'zod';
+import { env } from './env';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role?: string;
-}
+const AuthUserSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  role: z.string().optional(),
+});
+
+export type AuthUser = z.infer<typeof AuthUserSchema>;
 
 /**
  * Verify JWT token
@@ -25,23 +31,26 @@ export interface AuthUser {
  */
 export async function verifyToken(token: string): Promise<AuthUser | null> {
   try {
-    // TODO: Implement actual JWT verification
-    // For now, use mock verification
-    
-    if (!token || token.length < 10) {
+    if (!token) {
       return null;
     }
     
-    // In production, use jsonwebtoken:
-    // const decoded = verify(token, process.env.JWT_SECRET!);
-    // return decoded as AuthUser;
+    const secret = env.JWT_SECRET;
+    if (!secret) {
+      // Note: env.JWT_SECRET already handles production enforcement via requireEnv
+      return null;
+    }
     
-    // Mock user for development
-    return {
-      id: 'user_' + token.substring(0, 8),
-      email: 'user@example.com',
-      role: 'user'
-    };
+    const decoded = jwt.verify(token, secret);
+
+    // RULE 1: Zod validation on external input
+    const result = AuthUserSchema.safeParse(decoded);
+    if (!result.success) {
+      console.error('[Auth] Token payload validation failed:', result.error);
+      return null;
+    }
+    
+    return result.data;
     
   } catch (error) {
     console.error('[Auth] Token verification failed:', error);
@@ -139,16 +148,15 @@ export function requireRole(user: AuthUser, requiredRole: string): void {
  * @returns JWT token
  */
 export async function generateToken(user: AuthUser): Promise<string> {
-  // TODO: Implement actual JWT generation
-  // For now, return mock token
+  const secret = env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET not configured');
+  }
   
-  // In production, use jsonwebtoken:
-  // const token = sign(user, process.env.JWT_SECRET!, {
-  //   expiresIn: '7d'
-  // });
-  // return token;
-  
-  return 'mock_token_' + user.id + '_' + Date.now();
+  const token = jwt.sign(user, secret, {
+    expiresIn: '7d'
+  });
+  return token;
 }
 
 /**
@@ -158,15 +166,9 @@ export async function generateToken(user: AuthUser): Promise<string> {
  * @returns Hashed password
  */
 export async function hashPassword(password: string): Promise<string> {
-  // TODO: Implement actual password hashing
-  // For now, return mock hash
-  
-  // In production, use bcrypt:
-  // const salt = await bcrypt.genSalt(10);
-  // const hash = await bcrypt.hash(password, salt);
-  // return hash;
-  
-  return 'hashed_' + password;
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(password, salt);
+  return hash;
 }
 
 /**
@@ -177,13 +179,7 @@ export async function hashPassword(password: string): Promise<string> {
  * @returns True if password matches
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  // TODO: Implement actual password verification
-  // For now, use mock verification
-  
-  // In production, use bcrypt:
-  // return await bcrypt.compare(password, hash);
-  
-  return hash === 'hashed_' + password;
+  return await bcrypt.compare(password, hash);
 }
 
 // Made with Moe Abdelaziz

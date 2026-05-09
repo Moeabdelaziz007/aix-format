@@ -4,26 +4,35 @@
  */
 function requireEnv(key: string): string {
   const val = process.env[key];
-  if (!val) throw new Error(`Missing required env: ${key}`);
+  if (!val) {
+    // Only throw in non-development to avoid breaking local dev
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(`CRITICAL: Missing required environment variable: ${key}`);
+    } else {
+      console.warn(`[ENV] Warning: Missing required environment variable: ${key}`);
+      return '';
+    }
+  }
   return val;
 }
 
 export const env = {
   // Pi Network
-  PI_API_KEY:       process.env.PI_API_KEY || '',
-  PI_APP_ID:        process.env.PI_APP_ID || '',
+  PI_API_KEY:       requireEnv('PI_API_KEY'),
+  PI_APP_ID:        requireEnv('PI_APP_ID'),
   PI_ENV:           (process.env.PI_ENVIRONMENT || 'sandbox') as 'sandbox' | 'production',
 
   // OpenAI
-  OPENAI_API_KEY:   process.env.OPENAI_API_KEY || '',
+  OPENAI_API_KEY:   requireEnv('OPENAI_API_KEY'),
 
   // Upstash Redis
-  KV_REST_API_URL:  process.env.KV_REST_API_URL || '',
-  KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN || '',
+  KV_REST_API_URL:  requireEnv('KV_REST_API_URL'),
+  KV_REST_API_TOKEN: requireEnv('KV_REST_API_TOKEN'),
 
   // App
   NODE_ENV:         process.env.NODE_ENV || 'development',
   APP_URL:          process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  JWT_SECRET:       requireEnv('JWT_SECRET'),
 } as const;
 
 export type Env = typeof env;
