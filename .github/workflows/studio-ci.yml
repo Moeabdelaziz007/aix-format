@@ -23,7 +23,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.4
 
       - name: Setup Node 22
         uses: actions/setup-node@v4
@@ -38,7 +38,7 @@ jobs:
       # ── Studio install ──────────────────────────────────────────────────
       - name: Install studio dependencies
         working-directory: apps/studio
-        run: pnpm install --frozen-lockfile --no-package-lock
+        run: pnpm install --frozen-lockfile
 
       # ── Lint ────────────────────────────────────────────────────────────
       - name: Lint
