@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { secureRandom } from "@/lib/security-core";
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Types

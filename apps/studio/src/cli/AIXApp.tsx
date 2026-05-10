@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
+import { secureRandom } from "../lib/security-core";
 import Header from './components/Header';
 import PetRow from './components/PetRow';
 import BusLog from './components/BusLog';

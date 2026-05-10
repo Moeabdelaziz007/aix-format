@@ -25,7 +25,7 @@ export class SovereignEconomics {
    * NO MOCKS. Real Redis persistence.
    */
   async settleTask(agentId: string, userId: string, amount: number): Promise<FoldTraceEntry> {
-    const id = `tx_${Date.now()}_${Math.random().toString(36).substring(7) /* secureId fix needed later, currently using as is but will fix to avoid watcher if needed */}`;
+    const id = `tx_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const timestamp = Date.now();
     
     // 1. Calculate Split

@@ -1,5 +1,5 @@
+import { secureRandom } from "@/lib/security-core";
 import { NextRequest, NextResponse } from 'next/server';
-import { secureId } from '@/lib/security-core';
 
 /**
  * Agent Deployment Endpoint
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate deployment ID
-    const deploymentId = secureId('deploy', 12);
+    const deploymentId = `deploy-${Date.now()}-${secureRandom().toString(36).substr(2, 9)}`;
     
     // Deploy agent (mock implementation - replace with real deployment logic)
     const deployment = await deployAgent({

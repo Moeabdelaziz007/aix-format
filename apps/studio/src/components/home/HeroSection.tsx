@@ -7,7 +7,7 @@ import { Search, Rocket, ShieldCheck, Star, Users, Briefcase } from "lucide-reac
 import { Badge } from "@/components/shared";
 
 const VoiceOrb = dynamic(
-  () => import("@/components/studio/VoiceOrb").then(mod => mod.VoiceOrb),
+  () => import("@/design-system/agentic-components").then(mod => mod.VoiceOrb),
   { ssr: false, loading: () => <div className="w-64 h-64 animate-pulse bg-white/5 rounded-none" /> }
 );
 

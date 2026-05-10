@@ -1,3 +1,4 @@
+import { secureRandom } from "@/lib/security-core";
 /**
  * 🎨 INTERACTIVE DEVELOPMENT ENVIRONMENT
  * Multi-dimensional interface with simultaneous visual layers
@@ -14,7 +15,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { secureRandom } from '@/lib/security-core';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES

@@ -1,3 +1,5 @@
+import { secureRandom } from "@/lib/security-core";
+import { ErrorBoundary } from '@/design-system/agentic-components';
 "use client";
 
 import React, { useState } from "react";

@@ -1,3 +1,4 @@
+import { secureRandom } from "@/lib/security-core";
 #!/usr/bin/env node
 /**
  * 🎨 AIX Studio - Terminal UI Entry Point

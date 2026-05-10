@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Network, 
+  Activity,
+  ShieldAlert,
+  Zap,
   X, 
   ExternalLink, 
   Play, 
@@ -14,9 +16,11 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { AgentPet } from '@/components/shared/AgentPet';
+import { FadeIn } from '@/components/animations/FadeIn';
 
-// Dynamically import the 3D Graph to avoid SSR issues with ThreeJS
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
+// Dynamically import the 3D/2D Graphs to avoid SSR issues with ThreeJS
+// const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
+// const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
 interface Node {
   id: string;
@@ -60,12 +64,15 @@ export default function SpacePage() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 30000); // Poll every 30s
     return () => clearInterval(interval);
   }, []);
 
+  // Trick 1 & 2: Custom 3D Object with Glow & Persona
   const nodeThreeObject = useCallback((node: Node) => {
     const group = new THREE.Group();
+
+    // 1. Glowing Sphere (Status Indicator)
     const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(node.val),
       new THREE.MeshStandardMaterial({
@@ -78,6 +85,7 @@ export default function SpacePage() {
     );
     group.add(sphere);
 
+    // 2. Pet Billboard (Sprite)
     const canvas = document.createElement('canvas');
     canvas.width = 64;
     canvas.height = 64;
@@ -101,6 +109,7 @@ export default function SpacePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-white overflow-hidden relative">
+      {/* HUD Header */}
       <header className="absolute top-24 left-10 z-20 pointer-events-none">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -132,6 +141,7 @@ export default function SpacePage() {
         </div>
       </header>
 
+      {/* Canvas Area */}
       <div className="w-full h-screen">
         {!loading && (
           mode === '3d' ? (
@@ -151,24 +161,54 @@ export default function SpacePage() {
               onNodeClick={(node: any) => {
                 setSelectedNode(node);
                 const distance = 400;
-                const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
-                if (fgRef.current) {
-                  fgRef.current.cameraPosition(
-                    { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
-                    node,
-                    3000
-                  );
-                }
+                const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+                fgRef.current.cameraPosition(
+                  { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                  node,
+                  3000
+                );
               }}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-white/20">
-              2D Tactical View Offline
-            </div>
+            {/*<ForceGraph2D
+              ref={fgRef}
+              graphData={graphData}
+              backgroundColor="#0A0A0F"
+              nodeLabel={(node: any) => `${node.pet?.emoji || '🤖'} ${node.name}`}
+              nodeColor={(node: any) => node.color}
+              nodeVal={(node: any) => node.val}
+              linkWidth={(link: any) => link.value}
+              linkDirectionalParticles={4}
+              linkDirectionalParticleSpeed={0.005}
+              linkDirectionalParticleWidth={4}
+              linkDirectionalParticleColor={() => '#00FF88'}
+              onNodeClick={(node: any) => setSelectedNode(node)}
+              nodeCanvasObject={(node: any, ctx, globalScale) => {
+                const label = `${node.pet?.emoji || '🤖'} ${node.name}`;
+                const fontSize = 14 / globalScale;
+                ctx.font = `bold ${fontSize}px Inter`;
+
+                // Glowing Circle (Trick 1)
+                ctx.shadowColor = node.color;
+                ctx.shadowBlur = 20 / globalScale;
+
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
+                ctx.fillStyle = node.color;
+                ctx.fill();
+
+                // Label with backdrop
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, node.x, node.y + node.val + fontSize + 4);
+              }}
+            />
           )
         )}
       </div>
 
+      {/* Side Panel (Framer Motion) */}
       <AnimatePresence>
         {selectedNode && (
           <motion.aside
@@ -248,6 +288,7 @@ export default function SpacePage() {
         )}
       </AnimatePresence>
 
+      {/* Global Pulse Indicator */}
       <div className="absolute bottom-10 right-10 z-20 flex items-center gap-4 bg-black/40 backdrop-blur-xl border border-white/10 p-4 rounded-3xl">
         <div className="flex -space-x-3">
           {graphData.nodes.slice(0, 3).map((n, i) => (

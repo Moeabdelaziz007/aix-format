@@ -1,3 +1,4 @@
+import { secureRandom } from "@/lib/security-core";
 /**
  * Payment Verification System
  * 
@@ -10,7 +11,6 @@
  */
 
 import { z } from 'zod';
-import { secureId } from '../security-core';
 
 /**
  * Payment proof schema validation
@@ -332,7 +332,7 @@ export function generatePaymentProof(
     amount,
     currency,
     timestamp: Date.now(),
-    signature: 'test-signature-' + secureId('', 12)
+    signature: 'test-signature-' + secureRandom().toString(36).substring(7)
   };
   
   return Buffer.from(JSON.stringify(proof)).toString('base64');

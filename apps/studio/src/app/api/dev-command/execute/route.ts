@@ -1,5 +1,5 @@
+import { secureRandom, secureId, secureTransactionHash } from "@/lib/security-core";
 import { NextRequest } from 'next/server';
-import { secureId, secureTransactionHash } from '@/lib/security-core';
 
 export const runtime = 'edge';
 
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         const trustNodes: TrustNode[] = [];
         const createTrustNode = (type: TrustNode['type'], connections: string[] = []) => {
           const node: TrustNode = {
-            id: `node-${Date.now()}-${secureId('', 9)}`,
+            id: `node-${Date.now()}-${secureRandom().toString(36).substr(2, 9)}`,
             type,
             status: 'pending',
             connections
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
         // Complete validation
         validationNode.status = 'complete';
-        validationNode.hash = secureTransactionHash();
+        validationNode.hash = `0x${secureRandom().toString(16).substr(2, 64)}`;
         send('trust', validationNode);
 
         // Execute phases
@@ -115,17 +115,17 @@ export async function GET(request: NextRequest) {
           for (const stepContent of phaseData.steps) {
             // Send reasoning step
             const step: ReasoningStep = {
-              id: `step-${Date.now()}-${secureId('', 9)}`,
+              id: `step-${Date.now()}-${secureRandom().toString(36).substr(2, 9)}`,
               timestamp: Date.now(),
               phase: phaseData.phase,
               content: stepContent,
-              confidence: 0.7 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 0.3
+              confidence: 0.7 + secureRandom() * 0.3
             };
             send('reasoning', step);
 
             // Send stream chunk
             const chunk: StreamChunk = {
-              id: `chunk-${Date.now()}-${secureId('', 9)}`,
+              id: `chunk-${Date.now()}-${secureRandom().toString(36).substr(2, 9)}`,
               content: stepContent,
               type: phaseData.phase === 'act' ? 'action' : 'thought',
               timestamp: Date.now()
@@ -147,11 +147,11 @@ export async function GET(request: NextRequest) {
               await sleep(500);
               
               execNode.status = 'complete';
-              execNode.hash = secureTransactionHash();
+              execNode.hash = `0x${secureRandom().toString(16).substr(2, 64)}`;
               send('trust', execNode);
             }
 
-            await sleep(400 + Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] % 400));
+            await sleep(400 + secureRandom() * 400);
           }
         }
 
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
         await sleep(800);
         
         verifyNode.status = 'complete';
-        verifyNode.hash = secureTransactionHash();
+        verifyNode.hash = `0x${secureRandom().toString(16).substr(2, 64)}`;
         send('trust', verifyNode);
 
         // Send final result

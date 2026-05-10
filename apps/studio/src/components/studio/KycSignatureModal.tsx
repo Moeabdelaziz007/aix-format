@@ -1,3 +1,4 @@
+import { secureRandom } from "@/lib/security-core";
 "use client";
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";

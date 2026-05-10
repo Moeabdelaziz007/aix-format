@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { SetupWizard } from "@/components/studio/SetupWizard";
 import { AgentCard } from "@/components/agents/AgentCard";
-import { VoiceOrb } from "@/components/studio/VoiceOrb";
+import { VoiceOrb } from "@/design-system/agentic-components";
 import { AgenticKycSetup } from "@/components/studio/AgenticKycSetup";
 import LiveValidator from "@/components/studio/LiveValidator";
 import { SovereignStatusBar } from "@/components/layout/SovereignStatusBar";

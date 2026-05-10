@@ -1,8 +1,8 @@
+import { secureRandom } from "@/lib/security-core";
 'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { secureRandom } from '@/lib/security-core';
 import { Terminal, Shield, Cpu, Activity } from 'lucide-react';
 
 const MOCK_EVENTS = [

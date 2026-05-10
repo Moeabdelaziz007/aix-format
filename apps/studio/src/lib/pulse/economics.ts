@@ -1,4 +1,4 @@
-import { secureRandom } from '../security-core';
+import { secureRandom } from "@/lib/security-core";
 import { RevenueRouter, SovereignLoopManager } from "@aix-core/storage";
 import { Economics } from "@aix-types";
 

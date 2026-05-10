@@ -1,3 +1,4 @@
+import { ErrorBoundary } from '@/design-system/agentic-components';
 "use client";
 
 import { useState } from "react";

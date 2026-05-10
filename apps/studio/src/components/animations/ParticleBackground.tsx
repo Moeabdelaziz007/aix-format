@@ -1,3 +1,4 @@
+import { secureRandom } from "@/lib/security-core";
 "use client";
 
 import { motion } from "framer-motion";
@@ -9,10 +10,10 @@ export function ParticleBackground() {
   useEffect(() => {
     const newParticles = Array.from({ length: 20 }, []).map((_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 20 + 10,
+      x: secureRandom() * 100,
+      y: secureRandom() * 100,
+      size: secureRandom() * 3 + 1,
+      duration: secureRandom() * 20 + 10,
     }));
     setParticles(newParticles);
   }, []);
@@ -30,8 +31,8 @@ export function ParticleBackground() {
             height: particle.size,
           }}
           animate={{
-            x: [0, Math.random() * 100 - 50, 0],
-            y: [0, Math.random() * 100 - 50, 0],
+            x: [0, secureRandom() * 100 - 50, 0],
+            y: [0, secureRandom() * 100 - 50, 0],
             opacity: [0.1, 0.4, 0.1],
           }}
           transition={{

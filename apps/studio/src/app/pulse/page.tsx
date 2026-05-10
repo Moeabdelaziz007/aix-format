@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Box, Text } from '@/design-system/components';
+import { Box, Text } from '@/design-system/agentic-components';
 
 interface PulseEvent {
   type: 'bus' | 'pet' | 'meta' | 'connected' | 'error';

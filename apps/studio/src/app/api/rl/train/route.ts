@@ -1,3 +1,4 @@
+import { secureRandom } from "@/lib/security-core";
 import { NextRequest, NextResponse } from 'next/server';
 import { DQNAgent } from '@aix/core/compression/rl-engine';
 
@@ -113,19 +114,19 @@ async function runTraining(agent: DQNAgent, episodes: number, taskType: string):
 
 function generateRandomState(taskType: string): number[] {
   return [
-    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 1000,
-    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 500,
+    secureRandom() * 1000,
+    secureRandom() * 500,
     taskType === 'code' ? 0 : taskType === 'data' ? 1 : 2,
-    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296),
-    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 200,
-    (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 10
+    secureRandom(),
+    secureRandom() * 200,
+    secureRandom() * 10
   ];
 }
 
 function simulateCompression(state: number[], action: number): { nextState: number[], reward: number, done: boolean } {
   const compressionRatio = 2 + (action % 8);
-  const quality = 0.7 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 0.3;
-  const latency = 20 + (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296) * 80;
+  const quality = 0.7 + secureRandom() * 0.3;
+  const latency = 20 + secureRandom() * 80;
 
   const reward = (
     (compressionRatio / 10) * 0.3 +

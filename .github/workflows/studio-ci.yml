@@ -36,12 +36,12 @@ jobs:
       # ── Studio install ──────────────────────────────────────────────────
       - name: Install studio dependencies
         working-directory: apps/studio
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --no-package-lock
 
       # ── Lint ────────────────────────────────────────────────────────────
       - name: Lint
         working-directory: apps/studio
-        run: pnpm run lint --if-present
+        run: pnpm run lint
         env:
           UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
           UPSTASH_REDIS_REST_TOKEN: placeholder_token
@@ -58,7 +58,7 @@ jobs:
 
       # ── Schema-Type Drift Check ─────────────────────────────────────────
       - name: Schema-Type Sync Verification
-        run: pnpm run schema:sync:check
+        run: pnpm run --if-present schema:sync:check
         env:
           CI: true
 

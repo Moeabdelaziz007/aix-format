@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { secureRandom } from "../../lib/security-core";
 import type { Pet } from '../components/PetRow.js';
 
 const PETS_INIT: Pet[] = [
