@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { buildManifestFromVoice, VoiceWizardData } from '@aix-core/voice/ManifestBuilder';
+import { buildManifestFromVoice, VoiceWizardData } from '@aix-core';
 import { validateSovereignManifest } from '@/lib/protocol-validator';
 
 /**

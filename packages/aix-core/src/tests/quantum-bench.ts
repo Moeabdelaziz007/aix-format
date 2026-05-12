@@ -1,4 +1,4 @@
-import { QuantumMemoryCache } from '../memory/QuantumMemoryCache.js';
+import { QuantumMemoryCache } from '../memory/QuantumMemoryCache';
 
 /**
  * 📊 QUANTUM MEMORY BENCHMARK

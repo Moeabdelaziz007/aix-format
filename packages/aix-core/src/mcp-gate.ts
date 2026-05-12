@@ -7,9 +7,9 @@
  * Made with Moe Abdelaziz
  */
 
-import { health } from './health.js';
-import { AbomScanner } from './scanner.js';
-import { kv } from './memory/storage.js';
+import { health } from './health';
+import { AbomScanner } from './scanner';
+import { kv } from './memory/storage';
 
 export interface SanitizationResult {
   safe: boolean;

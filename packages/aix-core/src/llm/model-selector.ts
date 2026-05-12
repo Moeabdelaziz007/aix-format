@@ -1,5 +1,5 @@
-import { LLMProvider, MockProvider } from './types.js';
-import { GroqProvider } from './groq-provider.js';
+import { LLMProvider, MockProvider } from './types';
+import { GroqProvider } from './groq-provider';
 
 /**
  * 🧭 AIX Model Selector

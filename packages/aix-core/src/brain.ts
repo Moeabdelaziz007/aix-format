@@ -1,5 +1,5 @@
-import { kv, KEYS } from './memory/storage.js';
-import { generateHash } from './infra.js';
+import { kv, KEYS } from './memory/storage';
+import { generateHash } from './infra';
 import { Octokit } from '@octokit/rest';
 
 /**
@@ -8,7 +8,7 @@ import { Octokit } from '@octokit/rest';
  * Made with Moe Abdelaziz
  */
 
-import { SelfEvaluation, SelfReviewRecord } from './domain.js';
+import { SelfEvaluation, SelfReviewRecord } from './domain';
 
 export class AgentSelfReview {
   static async store(record: SelfReviewRecord) {
@@ -48,7 +48,7 @@ export interface LearnedProcedure {
  */
 export async function getRelevantProcedures(agentId: string, currentGoal: string, allProcedures: LearnedProcedure[]): Promise<LearnedProcedure[]> {
   try {
-    const { search: semanticSearch } = await import('./wikibrain/SemanticIndex.js');
+    const { search: semanticSearch } = await import('./wikibrain/SemanticIndex');
     const semanticResults = await semanticSearch(currentGoal, 3, { type: 'skill' });
     
     if (semanticResults.length > 0) {
@@ -92,7 +92,7 @@ export async function archiveWisdom(agentId: string, input: any, output: string,
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
       // 1. Semantic Indexing
-      const { SemanticIndex } = await import('./wikibrain/SemanticIndex.js');
+      const { SemanticIndex } = await import('./wikibrain/SemanticIndex');
       const index = new SemanticIndex();
       await index.index(`wisdom-${agentId}-${Date.now()}`, 'wisdom', wisdomSnippet, { agentId, type: 'meta_wisdom' });
 

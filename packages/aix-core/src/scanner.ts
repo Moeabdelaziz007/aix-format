@@ -1,5 +1,5 @@
-import { ValidationEngine, Validators } from './validation.js';
-import { ValidationResult } from './domain.js';
+import { ValidationEngine, Validators } from './validation';
+import { ValidationResult } from './domain';
 
 const ABOM_VALID_TYPES = ['model', 'dataset', 'library', 'tool', 'plugin', 'agent', 'runtime'];
 const ABOM_VALID_TRUST_TIERS = ['verified', 'community', 'unverified', 'revoked'];

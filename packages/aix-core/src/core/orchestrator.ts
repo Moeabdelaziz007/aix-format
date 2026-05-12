@@ -1,8 +1,8 @@
-import { bus, RINGS } from './bus.js';
-import { AgentHints } from '../memory/hints.js';
-import { StructuralNavigator } from '../navigation/navigator.js';
-import { StorageOrchestrator } from '../memory/storage.js';
-import { SovereignHealthService } from '../health.js';
+import { bus, RINGS } from './bus';
+import { AgentHints } from '../memory/hints';
+import { StructuralNavigator } from '../navigation/navigator';
+import { StorageOrchestrator } from '../memory/storage';
+import { SovereignHealthService } from '../health';
 
 /**
  * 🌌 AIX Sovereign Orchestrator (v1.0)

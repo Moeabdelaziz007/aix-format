@@ -1,5 +1,5 @@
-import { LLMProvider } from './types.js';
-import { CircuitBreaker } from '../infra.js';
+import { LLMProvider } from './types';
+import { CircuitBreaker } from '../infra';
 
 /**
  * Groq Provider - Fast as Light

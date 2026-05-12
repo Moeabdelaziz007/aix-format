@@ -1,4 +1,4 @@
-import { kv, KEYS } from "@aix-core/storage";
+import { kv, KEYS } from "@aix-core";
 import { GatewayProcess, GhostConfig } from "@aix-types";
 
 export class PulseGhost {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { indexAgent } from "@aix-core";
-import { SovereignHealthService } from "@aix-core/health";
+import { SovereignHealthService } from "@aix-core";
 
 /**
  * POST /api/wikibrain/reindex

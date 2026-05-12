@@ -1,15 +1,15 @@
 import { EventEmitter } from 'events';
-import { health } from './health.js';
-import { CuriosityEngine } from './curiosity.js';
-import { archiveWisdom } from './brain.js';
-import { AgentSelfReview } from './AgentSelfReview.js';
-import { AgentRuntimeEngine } from './agent-runtime.js';
-import { GroqProvider, ToolRegistry } from './llm/index.js';
-import { mcpGate } from './mcp-gate.js';
-import { SovereignEconomics } from './economics.js';
-import { getHarness } from './harness.config.js';
-import { getRustBridge } from '@aix/rust-core/src/bridge.js';
-import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema, BusEventSchema } from './domain.js';
+import { health } from './health';
+import { CuriosityEngine } from './curiosity';
+import { archiveWisdom } from './brain';
+import { AgentSelfReview } from './AgentSelfReview';
+import { AgentRuntimeEngine } from './agent-runtime';
+import { GroqProvider, ToolRegistry } from './llm/index';
+import { mcpGate } from './mcp-gate';
+import { SovereignEconomics } from './economics';
+import { getHarness } from './harness.config';
+import { getRustBridge } from '@aix/rust-core/src/bridge';
+import { AgentRequest, AgentRequestSchema, GatewayResponse, GatewayResponseSchema, BusEventSchema } from './domain';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
 

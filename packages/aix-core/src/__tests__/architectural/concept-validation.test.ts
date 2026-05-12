@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-// import { SovereignGateway } from '../../gateway.js';
+// import { SovereignGateway } from '../../gateway';
 
 /**
  * ============================================================================

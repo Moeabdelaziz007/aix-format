@@ -1,5 +1,5 @@
-import { MemoryPublisher } from '../memory/publishEvent.js';
-import { bus, RINGS, BusEvent } from '../core/bus.js';
+import { MemoryPublisher } from '../memory/publishEvent';
+import { bus, RINGS, BusEvent } from '../core/bus';
 
 /**
  * 🧪 AIX RESONANCE TEST (E2E)

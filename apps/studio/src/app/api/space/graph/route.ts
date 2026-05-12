@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv, getRegistry, GatewaySecurity } from "@aix-core/storage";
+import { kv, getRegistry, GatewaySecurity } from "@aix-core";
 
 /**
  * GET /api/space/graph

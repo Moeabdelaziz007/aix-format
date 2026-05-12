@@ -1,5 +1,5 @@
 import http from 'http';
-import { getGateway, getHarness, kv, KEYS } from './index.js';
+import { getGateway, getHarness, kv, KEYS } from './index';
 
 const PORT = process.env.PORT || 3369;
 

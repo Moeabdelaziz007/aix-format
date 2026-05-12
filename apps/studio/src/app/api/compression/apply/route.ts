@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ManifestCompressionIntegration } from '@aix/core/compression/manifest-integration';
+import { ManifestCompressionIntegration } from '@aix-core';
 
 export async function POST(req: NextRequest) {
   try {

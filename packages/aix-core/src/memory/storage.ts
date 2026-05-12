@@ -1,6 +1,6 @@
 import { Redis } from '@upstash/redis';
 import * as crypto from 'crypto';
-import { AIX_CONFIG } from '../core/config.js';
+import { AIX_CONFIG } from '../core/config';
 
 /**
  * 🗄️ SOVEREIGN_STORAGE

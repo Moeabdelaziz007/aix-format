@@ -1,6 +1,6 @@
-import { kv, KEYS } from './memory/storage.js';
-import { AbomScanner } from './scanner.js';
-import { ValidationResult } from './domain.js';
+import { kv, KEYS } from './memory/storage';
+import { AbomScanner } from './scanner';
+import { ValidationResult } from './domain';
 import { nanoid } from 'nanoid';
 
 /**

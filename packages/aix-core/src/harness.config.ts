@@ -1,6 +1,6 @@
-import { SovereignHealthService } from './health.js';
-import { AIXTokenBucket, RATE_LIMITS } from './rate-limit.js';
-import { kv } from './memory/storage.js';
+import { SovereignHealthService } from './health';
+import { AIXTokenBucket, RATE_LIMITS } from './rate-limit';
+import { kv } from './memory/storage';
 
 /**
  * AIX Sovereign Harness Config & Entry Point

@@ -111,8 +111,8 @@ Heartbeat keeps connection alive
 Replace simulation in `route.ts`:
 
 ```typescript
-import { Gateway } from '@aix/core/gateway';
-import { PetOrchestrator } from '@aix/core/pets';
+import { Gateway } from '@aix-core';
+import { PetOrchestrator } from '@aix-core';
 
 const gateway = new Gateway();
 const pets = new PetOrchestrator();
@@ -134,7 +134,7 @@ await gateway.execute(task);
 ### Add Trust Chain Integration
 
 ```typescript
-import { TrustChain } from '@aix/core/security';
+import { TrustChain } from '@aix-core';
 
 const trustChain = new TrustChain();
 

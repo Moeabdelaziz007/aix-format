@@ -12,7 +12,7 @@ import { getRustBridge } from '@aix-core';
  * - Graceful shutdown
  */
 
-import { PulseEvent } from '@aix-core/domain';
+import { PulseEvent } from '@aix-core';
 
 
 // Configuration

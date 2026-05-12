@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getRegistry, updateRegistryEntry, deleteRegistryEntry, type RegistryEntry } from "@aix-core/storage";
+import { getRegistry, updateRegistryEntry, deleteRegistryEntry, type RegistryEntry } from "@aix-core";
 import { successResponse, requireAuth, ERR, parseBody } from '@/lib/api-helpers';
 
 /**

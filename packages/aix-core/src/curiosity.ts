@@ -1,5 +1,5 @@
-import { kv, KEYS } from './memory/storage.js';
-import { shannonEntropy } from './infra.js';
+import { kv, KEYS } from './memory/storage';
+import { shannonEntropy } from './infra';
 
 /**
  * 💡 SOVEREIGN_CURIOSITY_ENGINE

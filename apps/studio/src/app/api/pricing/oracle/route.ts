@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv, getTotalAgentStake } from "../@aix-core/economics"
-import { BondingCurve } from "../@aix-core/economics/BondingCurve";
+import { kv, getTotalAgentStake } from "@aix-core"
+import { BondingCurve } from "@aix-core";
 
 export async function GET(req: NextRequest) {
   try {

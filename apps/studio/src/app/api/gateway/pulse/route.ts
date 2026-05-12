@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { 
   GatewayManager, 
   PulseEngine,
-} from "@aix-core/storage";
+} from "@aix-core";
 import { SwarmProcessor } from "@/lib/pulse/processor";
 
 /**

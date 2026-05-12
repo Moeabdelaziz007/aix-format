@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stakeAgent } from "../@aix-core/economics";
+import { stakeAgent } from "@aix-core";
 import { z } from 'zod';
 
 // Zod validation schema

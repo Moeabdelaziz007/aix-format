@@ -3,7 +3,7 @@
  * Made with Moe Abdelaziz
  */
 
-export * from './types.js';
-export * from './groq-provider.js';
-export * from './model-selector.js';
-export * from './observability.js';
+export * from './types';
+export * from './groq-provider';
+export * from './model-selector';
+export * from './observability';

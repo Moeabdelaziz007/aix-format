@@ -1,4 +1,4 @@
-import { getGateway, getHarness, kv, KEYS } from './index.js';
+import { getGateway, getHarness, kv, KEYS } from './index';
 
 // Environment variables should be provided by the shell or root config
 

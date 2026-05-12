@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getBus } from '@aix-core/bus';
+import { getBus } from '@aix-core';
 
 /**
  * AIX Real-Time Agent Stream (SSE)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRegistry, updateRegistryEntry } from "../@aix-core/registry";
+import { getRegistry, updateRegistryEntry } from "@aix-core";
 
 import { RegistryEntry } from "@/lib/types";
 

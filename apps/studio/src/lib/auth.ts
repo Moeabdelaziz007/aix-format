@@ -10,12 +10,58 @@
  */
 
 import { NextRequest } from 'next/server';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from "next-auth/providers/credentials";
+import { env } from './env';
 
 export interface AuthUser {
   id: string;
   email: string;
   role?: string;
 }
+
+/**
+ * NextAuth Configuration Options
+ */
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "Sovereign ID",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        // This is a placeholder for actual database lookup
+        if (credentials?.email === "admin@axiomid.app" && credentials?.password === "admin123") {
+          return { id: "1", email: "admin@axiomid.app", role: "admin" };
+        }
+        return null;
+      }
+    })
+  ],
+  session: {
+    strategy: 'jwt',
+  },
+  callbacks: {
+    async session({ session, token }) {
+      if (token && session.user) {
+        (session.user as any).id = token.sub;
+        (session.user as any).role = token.role;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as any).role;
+      }
+      return token;
+    },
+  },
+  secret: env.NEXTAUTH_SECRET,
+};
 
 /**
  * Verify JWT token
@@ -25,22 +71,19 @@ export interface AuthUser {
  */
 export async function verifyToken(token: string): Promise<AuthUser | null> {
   try {
-    // TODO: Implement actual JWT verification
-    // For now, use mock verification
+    if (!token) return null;
     
-    if (!token || token.length < 10) {
-      return null;
+    const secret = env.JWT_SECRET;
+    if (!secret) {
+        console.error('[Auth] JWT_SECRET not configured');
+        return null;
     }
+    const decoded = jwt.verify(token, secret) as any;
     
-    // In production, use jsonwebtoken:
-    // const decoded = verify(token, process.env.JWT_SECRET!);
-    // return decoded as AuthUser;
-    
-    // Mock user for development
     return {
-      id: 'user_' + token.substring(0, 8),
-      email: 'user@example.com',
-      role: 'user'
+      id: decoded.id || decoded.sub,
+      email: decoded.email,
+      role: decoded.role
     };
     
   } catch (error) {
@@ -139,16 +182,21 @@ export function requireRole(user: AuthUser, requiredRole: string): void {
  * @returns JWT token
  */
 export async function generateToken(user: AuthUser): Promise<string> {
-  // TODO: Implement actual JWT generation
-  // For now, return mock token
+  const secret = env.JWT_SECRET;
+  if (!secret) {
+      throw new Error('JWT_SECRET not configured');
+  }
   
-  // In production, use jsonwebtoken:
-  // const token = sign(user, process.env.JWT_SECRET!, {
-  //   expiresIn: '7d'
-  // });
-  // return token;
-  
-  return 'mock_token_' + user.id + '_' + Date.now();
+  return jwt.sign(
+    {
+      sub: user.id,
+      id: user.id,
+      email: user.email,
+      role: user.role
+    },
+    secret,
+    { expiresIn: '7d' }
+  );
 }
 
 /**
@@ -158,15 +206,8 @@ export async function generateToken(user: AuthUser): Promise<string> {
  * @returns Hashed password
  */
 export async function hashPassword(password: string): Promise<string> {
-  // TODO: Implement actual password hashing
-  // For now, return mock hash
-  
-  // In production, use bcrypt:
-  // const salt = await bcrypt.genSalt(10);
-  // const hash = await bcrypt.hash(password, salt);
-  // return hash;
-  
-  return 'hashed_' + password;
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
 }
 
 /**
@@ -177,13 +218,7 @@ export async function hashPassword(password: string): Promise<string> {
  * @returns True if password matches
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  // TODO: Implement actual password verification
-  // For now, use mock verification
-  
-  // In production, use bcrypt:
-  // return await bcrypt.compare(password, hash);
-  
-  return hash === 'hashed_' + password;
+  return await bcrypt.compare(password, hash);
 }
 
 // Made with Moe Abdelaziz

@@ -1,4 +1,4 @@
-import { RevenueRouter, SovereignLoopManager } from "@aix-core/storage";
+import { RevenueRouter, SovereignLoopManager } from "@aix-core";
 import { Economics } from "@aix-types";
 
 export interface EconResult {

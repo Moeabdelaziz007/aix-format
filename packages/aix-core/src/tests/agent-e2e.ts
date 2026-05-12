@@ -1,6 +1,6 @@
-import { SovereignGateway } from '../gateway.js';
-import { bus, RINGS } from '../core/bus.js';
-import { registry } from '../registry.js';
+import { SovereignGateway } from '../gateway';
+import { bus, RINGS } from '../core/bus';
+import { registry } from '../registry';
 
 /**
  * 🧪 AIX AGENT E2E TEST

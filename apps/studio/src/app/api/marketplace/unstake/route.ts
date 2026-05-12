@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { unstakeAgent } from "@aix-core/src/economics";
+import { unstakeAgent } from "@aix-core";
 import { requireAuth } from "@/lib/api-helpers";
-import { getTrustChain } from "@aix-core/src";
+import { getTrustChain } from "@aix-core";
 import { z } from "zod";
 
 /**

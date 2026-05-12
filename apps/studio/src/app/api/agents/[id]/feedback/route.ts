@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { kv, KEYS } from "@/lib/redis";
-import { extractSkillFromFeedback } from "@aix-core/storage";
+import { extractSkillFromFeedback } from "@aix-core";
 
 /**
  * POST /api/agents/[id]/feedback

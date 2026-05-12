@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { kv, KEYS } from '@/lib/redis';
-import { getGateway } from '@aix-core/gateway';
+import { getGateway } from '@aix-core';
 
 /**
  * AIX Stable Agent Run API

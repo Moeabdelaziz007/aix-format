@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DQNAgent } from '@aix/core/compression/rl-engine';
+import { DQNAgent } from '@aix-core';
 
 export async function POST(req: NextRequest) {
   try {

@@ -3,8 +3,8 @@
 
 import { pipeline } from '@xenova/transformers';
 import { z } from 'zod';
-import { kv } from '../memory/storage.js';
-import { SovereignEntity } from '../base.js';
+import { kv } from '../memory/storage';
+import { SovereignEntity } from '../base';
 
 // RULE 1: Strict Schemas
 export const SearchFilterSchema = z.object({

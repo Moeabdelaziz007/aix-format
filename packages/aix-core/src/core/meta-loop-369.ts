@@ -1,6 +1,6 @@
-import { AIXOrchestrator } from './orchestrator.js';
-import { StructuralNavigator } from '../navigation/navigator.js';
-import { bus, RINGS } from './bus.js';
+import { AIXOrchestrator } from './orchestrator';
+import { StructuralNavigator } from '../navigation/navigator';
+import { bus, RINGS } from './bus';
 
 /**
  * 🌀 AIX META-LOOP 369 (v1.0)

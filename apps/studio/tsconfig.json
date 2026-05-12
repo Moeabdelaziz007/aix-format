@@ -19,12 +19,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/sections/*": ["./src/sections/*"],
-      "@/design-system/*": ["./src/design-system/*"],
-      "@/constants/*": ["./src/constants/*"],
+      "@core/*": ["../../core/*"],
       "@aix-core": ["../../packages/aix-core/src/index.ts"],
       "@aix-core/*": ["../../packages/aix-core/src/*"]
     },
@@ -44,5 +39,3 @@
     "build"
   ]
 }
-
-// Made with Moe Abdelaziz + AI Team

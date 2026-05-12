@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { successResponse, requireAuth, ERR } from '@/lib/api-helpers';
-import { kv } from '@aix-core/src/storage/adapter';
+import { kv } from '@aix-core';
 
 /**
  * POST /api/zkkyc/prune

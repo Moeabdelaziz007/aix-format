@@ -1,5 +1,5 @@
 import { randomBytes, randomInt } from 'crypto';
-import { kv, KEYS } from '../memory/storage.js';
+import { kv, KEYS } from '../memory/storage';
 
 /**
  * AIX Channel Orchestration (v1.4.0-sovereign)

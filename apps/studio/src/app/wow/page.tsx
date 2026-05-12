@@ -1,92 +1,33 @@
+"use client";
+
+import React from 'react';
 import dynamic from 'next/dynamic';
-import { Metadata } from 'next';
 
 /**
  * Dynamic imports with SSR disabled for client components
  */
 const ReasoningTerminal = dynamic(
-  () => import('@/components/studio/ReasoningTerminal').then(mod => ({ default: mod.ReasoningTerminal })),
-  { ssr: false }
+    () => import('@/components/studio/ReasoningTerminal').then(mod => ({ default: (mod as any).ReasoningTerminal || mod.default })),
+    { ssr: false }
 );
 
 const TrustChainVisualizer = dynamic(
-  () => import('@/components/studio/TrustChainVisualizer').then(mod => ({ default: mod.TrustChainVisualizer })),
+  () => import('@/components/studio/TrustChainVisualizer').then(mod => ({ default: (mod as any).TrustChainVisualizer || mod.default })),
   { ssr: false }
 );
 
-/**
- * Page Props
- */
-interface WowPageProps {
-  searchParams: {
-    agent?: string;
-  };
-}
-
-/**
- * Generate metadata
- */
-export async function generateMetadata({ searchParams }: WowPageProps): Promise<Metadata> {
-  const agentId = searchParams.agent ?? 'default';
-  return {
-    title: `AIX Interactive — ${agentId}`,
-    description: 'Real-time AI agent development environment'
-  };
-}
-
-/**
- * WOW Dashboard Page
- * 
- * Interactive Development Environment showing:
- * - Live ReAct reasoning terminal
- * - Trust chain visualization
- * - Real-time agent state
- * 
- * @param searchParams.agent - Agent ID to monitor (default: 'default')
- */
-export default function WowPage({ searchParams }: WowPageProps) {
-  const agentId = searchParams.agent ?? 'default';
-
+export default function WowPage() {
   return (
-    <div className="grid grid-cols-[300px_1fr] grid-rows-[1fr_auto] h-screen bg-zinc-950">
-      {/* Left Sidebar: Trust Chain */}
-      <div className="row-span-2 border-r border-zinc-800 p-4 overflow-y-auto">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-zinc-100 mb-2">
-            Agent: {agentId}
-          </h2>
-          <p className="text-sm text-zinc-500">
-            Real-time monitoring
-          </p>
+    <div className="min-h-screen bg-black text-white p-8">
+      <h1 className="text-4xl font-bold mb-12">Agent Interactive Trace</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="rounded-3xl border border-white/10 bg-zinc-900/50 p-6 overflow-hidden h-[600px]">
+          <ReasoningTerminal />
         </div>
-        <TrustChainVisualizer agentId={agentId} maxBlocks={5} />
-      </div>
-
-      {/* Right Panel: Reasoning Terminal */}
-      <div className="overflow-hidden flex flex-col">
-        <ReasoningTerminal agentId={agentId} className="flex-1" />
-        
-        {/* Bottom Info Bar */}
-        <div className="border-t border-zinc-800 p-4 bg-zinc-900">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-4">
-              <span className="text-zinc-400">
-                Streaming from: <span className="text-zinc-100 font-mono">/api/pulse/stream</span>
-              </span>
-              <span className="text-zinc-600">|</span>
-              <span className="text-zinc-400">
-                Agent: <span className="text-zinc-100 font-mono">{agentId}</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-zinc-400">Live</span>
-            </div>
-          </div>
+        <div className="rounded-3xl border border-white/10 bg-zinc-900/50 p-6 overflow-hidden h-[600px]">
+          <TrustChainVisualizer />
         </div>
       </div>
     </div>
   );
 }
-
-// Made with Moe Abdelaziz

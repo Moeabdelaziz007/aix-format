@@ -7,7 +7,7 @@ import {
   PulseOrchestrator,
   AgentEventBus,
   PulseCommand
-} from "@aix-core/storage";
+} from "@aix-core";
 import { PulseReasoner } from "./reasoner";
 import { PulseGhost } from "./ghost";
 import { AIXManifest, GatewayProcess } from "@aix-types";

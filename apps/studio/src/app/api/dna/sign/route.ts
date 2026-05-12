@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { generateDNAFingerprint } from '@aix-core/security/dna';
+import { generateDNAFingerprint } from '@aix-core';
 import { successResponse, ERR, parseBody } from '@/lib/api-helpers';
 
 /**

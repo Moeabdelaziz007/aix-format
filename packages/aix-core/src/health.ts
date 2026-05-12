@@ -1,6 +1,6 @@
-import { kv, KEYS } from './memory/storage.js';
-import { generateHash, verifySignature as cryptoVerify } from './infra.js';
-import { getRustBridge } from '@aix/rust-core/src/bridge.js';
+import { kv, KEYS } from './memory/storage';
+import { generateHash, verifySignature as cryptoVerify } from './infra';
+import { getRustBridge } from '@aix/rust-core/src/bridge';
 import { createHash } from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -11,7 +11,7 @@ import path from 'path';
  * Made with Moe Abdelaziz
  */
 
-import { ActionRecord } from './domain.js';
+import { ActionRecord } from './domain';
 
 export class SovereignHealthService {
   private static instance: SovereignHealthService;

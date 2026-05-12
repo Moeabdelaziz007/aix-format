@@ -5,7 +5,7 @@
  * Made with Moe Abdelaziz
  */
 
-import { ValidationRule, ValidationError, ValidationResult, ValidationResultSchema } from './domain.js';
+import { ValidationRule, ValidationError, ValidationResult, ValidationResultSchema } from './domain';
 
 export class ValidationEngine {
   private rules: ValidationRule[] = [];

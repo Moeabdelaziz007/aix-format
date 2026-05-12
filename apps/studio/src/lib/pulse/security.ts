@@ -1,4 +1,4 @@
-import { kv, KEYS, evaluateAgent, executeDeadHand, sendHeartbeat, PulseEngine } from "@aix-core/storage";
+import { kv, KEYS, evaluateAgent, executeDeadHand, sendHeartbeat, PulseEngine } from "@aix-core";
 
 export type SecurityStatus = 'SAFE' | 'WARN' | 'QUARANTINE';
 

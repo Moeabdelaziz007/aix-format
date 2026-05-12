@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ReadableMemory, GatewaySecurity } from "@aix-core/storage";
+import { ReadableMemory, GatewaySecurity } from "@aix-core";
 
 /**
  * GET /api/agents/[id]/memory/tree

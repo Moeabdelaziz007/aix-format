@@ -4,17 +4,17 @@
  */
 
 import { z } from 'zod';
-import { kv, KEYS } from './memory/storage.js';
-import { health } from './health.js';
-import { AgentSelfReview } from './AgentSelfReview.js';
-import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm/index.js';
-import { SovereignEntity } from './base.js';
-import { MCPGate } from './mcp-gate.js';
+import { kv, KEYS } from './memory/storage';
+import { health } from './health';
+import { AgentSelfReview } from './AgentSelfReview';
+import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm/index';
+import { SovereignEntity } from './base';
+import { MCPGate } from './mcp-gate';
 import {
   ScratchEntry,
   SelfReviewRecord,
   SelfReviewRecordSchema
-} from './domain.js';
+} from './domain';
 
 // --- UNIFIED AGENT INTERFACES ---
 export const AgentTaskSchema = z.object({

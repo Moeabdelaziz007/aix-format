@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { AIX_CONFIG } from '../core/config.js';
+import { AIX_CONFIG } from '../core/config';
 
 /**
  * 🔗 AIX TRUST CHAIN (v1.0)

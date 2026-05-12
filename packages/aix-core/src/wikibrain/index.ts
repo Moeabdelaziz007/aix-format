@@ -1,1 +1,1 @@
-export * from './SemanticIndex.js';
+export * from './SemanticIndex';
