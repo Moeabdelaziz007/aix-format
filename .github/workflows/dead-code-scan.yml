@@ -23,12 +23,18 @@ jobs:
     name: Scan for Orphaned Exports
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Full history for git log analysis
+
+      - uses: pnpm/action-setup@v4
 
       - name: Install ripgrep
         run: |
