@@ -113,7 +113,7 @@
     "packages/pi-kyc"
   ],
   "dependencies": {
-    "@ai-sdk/google": "^1.0.0",
+    "@ai-sdk/google": "^3.0.73",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@octokit/rest": "^20.0.0",
     "@upstash/redis": "^1.38.0",
