@@ -46,7 +46,7 @@ jobs:
       # ── Lint ────────────────────────────────────────────────────────────
       - name: Lint
         working-directory: apps/studio
-        run: pnpm run lint --if-present
+        run: pnpm --if-present run lint
         env:
           UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
           UPSTASH_REDIS_REST_TOKEN: placeholder_token
@@ -86,7 +86,7 @@ jobs:
 
       # ── Core tests ──────────────────────────────────────────────────────
       - name: Core unit tests
-        run: pnpm test --if-present
+        run: pnpm --if-present test
         env:
           CI: true
 
