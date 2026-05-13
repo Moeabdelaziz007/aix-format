@@ -25,6 +25,8 @@
  * in Phase 1.1 of RFC-001 (see aix-format/docs/rfc).
  */
 
+import { AXIOM_AUTHORITY } from './version';
+
 // ── Primitive aliases ─────────────────────────────────────────────────────────
 
 /** Semantic versioning string (e.g. 1.0.0, 0.369.0, 2.0.0-beta.1). */
@@ -106,20 +108,6 @@ export interface AIXPersona {
 
 // ── identity_layer ────────────────────────────────────────────────────────────
 
-export interface AIXIdentityProvider {
-  type: 'pi_network' | 'world_id' | 'ens' | 'did_web' | 'axiom_id' | 'custom';
-  name: string;
-  authority?: string;
-  chain_id?: string;
-}
-
-export interface AIXIdentityVerification {
-  status: 'unverified' | 'basic' | 'verified' | 'institutional' | 'sovereign';
-  trust_level?: 0 | 1 | 2 | 3;
-  provider_specific_tier?: string;
-  proof_url?: string;
-}
-
 export interface ZKProof {
   /** Groth16 proof object as produced by snarkjs. */
   proof: Record<string, unknown>;
@@ -132,15 +120,44 @@ export interface ZKProof {
   circuit?: string;
 }
 
+/**
+ * AxiomID Identity block. `axiomid.app` is the Root Authority for all
+ * issued identities; the `authority` field is locked to that constant
+ * by the schema (`identity_layer.authority` is `const: "axiomid.app"`)
+ * so any consumer that mints an alternative authority is rejected.
+ *
+ * Required fields per schema: `id`, `authority`, `issuedAt`. All other
+ * fields are optional; their absence simply means the runtime has not
+ * recorded that signal yet.
+ */
 export interface AIXIdentityLayer {
   id: DID;
-  provider: AIXIdentityProvider;
-  verification?: AIXIdentityVerification;
+  /** Root authority. Locked to `axiomid.app` by the schema. */
+  authority: typeof AXIOM_AUTHORITY;
   issuedAt: ISODateTime;
   expiresAt?: ISODateTime;
+  /**
+   * Pi Network KYC tier. `0`/`unverified`, `1`/`basic`, `2`/`verified`,
+   * `3`/`sovereign`. Stored as either the integer (when machine-set by
+   * the KYC verifier) or the string label (when authored by hand).
+   */
+  kyc_tier?: number | string;
+  /** Has the authority verified this identity at any tier above 0? */
+  verified?: boolean;
   publicKey?: PublicKey;
-  zk_proof?: ZKProof;
+  signature?: Signature;
+  /**
+   * SHA-256 hex (64 chars) of a Pi Network UID, binding this DID to a
+   * verified Pi user without revealing the UID itself. Produced by
+   * `pi-kyc.hashPiUid()`.
+   */
   pi_uid_anchor?: string;
+  /**
+   * Optional zero-knowledge KYC proof attesting to identity properties
+   * without revealing the underlying data. Replay protection is
+   * handled at verification time via the nullifier registry.
+   */
+  zk_proof?: ZKProof;
 }
 
 // ── security ──────────────────────────────────────────────────────────────────
