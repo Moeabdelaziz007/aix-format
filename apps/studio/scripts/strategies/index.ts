@@ -73,7 +73,7 @@ const removeUnusedImports: Strategy = {
         if (m) importLines.push({ line, idx, names: m[1].split(',').map(n => n.trim().split(' as ').pop()!.trim()), from: m[2] });
       });
 
-      let modified = lines.slice();
+      const modified = lines.slice();
       const body = lines.join('\n');
 
       for (const { idx, names, from } of importLines) {

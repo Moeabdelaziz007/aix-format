@@ -1,6 +1,6 @@
-import Image from 'next/image';
 'use client';
 
+import Image from 'next/image';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileCode, Download, Cpu, ExternalLink } from 'lucide-react';
