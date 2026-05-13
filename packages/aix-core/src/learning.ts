@@ -109,9 +109,8 @@ export async function getFeedbackSkills(agentId: string): Promise<FeedbackSkill[
   
   if (!hashes.length) return [];
 
-  const skills = await Promise.all(
-    hashes.map(hash => kv.get<FeedbackSkill>(KEYS.agentSkillDetail(agentId, hash)))
-  );
+  const keys = hashes.map(hash => KEYS.agentSkillDetail(agentId, hash));
+  const skills = await kv.mget<FeedbackSkill>(...keys);
 
   return skills.filter((s): s is FeedbackSkill => s !== null);
 }

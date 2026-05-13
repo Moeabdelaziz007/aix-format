@@ -23,14 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.23.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: apps/studio/package-lock.json
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -55,12 +57,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.23.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - run: npm install
-      - run: npm test --if-present
+      - run: pnpm install
+      - run: pnpm test --if-present
 
   # ─────────────────────────────────────────
   # 3. Deploy to Vercel — only on main push
@@ -75,6 +80,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.23.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
