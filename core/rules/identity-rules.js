@@ -8,7 +8,7 @@ import { isValidID, isValidISO8601 } from '../validation-utils.js';
 export const identityRules = [
   {
     name: 'identity_layer.id.required',
-    test: (data) => !!data.identity_layer?.id,
+    check: (data) => !!data.identity_layer?.id,
     message: "Required field 'identity_layer.id' is missing",
     section: 'identity_layer',
     field: 'id'
@@ -16,7 +16,7 @@ export const identityRules = [
   
   {
     name: 'identity_layer.authority.required',
-    test: (data) => !!data.identity_layer?.authority,
+    check: (data) => !!data.identity_layer?.authority,
     message: "Required field 'identity_layer.authority' is missing",
     section: 'identity_layer',
     field: 'authority'
@@ -24,7 +24,7 @@ export const identityRules = [
   
   {
     name: 'identity_layer.issuedAt.required',
-    test: (data) => !!data.identity_layer?.issuedAt,
+    check: (data) => !!data.identity_layer?.issuedAt,
     message: "Required field 'identity_layer.issuedAt' is missing",
     section: 'identity_layer',
     field: 'issuedAt'
@@ -32,7 +32,7 @@ export const identityRules = [
   
   {
     name: 'identity_layer.id.format',
-    test: (data) => {
+    check: (data) => {
       const id = data.identity_layer?.id;
       return !id || isValidID(id);
     },
@@ -43,7 +43,7 @@ export const identityRules = [
   
   {
     name: 'identity_layer.authority.axiom',
-    test: (data) => {
+    check: (data) => {
       const id = data.identity_layer?.id;
       const authority = data.identity_layer?.authority;
       if (!id || !authority) return true;
@@ -59,7 +59,7 @@ export const identityRules = [
   
   {
     name: 'identity_layer.authority.web',
-    test: (data) => {
+    check: (data) => {
       const id = data.identity_layer?.id;
       const authority = data.identity_layer?.authority;
       if (!id || !authority) return true;
@@ -82,7 +82,7 @@ export const identityRules = [
   
   {
     name: 'identity_layer.issuedAt.format',
-    test: (data) => {
+    check: (data) => {
       const issuedAt = data.identity_layer?.issuedAt;
       return !issuedAt || isValidISO8601(issuedAt);
     },

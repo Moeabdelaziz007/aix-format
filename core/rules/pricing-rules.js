@@ -6,7 +6,7 @@
 export const pricingRules = [
   {
     name: 'pricing.currency.valid',
-    test: (data) => {
+    check: (data) => {
       const currency = data.pricing?.currency || data.economics?.pricing?.currency;
       if (!currency) return true;
       const valid = ['USD', 'EUR', 'BTC', 'ETH', 'PI'];
@@ -24,7 +24,7 @@ export const pricingRules = [
   
   {
     name: 'pricing.model.valid',
-    test: (data) => {
+    check: (data) => {
       const model = data.pricing?.model || data.economics?.pricing?.model;
       if (!model) return true;
       const valid = ['pay_per_call', 'subscription', 'freemium', 'tiered'];
@@ -40,7 +40,7 @@ export const pricingRules = [
   
   {
     name: 'pricing.cost_per_call.amount',
-    test: (data) => {
+    check: (data) => {
       const amount = data.pricing?.cost_per_call?.amount || data.economics?.pricing?.cost_per_call?.amount;
       return amount === undefined || (typeof amount === 'number' && amount >= 0);
     },
@@ -51,7 +51,7 @@ export const pricingRules = [
   
   {
     name: 'pricing.subscription.monthly_fee.amount',
-    test: (data) => {
+    check: (data) => {
       const amount = data.pricing?.subscription?.monthly_fee?.amount || 
                      data.economics?.pricing?.subscription?.monthly_fee?.amount;
       return amount === undefined || (typeof amount === 'number' && amount >= 0);
@@ -63,7 +63,7 @@ export const pricingRules = [
   
   {
     name: 'pricing.subscription.included_calls',
-    test: (data) => {
+    check: (data) => {
       const calls = data.pricing?.subscription?.included_calls || 
                     data.economics?.pricing?.subscription?.included_calls;
       return calls === undefined || (Number.isInteger(calls) && calls >= 0);
