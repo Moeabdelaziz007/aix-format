@@ -105,6 +105,7 @@
     "packages/aix-core",
     "packages/aix-rust-core",
     "packages/aix-zkkyc",
+    "packages/axiom-schema",
     "packages/mcp-gateway",
     "packages/mcp-server",
     "packages/pi-kyc"

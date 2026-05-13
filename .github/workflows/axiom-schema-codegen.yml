@@ -1,0 +1,66 @@
+name: "@axiom/schema codegen drift check"
+
+# The codegen ratchet: regenerates src/types.gen.ts from the JSON
+# schema and fails if the regenerated output differs from the file
+# committed in the PR. Any change to the schema MUST also include the
+# regenerated TypeScript mirror, and any change to the mirror MUST
+# come from a schema change. This is the single mechanism that
+# defuses the drift bomb between the schema and its TS surface.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/axiom-schema/schemas/**'
+      - 'packages/axiom-schema/scripts/codegen.ts'
+      - 'packages/axiom-schema/src/types.gen.ts'
+      - 'packages/axiom-schema/package.json'
+      - '.github/workflows/axiom-schema-codegen.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/axiom-schema/schemas/**'
+      - 'packages/axiom-schema/scripts/codegen.ts'
+      - 'packages/axiom-schema/src/types.gen.ts'
+      - 'packages/axiom-schema/package.json'
+      - '.github/workflows/axiom-schema-codegen.yml'
+
+concurrency:
+  group: axiom-schema-codegen-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  drift-check:
+    name: regenerate and diff
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Regenerate types from schema
+        working-directory: packages/axiom-schema
+        run: pnpm run codegen
+
+      - name: Verify no drift between schema and committed types.gen.ts
+        run: |
+          if ! git diff --exit-code packages/axiom-schema/src/types.gen.ts; then
+            echo ""
+            echo "::error::types.gen.ts is out of date relative to schemas/aix.schema.json"
+            echo "::error::Run \`pnpm --filter @axiom/schema codegen\` locally and commit the result."
+            exit 1
+          fi
+          echo "✓ Schema and generated types are in sync."

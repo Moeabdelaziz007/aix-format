@@ -1,0 +1,64 @@
+{
+  "name": "@axiom/schema",
+  "version": "1.3.0",
+  "description": "Canonical AIX manifest JSON Schema and TypeScript types. Single source of truth for the AIX (Artificial Intelligence eXchange) Sovereign Protocol.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/",
+    "src/",
+    "schemas/",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema.json": "./schemas/aix.schema.json",
+    "./generated": {
+      "types": "./dist/types.gen.d.ts",
+      "default": "./dist/types.gen.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "aix",
+    "axiom",
+    "schema",
+    "json-schema",
+    "agent",
+    "manifest",
+    "sovereign-protocol",
+    "axiomid"
+  ],
+  "sideEffects": false,
+  "license": "Apache-2.0",
+  "author": "Mohamed H Abdelaziz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Moeabdelaziz007/aix-format.git",
+    "directory": "packages/axiom-schema"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "codegen": "tsx scripts/codegen.ts",
+    "codegen:check": "tsx scripts/codegen.ts && git diff --exit-code src/types.gen.ts",
+    "build": "tsc",
+    "prepack": "pnpm run codegen && pnpm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "json-schema-to-typescript": "^15.0.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
