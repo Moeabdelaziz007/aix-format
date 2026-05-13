@@ -11,7 +11,15 @@ import { Octokit } from '@octokit/rest';
 import { SelfEvaluation, SelfReviewRecord } from './domain.js';
 
 export class AgentSelfReview {
-  static async store(record: SelfReviewRecord) {
+  /**
+   * Persist a self-review record. Named `record` (not `store`) so it
+   * reads like the observability/telemetry verb the callers in
+   * agent-runtime.ts and gateway.ts already use:
+   *   AgentSelfReview.record(reviewRecord)
+   * The old `./AgentSelfReview.js` module that exported this method
+   * was removed; this is now the single declaration site.
+   */
+  static async record(record: SelfReviewRecord) {
     await kv.set(KEYS.agentSelfReview(record.agentId, record.taskId), record);
     await kv.lpush(KEYS.agentSelfReviewHistory(record.agentId), JSON.stringify(record));
     await kv.ltrim(KEYS.agentSelfReviewHistory(record.agentId), 0, 49);
