@@ -16,14 +16,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: 🟢 Setup Node.js (High-Speed Runtime)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: '22'
+          cache: 'pnpm'
 
       - name: 📦 Install Dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: 🧬 Activate Meta-Loop & Wisdom Grafting
         run: npx tsx scripts/activate-meta-loop.ts --infinite
@@ -39,7 +42,7 @@ jobs:
 
       - name: 🏥 Self-Heal & Report
         if: always()
-        run: npm run health:check
+        run: pnpm run health:check
         
       - name: 📬 Commit Lessons Learned
         if: always()

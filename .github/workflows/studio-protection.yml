@@ -48,23 +48,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: TypeScript type check (Studio)
-        run: npm --prefix apps/studio exec tsc --noEmit
+        run: pnpm --filter ./apps/studio exec tsc --noEmit
         # TS errors in Studio High-Risk zone are BLOCKING (not warn-only)
         continue-on-error: false
 
       - name: Next.js production build (Studio)
-        run: npm --prefix apps/studio run build
+        run: pnpm --filter ./apps/studio run build
         env:
           CI: true
           # Minimal env to satisfy build — real secrets not needed for build check
