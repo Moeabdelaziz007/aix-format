@@ -1,0 +1,53 @@
+name: Axiom Smoke Gate
+
+# Baseline blocker. Runs the 12 smoke scenarios before any merge. The
+# bar for what lives in scripts/smoke.mjs is high: each scenario must be
+# small, fast (sub-second), and catastrophic if it ever regressed. Heavy
+# tests stay in the per-package suites.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel any in-progress smoke run for the same PR / branch when a newer
+# push lands; we only care about the latest commit's smoke result.
+concurrency:
+  group: smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: smoke (12 scenarios)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Run smoke suite
+        run: node --experimental-strip-types scripts/smoke.mjs
+
+      - name: Run smoke suite (JSON, artifact)
+        if: always()
+        run: node --experimental-strip-types scripts/smoke.mjs --json > smoke-report.json || true
+
+      - name: Upload smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-${{ github.sha }}
+          path: smoke-report.json
+          if-no-files-found: warn
