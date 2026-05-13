@@ -1,13 +1,15 @@
 <!-- ════════════════ AIX SOVEREIGN STACK · UNIFIED BRANDING ════════════════ -->
 
 <div align="center">
-  <img src="./assets/aix-stack-header.svg" alt="The AIX Sovereign Stack — L1 PROTOCOL · L2 RUNTIME · L3 MARKETPLACE" width="100%"/>
+  <img src="./assets/aix-stack-header-v2.svg" alt="The AIX Sovereign Stack · Echo369 — L0 Root · L1 Protocol · L2 Runtime · L3 Marketplace · L4-L6 Satellites" width="100%"/>
 </div>
 
 <div align="center">
 
+[![AIX Stack](https://img.shields.io/badge/AIX%20STACK-Echo369-39FF14?style=for-the-badge&labelColor=050505)](./AXIOM.md)
+[![Spec](https://img.shields.io/badge/SPEC-AIX%2F1.0-39FF14?style=for-the-badge&labelColor=050505)](./AXIOM.md)
 [![Layer](https://img.shields.io/badge/LAYER-L1%20%C2%B7%20PROTOCOL-39FF14?style=for-the-badge&labelColor=050505)](https://github.com/Moeabdelaziz007/aix-format)
-[![Stack](https://img.shields.io/badge/AIX%20STACK-v0.369.0-39FF14?style=for-the-badge&labelColor=050505)](https://github.com/Moeabdelaziz007/aix-format)
+[![Version](https://img.shields.io/badge/version-v0.369.0-39FF14?style=for-the-badge&labelColor=050505)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/LICENSE-Apache%202.0-39FF14?style=for-the-badge&labelColor=050505)](./LICENSE)
 
 </div>
@@ -20,7 +22,13 @@
 
 <div align="center">
 
-**🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
+**Sovereign Stack** &nbsp;·&nbsp; **🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
+
+</div>
+
+<div align="center">
+
+<sub>Root Authority · [**L0 · `axiomid-project` ↑**](https://github.com/Moeabdelaziz007/axiomid-project) &nbsp;·&nbsp; Satellites · [**L4 · `AlphaAxiom` ↓**](https://github.com/Moeabdelaziz007/AlphaAxiom) &nbsp;·&nbsp; [**L5 · `PiWorker-OS` ↓**](https://github.com/Moeabdelaziz007/PiWorker-OS) &nbsp;·&nbsp; [**L6 · `GemClaw` ↓**](https://github.com/Moeabdelaziz007/GemClaw)</sub>
 
 </div>
 
@@ -90,11 +98,13 @@ The AIX Protocol itself is composed of three internal tiers:
 
 ### 🌐 THE STACK | المنظومة المتكاملة
 
-`aix-format` is **L1** of the AIX Sovereign Stack — the open standard that the other two layers build on. The protocol defined here is implemented by the **IQRA Runtime** and extended by the **Agent-Skills Marketplace**.
+`aix-format` is **L1** of the AIX Sovereign Stack — the open standard that the other two layers build on. The protocol defined here is implemented by the **IQRA Runtime** and extended by the **Agent-Skills Marketplace**. Around the stack sits a **root authority** (L0) and a tier of **satellite layers** (L4-L6) — consumer applications that buy skills from L3 and ride the protocol.
 
 <div align="center">
-  <img src="./assets/aix-stack-diagram.svg" alt="AIX Stack Topology — L1 Protocol, L2 Runtime, L3 Marketplace" width="100%"/>
+  <img src="./assets/aix-stack-diagram-v2.svg" alt="AIX Stack Topology · Echo369 — Root Authority, Sovereign Core, Satellite Layers" width="100%"/>
 </div>
+
+#### Sovereign Stack (the three core repos)
 
 | Layer | Repo | Role | Status |
 |:---:|:---|:---|:---:|
@@ -103,6 +113,23 @@ The AIX Protocol itself is composed of three internal tiers:
 | ⚪ **L3** | [`aix-agent-skills`](https://github.com/Moeabdelaziz007/aix-agent-skills) | **Marketplace** · 7 Layers · Constitutional · TrustChain | [→ Read](https://github.com/Moeabdelaziz007/aix-agent-skills) |
 
 > The three repositories are **one project in three layers**. The protocol is the contract, the runtime is the engine, the marketplace is the catalog. Same constitution, same TrustChain, same palette, same author.
+
+#### Extended Ecosystem (root authority + satellites)
+
+Outside the strict L1/L2/L3 chain sits the root authority and a tier of satellite layers. They consume the stack and ride the protocol; they do NOT define it. See [`AXIOM.md §4.5`](./AXIOM.md) for the full doctrine.
+
+| Tier | Repo | Role |
+|:---:|:---|:---|
+| 👑 **L0** | [`axiomid-project`](https://github.com/Moeabdelaziz007/axiomid-project) | **Root Authority** · sole issuer of `did:axiom:axiomid.app:*` · proprietary |
+| 💹 **L4** | [`AlphaAxiom`](https://github.com/Moeabdelaziz007/AlphaAxiom) | **Satellite · Trading** · MT5/Bybit/EVM adapters · Gemini brain · skill plugin runtime |
+| π **L5** | [`PiWorker-OS`](https://github.com/Moeabdelaziz007/PiWorker-OS) | **Satellite · Pi** · Pi Network workers · Pi SDK · KYC anchor |
+| 🎙️ **L6** | [`GemClaw`](https://github.com/Moeabdelaziz007/GemClaw) | **Satellite · Voice** · voice forge · Gemini Live · Firebase · persona templates |
+
+**Topology invariants** — money flows upward (satellites → L3), identity flows downward (L0 → all), trust flows centrally (every M2M transaction mirrors into L2 TrustChain). Genus 0, tree-shaped, χ = +1. The stack is a tree, not a tangle.
+
+#### Versioning at a glance
+
+Every repo versions itself independently using strict SemVer. Cross-repo coherence is communicated through a shared `aix.stackVersion` field plus a stack-wide release codename. Current window: **Echo369** · spec **AIX/1.0**. Full doctrine: [`AIX_STACK_VERSIONING.md`](./AIX_STACK_VERSIONING.md).
 
 ---
 
@@ -350,7 +377,13 @@ AIX Format is licensed under the **Apache License 2.0**.
 </div>
 
 <div align="center">
-  <img src="./assets/aix-footer-quote.svg" alt="AIX Stack — King isn't Born, he is Made." width="100%"/>
+
+<sub>L0 · [`axiomid-project`](https://github.com/Moeabdelaziz007/axiomid-project) &nbsp;·&nbsp; L4 · [`AlphaAxiom`](https://github.com/Moeabdelaziz007/AlphaAxiom) &nbsp;·&nbsp; L5 · [`PiWorker-OS`](https://github.com/Moeabdelaziz007/PiWorker-OS) &nbsp;·&nbsp; L6 · [`GemClaw`](https://github.com/Moeabdelaziz007/GemClaw)</sub>
+
+</div>
+
+<div align="center">
+  <img src="./assets/aix-footer-quote-v2.svg" alt="AIX Stack · Echo369 — King isn't Born, he is Made." width="100%"/>
 </div>
 
 <!-- ════════════════ /AIX SOVEREIGN STACK · FOOTER ════════════════ -->
