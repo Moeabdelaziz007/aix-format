@@ -68,9 +68,9 @@ This package is intentionally **AIX-agnostic**, not IQRA-specific. Any sovereign
   - `DASTŪR.md` (compact): the universal rules — no mocks, no hallucinations, no PII leakage, no privileged-action escalation, no shared-secret cryptography.
   - `HARAM_LIST.json`: structured regex with locales. Schema:
     ```ts
-    { id, label_ar, label_en, severity, patterns: RegExp[], references: string[], categories: string[] }
+    { id, label_ar, label_en, severity, patterns: string[], references: string[], categories: string[] }
     ```
-    Seed entries merge L2 `forbidden_patterns.ts` (12 regex) + L3 `purity-filter.ts HARAM_PATTERNS` (4 categories AR+EN) + L2 `damir_conscience.FORBIDDEN_INTENTIONS` (25 keywords AR+EN). Compiled to RegExp objects at module load; never parsed from markdown at runtime.
+    `patterns` are regex source strings (JSON cannot hold native `RegExp` objects). The package compiles them into `RegExp` once at module load and exposes the compiled forms; `string[]` is what is on disk. Seed entries merge L2 `forbidden_patterns.ts` (12 regex) + L3 `purity-filter.ts HARAM_PATTERNS` (4 categories AR+EN) + L2 `damir_conscience.FORBIDDEN_INTENTIONS` (25 keywords AR+EN). Never parsed from markdown at runtime.
   - `SACRED_CONSTANTS.json`: pure numerical primitives `{ 3, 7, 9, 19, 40, 49, 369, 700 }`, no tafsir.
   - `VERSION.md`: semver + supersession.
 - **Public API**: typed accessors for the four universals; no business logic.
@@ -133,7 +133,7 @@ Order matters: trustchain depends on identity for the signature field; runtime-a
 
 ## 6. Phase 1.0 cleanup PR (DROP list)
 
-Single PR. 18 files removed, zero new behaviour.
+Single L1 PR. 14 files removed, zero new behaviour. L3 dupes (`legacy-trust-chain.ts`, `iqra-purity-filter.ts`) are removed in a separate L3 PR sequenced with L3 migration in Phase 1.3 / 1.4. `apps/studio/src/lib/security-core.ts TrustChainManager` is a rewrite, not a delete, and lands as a consumer-side change in Phase 1.3 (tracked in §5.1 Migration, not here).
 
 | # | Path | Reason |
 |---|---|---|
@@ -143,10 +143,14 @@ Single PR. 18 files removed, zero new behaviour.
 | 4-11 | `aix-format/types/{aix, aix.schema, aix-v1.schema, aix-enhanced.schema, axiom-aix.schema, manifest.schema, parser, pi_kyc_adapter}.d.ts` | Stale generated artifacts (8 files). Will be re-emitted from `@aix/schema` in Phase 1.1 |
 | 12 | `aix-format/packages/aix-types/` (whole dir) | Trivial `index.d.ts` wrapper; subsumed by `@aix/schema` |
 | 13 | `aix-format/packages/aix-core/src/security/trust-chain.ts` | HMAC + shared secret, in-memory static. Security antipattern. Hard delete, no shim |
-| 14 | `aix-format/apps/studio/src/lib/security-core.ts TrustChainManager` (rewrite) | Replaced by `@aix/trustchain` consumer |
-| 15-16 | `aix-format/tests/integration/{signature-verification, gateway-expectation-integration}.test.ts MockTrustChain` | Mock classes replaced by real `@aix/trustchain` |
-| 17 | `aix-agent-skills/aix-constitutional-runtime/src/skills/legacy-trust-chain.ts` | Internal L3 dupe |
-| 18 | `aix-agent-skills/aix-constitutional-runtime/src/skills/iqra-purity-filter.ts` | Internal L3 dupe of `purity-filter.ts` |
+| 14-15 | `aix-format/tests/integration/{signature-verification, gateway-expectation-integration}.test.ts MockTrustChain` | Mock classes replaced by real `@aix/trustchain` |
+
+L3 cleanup (separate PR, Phase 1.3 / 1.4):
+
+| Path | Reason |
+|---|---|
+| `aix-agent-skills/aix-constitutional-runtime/src/skills/legacy-trust-chain.ts` | Internal L3 dupe. Removed when L3 adopts `@aix/trustchain` (Phase 1.3) |
+| `aix-agent-skills/aix-constitutional-runtime/src/skills/iqra-purity-filter.ts` | Internal L3 dupe of `purity-filter.ts`. Removed when L3 adopts `@aix/constitution` (Phase 1.4) |
 
 ## 7. Breaking changes
 
@@ -171,9 +175,13 @@ Standard deprecation policy: one minor release of re-export shims for renames an
 ## 9. Open risks
 
 - **npm scope ownership** for `@aix/*`. The L1 maintainer must own (or transfer ownership of) the `@aix` scope before any of the five packages are published to the public registry.
-- **Cross-repo CI**: when `@aix/schema` bumps, L2 and L3 need PRs opened automatically. Tooling does not exist yet; outside Phase 1 scope but blocks Phase 2.
+- **Cross-repo CI**: when `@aix/schema` bumps, L2 and L3 must absorb the change. Mitigation is graduated:
+  - *Phase 1.5 (manual coordination, no automation cost)*: every `@aix/*` package ships a `CHANGELOG.md` whose release entries include a checklist line — "Open dependency-bump PRs in `Moeabdelaziz007/iqra` and `Moeabdelaziz007/aix-agent-skills`." The Phase 1.5 `OWNERSHIP.md` codifies who owns each repo's update.
+  - *Phase 2.0 (medium-term, ~1-2 days)*: enable Renovate or Dependabot in L2 and L3 against the `@aix/*` scope. Auto-creates the dependency PRs; no auto-merge.
+  - *Phase 2.x (full automation, ~3-5 days)*: on `@aix/*` release, a GitHub Actions `workflow_dispatch` triggers L2 and L3 to open + test a bump PR end to end.
+  Until Phase 2.0 lands, Phase 2 itself is blocked by this risk; the manual path keeps Phase 1 unblocked.
 - **Author conventions**: contributors must learn which package owns which concept. Mitigation: a one-page `OWNERSHIP.md` shipped with Phase 1.5.
-- **Phase 1.0 cleanup PR collisions**: the 18 files span L1, L2, L3. The cleanup itself is L1-only; L2 and L3 cleanups are sequenced in their respective migration phases.
+- **Phase 1.0 cleanup is L1-only**: §6 covers 14 L1 files. The 2 L3 dupes (`legacy-trust-chain.ts`, `iqra-purity-filter.ts`) ship in their own L3 PR alongside L3 migration. L2 cleanups are sequenced in their migration steps.
 
 ## 10. Next step
 
