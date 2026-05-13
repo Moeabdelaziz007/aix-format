@@ -131,7 +131,7 @@ These numbers are encoded in code (not docs only). They are referenced by name i
 | `NINETEEN` | 19 | Quranic structural prime |
 | `ARBAUN` | 40 | Maturation period |
 | `FORTY_NINE` | 49 (= 7×7) | HOT memory cap, resource-pool max |
-| `THREE_SIXTY_NINE` | 369 | Tesla/evolution motif; used in protocol patch versions |
+| `THREE_SIXTY_NINE` | 369 | Tesla/evolution motif; used as the minor segment of protocol versions (e.g. `AIX_PROTOCOL_VERSION = "0.369.0"`) |
 
 Changing any of these is a constitutional amendment, not a refactor.
 
