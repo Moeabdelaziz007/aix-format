@@ -55,7 +55,9 @@ jobs:
           echo "▶ Found changed AIX files — running strict validation..."
           FAIL=0
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [[ "$file" == *.aix* ]] || [[ "$file" == examples/* ]]; then
+            # Only validate AIX manifests. Skip plugin scripts and other
+            # non-manifest files that happen to live under examples/.
+            if [[ "$file" =~ \.aix(\.(json|yaml|yml))?$ ]]; then
               echo "  Validating: $file"
               if ! node bin/aix-validate.js "$file" 2>&1; then
                 echo "  ❌ FAILED: $file"
@@ -63,6 +65,8 @@ jobs:
               else
                 echo "  ✅ PASSED: $file"
               fi
+            else
+              echo "  Skipping (not an AIX manifest): $file"
             fi
           done
           if [ $FAIL -ne 0 ]; then

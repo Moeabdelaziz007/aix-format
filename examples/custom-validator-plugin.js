@@ -6,7 +6,7 @@
  */
 
 import { ValidationPlugin } from '../core/validation-plugins.js';
-import { addError, addWarning } from '../core/plugins/validation-utils.js';
+import { addError, addWarning } from '../core/validation-utils.js';
 
 /**
  * Example 1: Company-specific naming convention validator

@@ -14,7 +14,7 @@ import crypto from 'crypto';
 import yaml from 'js-yaml';
 
 // Import new validation engine
-import { validate, register, clear } from './validation-engine.js';
+import { validate, register } from './validation-engine.js';
 import { allRules } from './rules/index.js';
 import { loadFromConfig } from './rule-loader.js';
 
