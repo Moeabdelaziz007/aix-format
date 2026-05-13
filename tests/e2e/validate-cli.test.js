@@ -11,9 +11,13 @@ import assert from 'node:assert/strict';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { execFileSync } from 'child_process';
 
-const REPO_ROOT = path.resolve(import.meta.dirname, '..', '..');
+// import.meta.dirname is Node 20.11+, but package.json declares engines.node
+// >=18.0.0. Derive the dirname via fileURLToPath for Node 18 compatibility.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const VALIDATE = path.join(REPO_ROOT, 'bin', 'aix-validate.js');
 
 function runValidate(args, opts = {}) {
