@@ -149,7 +149,12 @@ test('severity override is respected', () => {
   const file = fixture('a.md', 'note \u2014 here\n');
   const rules = buildRules({ severities: { 'no-em-dash': 'error' }, naming: 'mixed' });
   const findings = lintFile(file, rules);
-  assert.equal(findings[0].severity, 'error');
+  // Locate by rule id rather than position. Any other rule emitting on
+  // this fixture (a future markdown-quality check, say) would have
+  // silently broken the previous findings[0] assertion.
+  const emDash = findings.find(f => f.rule === 'no-em-dash');
+  assert.ok(emDash, 'no-em-dash finding must exist');
+  assert.equal(emDash!.severity, 'error');
 });
 
 test('lintFiles aggregates report', () => {

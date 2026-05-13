@@ -80,6 +80,26 @@ test('trustChainScore: broken linkage scored < 100', () => {
   assert.ok(sub.score !== null && sub.score < 100);
 });
 
+test('trustChainScore: rejects payload missing the entries key entirely', () => {
+  // Regression: `{}` used to coerce to entries=[] and return score 100
+  // ("empty chain, vacuously intact"). For external trust-chain input,
+  // a missing entries key is a structural failure, not a valid empty
+  // export. Now scored 0 with a clear detail.
+  const f = tmp('chain.json', JSON.stringify({}));
+  const sub = trustChainScore(f);
+  assert.equal(sub.score, 0);
+  assert.ok(sub.detail.includes('missing entries array'));
+});
+
+test('trustChainScore: rejects null top-level payload', () => {
+  // Same defensive guard for `null` — would previously have thrown on
+  // .entries access; now returns 0 + structural-failure detail.
+  const f = tmp('chain.json', 'null');
+  const sub = trustChainScore(f);
+  assert.equal(sub.score, 0);
+  assert.ok(sub.detail.includes('missing entries array'));
+});
+
 test('trustChainScore: rejects non-array entries with a structural failure', () => {
   // Regression: when `entries` is present but is a string / number / object,
   // dereferencing .length used to yield NaN and the aggregate scoring

@@ -141,13 +141,27 @@ export function trustChainScore(chainPath: string): SubScore {
   } catch (e) {
     return { name: 'trust-chain', score: 0, weight: 25, detail: `parse error: ${(e as Error).message}` };
   }
-  // The chain file is external input. If `entries` is present but is
-  // something other than an array (a string, a number, an object, etc.),
-  // the previous code dereferenced .length on a non-array and propagated
-  // NaN into the aggregate score. Treat any non-array `entries` as a
-  // structural failure — score 0 with a clear detail — instead.
-  const rawEntries = (data as { entries?: unknown } | null)?.entries;
-  if (rawEntries !== undefined && !Array.isArray(rawEntries)) {
+  // The chain file is external input. Three failure shapes that must
+  // all return a structural-failure finding instead of a vacuous 100:
+  //
+  //   1. Top-level value is null / undefined / a primitive: it can't
+  //      hold an `entries` key at all.
+  //   2. The `entries` key is missing entirely. Previous code coerced
+  //      this to [] and then reported "empty chain (vacuously intact)"
+  //      with score 100 — a silent perfect score on garbage input.
+  //   3. `entries` is present but not an array (string, number, object,
+  //      etc.). Previous code would have dereferenced .length on a
+  //      non-array and propagated NaN into the aggregate.
+  if (!data || typeof data !== 'object' || !('entries' in data)) {
+    return {
+      name: 'trust-chain',
+      score: 0,
+      weight: 25,
+      detail: 'invalid chain shape: missing entries array',
+    };
+  }
+  const rawEntries = (data as { entries: unknown }).entries;
+  if (!Array.isArray(rawEntries)) {
     return {
       name: 'trust-chain',
       score: 0,
@@ -155,7 +169,7 @@ export function trustChainScore(chainPath: string): SubScore {
       detail: 'invalid chain shape: entries must be an array',
     };
   }
-  const entries = (rawEntries ?? []) as ChainEntry[];
+  const entries = rawEntries as ChainEntry[];
   if (entries.length === 0) {
     return { name: 'trust-chain', score: 100, weight: 25, detail: 'empty chain (vacuously intact)' };
   }
