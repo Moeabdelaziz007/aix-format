@@ -152,47 +152,7 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 .btn-sm  { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
 .btn-md  { padding: 0.625rem 1.25rem; font-size: 0.875rem; }
 
-/* ─── Badge ────────────────────────────────────────────────────────────────── */
-/* FIX: `badge` and `badge-primary` classes were used in Navbar but not defined */
-.badge {
-  display:         inline-flex;
-  align-items:     center;
-  gap:             0.375rem;
-  padding:         0.25rem 0.625rem;
-  border-radius:   9999px;
-  font-size:       0.6875rem;
-  font-weight:     600;
-  letter-spacing:  0.04em;
-}
-.badge-primary {
-  background:   rgba(0, 219, 233, 0.08);
-  border:       1px solid rgba(0, 219, 233, 0.2);
-  color:        var(--color-primary);
-}
-
-/* ─── Divider ───────────────────────────────────────────────────────────────── */
-/* FIX: `.divider` was used in Navbar dropdown but not defined */
-.divider {
-  height:     1px;
-  background: var(--color-border);
-}
-
 /* ─── AgentCard — CSS-only hire button ─────────────────────────────────────── */
-.btn {
-  display:         inline-flex;
-  align-items:     center;
-  justify-content: center;
-  gap:             0.5rem;
-  padding:         0.5rem 1.25rem;
-  border-radius:   0;
-  font-size:       0.75rem;
-  font-weight:     700;
-  cursor:          pointer;
-  transition:      background 150ms ease, color 150ms ease;
-  border:          1px solid transparent;
-  text-transform:  uppercase;
-  letter-spacing:  0.1em;
-}
 .agent-card-hire-btn:hover {
   background:  var(--agent-color, #00d4ff);
   color:       #050507;
@@ -239,6 +199,31 @@ input, button, textarea, select   { font: inherit; color: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ─── Badge ────────────────────────────────────────────────────────────────── */
+/* FIX: `badge` and `badge-primary` classes were used in Navbar but not defined */
+.badge {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             0.375rem;
+  padding:         0.25rem 0.625rem;
+  border-radius:   9999px;
+  font-size:       0.6875rem;
+  font-weight:     600;
+  letter-spacing:  0.04em;
+}
+.badge-primary {
+  background:   rgba(0, 219, 233, 0.08);
+  border:       1px solid rgba(0, 219, 233, 0.2);
+  color:        var(--color-primary);
+}
+
+/* ─── Divider ───────────────────────────────────────────────────────────────── */
+/* FIX: `.divider` was used in Navbar dropdown but not defined */
+.divider {
+  height:     1px;
+  background: var(--color-border);
+}
 
 /* ─── Animated gradient ─────────────────────────────────────────────────────── */
 @keyframes gradient-x {
