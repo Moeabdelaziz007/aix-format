@@ -14,7 +14,7 @@
 
 <div align="center">
 
-**`← L0`** &nbsp;·&nbsp; **🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
+**🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
 
 </div>
 
@@ -64,9 +64,11 @@ AIX هو فلاشـة الوكلاء: ملف واحد موقَّع يشيل هو
 
 ---
 
-### 🏛️ System Architecture | بنية النظام
+### 🏛️ Protocol Architecture | بنية البروتوكول
 
-The AIX Protocol operates on a three-tier sovereign stack:
+> Not to be confused with the **AIX Sovereign Stack** above, which refers to the three sister repositories (L1 Protocol · L2 Runtime · L3 Marketplace). The section below describes the three internal tiers **inside** this L1 Protocol repository.
+
+The AIX Protocol itself is composed of three internal tiers:
 
 1. **Identity Layer (did:axiom)** — Ed25519 signatures anchored to Pi Network.
    Every agent has a verified human (KYC) or institutional backer.
@@ -88,8 +90,8 @@ The AIX Protocol operates on a three-tier sovereign stack:
 | Layer | Repo | Role | Status |
 |:---:|:---|:---|:---:|
 | 🟢 **L1** | [`aix-format`](https://github.com/Moeabdelaziz007/aix-format) | **Protocol** · Universal Agent Passport · DID · Manifest · ABOM · TrustChain | **You are here** |
-| ⚪ **L2** | [`iqra`](https://github.com/Moeabdelaziz007/iqra) | **Runtime** · Sovereign AI OS · 7 Loops · MCTS · Damir · MissionControl | → Read |
-| ⚪ **L3** | [`aix-agent-skills`](https://github.com/Moeabdelaziz007/aix-agent-skills) | **Marketplace** · 58 Skills · 7 Layers · Constitutional Runtime | → Read |
+| ⚪ **L2** | [`iqra`](https://github.com/Moeabdelaziz007/iqra) | **Runtime** · Sovereign AI OS · 7 Loops · MCTS · Damir · MissionControl | [→ Read](https://github.com/Moeabdelaziz007/iqra) |
+| ⚪ **L3** | [`aix-agent-skills`](https://github.com/Moeabdelaziz007/aix-agent-skills) | **Marketplace** · 58 Skills · 7 Layers · Constitutional Runtime | [→ Read](https://github.com/Moeabdelaziz007/aix-agent-skills) |
 
 > The three repositories are **one project in three layers**. The protocol is the contract, the runtime is the engine, the marketplace is the catalog. Same constitution, same TrustChain, same palette, same author.
 
@@ -313,7 +315,7 @@ AIX Format is licensed under the **Apache License 2.0**.
 
 <div align="center">
 
-**`← L0`** &nbsp;·&nbsp; **🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
+**🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
 
 </div>
 
