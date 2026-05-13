@@ -17,7 +17,9 @@ export default function AgentInteraction({ agentId }: { agentId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isInvoking, setIsInvoking] = useState(false);
-  const [sessionId] = useState(() => 'session_' + Math.random().toString(36).slice(2, 11));
+  // Per RULE 2: session IDs are security-sensitive, so derive them
+  // from the Web Crypto RNG instead of Math.random.
+  const [sessionId] = useState(() => 'session_' + crypto.randomUUID().replace(/-/g, '').slice(0, 9));
   const [hasFeedback, setHasFeedback] = useState<Record<number, boolean>>({});
 
   const handleInvoke = async () => {

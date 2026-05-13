@@ -37,9 +37,43 @@ if (statSync('apps/studio').isDirectory()) {
         foundProhibitedAuth = true;
       }
 
-      // RULE 2: crypto.randomBytes over Math.random
-      if (content.includes('Math.random()') && !path.includes('test')) {
-        errors.push(`❌ RULE 2 VIOLATION: Math.random() found in ${path}. Security First! Use crypto.randomBytes() for all randoms and payments.`);
+      // RULE 2: crypto.randomBytes/randomUUID over Math.random in
+      // security-sensitive paths. The previous rule flagged every
+      // Math.random() call in the entire studio tree, which caught 22
+      // legitimate UI-animation and mock-data uses (particle bg,
+      // KYC-modal visual particles, CLI pet entropy, dashboard mock
+      // events, RL training simulation, etc.) and drowned the real
+      // signal in noise. Use Math.random freely for UI; mandate crypto
+      // only where the value lands in an identifier, signature, hash,
+      // session token, or other security primitive.
+      const SECURITY_SENSITIVE = [
+        /\/lib\/payment\//,
+        /\/lib\/security/,
+        /\/lib\/identity/,
+        /\/lib\/auth/,
+        /\/app\/api\/agents\/deploy\//,
+        /\/app\/api\/agents\/payment\//,
+        /\/app\/api\/kyc\//,
+        /\/app\/api\/zkkyc\//,
+        /\/components\/studio\/AgentInteraction\./,
+        /\/app\/identity\//,
+      ];
+      const isSecuritySensitive = SECURITY_SENSITIVE.some((re) => re.test(path));
+      if (isSecuritySensitive && !path.includes('test')) {
+        // Match Math.random( as a real call, not the literal string
+        // inside a // comment or a * JSDoc line. content.includes()
+        // would otherwise flag a file that just documents RULE 2.
+        const lines = content.split('\n');
+        const offendingLine = lines.find((line) => {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('//') || trimmed.startsWith('*')) return false;
+          return /Math\.random\s*\(/.test(line);
+        });
+        if (offendingLine) {
+          errors.push(
+            `❌ RULE 2 VIOLATION: Math.random() found in security-sensitive ${path}. Use crypto.randomBytes()/randomUUID()/getRandomValues() — see apps/studio/src/lib/security-core.ts for helpers.`
+          );
+        }
       }
 
       // RULE 4 & 7: AgentSelfReview & CuriosityEngine enforcement
@@ -72,10 +106,26 @@ if (cssHasPristineGlassmorphism) {
 }
 
 // 3. Schema validation sync check
+// Historically this rule looked for two methods directly on AIXParser
+// (`validateStructure` and `validateRequirements`). The latter was
+// refactored away when requirements validation moved into the
+// pluggable rule engine (core/rules/requirements-rules.js — every
+// rule there registers via core/validation-engine.js and is invoked
+// by validateStructure under the hood). Keep the check honest:
+// require the entry point method on the parser AND require the
+// requirements rule module to exist.
 try {
   const parserContent = readFileSync('core/parser.js', 'utf8');
-  if (!parserContent.includes('validateStructure') || !parserContent.includes('validateRequirements')) {
-    errors.push('⚠️ Parser Structure: validateStructure or validateRequirements missing from core/parser.js. Ensure sync with schemas.');
+  const hasEntryPoint = parserContent.includes('validateStructure');
+  let hasRequirementsRules = false;
+  try {
+    const reqRules = readFileSync('core/rules/requirements-rules.js', 'utf8');
+    hasRequirementsRules = /export\s+const\s+requirementsRules/.test(reqRules);
+  } catch {
+    hasRequirementsRules = false;
+  }
+  if (!hasEntryPoint || !hasRequirementsRules) {
+    errors.push('⚠️ Parser Structure: validateStructure missing from core/parser.js or requirementsRules missing from core/rules/requirements-rules.js. Ensure sync with schemas.');
   } else {
     findings.push('✅ Architecture: Parser core methods for schema validation are present.');
   }

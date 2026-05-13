@@ -10,6 +10,7 @@
  */
 
 import { z } from 'zod';
+import { randomBytes } from 'crypto';
 
 /**
  * Payment proof schema validation
@@ -331,7 +332,7 @@ export function generatePaymentProof(
     amount,
     currency,
     timestamp: Date.now(),
-    signature: 'test-signature-' + Math.random().toString(36).substring(7)
+    signature: 'test-signature-' + randomBytes(8).toString('hex')
   };
   
   return Buffer.from(JSON.stringify(proof)).toString('base64');

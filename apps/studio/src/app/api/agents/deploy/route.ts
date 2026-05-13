@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
 
 /**
  * Agent Deployment Endpoint
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate deployment ID
-    const deploymentId = `deploy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const deploymentId = `deploy-${Date.now()}-${randomBytes(6).toString('hex')}`;
     
     // Deploy agent (mock implementation - replace with real deployment logic)
     const deployment = await deployAgent({

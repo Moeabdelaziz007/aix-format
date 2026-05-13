@@ -60,7 +60,10 @@ export default function IdentityPage() {
         await new Promise((r) => setTimeout(r, 1000));
         setPiUser({
           username: "Pioneer_Dev",
-          uid: "dev_" + Math.random().toString(36).slice(2, 8),
+          // Dev-only fallback identity. Use Web Crypto's randomUUID so
+          // the uid is unpredictable even though it never reaches a
+          // production Pi user.
+          uid: "dev_" + crypto.randomUUID().replace(/-/g, "").slice(0, 6),
         });
       } else {
         throw new Error("Pi SDK unavailable. Please enable the Pi SDK and try again.");
