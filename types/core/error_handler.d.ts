@@ -21,12 +21,7 @@ import { z } from 'zod';
 /**
  * RULE 1: All inputs → Zod validation
  */
-declare const ErrorContextSchema: z.ZodObject<{
-    code: z.ZodOptional<z.ZodString>;
-    agentId: z.ZodOptional<z.ZodString>;
-    action: z.ZodOptional<z.ZodString>;
-    requestId: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
+declare const ErrorContextSchema: any;
 type ErrorContext = z.infer<typeof ErrorContextSchema>;
 interface SafeError {
     message: string;
@@ -37,11 +32,7 @@ interface SafeError {
 /**
  * Circuit Breaker Configuration Schema
  */
-declare const CircuitBreakerConfigSchema: z.ZodObject<{
-    failureThreshold: z.ZodOptional<z.ZodNumber>;
-    successThreshold: z.ZodOptional<z.ZodNumber>;
-    timeoutSeconds: z.ZodOptional<z.ZodNumber>;
-}, z.core.$loose>;
+declare const CircuitBreakerConfigSchema: any;
 type CircuitBreakerConfig = z.infer<typeof CircuitBreakerConfigSchema>;
 /**
  * Circuit Breaker Implementation

@@ -26,7 +26,17 @@ declare const ErrorContextSchema: z.ZodObject<{
     agentId: z.ZodOptional<z.ZodString>;
     action: z.ZodOptional<z.ZodString>;
     requestId: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
+}, "strip", z.ZodTypeAny, {
+    code?: string | undefined;
+    agentId?: string | undefined;
+    action?: string | undefined;
+    requestId?: string | undefined;
+}, {
+    code?: string | undefined;
+    agentId?: string | undefined;
+    action?: string | undefined;
+    requestId?: string | undefined;
+}>;
 type ErrorContext = z.infer<typeof ErrorContextSchema>;
 interface SafeError {
     message: string;
@@ -41,7 +51,15 @@ declare const CircuitBreakerConfigSchema: z.ZodObject<{
     failureThreshold: z.ZodOptional<z.ZodNumber>;
     successThreshold: z.ZodOptional<z.ZodNumber>;
     timeoutSeconds: z.ZodOptional<z.ZodNumber>;
-}, z.core.$loose>;
+}, "passthrough", z.ZodTypeAny, z.objectOutputType<{
+    failureThreshold: z.ZodOptional<z.ZodNumber>;
+    successThreshold: z.ZodOptional<z.ZodNumber>;
+    timeoutSeconds: z.ZodOptional<z.ZodNumber>;
+}, z.ZodTypeAny, "passthrough">, z.objectInputType<{
+    failureThreshold: z.ZodOptional<z.ZodNumber>;
+    successThreshold: z.ZodOptional<z.ZodNumber>;
+    timeoutSeconds: z.ZodOptional<z.ZodNumber>;
+}, z.ZodTypeAny, "passthrough">>;
 type CircuitBreakerConfig = z.infer<typeof CircuitBreakerConfigSchema>;
 /**
  * Circuit Breaker Implementation

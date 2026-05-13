@@ -3,43 +3,8 @@
  * Secure, type-safe KYC verification with privacy-preserving identity generation
  */
 import { z } from 'zod';
-declare const PiAuthResultSchema: z.ZodObject<{
-    user: z.ZodObject<{
-        uid: z.ZodString;
-    }, z.core.$strip>;
-    accessToken: z.ZodString;
-    signature: z.ZodString;
-    publicKey: z.ZodString;
-    vlaDevice: z.ZodOptional<z.ZodObject<{
-        adapter: z.ZodOptional<z.ZodString>;
-        id: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-declare const AdapterOptionsSchema: z.ZodObject<{
-    uidSalt: z.ZodOptional<z.ZodString>;
-    didMethod: z.ZodOptional<z.ZodString>;
-    didAuthority: z.ZodOptional<z.ZodString>;
-    assuranceLevel: z.ZodOptional<z.ZodEnum<{
-        substantial: "substantial";
-        low: "low";
-        high: "high";
-    }>>;
-    minAssuranceLevel: z.ZodOptional<z.ZodEnum<{
-        substantial: "substantial";
-        low: "low";
-        high: "high";
-    }>>;
-    enforceJwtExpiry: z.ZodOptional<z.ZodBoolean>;
-    enforceJwtAlg: z.ZodOptional<z.ZodBoolean>;
-    allowedJwtAlgs: z.ZodOptional<z.ZodArray<z.ZodString>>;
-    challengeNonce: z.ZodOptional<z.ZodString>;
-    blockchainAnchor: z.ZodOptional<z.ZodObject<{
-        chain: z.ZodString;
-        txid: z.ZodString;
-        blockHeight: z.ZodOptional<z.ZodNumber>;
-        anchoredAt: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
+declare const PiAuthResultSchema: any;
+declare const AdapterOptionsSchema: any;
 export type PiAuthResult = z.infer<typeof PiAuthResultSchema>;
 export type AdapterOptions = z.infer<typeof AdapterOptionsSchema>;
 export interface IdentityLayer {

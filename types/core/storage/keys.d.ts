@@ -17,6 +17,9 @@ export declare const NS: {
     readonly EXECUTION: "execution:";
     readonly BUS: "bus:";
     readonly RATE: "rate:";
+    readonly HINTS: "hints:";
+    readonly GRAPH: "graph:";
+    readonly TIER1: "tier1:";
 };
 /**
  * Key generation functions
@@ -66,6 +69,11 @@ export declare const KEYS: {
     readonly busBacklog: () => string;
     readonly rate: (key: string) => string;
     readonly rateLimit: (identifier: string) => string;
+    readonly fileHint: (filePath: string) => string;
+    readonly dependencyNode: (nodeId: string) => string;
+    readonly structuralMap: (scope: string) => string;
+    readonly constitution: () => string;
+    readonly specializedKnowledge: (agentRole: string) => string;
 };
 /**
  * Key pattern validation

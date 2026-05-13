@@ -6,40 +6,106 @@ import { z } from 'zod';
 declare const PiAuthResultSchema: z.ZodObject<{
     user: z.ZodObject<{
         uid: z.ZodString;
-    }, z.core.$strip>;
+    }, "strip", z.ZodTypeAny, {
+        uid: string;
+    }, {
+        uid: string;
+    }>;
     accessToken: z.ZodString;
     signature: z.ZodString;
     publicKey: z.ZodString;
     vlaDevice: z.ZodOptional<z.ZodObject<{
         adapter: z.ZodOptional<z.ZodString>;
         id: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
+    }, "strip", z.ZodTypeAny, {
+        adapter?: string | undefined;
+        id?: string | undefined;
+    }, {
+        adapter?: string | undefined;
+        id?: string | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    user: {
+        uid: string;
+    };
+    accessToken: string;
+    signature: string;
+    publicKey: string;
+    vlaDevice?: {
+        adapter?: string | undefined;
+        id?: string | undefined;
+    } | undefined;
+}, {
+    user: {
+        uid: string;
+    };
+    accessToken: string;
+    signature: string;
+    publicKey: string;
+    vlaDevice?: {
+        adapter?: string | undefined;
+        id?: string | undefined;
+    } | undefined;
+}>;
 declare const AdapterOptionsSchema: z.ZodObject<{
     uidSalt: z.ZodOptional<z.ZodString>;
     didMethod: z.ZodOptional<z.ZodString>;
     didAuthority: z.ZodOptional<z.ZodString>;
-    assuranceLevel: z.ZodOptional<z.ZodEnum<{
-        substantial: "substantial";
-        low: "low";
-        high: "high";
-    }>>;
-    minAssuranceLevel: z.ZodOptional<z.ZodEnum<{
-        substantial: "substantial";
-        low: "low";
-        high: "high";
-    }>>;
+    assuranceLevel: z.ZodOptional<z.ZodEnum<["low", "substantial", "high"]>>;
+    minAssuranceLevel: z.ZodOptional<z.ZodEnum<["low", "substantial", "high"]>>;
     enforceJwtExpiry: z.ZodOptional<z.ZodBoolean>;
     enforceJwtAlg: z.ZodOptional<z.ZodBoolean>;
-    allowedJwtAlgs: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    allowedJwtAlgs: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     challengeNonce: z.ZodOptional<z.ZodString>;
     blockchainAnchor: z.ZodOptional<z.ZodObject<{
         chain: z.ZodString;
         txid: z.ZodString;
         blockHeight: z.ZodOptional<z.ZodNumber>;
         anchoredAt: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
+    }, "strip", z.ZodTypeAny, {
+        chain: string;
+        txid: string;
+        blockHeight?: number | undefined;
+        anchoredAt?: string | undefined;
+    }, {
+        chain: string;
+        txid: string;
+        blockHeight?: number | undefined;
+        anchoredAt?: string | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    uidSalt?: string | undefined;
+    didMethod?: string | undefined;
+    didAuthority?: string | undefined;
+    assuranceLevel?: "low" | "substantial" | "high" | undefined;
+    minAssuranceLevel?: "low" | "substantial" | "high" | undefined;
+    enforceJwtExpiry?: boolean | undefined;
+    enforceJwtAlg?: boolean | undefined;
+    allowedJwtAlgs?: string[] | undefined;
+    challengeNonce?: string | undefined;
+    blockchainAnchor?: {
+        chain: string;
+        txid: string;
+        blockHeight?: number | undefined;
+        anchoredAt?: string | undefined;
+    } | undefined;
+}, {
+    uidSalt?: string | undefined;
+    didMethod?: string | undefined;
+    didAuthority?: string | undefined;
+    assuranceLevel?: "low" | "substantial" | "high" | undefined;
+    minAssuranceLevel?: "low" | "substantial" | "high" | undefined;
+    enforceJwtExpiry?: boolean | undefined;
+    enforceJwtAlg?: boolean | undefined;
+    allowedJwtAlgs?: string[] | undefined;
+    challengeNonce?: string | undefined;
+    blockchainAnchor?: {
+        chain: string;
+        txid: string;
+        blockHeight?: number | undefined;
+        anchoredAt?: string | undefined;
+    } | undefined;
+}>;
 export type PiAuthResult = z.infer<typeof PiAuthResultSchema>;
 export type AdapterOptions = z.infer<typeof AdapterOptionsSchema>;
 export interface IdentityLayer {
