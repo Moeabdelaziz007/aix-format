@@ -39,6 +39,10 @@ export type AxiomDID = string;
  */
 export interface AIXFormat {
   /**
+   * Optional top-level shorthand for the AIX schema version this manifest targets (e.g. "0.369.0"). When omitted, consumers should fall back to meta.format_version, then to the schema URL parsed from $id, then to '0.369.0'. Schema registry: https://axiomid.app/schemas/aix.schema.json
+   */
+  aix_version?: string;
+  /**
    * Agent metadata and identification
    */
   meta: {
@@ -79,7 +83,7 @@ export interface AIXFormat {
     framework?: string;
     runtime_version?: string;
     /**
-     * AIX format version (e.g. 1.3)
+     * AIX format version this manifest targets. Co-exists with the top-level `aix_version` shorthand; when both are present, consumers SHOULD treat them as equal (a validator MAY warn on disagreement). Free-form for legacy reasons — prefer SemVer.
      */
     format_version?: string;
     /**
@@ -198,6 +202,11 @@ export interface AIXFormat {
     expiresAt?: ISODateTime;
     publicKey?: PublicKey;
     signature?: Signature;
+    /**
+     * Optional Pi Network user-ID anchor. SHA-256 hex of the verified Pi UID (32 bytes / 64 hex chars). Binds this DID to a verified Pi user without revealing the UID itself. Produced by packages/pi-kyc hashPiUid(). When present, resolvers SHOULD verify the value matches the KYC proof returned by Pi.
+     */
+    pi_uid_anchor?: string;
+    zk_proof?: ZKProof;
   };
   trustchain?: {
     entries: {
@@ -237,7 +246,7 @@ export interface AIXFormat {
     [k: string]: unknown | undefined;
   };
   /**
-   * Agent capabilities
+   * Agent capabilities — the MCP-flavoured tool surface the agent exposes. Each entry is one tool / capability.
    */
   skills?: {
     name: string;
@@ -250,6 +259,10 @@ export interface AIXFormat {
     examples?: string[];
     priority?: number;
     timeout?: number;
+    /**
+     * Per-tool safety score on a 0-10 scale. 10 = fully sandboxed read-only operation; 0 = arbitrary code execution / unbounded side effects. Consumers can use this to gate dispatch (e.g. require safety_score >= 7 for autonomous runs). Optional — defaults to 5 (unknown / standard) when omitted.
+     */
+    safety_score?: number;
   }[];
   /**
    * API integrations
@@ -345,6 +358,10 @@ export interface AIXFormat {
       address: string;
       provider?: "coinbase-agentkit" | "stripe-agent-wallet" | "generic";
       tee_secured?: boolean;
+      /**
+       * Optional HTTP 402 Payment Required endpoint URL this wallet exposes for pay-per-call settlements (RFC-style x402 flow, see economics.payment_gateways.x402 for the top-level enable flag). Clients hit this URL, receive a 402 with payment instructions referencing the wallet address, settle, then retry the original request.
+       */
+      x402_endpoint?: string;
       [k: string]: unknown | undefined;
     }[];
     payment_gateways?: {
@@ -591,6 +608,30 @@ export interface Signature {
   canonicalization?: "JCS" | "RFC8785";
 }
 /**
+ * Optional zero-knowledge KYC proof attesting to identity properties (tier, jurisdiction, age, etc.) without revealing the underlying data. Verified by packages/aix-zkkyc ProofVerifier. Replay protection is handled at verification time via the nullifier registry; presence of this field does not by itself confer KYC status.
+ */
+export interface ZKProof {
+  /**
+   * Groth16 proof object as produced by snarkjs. Free-form because the snarkjs shape (a, b, c, protocol, curve) is not stable across versions.
+   */
+  proof: {
+    [k: string]: unknown | undefined;
+  };
+  /**
+   * Public inputs to the proof — decimal-encoded field elements as strings
+   */
+  publicSignals: string[];
+  /**
+   * Unique proof identifier used by NullifierRegistry to prevent replay attacks. Recommended: SHA-256 hex.
+   */
+  nullifier: string;
+  timestamp?: ISODateTime;
+  /**
+   * Identifier of the circuit that produced this proof (e.g. pkyc-v1, age-over-18-v2). Recommended for verifier dispatch.
+   */
+  circuit?: string;
+}
+/**
  * Optional Meta Arbiter runtime configuration — wires into the agent's orchestration layer
  */
 export interface MetaArbiterConfig {
@@ -641,6 +682,33 @@ export interface MetaArbiterConfig {
    * Target cognitive growth milestone level (GrowthMonitor)
    */
   growth_milestone_level?: "beginner" | "intermediate" | "advanced" | "expert";
+}
+/**
+ * Zero-knowledge proof structure (Groth16). Mirrors the ZKProof interface in packages/aix-zkkyc/src/ProofVerifier.ts so on-chain proofs round-trip through the manifest without re-encoding.
+ *
+ * This interface was referenced by `AIXFormat`'s JSON-Schema
+ * via the `definition` "ZKProof".
+ */
+export interface ZKProof1 {
+  /**
+   * Groth16 proof object as produced by snarkjs. Free-form because the snarkjs shape (a, b, c, protocol, curve) is not stable across versions.
+   */
+  proof: {
+    [k: string]: unknown | undefined;
+  };
+  /**
+   * Public inputs to the proof — decimal-encoded field elements as strings
+   */
+  publicSignals: string[];
+  /**
+   * Unique proof identifier used by NullifierRegistry to prevent replay attacks. Recommended: SHA-256 hex.
+   */
+  nullifier: string;
+  timestamp?: ISODateTime;
+  /**
+   * Identifier of the circuit that produced this proof (e.g. pkyc-v1, age-over-18-v2). Recommended for verifier dispatch.
+   */
+  circuit?: string;
 }
 /**
  * Meta Arbiter — 'العقل المدبر' — orchestration config for the agent's internal subsystem controller. Controls activation thresholds, coordination strategy, and growth monitoring.

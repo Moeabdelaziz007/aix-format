@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://axiomid.app/schemas/aix.schema.json",
-  "$comment": "AIX Format v0.369.0 — Unified Canonical Bundled Schema. Supersedes aix-v1.schema.json, axiom-aix.schema.json, aix-enhanced.schema.json. © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions",
+  "$comment": "AIX Format v0.369.0 — Unified Canonical Bundled Schema. Supersedes aix-v1.schema.json, axiom-aix.schema.json, aix-enhanced.schema.json. © 2026 Mohamed Abdelaziz / AMRIKYY AI Solutions. v0.369.0+ adds optional fields aix_version, skills[].safety_score, identity_layer.zk_proof, identity_layer.pi_uid_anchor, economics.wallets[].x402_endpoint — all backward compatible.",
   "title": "AIX Format",
   "description": "Unified JSON Schema for AIX (Artificial Intelligence eXchange) v0.369.0 — Sovereign Protocol. The Digital DNA of autonomous AI agents. Created by Mohamed Abdelaziz - AMRIKYY AI Solutions 2026",
   "type": "object",
@@ -74,6 +74,35 @@
           "enum": ["JCS", "RFC8785"],
           "default": "JCS",
           "description": "JSON canonicalization scheme used before signing"
+        }
+      }
+    },
+    "ZKProof": {
+      "type": "object",
+      "description": "Zero-knowledge proof structure (Groth16). Mirrors the ZKProof interface in packages/aix-zkkyc/src/ProofVerifier.ts so on-chain proofs round-trip through the manifest without re-encoding.",
+      "required": ["proof", "publicSignals", "nullifier"],
+      "additionalProperties": false,
+      "properties": {
+        "proof": {
+          "description": "Groth16 proof object as produced by snarkjs. Free-form because the snarkjs shape (a, b, c, protocol, curve) is not stable across versions.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "publicSignals": {
+          "type": "array",
+          "description": "Public inputs to the proof — decimal-encoded field elements as strings",
+          "items": { "type": "string" }
+        },
+        "nullifier": {
+          "type": "string",
+          "description": "Unique proof identifier used by NullifierRegistry to prevent replay attacks. Recommended: SHA-256 hex.",
+          "minLength": 32
+        },
+        "timestamp": { "$ref": "#/$defs/ISODateTime" },
+        "circuit": {
+          "type": "string",
+          "description": "Identifier of the circuit that produced this proof (e.g. pkyc-v1, age-over-18-v2). Recommended for verifier dispatch.",
+          "examples": ["pkyc-v1"]
         }
       }
     },
@@ -153,6 +182,12 @@
   },
 
   "properties": {
+    "aix_version": {
+      "$ref": "#/$defs/SemVer",
+      "description": "Optional top-level shorthand for the AIX schema version this manifest targets (e.g. \"0.369.0\"). When omitted, consumers should fall back to meta.format_version, then to the schema URL parsed from $id, then to '0.369.0'. Schema registry: https://axiomid.app/schemas/aix.schema.json",
+      "examples": ["0.369.0", "1.0.0"]
+    },
+
     "meta": {
       "type": "object",
       "description": "Agent metadata and identification",
@@ -183,7 +218,11 @@
         "language": { "type": "string", "pattern": "^[a-z]{2}$", "examples": ["en", "ar"] },
         "framework": { "type": "string", "examples": ["openai", "anthropic", "gemini"] },
         "runtime_version": { "type": "string" },
-        "format_version": { "type": "string", "description": "AIX format version (e.g. 1.3)", "examples": ["1.3"] },
+        "format_version": {
+          "type": "string",
+          "description": "AIX format version this manifest targets. Co-exists with the top-level `aix_version` shorthand; when both are present, consumers SHOULD treat them as equal (a validator MAY warn on disagreement). Free-form for legacy reasons — prefer SemVer.",
+          "examples": ["1.3", "0.369.0"]
+        },
         "lineage": {
           "type": "array",
           "description": "Agent genealogy and heritage tracking",
@@ -330,7 +369,17 @@
         "issuedAt": { "$ref": "#/$defs/ISODateTime" },
         "expiresAt": { "$ref": "#/$defs/ISODateTime" },
         "publicKey": { "$ref": "#/$defs/PublicKey" },
-        "signature": { "$ref": "#/$defs/Signature" }
+        "signature": { "$ref": "#/$defs/Signature" },
+        "pi_uid_anchor": {
+          "type": "string",
+          "description": "Optional Pi Network user-ID anchor. SHA-256 hex of the verified Pi UID (32 bytes / 64 hex chars). Binds this DID to a verified Pi user without revealing the UID itself. Produced by packages/pi-kyc hashPiUid(). When present, resolvers SHOULD verify the value matches the KYC proof returned by Pi.",
+          "pattern": "^[0-9a-f]{64}$",
+          "examples": ["e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]
+        },
+        "zk_proof": {
+          "$ref": "#/$defs/ZKProof",
+          "description": "Optional zero-knowledge KYC proof attesting to identity properties (tier, jurisdiction, age, etc.) without revealing the underlying data. Verified by packages/aix-zkkyc ProofVerifier. Replay protection is handled at verification time via the nullifier registry; presence of this field does not by itself confer KYC status."
+        }
       }
     },
 
@@ -391,7 +440,7 @@
 
     "skills": {
       "type": "array",
-      "description": "Agent capabilities",
+      "description": "Agent capabilities — the MCP-flavoured tool surface the agent exposes. Each entry is one tool / capability.",
       "items": {
         "type": "object",
         "required": ["name", "description"],
@@ -404,7 +453,14 @@
           "triggers": { "type": "array", "items": { "type": "string" } },
           "examples": { "type": "array", "items": { "type": "string" } },
           "priority": { "type": "integer", "minimum": 1, "maximum": 10 },
-          "timeout": { "type": "integer", "minimum": 1 }
+          "timeout": { "type": "integer", "minimum": 1 },
+          "safety_score": {
+            "type": "number",
+            "description": "Per-tool safety score on a 0-10 scale. 10 = fully sandboxed read-only operation; 0 = arbitrary code execution / unbounded side effects. Consumers can use this to gate dispatch (e.g. require safety_score >= 7 for autonomous runs). Optional — defaults to 5 (unknown / standard) when omitted.",
+            "minimum": 0,
+            "maximum": 10,
+            "default": 5
+          }
         }
       }
     },
@@ -564,7 +620,13 @@
               "chain": { "type": "string", "enum": ["base", "solana", "arbitrum", "pi-mainnet"] },
               "address": { "type": "string" },
               "provider": { "type": "string", "enum": ["coinbase-agentkit", "stripe-agent-wallet", "generic"] },
-              "tee_secured": { "type": "boolean", "default": false }
+              "tee_secured": { "type": "boolean", "default": false },
+              "x402_endpoint": {
+                "type": "string",
+                "format": "uri",
+                "description": "Optional HTTP 402 Payment Required endpoint URL this wallet exposes for pay-per-call settlements (RFC-style x402 flow, see economics.payment_gateways.x402 for the top-level enable flag). Clients hit this URL, receive a 402 with payment instructions referencing the wallet address, settle, then retry the original request.",
+                "examples": ["https://pay.example.com/x402/agent-001"]
+              }
             }
           }
         },
