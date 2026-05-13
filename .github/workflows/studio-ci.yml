@@ -34,9 +34,14 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       # ── Studio install ──────────────────────────────────────────────────
+      # `pnpm install` already runs from the workspace root above, so a second
+      # install inside apps/studio would just re-resolve the same graph. We
+      # keep this step for explicitness but pass only flags pnpm understands;
+      # `--no-package-lock` is npm-only and made pnpm exit with
+      # "Unknown option: 'package-lock'".
       - name: Install studio dependencies
         working-directory: apps/studio
-        run: pnpm install --no-frozen-lockfile --no-package-lock
+        run: pnpm install --no-frozen-lockfile
 
       # ── Lint ────────────────────────────────────────────────────────────
       - name: Lint
