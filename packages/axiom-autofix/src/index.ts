@@ -13,7 +13,7 @@
 // These three rules kill the auto-PR antipattern that TawbahLoop and
 // sentinel-autofix introduced.
 
-import { readFileSync, writeFileSync, existsSync, statSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, lstatSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
@@ -21,6 +21,14 @@ export interface Fix {
   /** Stable id, mirrors a corresponding lint rule where applicable. */
   id: string;
   description: string;
+  /**
+   * Optional file-path filter. When defined, the runner only invokes
+   * `transform` on paths for which this returns true. Used by fixes that
+   * are language-specific (e.g. tab-stripping only makes sense in
+   * markdown — a leading tab in a `.ts` file is significant indentation
+   * the user wants left alone).
+   */
+  appliesTo?: (filePath: string) => boolean;
   /** Returns the new content, or null if nothing to fix. */
   transform: (content: string) => string | null;
 }
@@ -54,6 +62,12 @@ export const fixEmDash: Fix = {
 export const fixTabInMarkdown: Fix = {
   id: 'no-tab-in-markdown',
   description: 'Replace leading tabs with two spaces in markdown files.',
+  // Scope to .md / .mdx only. The previous shape applied this fix to
+  // every file in the run, which rewrote significant leading tabs in
+  // .ts and .go sources and produced unrelated diffs.
+  appliesTo(filePath) {
+    return /\.mdx?$/i.test(filePath);
+  },
   transform(content) {
     if (!content.includes('\t')) return null;
     const next = content
@@ -142,6 +156,7 @@ export function applyFixesToFile(filePath: string, opts: RunOptions = {}): FixRe
   const results: FixResult[] = [];
   let current = original;
   for (const fix of fixes) {
+    if (fix.appliesTo && !fix.appliesTo(filePath)) continue;
     const next = fix.transform(current);
     if (next === null) continue;
     const result: FixResult = {
@@ -165,14 +180,27 @@ export function applyFixesToFiles(paths: string[], opts: RunOptions = {}): FixRe
   const out: FixResult[] = [];
   // Expand any directory inputs into their constituent files so a caller
   // passing `docs/` gets the same behaviour as passing every markdown
-  // file inside docs/ individually. We skip common vendored / generated
-  // trees (node_modules, .git, dist, build, .next, coverage) and
-  // symlinks to avoid loops.
-  const skip = /(?:^|\/)(?:node_modules|\.git|\.next|dist|build|coverage|\.generated)(?:\/|$)/;
+  // file inside docs/ individually. Two correctness properties:
+  //
+  //   1. Separator-agnostic skip set. The previous regex anchored on '/'
+  //      and silently let `src\node_modules\pkg` through on Windows
+  //      because `node:path.join()` uses '\' there. Now we split the
+  //      path on either separator and check each segment against a Set.
+  //   2. Symlink-safe traversal. Using statSync to detect directories
+  //      dereferences symlinks, so a directory symlinked back to one of
+  //      its ancestors caused infinite recursion. Switched to lstatSync
+  //      and refused to enter symlinks at all (they're rare in source
+  //      trees and the risk of a loop dwarfs the benefit of following).
+  const SKIP_DIRS = new Set([
+    'node_modules', '.git', '.next', 'dist', 'build', 'coverage', '.generated',
+  ]);
+  const shouldSkip = (p: string) => p.split(/[\\/]/).some(seg => SKIP_DIRS.has(seg));
+
   function expand(p: string, acc: string[]) {
-    if (skip.test(p)) return;
-    let s: ReturnType<typeof statSync>;
-    try { s = statSync(p); } catch { return; }
+    if (shouldSkip(p)) return;
+    let s: ReturnType<typeof lstatSync>;
+    try { s = lstatSync(p); } catch { return; }
+    if (s.isSymbolicLink()) return;
     if (s.isFile()) {
       acc.push(p);
     } else if (s.isDirectory()) {

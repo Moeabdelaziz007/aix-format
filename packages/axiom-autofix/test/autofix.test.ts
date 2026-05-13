@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { writeFileSync, readFileSync, mkdtempSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import {
   fixEmDash,
   fixTabInMarkdown,
@@ -92,6 +92,49 @@ test('token validation: missing prefix rejected', () => {
   assert.equal(validateApprovalToken('not-a-token', sha), false);
 });
 
+test('no-tab-in-markdown does not rewrite tabs in .ts source', () => {
+  // Regression: previously fixTabInMarkdown ran on every file with no
+  // file-type guard, so a TypeScript file's significant leading tab
+  // would be silently replaced with two spaces. Now the fix has an
+  // appliesTo filter that restricts it to .md / .mdx.
+  const tsFile = tmp('a.ts', '\texport const x = 1;\n');
+  const before = readFileSync(tsFile, 'utf8');
+  const results = applyFixesToFile(tsFile, { approved: true });
+  const tabFix = results.find(r => r.fix === 'no-tab-in-markdown');
+  assert.equal(tabFix, undefined, 'tab fix must not run on .ts files');
+  assert.equal(readFileSync(tsFile, 'utf8'), before, '.ts content must be unchanged');
+});
+
+test('no-tab-in-markdown does rewrite tabs in .md files (positive case)', () => {
+  const mdFile = tmp('a.md', '\theading\n');
+  applyFixesToFile(mdFile, { approved: true });
+  const after = readFileSync(mdFile, 'utf8');
+  assert.ok(!after.startsWith('\t'), 'leading tab must be replaced');
+  assert.ok(after.startsWith('  '), 'leading tab must become two spaces');
+});
+
+test('applyFixesToFiles refuses to recurse into a symlinked directory', () => {
+  // Build dir/, then create dir/loop -> .. so a naive recursive walk
+  // would loop forever. lstatSync + isSymbolicLink() must short-circuit.
+  const dir = mkdtempSync(join(tmpdir(), 'axiom-autofix-link-'));
+  writeFileSync(join(dir, 'real.md'), 'foo \u2014 bar\n', 'utf8');
+  try {
+    // node:fs symlinkSync — wrap in try/catch because some CI sandboxes
+    // forbid symlink creation; we just skip the assertion in that case.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('node:fs') as typeof import('node:fs');
+    fs.symlinkSync('..', join(dir, 'loop'), 'dir');
+  } catch {
+    return; // sandbox without symlink permission
+  }
+  const out = applyFixesToFiles([dir], { approved: false });
+  // Must terminate AND find real.md. Visiting the symlink would either
+  // loop forever (timeout) or surface a 'loop/real.md'-prefixed file.
+  const files = out.map(r => r.file);
+  assert.ok(files.some(f => f.endsWith('real.md')));
+  assert.ok(!files.some(f => f.includes('/loop/')), 'must not descend into symlinked dir');
+});
+
 test('applyFixesToFile skips a directory input without throwing', () => {
   // Regression for the EISDIR bug: previously applyFixesToFile called
   // readFileSync on whatever path it received and crashed on directories.
@@ -108,7 +151,12 @@ test('applyFixesToFiles expands directories into constituent files', () => {
   writeFileSync(join(dir, 'a.md'), 'foo \u2014 bar\n', 'utf8');
   writeFileSync(join(sub, 'b.md'), 'baz \u2014 qux\n', 'utf8');
   const out = applyFixesToFiles([dir], { approved: false });
-  const files = new Set(out.map(r => r.file.split('/').pop()));
+  // Use path.basename so the assertion holds on Windows (where the
+  // walker emits backslash-separated paths) as well as POSIX. The
+  // previous split('/').pop() returned the entire path on Windows
+  // and the set membership check failed even when the walker was
+  // working correctly.
+  const files = new Set(out.map(r => basename(r.file)));
   assert.ok(files.has('a.md'), 'must walk top-level file');
   assert.ok(files.has('b.md'), 'must recurse into sub-directory');
 });
