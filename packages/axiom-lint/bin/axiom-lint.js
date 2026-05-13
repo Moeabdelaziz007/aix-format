@@ -82,7 +82,18 @@ if (opts.format === 'json') {
   console.log(`${report.totalFiles} files scanned, ${report.filesWithFindings} with findings: ${report.errorCount} error / ${report.warningCount} warning / ${report.infoCount} info`);
 }
 
+// Exit-code policy:
+//   - If there are zero findings we always exit 0, no matter what
+//     --fail-on says. The previous code initialised `worst` to 0 and
+//     compared `worst >= threshold`; with `--fail-on info` the threshold
+//     is also 0, so a perfectly clean run reported a failure. That
+//     made `--fail-on info` unusable in CI.
+//   - With findings present, the worst observed severity must reach the
+//     configured threshold to fail. info < warning < error.
 const severityRank = { info: 0, warning: 1, error: 2 };
 const threshold = severityRank[opts.failOn] ?? 2;
+if (report.findings.length === 0) {
+  process.exit(0);
+}
 const worst = report.findings.reduce((acc, f) => Math.max(acc, severityRank[f.severity] ?? 0), 0);
 process.exit(worst >= threshold ? 1 : 0);

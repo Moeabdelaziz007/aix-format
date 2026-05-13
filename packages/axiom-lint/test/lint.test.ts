@@ -54,6 +54,21 @@ test('detects GitHub PAT', () => {
   assert.ok(findings.some(f => f.rule === 'no-secrets/github-pat'));
 });
 
+test('secrets rule scans PEM key file conventions (.pem, .key, id_rsa, id_ed25519)', () => {
+  // Regression: the private-key-pem pattern was in the detector but
+  // the file filter excluded the very files that hold those keys.
+  const pem = '-----BEGIN PRIVATE KEY-----\nAAAA\n-----END PRIVATE KEY-----\n';
+  const rules = buildRules({ naming: 'mixed' });
+  for (const name of ['server.pem', 'client.key', 'id_rsa', 'id_ed25519', 'id_rsa.pem']) {
+    const file = fixture(name, pem);
+    const findings = lintFile(file, rules);
+    assert.ok(
+      findings.some(f => f.rule === 'no-secrets/private-key-pem'),
+      `${name} must be scanned for PEM keys`,
+    );
+  }
+});
+
 test('secrets rule scans .env variant filenames (.env.local, .env.production, .env.test)', () => {
   // Regression for the blind spot where /env$/ only matched a bare .env
   // file. Real leaks live in .env.local far more often than in .env.
@@ -113,6 +128,18 @@ test('lintFiles aggregates report', () => {
   assert.equal(report.totalFiles, 2);
   assert.equal(report.filesWithFindings, 2);
   assert.ok(report.findings.length >= 2);
+});
+
+test('clean run yields zero findings (used by --fail-on info exit-code policy)', () => {
+  // Ground-truth for the CLI fix: a directory whose content tripped no
+  // rule must report zero findings, so the exit-code policy can return
+  // 0 even when --fail-on is set to the lowest tier (info).
+  const file = fixture('clean.ts', `export function add(a: number, b: number) { return a + b; }\n`);
+  const report = lintFiles([file], { naming: 'mixed' });
+  assert.equal(report.findings.length, 0);
+  assert.equal(report.errorCount, 0);
+  assert.equal(report.warningCount, 0);
+  assert.equal(report.infoCount, 0);
 });
 
 test('exclude regex skips file entirely', () => {

@@ -51,6 +51,56 @@ test('validateManifestFiles handles missing files cleanly', () => {
   assert.ok(report.findings[0].message.includes('not found'));
 });
 
+test('skill markdown: accepts CRLF line endings (Windows authoring)', () => {
+  // Regression: the frontmatter regex was hard-coded to LF, so a file
+  // authored on Windows tripped a false "missing frontmatter" error.
+  const body =
+    `---\r\n` +
+    `name: ok-name\r\n` +
+    `tier: 1\r\n` +
+    `description: one sentence\r\n` +
+    `---\r\n` +
+    `\r\n` +
+    `## Purpose\r\n` +
+    `\r\n` +
+    `Real content.\r\n`;
+  const file = tmp('windows.md', body);
+  const findings = validateSkillMarkdown(file);
+  assert.equal(
+    findings.filter(f => f.message.includes('frontmatter')).length,
+    0,
+    `unexpected frontmatter errors: ${JSON.stringify(findings)}`,
+  );
+});
+
+test('skill markdown: required-key check is anchored, not substring', () => {
+  // Regression: fm.includes('name:') used to accept `rename:` and
+  // similar lookalikes. Each lookalike must now be flagged as a
+  // missing-required-key error.
+  const file = tmp('substr.md', `---
+rename: bad
+frontier: 2
+short_description: nope
+---
+
+## Purpose
+
+x
+`);
+  const findings = validateSkillMarkdown(file);
+  const missing = new Set(
+    findings
+      .filter(f => f.message.startsWith('frontmatter missing required key'))
+      .map(f => f.message),
+  );
+  for (const key of ['name', 'tier', 'description']) {
+    assert.ok(
+      [...missing].some(m => m.includes(`"${key}"`)),
+      `expected missing-key error for "${key}", got ${[...missing].join(' / ')}`,
+    );
+  }
+});
+
 test('skill markdown: rejects missing frontmatter', () => {
   const file = tmp('s.md', '# A skill\n\nSome body.\n');
   const findings = validateSkillMarkdown(file);

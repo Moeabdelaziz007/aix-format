@@ -142,20 +142,32 @@ export function validateSkillMarkdown(file: string): ValidationFinding[] {
   const content = readFileSync(file, 'utf8');
   const out: ValidationFinding[] = [];
 
-  // Frontmatter check.
-  const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  // Frontmatter check. Accept LF (Unix) and CRLF (Windows) line endings
+  // so a markdown file authored on Windows is not mis-reported as
+  // having no frontmatter. We do not normalise the entire file (that
+  // would hide cross-platform diffs elsewhere); we just relax the
+  // delimiter regex.
+  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!fmMatch) {
     out.push({ checker: 'skill-md', severity: 'error', file, message: 'missing YAML frontmatter' });
     return out;
   }
   const fm = fmMatch[1];
-  for (const required of ['name:', 'tier:', 'description:']) {
-    if (!fm.includes(required)) {
+
+  // Required-key detection used to be `fm.includes(required)`, which
+  // accepted any substring match — so `rename:` satisfied `name:`,
+  // `frontier:` satisfied `tier:`, `short_description:` satisfied
+  // `description:`. Now we anchor each required key to the start of a
+  // line (after optional whitespace) so only a real top-level key
+  // satisfies the check.
+  for (const required of ['name', 'tier', 'description']) {
+    const exact = new RegExp(`^[ \\t]*${required}\\s*:`, 'm');
+    if (!exact.test(fm)) {
       out.push({
         checker: 'skill-md',
         severity: 'error',
         file,
-        message: `frontmatter missing required key "${required.replace(':', '')}"`,
+        message: `frontmatter missing required key "${required}"`,
       });
     }
   }

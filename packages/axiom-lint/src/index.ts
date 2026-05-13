@@ -76,13 +76,16 @@ const ruleSecretsScan: LintRule = {
   description: 'Detect hard-coded credentials (AWS, GitHub PATs, OpenAI keys, private keys, Pi secrets).',
   defaultSeverity: 'error',
   // Skip lockfiles and binary-ish encodings to keep false positives bounded.
-  // The .env branch must accept the common variants (.env.local,
-  // .env.production, .env.example, .env.test, etc.) — the previous
-  // /env$/ alternative only matched a bare .env file and let leaked
-  // credentials in .env.local sail through unnoticed. We allow an
-  // optional second suffix segment to cover every realistic naming
-  // convention dotenv ecosystems use.
-  filePattern: /\.(?:ts|tsx|js|jsx|mjs|cjs|json|jsonc|yaml|yml|sh|py|go|rs|md|toml)$|\.env(?:\.[A-Za-z0-9_-]+)?$/i,
+  // Three orthogonal alternatives are stitched together:
+  //   1. Source extensions we know to scan (ts/js/json/yaml/sh/py/go/rs/md/toml).
+  //   2. .env and every .env.<suffix> variant (.env.local, .env.production,
+  //      .env.test, .env.example, ...).
+  //   3. Key-file conventions: any *.pem / *.key / *.crt / *.cer / *.p12 /
+  //      *.pfx file, plus the unsuffixed id_rsa / id_dsa / id_ed25519 /
+  //      id_ecdsa files SSH writes by default. PEM keys living in any of
+  //      these are exactly the leak shape the private-key-pem detector was
+  //      built for; excluding them from the file filter was the whole bug.
+  filePattern: /\.(?:ts|tsx|js|jsx|mjs|cjs|json|jsonc|yaml|yml|sh|py|go|rs|md|toml|pem|key|crt|cer|p12|pfx)$|\.env(?:\.[A-Za-z0-9_-]+)?$|(?:^|\/)id_(?:rsa|dsa|ed25519|ecdsa)(?:\.[A-Za-z0-9_-]+)?$/i,
   check(file, content) {
     const out: LintFinding[] = [];
     const lines = content.split('\n');
