@@ -520,7 +520,11 @@ export class AIXAgent {
 }
 
 // ─── Plugin System Exports ────────────────────────────────────────────────────
-// Export plugin system for external use
-export { defaultRegistry, PluginRegistry };
-export { ValidationPlugin } from './validation-plugins.js';
-export * from './plugins/index.js';
+// The plugin system (`defaultRegistry`, `PluginRegistry`, `ValidationPlugin`,
+// and `./plugins/*`) was removed in an earlier refactor but the re-exports
+// were left behind. They referenced undefined identifiers and missing files,
+// which caused `import { AIXParser } from '../core/parser.js'` to fail at
+// module-link time with:
+//   SyntaxError: Export 'PluginRegistry' is not defined in module
+// The exports below are intentionally omitted until the plugin system is
+// re-introduced. If/when it is, re-export it from its concrete module here.
