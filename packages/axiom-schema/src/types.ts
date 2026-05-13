@@ -315,18 +315,73 @@ export interface AIXPiNetwork {
 
 // ── abom ──────────────────────────────────────────────────────────────────────
 
-export interface AIXAbomDependency {
-  name: string;
+/** Underlying model metadata in `abom.model`. Closed by the schema. */
+export interface AIXAbomModel {
+  provider?: string;
+  name?: string;
   version?: string;
-  source?: string;
-  license?: string;
 }
 
+/** Governance and license metadata in `abom.governance`. Open per schema. */
+export interface AIXAbomGovernance {
+  license?: string;
+  [extra: string]: unknown;
+}
+
+/** One entry in `abom.tools`. Closed by the schema. */
+export interface AIXAbomTool {
+  name?: string;
+  version?: string;
+}
+
+/** One entry in `abom.constituents`. Required `name`+`version`, closed by schema. */
+export interface AIXAbomConstituent {
+  name: string;
+  version: string;
+  type?: 'model' | 'dataset' | 'library' | 'tool' | 'plugin' | 'agent' | 'runtime';
+  /** Package URL identifier. */
+  purl?: string;
+  hash?: string;
+  integrity_hash?: string;
+  license?: string;
+  supplier?: string;
+  trust_tier?: 'verified' | 'community' | 'unverified' | 'revoked';
+  security_status?: 'clean' | 'vulnerable' | 'revoked' | 'unknown';
+  source_registry?: string;
+}
+
+/** One entry in `abom.attestations`. Closed by the schema. */
+export interface AIXAbomAttestation {
+  type?: string;
+  value?: string;
+  signer?: string;
+}
+
+/**
+ * Agent Bill of Materials. AI-SBOM compatible supply-chain transparency
+ * block. Schema is `additionalProperties: true` so extension keys are
+ * permitted; the named fields below mirror the current canonical shape.
+ */
 export interface AIXAbom {
-  base_models?: AIXAbomDependency[];
-  training_datasets?: AIXAbomDependency[];
-  plugins?: AIXAbomDependency[];
-  saas_dependencies?: AIXAbomDependency[];
+  /** SHA-256 hash (or short hash) of the full ABOM for supply chain verification. */
+  integrity_hash?: string;
+  spec_version?: string;
+  /** SBOM format identifier. */
+  bom_format?: string;
+  risk_level?: 'low' | 'medium' | 'high';
+  generated?: ISODateTime;
+  generated_by?: string;
+  timestamp?: ISODateTime;
+  /** High-level agent capability labels. */
+  capabilities?: string[];
+  /** Flat list of dependency identifiers (free-form). */
+  dependencies?: string[];
+  model?: AIXAbomModel;
+  governance?: AIXAbomGovernance;
+  tools?: AIXAbomTool[];
+  constituents?: AIXAbomConstituent[];
+  attestations?: AIXAbomAttestation[];
+  [extra: string]: unknown;
 }
 
 // ── meta_arbiter ──────────────────────────────────────────────────────────────
@@ -395,6 +450,17 @@ export interface AIXAPIEndpoint {
   parameters?: Array<Record<string, unknown>>;
 }
 
+export interface AIXAPIRateLimit {
+  requests?: number;
+  /** Window in seconds. */
+  period?: number;
+}
+
+export interface AIXAPIRetry {
+  max_attempts?: number;
+  backoff?: 'exponential' | 'linear' | 'constant';
+}
+
 /** One entry in the manifest's `apis` array. */
 export interface AIXAPI {
   name: string;
@@ -403,15 +469,140 @@ export interface AIXAPI {
   version?: string;
   auth?: AIXAPIAuth;
   endpoints?: AIXAPIEndpoint[];
-  rate_limit?: Record<string, unknown>;
+  rate_limit?: AIXAPIRateLimit;
+  /** Per-call timeout in seconds. */
+  timeout?: number;
+  retry?: AIXAPIRetry;
+}
+
+// ── mcp ──────────────────────────────────────────────────────────────────────
+
+/** One entry in `mcp.servers`. Required `name` + `command`. */
+export interface AIXMcpServer {
+  name: string;
+  command: string;
+  args?: string[];
+  /** Environment variables (string-only values per schema). */
+  env?: Record<string, string>;
+  description?: string;
+  capabilities?: string[];
+  /** Spawn timeout in seconds, positive integer. */
+  timeout?: number;
+  auto_start?: boolean;
+}
+
+/** One entry in `mcp.prompts`. Required `name`. */
+export interface AIXMcpPrompt {
+  name: string;
+  description?: string;
+}
+
+export interface AIXMcp {
+  servers?: AIXMcpServer[];
+  prompts?: AIXMcpPrompt[];
+}
+
+// ── memory ───────────────────────────────────────────────────────────────────
+
+export interface AIXMemoryEpisodic {
+  enabled?: boolean;
+  max_messages?: number;
+  retention_days?: number;
+  storage?: 'local' | 'cloud' | 'vector_db' | 'database';
+}
+
+export interface AIXMemorySemantic {
+  enabled?: boolean;
+  embedding_model?: string;
+  vector_db?: string;
+  /** Cosine similarity threshold 0.0-1.0. */
+  similarity_threshold?: number;
+  max_results?: number;
+}
+
+export interface AIXMemoryProcedural {
+  enabled?: boolean;
+  storage?: string;
+  max_workflows?: number;
+}
+
+export interface AIXMemoryPersistence {
+  enabled?: boolean;
+  backend?: 'file' | 'database' | 'redis' | 's3' | 'postgresql' | 'sqlite';
+  /** Backend-specific configuration. Schema leaves this open. */
+  config?: Record<string, unknown>;
+}
+
+export interface AIXMemory {
+  episodic?: AIXMemoryEpisodic;
+  semantic?: AIXMemorySemantic;
+  procedural?: AIXMemoryProcedural;
+  persistence?: AIXMemoryPersistence;
+}
+
+// ── live_voice ───────────────────────────────────────────────────────────────
+
+/**
+ * Live Voice Models integration. Schema requires both `enabled` and
+ * `provider`, and closes the object to the four named fields.
+ */
+export interface AIXLiveVoice {
+  enabled: boolean;
+  provider: 'openai-realtime' | 'hume' | 'elevenlabs' | 'generic';
+  voice_id?: string;
+  latency_mode?: 'ultra_low' | 'standard' | 'high_quality';
+}
+
+// ── requirements ─────────────────────────────────────────────────────────────
+
+export interface AIXRequirementsHardware {
+  cpu_cores?: number;
+  memory_mb?: number;
+  storage_mb?: number;
+  gpu_required?: boolean;
+  gpu_memory_mb?: number;
+}
+
+export interface AIXRequirementsSoftware {
+  runtime?: string;
+  dependencies?: string[];
+  python_version?: string;
+  node_version?: string;
+}
+
+export interface AIXRequirementsNetwork {
+  internet_access?: boolean;
+  bandwidth_mbps?: number;
+  allowed_domains?: string[];
+}
+
+/**
+ * Vision-Language-Action adapter config. Schema requires `adapter`
+ * when `vla` is present.
+ */
+export interface AIXRequirementsVLA {
+  adapter: 'openpi' | 'π0.7' | 'generic';
+  /** Vision configuration; schema leaves the inner shape open. */
+  vision?: Record<string, unknown>;
+  language?: Record<string, unknown>;
+  action?: Record<string, unknown>;
+}
+
+export interface AIXRequirements {
+  hardware?: AIXRequirementsHardware;
+  software?: AIXRequirementsSoftware;
+  network?: AIXRequirementsNetwork;
+  vla?: AIXRequirementsVLA;
 }
 
 // ── Open / progressive sections ──────────────────────────────────────────────
-// Object-shaped sections whose nested types are not yet fully
-// authored on the rich surface. Declared as opaque records so future
-// emitters can fill them progressively without breaking type-safety
-// here. Array-shaped sections (skills, apis) are handled above with
-// dedicated array types.
+// `economics` remains opaque on the rich surface — it is the only
+// remaining top-level section whose canonical shape is large and
+// extensible enough (`additionalProperties: true`, plus several
+// optional payment gateway sub-objects) that authoring a dedicated
+// rich type is out of scope for this initial @aix/schema release.
+// All other previously-opaque sections (mcp, memory, live_voice,
+// requirements) now have dedicated types above.
 
 export type AIXOpaqueSection = Record<string, unknown>;
 
@@ -434,12 +625,12 @@ export interface AIXManifest {
 
   apis?: AIXAPI[];
   skills?: AIXSkill[];
-  mcp?: AIXOpaqueSection;
-  memory?: AIXOpaqueSection;
-  topology?: AIXOpaqueSection;
-  live_voice?: AIXOpaqueSection;
+  mcp?: AIXMcp;
+  memory?: AIXMemory;
+  live_voice?: AIXLiveVoice;
+  requirements?: AIXRequirements;
+  /** `economics` keeps the opaque shape for this release; see the comment above the `AIXOpaqueSection` declaration. */
   economics?: AIXOpaqueSection;
-  requirements?: AIXOpaqueSection;
 }
 
 // ── Utility guards ────────────────────────────────────────────────────────────
