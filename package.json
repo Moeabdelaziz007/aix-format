@@ -114,7 +114,7 @@
     "@ai-sdk/google": "^1.0.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@octokit/rest": "^20.0.0",
-    "@upstash/redis": "^1.37.0",
+    "@upstash/redis": "^1.38.0",
     "ai": "^4.0.0",
     "framer-motion": "^11.11.0",
     "js-yaml": "^4.1.1",
