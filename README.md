@@ -22,7 +22,7 @@
 
 <!-- ════════════════ /AIX SOVEREIGN STACK ════════════════ -->
 
-# 🧬 AIX Format — Universal Agent Passport v0.369.0
+# 🧬 AIX Format — Universal Agent Passport v0.369
 
  Vision
 “If your laptop dies or your cloud vendor disappears, your agents should not.
