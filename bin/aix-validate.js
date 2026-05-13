@@ -75,12 +75,17 @@ if (!existsSync(resolvedPath)) {
 // Parse and validate
 const parser = new AIXParser();
 
+// `parser.parse(...)` returns a Promise since validateStructure was made async
+// in the plugin-based validation refactor (commit 6cb9412). The top-level body
+// of this script must run inside an async IIFE so the awaited result is the
+// AIXAgent instance, not a Promise (which has no `.meta`).
+(async () => {
 try {
   // Read raw content for security checksum validation if required
   const rawContent = readFileSync(resolvedPath, 'utf8');
-  
+
   // This will throw if structural validation fails
-  const agent = parser.parse(rawContent, filePath);
+  const agent = await parser.parse(rawContent, filePath);
 
   const additionalErrors = [];
 
@@ -311,3 +316,4 @@ try {
   
   process.exit(1);
 }
+})();
