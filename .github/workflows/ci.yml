@@ -65,7 +65,15 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install --no-frozen-lockfile
-      - run: pnpm test --if-present
+      # pnpm does not support `--if-present` on `pnpm test`. Guard on
+      # the script existing in package.json so this step is a no-op
+      # when packages/aix-core has no `test` script defined.
+      - run: |
+          if node -e "process.exit(require('./package.json').scripts?.test ? 0 : 1)"; then
+            pnpm test
+          else
+            echo "no 'test' script in $(pwd)/package.json — skipping"
+          fi
 
   # ─────────────────────────────────────────
   # 3. Deploy to Vercel — only on main push

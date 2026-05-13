@@ -44,9 +44,13 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       # ── Lint ────────────────────────────────────────────────────────────
+      # pnpm does not implement `--if-present` for `pnpm run <script>`.
+      # The flag was leaking through to eslint as a CLI arg and breaking
+      # the step with `Invalid option '--if-present'`. The apps/studio
+      # package always defines `lint`, so just invoke it directly.
       - name: Lint
         working-directory: apps/studio
-        run: pnpm run lint --if-present
+        run: pnpm run lint
         env:
           UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
           UPSTASH_REDIS_REST_TOKEN: placeholder_token
@@ -85,8 +89,15 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
 
       # ── Core tests ──────────────────────────────────────────────────────
+      # pnpm has no `--if-present` flag for `pnpm test`, so guard with a
+      # shell check on the script definition in package.json instead.
       - name: Core unit tests
-        run: pnpm test --if-present
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.test ? 0 : 1)"; then
+            pnpm test
+          else
+            echo "no 'test' script in $(pwd)/package.json — skipping"
+          fi
         env:
           CI: true
 
