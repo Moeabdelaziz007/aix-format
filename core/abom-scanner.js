@@ -2,120 +2,152 @@
  * ABOM Risk Scoring Engine (2026 Compliance Standard)
  */
 
-export function scanAgent(agent) {
-  let score = 0;
-  const risks = [];
-  const recommendations = [];
-
-  // 1. abom.integrity_hash موجود → +10
+function checkIntegrityHash(agent, result) {
   if (agent.abom?.integrity_hash) {
-    score += 10;
+    result.score += 10;
   } else {
-    risks.push({ category: 'Security', severity: 'high', message: 'Missing ABOM integrity hash' });
-    recommendations.push('Generate a SHA-256 integrity hash for your agent manifest');
+    result.risks.push({ category: 'Security', severity: 'high', message: 'Missing ABOM integrity hash' });
+    result.recommendations.push('Generate a SHA-256 integrity hash for your agent manifest');
   }
+}
 
-  // 2. abom.model.provider معروف (openai, anthropic, etc.) → +10
+function checkModelProvider(agent, result) {
   const knownProviders = ['openai', 'anthropic', 'google', 'meta', 'mistral', 'cohere'];
   if (agent.abom?.model?.provider && knownProviders.includes(agent.abom.model.provider.toLowerCase())) {
-    score += 10;
+    result.score += 10;
   } else {
-    risks.push({ category: 'Supply Chain', severity: 'medium', message: 'Unknown or missing model provider' });
-    recommendations.push('Specify a recognized AI model provider in ABOM metadata');
+    result.risks.push({ category: 'Supply Chain', severity: 'medium', message: 'Unknown or missing model provider' });
+    result.recommendations.push('Specify a recognized AI model provider in ABOM metadata');
   }
+}
 
-  // 3. abom.dataset.provenance موجود → +10
+function checkDatasetProvenance(agent, result) {
   if (agent.abom?.dataset?.sources && agent.abom.dataset.sources.length > 0) {
-    score += 10;
+    result.score += 10;
   } else {
-    risks.push({ category: 'Transparency', severity: 'medium', message: 'Missing dataset provenance' });
-    recommendations.push('Document the data sources used for agent training or fine-tuning');
+    result.risks.push({ category: 'Transparency', severity: 'medium', message: 'Missing dataset provenance' });
+    result.recommendations.push('Document the data sources used for agent training or fine-tuning');
   }
+}
 
-  // 4. abom.governance.human_oversight = true → +15
+function checkHumanOversight(agent, result) {
   if (agent.abom?.governance?.human_oversight === true) {
-    score += 15;
+    result.score += 15;
   } else {
-    risks.push({ category: 'Governance', severity: 'high', message: 'No human oversight declared' });
-    recommendations.push('Implement a human-in-the-loop mechanism for critical actions');
+    result.risks.push({ category: 'Governance', severity: 'high', message: 'No human oversight declared' });
+    result.recommendations.push('Implement a human-in-the-loop mechanism for critical actions');
   }
+}
 
-  // 5. identity.did موجود → +10
+function checkIdentity(agent, result) {
   if (agent.identity_layer?.id || agent.did) {
-    score += 10;
+    result.score += 10;
   } else {
-    risks.push({ category: 'Identity', severity: 'critical', message: 'Missing Sovereign DID' });
-    recommendations.push('Register a Decentralized Identifier (DID) via AxiomID');
+    result.risks.push({ category: 'Identity', severity: 'critical', message: 'Missing Sovereign DID' });
+    result.recommendations.push('Register a Decentralized Identifier (DID) via AxiomID');
   }
+}
 
-  // 6. kyc_tier = 'verified' → +10
+function checkKyc(agent, result) {
   if (agent.kyc_tier === 'verified' || agent.identity_layer?.kyc_tier === 'verified') {
-    score += 10;
+    result.score += 10;
   } else {
-    risks.push({ category: 'Trust', severity: 'medium', message: 'Identity not verified' });
-    recommendations.push('Complete Pi KYC to reach the "verified" trust tier');
+    result.risks.push({ category: 'Trust', severity: 'medium', message: 'Identity not verified' });
+    result.recommendations.push('Complete Pi KYC to reach the "verified" trust tier');
   }
+}
 
-  // 7. security.sandboxed = true → +10
+function checkSecuritySandbox(agent, result) {
   if (agent.security?.sandboxed === true) {
-    score += 10;
+    result.score += 10;
   } else {
-    risks.push({ category: 'Security', severity: 'high', message: 'Agent not sandboxed' });
-    recommendations.push('Ensure the agent executes in a restricted, sandboxed environment');
+    result.risks.push({ category: 'Security', severity: 'high', message: 'Agent not sandboxed' });
+    result.recommendations.push('Ensure the agent executes in a restricted, sandboxed environment');
   }
+}
 
-  // 8. مش عنده capabilities خطيرة بلا governance → +10
+function checkDangerousCapabilities(agent, result) {
   const dangerousCapabilities = ['filesystem_write', 'network_raw', 'shell_exec'];
   const hasUncheckedDangerous = agent.abom?.capabilities?.some(c =>
     dangerousCapabilities.includes(c)
   ) && !agent.abom?.governance?.policy_url;
 
   if (!hasUncheckedDangerous) {
-    score += 10;
+    result.score += 10;
   } else {
-    risks.push({ category: 'Policy', severity: 'high', message: 'Dangerous capabilities without governance policy' });
-    recommendations.push('Link a clear governance policy if your agent uses privileged system access');
+    result.risks.push({ category: 'Policy', severity: 'high', message: 'Dangerous capabilities without governance policy' });
+    result.recommendations.push('Link a clear governance policy if your agent uses privileged system access');
   }
+}
 
-  // 9. version موجود وصحيح (semver) → +5
+function checkVersion(agent, result) {
   const semverRegex = /^(\d+)\.(\d+)\.(\d+)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/;
   if (agent.meta?.version && semverRegex.test(agent.meta.version)) {
-    score += 5;
+    result.score += 5;
   } else {
-    recommendations.push('Use semantic versioning (e.g., 1.0.0) for agent manifests');
+    result.recommendations.push('Use semantic versioning (e.g., 1.0.0) for agent manifests');
   }
+}
 
-  // 10. mcp.endpoints مأمونة (https فقط) → +10
+function checkMcpEndpoints(agent, result) {
   const endpoints = agent.mcp?.endpoints || [];
   const allSecure = endpoints.length > 0 && endpoints.every(e => e.uri.startsWith('https://'));
   if (allSecure) {
-    score += 10;
+    result.score += 10;
   } else if (endpoints.length > 0) {
-    risks.push({ category: 'Network', severity: 'critical', message: 'Insecure MCP endpoints detected' });
-    recommendations.push('Upgrade all MCP endpoints to use HTTPS');
+    result.risks.push({ category: 'Network', severity: 'critical', message: 'Insecure MCP endpoints detected' });
+    result.recommendations.push('Upgrade all MCP endpoints to use HTTPS');
   } else {
-    score += 5; // Neutral if no endpoints
+    result.score += 5; // Neutral if no endpoints
   }
+}
+
+function calculateGrade(score) {
+  if (score >= 90) return 'A';
+  if (score >= 80) return 'B';
+  if (score >= 70) return 'C';
+  if (score >= 60) return 'D';
+  return 'F';
+}
+
+function determineCompliance(score, agent) {
+  return {
+    eu_cra: score >= 80,
+    nist_ai_rmf: score >= 70,
+    kyc_complete: agent.kyc_tier === 'verified' || agent.identity_layer?.kyc_tier === 'verified'
+  };
+}
+
+export function scanAgent(agent) {
+  const result = {
+    score: 0,
+    risks: [],
+    recommendations: []
+  };
+
+  const rules = [
+    checkIntegrityHash,
+    checkModelProvider,
+    checkDatasetProvenance,
+    checkHumanOversight,
+    checkIdentity,
+    checkKyc,
+    checkSecuritySandbox,
+    checkDangerousCapabilities,
+    checkVersion,
+    checkMcpEndpoints
+  ];
+
+  rules.forEach(rule => rule(agent, result));
 
   // Cap score at 100
-  score = Math.min(100, score);
-
-  // Determine Grade
-  let grade = 'F';
-  if (score >= 90) grade = 'A';
-  else if (score >= 80) grade = 'B';
-  else if (score >= 70) grade = 'C';
-  else if (score >= 60) grade = 'D';
+  result.score = Math.min(100, result.score);
 
   return {
-    score,
-    grade,
-    risks,
-    recommendations,
-    compliance: {
-      eu_cra: score >= 80,
-      nist_ai_rmf: score >= 70,
-      kyc_complete: agent.kyc_tier === 'verified' || agent.identity_layer?.kyc_tier === 'verified'
-    }
+    score: result.score,
+    grade: calculateGrade(result.score),
+    risks: result.risks,
+    recommendations: result.recommendations,
+    compliance: determineCompliance(result.score, agent)
   };
 }
