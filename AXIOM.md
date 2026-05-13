@@ -1,7 +1,7 @@
-# 📜 AXIOM — The Sovereign Constitution
+# 📜 AXIOM: The Sovereign Constitution
 
 > "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ"
-> "Read! In the name of your Lord who created" — Al-ʿAlaq, 96:1
+> "Read! In the name of your Lord who created": Al-ʿAlaq, 96:1
 
 This document is the supreme protocol constitution for the AIX (Artificial Intelligence eXchange) Sovereign Stack. It supersedes all per-repo agent instructions and is the single source of truth for cross-stack policy. Every agent operating on any repository under the `axiomid.app` authority MUST read this file before opening a pull request.
 
@@ -11,7 +11,7 @@ Seeded from `iqra/IQRA_SUPREME.md`. Generalised to the stack.
 
 ## 1. The Prime Directive
 
-The stack is a **Governed Adaptive Memory Runtime**, not a prompt. Every change — every commit, every PR, every emitted manifest — moves through the same seven steps:
+The stack is a **Governed Adaptive Memory Runtime**, not a prompt. Every change: every commit, every PR, every emitted manifest: moves through the same seven steps:
 
 > Observe → Retrieve → Reason → Validate → Execute → Reflect → Save
 
@@ -55,26 +55,64 @@ Every claim a sovereign agent emits MUST be grounded in real schema, real signat
 
 ### 3.3 Memory Governance is the Heart
 
-The TrustChain is **append-only**. Resources are **consumed once** (Graded Linear Logic — see `iqra/src/lib/iqra/06-security/damir_conscience.ts`). Every action emits an audit entry; every entry chains to the prior entry's hash. Breakage of the chain is breakage of the system.
+The TrustChain is **append-only**. Resources are **consumed once** (Graded Linear Logic: see `iqra/src/lib/iqra/06-security/damir_conscience.ts`). Every action emits an audit entry; every entry chains to the prior entry's hash. Breakage of the chain is breakage of the system.
 
 ---
 
 ## 4. The Stack Layers
 
 ```text
-L1 — aix-format          The Spec (schemas, types, identity primitives)
-L2 — iqra                The Runtime (mission control, conscience, workers, evolution)
-L3 — aix-agent-skills    The Marketplace (skills + governance + constitutional runtime)
+L1: aix-format          The Spec (schemas, types, identity primitives)
+L2: iqra                The Runtime (mission control, conscience, workers, evolution)
+L3: aix-agent-skills    The Marketplace (skills + governance + constitutional runtime)
 ```
 
 Dependency direction is **one-way only**: L3 depends on L2 depends on L1. Reverse imports are forbidden.
 
-Adjacent product repos live under the same authority but are not in the strict Sovereign Stack:
-- `axiomid-project` — proprietary identity-authority surface
-- `PiWorker` — Pi-Network worker runtime
-- `AlphaAxiom` — trading product line
+The three Sovereign Stack repos share one constitution (this file), one TrustChain shape, one DID authority, one palette, and one codename window (currently `Echo369`).
 
-Cross-stack changes that affect more than one repo MUST land as coordinated PRs and reference each other in their descriptions.
+---
+
+## 4.5 Extended Ecosystem · Satellite Layers
+
+Outside the strict L1/L2/L3 chain, the ecosystem contains a **root authority** above the stack and a tier of **satellite layers** below it. These repositories live under the same `axiomid.app` authority and consume the stack, but they are NOT members of the Sovereign Stack itself.
+
+```text
+                       L0: axiomid-project    Root Authority (issues did:axiom · proprietary)
+                                  │
+                       identity flows ↓
+                       ┌──────────┴──────────┐
+                       │  L1 · L2 · L3       │  Sovereign Stack (this constitution)
+                       └──────────┬──────────┘
+                       money flows ↑
+                       ┌──────────┴──────────┐
+                       │  L4 · L5 · L6       │  Satellite Layers (consumers · application repos)
+                       └─────────────────────┘
+```
+
+| Tier | Repo | Role | Relationship to the Stack |
+|---|---|---|---|
+| **L0** | `axiomid-project` | Root authority. Sole issuer of `did:axiom:axiomid.app:*` identifiers. Proprietary. | Above the stack. Identity flows downward into L1/L2/L3 and the satellites. |
+| **L4** | `AlphaAxiom` | Trading product line. MT5 / Bybit / EVM adapters, Gemini brain, skill plugin runtime. | Satellite consumer. Buys skills from L3 via x402. Records receipts in L2 TrustChain. |
+| **L5** | `PiWorker-OS` | Pi-Network worker runtime. Pi SDK, KYC anchor, worker scheduling. | Satellite consumer. Buys Pi-flavoured skills from L3. |
+| **L6** | `GemClaw` | Voice-first agent forge. Gemini Live, Firebase, persona templates. | Satellite consumer. Buys voice/persona skills from L3. |
+
+### 4.5.1 Invariants
+
+The four invariants below MUST hold for every satellite. They are how the ecosystem stays a tree (genus 0, χ = +1) rather than a tangle.
+
+1. **Dependency direction**: satellites depend on L1/L2/L3. The stack does NOT depend on any satellite. Reverse imports are forbidden.
+2. **Money flows upward**: from L4/L5/L6 into L3 (and onward through the protocol). Skill purchases are the canonical M2M unit.
+3. **Identity flows downward**: from L0 into L1/L2/L3 and into every satellite. Every agent in any tier carries a `did:axiom:axiomid.app:*` minted by L0.
+4. **Trust flows centrally**: every M2M transaction recorded by L4/L5/L6 is mirrored into L2's TrustChain. The marketplace records the sell side; the satellite records the buy side; L2 cross-verifies both.
+
+### 4.5.2 What a satellite is not
+
+A satellite is NOT a member of the Sovereign Stack. It does not get a vote in this constitution. It does not get to define new payment rails, schema fields, or TrustChain shapes. If a satellite needs a primitive that does not exist yet, the answer is a coordinated PR upstream into L1 (and then L2 and L3 as needed), not a one-off implementation in the satellite.
+
+### 4.5.3 Cross-tier coordination
+
+Cross-stack changes that affect more than one repo (stack or satellite) MUST land as coordinated PRs and reference each other in their descriptions. A change that introduces a new payment rail, for example, touches L1 (schema), L3 (gateway), L4/L5/L6 (buyer clients), and L2 (ledger): five coordinated PRs, one purpose.
 
 ---
 
@@ -98,10 +136,12 @@ Re-implementing any of these in a downstream repo is forbidden. Consumers depend
 
 | Surface | Convention |
 |---|---|
-| Skill identifiers | `snake_case` (regex `^[a-z0-9_]+$`) — enforced by schema |
+| Skill identifiers | `snake_case` (regex `^[a-z0-9_]+$`): enforced by schema |
 | File names / branches | `kebab-case` |
 | Package scopes | `@axiom/<concept>` for canonical core. Avoid `@aix/<topic>` going forward |
-| Versions | SemVer. Manifests carry the version in `meta.format_version` (or the top-level `aix_version` shorthand); both are pinned in code via the `AIX_FORMAT_VERSION` constant exported from `@axiom/schema/version`. Patch bumps are non-shape-breaking |
+| Versions | **Independent SemVer per repo + stack-wide codename.** See [`AIX_STACK_VERSIONING.md`](./AIX_STACK_VERSIONING.md) for the full doctrine. Manifests carry the version in `meta.format_version` (or the top-level `aix_version` shorthand); both are pinned in code via the `AIX_FORMAT_VERSION` constant exported from `@axiom/schema/version`. Patch bumps are non-shape-breaking. |
+| Stack codename | `Echo369` (current release window). Rotates with the spec major version (`AIX/1.0` → `AIX/2.0` → ...). |
+| Stack compatibility | Every repo (stack or satellite) declares `aix.stackVersion`, `aix.stackCodename`, `aix.spec`, `aix.layer`, and `aix.authority` in its root manifest. The repo's own `version` field stays SemVer-honest. |
 | Commit messages | Conventional Commits where the project's `AGENTS.md` does not say otherwise |
 
 ---
@@ -131,9 +171,9 @@ These numbers are encoded in code (not docs only). They are referenced by name i
 | `NINETEEN` | 19 | Quranic structural prime |
 | `ARBAUN` | 40 | Maturation period |
 | `FORTY_NINE` | 49 (= 7×7) | HOT memory cap, resource-pool max |
-| `THREE_SIXTY_NINE` | 369 | Tesla/evolution motif; used as the minor segment of protocol versions (e.g. `AIX_PROTOCOL_VERSION = "0.369.0"`) |
+| `THREE_SIXTY_NINE` | 369 | Tesla/evolution motif; used as the minor segment of protocol versions (e.g. `AIX_PROTOCOL_VERSION = "0.369.0"`) and as the anchor for the current release codename `Echo369` |
 
-Changing any of these is a constitutional amendment, not a refactor.
+Changing any of these is a constitutional amendment, not a refactor. The 369 motif lives in protocol constants, the codename, and the Growth Engine cadence; it does NOT bleed into consumer-facing app versions (see `AIX_STACK_VERSIONING.md §6`).
 
 ---
 
@@ -153,8 +193,8 @@ This file MAY be quoted or excerpted in any repo's README or CONTRIBUTING. It MU
 ## 10. The Closing Reminder
 
 > "وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ"
-> "Indeed, you are of a great moral character" — Al-Qalam, 68:4
+> "Indeed, you are of a great moral character": Al-Qalam, 68:4
 
 Sovereignty is not a feature. It is a contract.
 
-— axiomid.app
+: axiomid.app
