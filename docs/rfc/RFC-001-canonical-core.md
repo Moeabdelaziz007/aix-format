@@ -48,7 +48,7 @@ The drift is silent: changing the L1 schema does not break the L2 mirror, which 
   - `@aix/identity/did` — `did:axiom` ↔ `did:web` translator.
   - `@aix/identity/pi` — Pi Network domain-claim flow (well-known endpoint).
 - **Semver baseline**: `1.3.0`.
-- **Dependencies**: `@aix/schema`, `@noble/ed25519@^2.3`, `@noble/hashes@^1.5`.
+- **Dependencies**: `@aix/schema`, `@noble/ed25519@^2.3`, `@noble/hashes@^1.8`.
 - **Deferred**: Groth16 ZK proofs (snarkjs ~1MB WASM) become `@aix/zk` in Phase 2. They stay in `aix-format/packages/aix-zkkyc/` for now.
 
 ### 3.3 `@aix/trustchain`
@@ -170,7 +170,7 @@ Standard deprecation policy: one minor release of re-export shims for renames an
 
 ## 9. Open risks
 
-- **npm scope ownership** for `@aix/*`. The L1 maintainer must own (or transfer ownership of) the `@aix` scope before Phase 1.6 publication.
+- **npm scope ownership** for `@aix/*`. The L1 maintainer must own (or transfer ownership of) the `@aix` scope before any of the five packages are published to the public registry.
 - **Cross-repo CI**: when `@aix/schema` bumps, L2 and L3 need PRs opened automatically. Tooling does not exist yet; outside Phase 1 scope but blocks Phase 2.
 - **Author conventions**: contributors must learn which package owns which concept. Mitigation: a one-page `OWNERSHIP.md` shipped with Phase 1.5.
 - **Phase 1.0 cleanup PR collisions**: the 18 files span L1, L2, L3. The cleanup itself is L1-only; L2 and L3 cleanups are sequenced in their respective migration phases.
