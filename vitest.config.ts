@@ -10,14 +10,21 @@ export default defineConfig({
     // The tests/e2e/ folder is excluded here because those tests use
     // node:test and are run by the dedicated test:e2e:node script.
     include: ['tests/**/*.test.{js,ts}', 'packages/**/*.test.{js,ts}'],
-    // Use **/node_modules/** to also catch transitively-installed test files
-    // that ship inside dependency packages (zod ships its own tests, etc.).
-    // The plain 'node_modules/**' pattern only matches the top-level dir.
+    // Exclude folders that ship tests written for a different runner so
+    // vitest doesn't try to run them and fail in confusing ways:
+    //   tests/node-test/    -> node:test runner (run via test:node)
+    //   tests/e2e/          -> node:test runner (run via test:e2e:node)
+    //   *.spec.ts           -> Playwright (run via test:e2e)
+    // Also use **/node_modules/** to catch transitively-installed test
+    // files that ship inside dependency packages (zod, etc.). The plain
+    // 'node_modules/**' pattern only matches the top-level dir.
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       'apps/studio/.next/**',
       'tests/e2e/**',
+      'tests/node-test/**',
+      'tests/**/*.spec.ts',
     ],
     coverage: {
       provider: 'v8',
