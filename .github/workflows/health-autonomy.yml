@@ -145,6 +145,7 @@ jobs:
         with:
           name: health-score-report
           path: .generated/
+        continue-on-error: true
 
       - name: Download trend analysis artifact
         uses: actions/download-artifact@v4
