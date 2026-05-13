@@ -1,0 +1,21 @@
+{
+  "name": "@axiom/autofix",
+  "version": "0.1.0",
+  "description": "Single auto-fix entry point behind a human-approval gate. Replaces TawbahLoop + sentinel-autofix.yml auto-PR bots.",
+  "type": "module",
+  "main": "src/index.ts",
+  "bin": {
+    "axiom-autofix": "bin/axiom-autofix.js"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test --experimental-strip-types test/*.test.ts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "files": ["src", "bin", "README.md"]
+}

@@ -1,0 +1,67 @@
+name: Axiom Checks
+
+on:
+  pull_request:
+    paths:
+      - 'packages/axiom-lint/**'
+      - 'packages/axiom-validate/**'
+      - 'packages/axiom-health/**'
+      - 'packages/axiom-autofix/**'
+      - '.github/workflows/axiom-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/axiom-lint/**'
+      - 'packages/axiom-validate/**'
+      - 'packages/axiom-health/**'
+      - 'packages/axiom-autofix/**'
+      - '.github/workflows/axiom-checks.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    strategy:
+      matrix:
+        package:
+          - axiom-lint
+          - axiom-validate
+          - axiom-health
+          - axiom-autofix
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Test ${{ matrix.package }}
+        run: |
+          cd packages/${{ matrix.package }}
+          node --experimental-strip-types --test test/*.test.ts
+
+  lint-self:
+    name: axiom-lint dogfood
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run axiom-lint on the four new packages
+        run: |
+          node --experimental-strip-types packages/axiom-lint/bin/axiom-lint.js \
+            packages/axiom-lint packages/axiom-validate packages/axiom-health packages/axiom-autofix \
+            --fail-on error

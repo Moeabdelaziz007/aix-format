@@ -14,6 +14,12 @@ packages:
   - 'packages/mcp-gateway'
   - 'packages/mcp-server'
   - 'packages/pi-kyc'
+  # The four unified Axiom check tools (replace 13 scattered legacy guards).
+  # See packages/axiom-*/README.md for what each one replaces.
+  - 'packages/axiom-lint'
+  - 'packages/axiom-validate'
+  - 'packages/axiom-health'
+  - 'packages/axiom-autofix'
 
 onlyBuiltDependencies:
   - esbuild
