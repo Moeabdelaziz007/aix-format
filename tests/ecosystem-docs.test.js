@@ -320,7 +320,7 @@ describe('AIX_STACK_VERSIONING.md: content validation', () => {
 
   it('rejects lockstep SemVer bumps for cosmetic reasons (§5)', () => {
     const section5 = content.split('## 5.')[1].split('## 6.')[0];
-    expect(section5).toMatch(/MUST NOT.*bump.*lockstep|cosmetic/i);
+    expect(section5).toMatch(/MUST NOT.*(?:bump.*lockstep|cosmetic)/i);
   });
 });
 
