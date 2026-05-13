@@ -236,8 +236,8 @@ aix deploy --platform ibm-watsonx
 |:---|:---|:---|
 | Agent Builder | ✅ Live | [Guide](docs/BUILDER_GUIDE.md) |
 | MCP Registry | ✅ Live | [Registry](docs/MCP_GATEWAY.md) |
-| ABOM Scanner | ✅ Live | [Security](docs/ABOM_SAAS_BOM.md) |
-| KYC Identity | ✅ Live | [Spec](docs/SPEC_V1_3.md) |
+| ABOM Scanner | ✅ Live | [Security](docs/SECURITY.md) |
+| KYC Identity | ✅ Live | [Spec](docs/AIX_SPEC.md) |
 | TrustChain Module | ✅ v0.369.0 | [Module](packages/aix-core/src/trust-chain/) |
 | Evolution Tracking | ✅ v0.369.0 | [Schema](schemas/aix.schema.json) |
 | ABOM → MCP Gate | ✅ v0.369.0 | [Gate](core/mcp-gate.ts) |
