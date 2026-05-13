@@ -67,3 +67,22 @@ test-results/
 
 # AIX Studio Data
 apps/studio/data/registry.json
+
+# Local dev scratch / build error dumps — never commit these
+*-errors.txt
+*_errors.txt
+build_errors*.txt
+tsc_output*.txt
+test_results.txt
+studio-errors.txt
+aix-core-errors.txt
+
+# Dev scratch areas
+scratch/
+.backups/
+
+# Generated reports / health dashboards (output of npm scripts)
+.generated/
+
+# Vercel deploy trigger marker
+.vercel-trigger
