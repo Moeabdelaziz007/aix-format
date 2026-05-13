@@ -1,0 +1,62 @@
+<svg width="900" height="220" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="cfHeader" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#050505"/>
+      <path d="M0,0 L5,5 L10,0 L5,-5 Z M5,5 L10,10 L15,5 L10,0 Z M-5,5 L0,10 L5,5 L0,0 Z M0,10 L5,15 L10,10 L5,5 Z" fill="#0d0d0d"/>
+    </pattern>
+    <linearGradient id="topAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#39FF14" stop-opacity="0.1"/>
+      <stop offset="50%" stop-color="#39FF14" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#39FF14" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="layerGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="220" fill="url(#cfHeader)" rx="12" stroke="#39FF14" stroke-opacity="0.3" stroke-width="1"/>
+  <rect width="900" height="220" fill="#000000" opacity="0.45" rx="12"/>
+  <rect width="900" height="3" fill="url(#topAccent)" rx="2"/>
+
+  <text x="450" y="40" font-family="'Consolas','Fira Code',monospace" font-size="11"
+        fill="#888888" letter-spacing="5" text-anchor="middle">// THE AIX SOVEREIGN STACK</text>
+  <text x="450" y="72" font-family="'Consolas','Fira Code',monospace" font-size="22"
+        fill="#ffffff" letter-spacing="3" text-anchor="middle" font-weight="600">AIX  ·  v0.369.0</text>
+
+  <!-- Three layer boxes: L1 highlighted (current = PROTOCOL) -->
+  <g transform="translate(60, 100)">
+    <rect width="240" height="90" rx="8" fill="#0a0a0a" stroke="#39FF14" stroke-width="2" filter="url(#layerGlow)"/>
+    <rect width="240" height="3" fill="#39FF14"/>
+    <text x="20" y="28" font-family="'Consolas',monospace" font-size="11" fill="#39FF14" letter-spacing="2">L1 · YOU ARE HERE</text>
+    <text x="20" y="55" font-family="'Consolas',monospace" font-size="20" fill="#ffffff" font-weight="600" letter-spacing="2">AIX-FORMAT</text>
+    <text x="20" y="76" font-family="'Consolas',monospace" font-size="11" fill="#aaaaaa">PROTOCOL · MANIFEST · DID</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <text x="320" y="155" font-family="'Consolas',monospace" font-size="22" fill="#39FF14" opacity="0.6">⇆</text>
+
+  <g transform="translate(340, 100)">
+    <rect width="220" height="90" rx="8" fill="#0a0a0a" stroke="#666666" stroke-width="1"/>
+    <rect width="220" height="3" fill="#666666"/>
+    <text x="20" y="28" font-family="'Consolas',monospace" font-size="11" fill="#888888" letter-spacing="2">L2 · RUNTIME</text>
+    <text x="20" y="55" font-family="'Consolas',monospace" font-size="20" fill="#aaaaaa" font-weight="600" letter-spacing="2">IQRA</text>
+    <text x="20" y="76" font-family="'Consolas',monospace" font-size="11" fill="#777777">7 LOOPS · MCTS · DAMIR</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <text x="580" y="155" font-family="'Consolas',monospace" font-size="22" fill="#39FF14" opacity="0.6">⇆</text>
+
+  <g transform="translate(600, 100)">
+    <rect width="240" height="90" rx="8" fill="#0a0a0a" stroke="#666666" stroke-width="1"/>
+    <rect width="240" height="3" fill="#666666"/>
+    <text x="20" y="28" font-family="'Consolas',monospace" font-size="11" fill="#888888" letter-spacing="2">L3 · MARKETPLACE</text>
+    <text x="20" y="55" font-family="'Consolas',monospace" font-size="20" fill="#aaaaaa" font-weight="600" letter-spacing="2">AGENT-SKILLS</text>
+    <text x="20" y="76" font-family="'Consolas',monospace" font-size="11" fill="#777777">7 LAYERS · CONSTITUTIONAL</text>
+  </g>
+
+  <circle cx="860" cy="40" r="4" fill="#39FF14">
+    <animate attributeName="opacity" values="1;0.2;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="850" y="44" font-family="'Consolas',monospace" font-size="10" fill="#888888" text-anchor="end" letter-spacing="1">LIVE</text>
+</svg>

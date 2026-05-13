@@ -1,0 +1,71 @@
+<svg width="900" height="320" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="cfDiag" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#050505"/>
+      <path d="M0,0 L5,5 L10,0 L5,-5 Z M5,5 L10,10 L15,5 L10,0 Z M-5,5 L0,10 L5,5 L0,0 Z M0,10 L5,15 L10,10 L5,5 Z" fill="#0d0d0d"/>
+    </pattern>
+    <linearGradient id="topAccent2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#39FF14" stop-opacity="0.1"/>
+      <stop offset="50%" stop-color="#39FF14" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#39FF14" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="nodeGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="320" fill="url(#cfDiag)" rx="12" stroke="#39FF14" stroke-opacity="0.3" stroke-width="1"/>
+  <rect width="900" height="320" fill="#000000" opacity="0.45" rx="12"/>
+  <rect width="900" height="3" fill="url(#topAccent2)" rx="2"/>
+
+  <text x="30" y="38" font-family="'Consolas','Fira Code',monospace" font-size="11"
+        fill="#888888" letter-spacing="3">// SYSTEM TOPOLOGY</text>
+  <text x="30" y="66" font-family="'Consolas','Fira Code',monospace" font-size="20"
+        fill="#ffffff" font-weight="600" letter-spacing="2">THE AIX SOVEREIGN STACK</text>
+  <line x1="30" y1="80" x2="870" y2="80" stroke="#39FF14" stroke-opacity="0.25" stroke-width="1"/>
+
+  <!-- Three layered nodes connecting bottom -> top: L3 publishes via L1 to L2 -->
+  <!-- L1 PROTOCOL (top center) -->
+  <g transform="translate(450, 130)" filter="url(#nodeGlow)">
+    <circle r="48" fill="#0a0a0a" stroke="#39FF14" stroke-width="2"/>
+    <circle r="40" fill="#050505" stroke="#39FF14" stroke-opacity="0.3"/>
+    <text y="-4" font-family="'Consolas',monospace" font-size="11" fill="#39FF14" text-anchor="middle" letter-spacing="2">L1</text>
+    <text y="14" font-family="'Consolas',monospace" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="600" letter-spacing="1">PROTOCOL</text>
+    <text y="30" font-family="'Consolas',monospace" font-size="9" fill="#aaaaaa" text-anchor="middle">aix-format</text>
+  </g>
+
+  <!-- L2 RUNTIME (left bottom) -->
+  <g transform="translate(220, 240)" filter="url(#nodeGlow)">
+    <circle r="44" fill="#0a0a0a" stroke="#7FFF50" stroke-width="2"/>
+    <circle r="36" fill="#050505" stroke="#7FFF50" stroke-opacity="0.3"/>
+    <text y="-4" font-family="'Consolas',monospace" font-size="11" fill="#7FFF50" text-anchor="middle" letter-spacing="2">L2</text>
+    <text y="14" font-family="'Consolas',monospace" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="600" letter-spacing="1">RUNTIME</text>
+    <text y="30" font-family="'Consolas',monospace" font-size="9" fill="#aaaaaa" text-anchor="middle">iqra</text>
+  </g>
+
+  <!-- L3 MARKETPLACE (right bottom) -->
+  <g transform="translate(680, 240)" filter="url(#nodeGlow)">
+    <circle r="44" fill="#0a0a0a" stroke="#39FFC4" stroke-width="2"/>
+    <circle r="36" fill="#050505" stroke="#39FFC4" stroke-opacity="0.3"/>
+    <text y="-4" font-family="'Consolas',monospace" font-size="11" fill="#39FFC4" text-anchor="middle" letter-spacing="2">L3</text>
+    <text y="14" font-family="'Consolas',monospace" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="600" letter-spacing="1">MARKETPLACE</text>
+    <text y="30" font-family="'Consolas',monospace" font-size="9" fill="#aaaaaa" text-anchor="middle">aix-agent-skills</text>
+  </g>
+
+  <!-- Edges with animated dashes -->
+  <path d="M 450 178 Q 335 200 220 196" fill="none" stroke="#39FF14" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="6 6">
+    <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="2.5s" repeatCount="indefinite"/>
+  </path>
+  <path d="M 450 178 Q 565 200 680 196" fill="none" stroke="#39FF14" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="6 6">
+    <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="2.5s" repeatCount="indefinite"/>
+  </path>
+  <path d="M 264 240 Q 450 285 636 240" fill="none" stroke="#39FF14" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="6 6">
+    <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="3s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- Edge labels -->
+  <text x="320" y="195" font-family="'Consolas',monospace" font-size="9" fill="#888888" text-anchor="middle" letter-spacing="2">// IMPLEMENTS</text>
+  <text x="580" y="195" font-family="'Consolas',monospace" font-size="9" fill="#888888" text-anchor="middle" letter-spacing="2">// PUBLISHES VIA</text>
+  <text x="450" y="297" font-family="'Consolas',monospace" font-size="9" fill="#888888" text-anchor="middle" letter-spacing="2">// CONSUMES</text>
+</svg>

@@ -1,3 +1,27 @@
+<!-- ════════════════ AIX SOVEREIGN STACK · UNIFIED BRANDING ════════════════ -->
+
+<div align="center">
+  <img src="./assets/aix-stack-header.svg" alt="The AIX Sovereign Stack — L1 PROTOCOL · L2 RUNTIME · L3 MARKETPLACE" width="100%"/>
+</div>
+
+<div align="center">
+
+[![Layer](https://img.shields.io/badge/LAYER-L1%20%C2%B7%20PROTOCOL-39FF14?style=for-the-badge&labelColor=050505)](https://github.com/Moeabdelaziz007/aix-format)
+[![Stack](https://img.shields.io/badge/AIX%20STACK-v0.369.0-39FF14?style=for-the-badge&labelColor=050505)](https://github.com/Moeabdelaziz007/aix-format)
+[![License](https://img.shields.io/badge/LICENSE-Apache%202.0-39FF14?style=for-the-badge&labelColor=050505)](./LICENSE)
+
+</div>
+
+<div align="center">
+
+**🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
+
+</div>
+
+<br/>
+
+<!-- ════════════════ /AIX SOVEREIGN STACK ════════════════ -->
+
 # 🧬 AIX Format — Universal Agent Passport v0.369.0
 
  Vision
@@ -40,9 +64,11 @@ AIX هو فلاشـة الوكلاء: ملف واحد موقَّع يشيل هو
 
 ---
 
-### 🏛️ System Architecture | بنية النظام
+### 🏛️ Protocol Architecture | بنية البروتوكول
 
-The AIX Protocol operates on a three-tier sovereign stack:
+> Not to be confused with the **AIX Sovereign Stack** above, which refers to the three sister repositories (L1 Protocol · L2 Runtime · L3 Marketplace). The section below describes the three internal tiers **inside** this L1 Protocol repository.
+
+The AIX Protocol itself is composed of three internal tiers:
 
 1. **Identity Layer (did:axiom)** — Ed25519 signatures anchored to Pi Network.
    Every agent has a verified human (KYC) or institutional backer.
@@ -50,6 +76,24 @@ The AIX Protocol operates on a three-tier sovereign stack:
    with ABOM safetyScore gating and Human-in-the-Loop approval.
 3. **Economic Layer (M2M)** — Pluggable multi-chain settlement:
    Pi (default) · Stripe · Base L2 · Solana · Lightning · Custom.
+
+---
+
+### 🌐 THE STACK | المنظومة المتكاملة
+
+`aix-format` is **L1** of the AIX Sovereign Stack — the open standard that the other two layers build on. The protocol defined here is implemented by the **IQRA Runtime** and extended by the **Agent-Skills Marketplace**.
+
+<div align="center">
+  <img src="./assets/aix-stack-diagram.svg" alt="AIX Stack Topology — L1 Protocol, L2 Runtime, L3 Marketplace" width="100%"/>
+</div>
+
+| Layer | Repo | Role | Status |
+|:---:|:---|:---|:---:|
+| 🟢 **L1** | [`aix-format`](https://github.com/Moeabdelaziz007/aix-format) | **Protocol** · Universal Agent Passport · DID · Manifest · ABOM · TrustChain | **You are here** |
+| ⚪ **L2** | [`iqra`](https://github.com/Moeabdelaziz007/iqra) | **Runtime** · Sovereign AI OS · 7 Loops · MCTS · Damir · MissionControl | [→ Read](https://github.com/Moeabdelaziz007/iqra) |
+| ⚪ **L3** | [`aix-agent-skills`](https://github.com/Moeabdelaziz007/aix-agent-skills) | **Marketplace** · 7 Layers · Constitutional · TrustChain | [→ Read](https://github.com/Moeabdelaziz007/aix-agent-skills) |
+
+> The three repositories are **one project in three layers**. The protocol is the contract, the runtime is the engine, the marketplace is the catalog. Same constitution, same TrustChain, same palette, same author.
 
 ---
 
@@ -264,3 +308,20 @@ aix deploy --platform ibm-watsonx
 
 AIX Format is licensed under the **Apache License 2.0**.
 تنسيق AIX مرخّص بموجب **رخصة Apache 2.0**.
+
+---
+
+<!-- ════════════════ AIX SOVEREIGN STACK · FOOTER ════════════════ -->
+
+<div align="center">
+
+**🟢 L1 · PROTOCOL · `aix-format` · YOU ARE HERE** &nbsp;·&nbsp; [**L2 · RUNTIME · `iqra` →**](https://github.com/Moeabdelaziz007/iqra) &nbsp;·&nbsp; [**L3 · MARKETPLACE · `aix-agent-skills` →**](https://github.com/Moeabdelaziz007/aix-agent-skills)
+
+</div>
+
+<div align="center">
+  <img src="./assets/aix-footer-quote.svg" alt="AIX Stack — King isn't Born, he is Made." width="100%"/>
+</div>
+
+<!-- ════════════════ /AIX SOVEREIGN STACK · FOOTER ════════════════ -->
+
