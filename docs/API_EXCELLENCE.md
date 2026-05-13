@@ -119,7 +119,8 @@ retry:
 ```
 delay = min(initial_delay * 2^(attempt-1), max_delay)
 if jitter:
-  delay = delay * (0.5 + random(0, 0.5))
+  // Use cryptographically secure random values
+  delay = delay * (0.5 + secure_random(0, 0.5))
 ```
 
 **Example Sequence (with jitter):**
@@ -306,8 +307,10 @@ class AIXErrorHandler {
     
     // Add jitter to prevent thundering herd
     if (jitter) {
+      // Use cryptographically secure random values
+      const secureRandom = crypto.randomBytes(4).readUInt32BE() / 0xFFFFFFFF;
       // Random value between 50% and 100% of calculated delay
-      delay = delay * (0.5 + Math.random() * 0.5);
+      delay = delay * (0.5 + secureRandom * 0.5);
     }
     
     return Math.floor(delay);
@@ -376,7 +379,7 @@ class AIXErrorHandler {
    * Helper: Generate unique request ID
    */
   generateRequestId() {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${crypto.randomUUID()}`;
   }
   
   /**

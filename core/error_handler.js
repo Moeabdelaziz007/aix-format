@@ -17,6 +17,8 @@
  * Licensed under MIT License - See LICENSE.md
  */
 
+import crypto from 'node:crypto';
+
 /**
  * Main error handler class
  */
@@ -183,7 +185,8 @@ export class AIXErrorHandler {
     // Add jitter to prevent thundering herd
     // Random value between 50% and 100% of calculated delay
     if (jitter) {
-      delay = delay * (0.5 + Math.random() * 0.5);
+      const secureRandom = crypto.randomBytes(4).readUInt32BE() / 0xFFFFFFFF;
+      delay = delay * (0.5 + secureRandom * 0.5);
     }
     
     return Math.floor(delay);
@@ -303,7 +306,7 @@ export class AIXErrorHandler {
    * @returns {string} Request ID
    */
   generateRequestId() {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${crypto.randomUUID()}`;
   }
   
   /**
