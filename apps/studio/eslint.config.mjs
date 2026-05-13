@@ -1,14 +1,31 @@
 import { defineConfig, globalIgnores } from "eslint/config";
-// eslint-config-next ships these subpaths without a package.json
-// "exports" map, so Node's ESM resolver requires the explicit .js
-// extension. Without it, ESLint 9 on Node 22 fails with
-// ERR_MODULE_NOT_FOUND on first run.
-import nextVitals from "eslint-config-next/core-web-vitals.js";
-import nextTs from "eslint-config-next/typescript.js";
+import { FlatCompat } from "@eslint/eslintrc";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+// eslint-config-next 15 still ships its `core-web-vitals` and
+// `typescript` subpaths as legacy `{ extends: [...] }` CommonJS
+// configs. The previous setup did
+//
+//   import nextVitals from "eslint-config-next/core-web-vitals.js";
+//   ...
+//   defineConfig([...nextVitals, ...nextTs, ...])
+//
+// which broke at link time with `TypeError: nextVitals is not iterable`
+// because those imports are config OBJECTS, not flat-config arrays.
+// FlatCompat is Next.js's documented bridge for consuming legacy
+// configs from the new flat config. `@eslint/eslintrc` is already in
+// the workspace (pulled in transitively), so no new direct dep is
+// required.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const compat = new FlatCompat({ baseDirectory: __dirname });
 
 const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
+  // Use the conventional ESLint short names that resolve through
+  // `eslint-config-next` — these match Next.js 15's official
+  // flat-config example exactly.
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
