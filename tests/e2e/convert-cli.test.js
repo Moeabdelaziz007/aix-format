@@ -54,66 +54,71 @@ test('aix-convert: unknown format flag is rejected', () => {
   assert.throws(() => execFileSync('node', [CONVERT, 'examples/persona-agent.aix', out, '--format', 'xml'], { encoding: 'utf8', cwd: REPO_ROOT }));
 });
 
-// Tests for the sync parseFile change (PR: removed `await` from parser.parseFile())
-test('aix-convert: yaml -> json output contains correct agent name (not undefined)', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-name-'));
-  const out = path.join(dir, 'output.json');
-  runConvert(['examples/persona-agent.aix', out, '--format', 'json']);
+// --- PR coverage: sync parseFile (removed await), modified and new example files ---
+
+test('aix-convert: pi-agent.aix (abom without type/purl) converts to JSON', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-pi-'));
+  const out = path.join(dir, 'pi-agent.json');
+  runConvert(['examples/pi-agent.aix', out, '--format', 'json']);
+  assert.ok(fs.existsSync(out), 'output JSON file should exist');
   const parsed = JSON.parse(fs.readFileSync(out, 'utf8'));
-  // If parseFile is called without await, agent is a Promise and meta is undefined,
-  // causing the process to exit with an error before writing the file.
-  // Verify the meta.name is the actual value from the manifest, not undefined.
-  assert.strictEqual(parsed.meta.name, 'Customer Service Bot');
+  assert.ok(parsed.meta, 'should have meta block');
+  assert.ok(parsed.abom, 'should have abom block');
+  const constituents = parsed.abom.constituents ?? [];
+  assert.ok(constituents.length > 0, 'abom should have constituents');
+  // Verify that the PR change (removing type and purl fields) is preserved through conversion
+  for (const c of constituents) {
+    assert.strictEqual(c.type, undefined, 'constituent should not have type field after PR change');
+    assert.strictEqual(c.purl, undefined, 'constituent should not have purl field after PR change');
+  }
 });
 
-test('aix-convert: yaml -> json --pretty produces indented output', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-pretty-'));
-  const out = path.join(dir, 'persona-pretty.json');
-  runConvert(['examples/persona-agent.aix', out, '--format', 'json', '--pretty']);
+test('aix-convert: enhanced-agent.aix (version "1.0", with memory.persistence) converts to JSON', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-enhanced-'));
+  const out = path.join(dir, 'enhanced-agent.json');
+  runConvert(['examples/enhanced-agent.aix', out, '--format', 'json']);
+  assert.ok(fs.existsSync(out), 'output JSON file should exist');
+  const parsed = JSON.parse(fs.readFileSync(out, 'utf8'));
+  assert.strictEqual(parsed.meta.version, '1.0', 'version should be "1.0" as changed in PR');
+  assert.strictEqual(parsed.identity_layer, undefined, 'identity_layer should be absent (removed in PR)');
+  assert.ok(parsed.memory?.persistence, 'memory.persistence section should be present (added in PR)');
+  assert.strictEqual(parsed.memory.persistence.enabled, true);
+  assert.strictEqual(parsed.memory.persistence.backend, 'file');
+});
+
+test('aix-convert: enhanced-agent.aix yaml -> yaml roundtrip preserves meta name', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-enhanced-yaml-'));
+  const out = path.join(dir, 'enhanced-agent.aix');
+  runConvert(['examples/enhanced-agent.aix', out, '--format', 'yaml']);
+  assert.ok(fs.existsSync(out), 'output YAML file should exist');
   const content = fs.readFileSync(out, 'utf8');
-  // Pretty-printed JSON has newlines and indentation
-  assert.ok(content.includes('\n'), 'pretty output should contain newlines');
-  assert.ok(content.includes('  '), 'pretty output should be indented');
-  // Must still parse as valid JSON
-  const parsed = JSON.parse(content);
-  assert.ok(parsed.meta, 'pretty JSON should have a meta block');
+  assert.match(content, /Web Scraper Pro/, 'agent name should survive YAML roundtrip');
 });
 
-test('aix-convert: yaml -> yaml roundtrip produces non-empty file', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-yaml-yaml-'));
-  const out = path.join(dir, 'persona-out.yaml');
-  runConvert(['examples/persona-agent.aix', out, '--format', 'yaml']);
-  assert.ok(fs.existsSync(out), 'output yaml file should exist');
-  const content = fs.readFileSync(out, 'utf8');
-  assert.ok(content.length > 0, 'output yaml should not be empty');
-  assert.ok(content.includes('meta'), 'yaml output should contain a meta section');
+test('aix-convert: -f shorthand accepted as alias for --format', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-shorthand-'));
+  const out = path.join(dir, 'pi-agent.json');
+  // -f is the documented shorthand for --format
+  runConvert(['examples/pi-agent.aix', out, '-f', 'json']);
+  assert.ok(fs.existsSync(out), 'output file should exist when using -f shorthand');
 });
 
-test('aix-convert: yaml -> toml produces a non-empty file', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-yaml-toml-'));
-  const out = path.join(dir, 'persona.toml');
-  runConvert(['examples/persona-agent.aix', out, '--format', 'toml']);
-  assert.ok(fs.existsSync(out), 'output toml file should exist');
-  const content = fs.readFileSync(out, 'utf8');
-  assert.ok(content.length > 0, 'output toml should not be empty');
-  assert.ok(content.includes('[meta]'), 'toml output should have a [meta] section');
-});
-
-test('aix-convert: yml alias is accepted as format', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-yml-alias-'));
-  const out = path.join(dir, 'persona.yml');
-  // --format yml should be treated the same as --format yaml
-  runConvert(['examples/persona-agent.aix', out, '--format', 'yml']);
-  assert.ok(fs.existsSync(out), 'output .yml file should exist');
-  const content = fs.readFileSync(out, 'utf8');
-  assert.ok(content.length > 0, 'output yml should not be empty');
-});
-
-test('aix-convert: nonexistent input exits non-zero', () => {
+test('aix-convert: non-existent input file exits non-zero', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-missing-'));
   const out = path.join(dir, 'out.json');
   assert.throws(
-    () => runConvert(['/no/such/file.aix', out, '--format', 'json']),
+    () => execFileSync('node', [CONVERT, 'examples/does-not-exist.aix', out, '--format', 'json'], { encoding: 'utf8', cwd: REPO_ROOT }),
     'should throw when input file does not exist'
   );
+});
+
+test('aix-convert: yaml -> toml conversion produces a non-empty file', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-convert-toml-'));
+  const out = path.join(dir, 'pi-agent.toml');
+  runConvert(['examples/pi-agent.aix', out, '--format', 'toml']);
+  assert.ok(fs.existsSync(out), 'output TOML file should exist');
+  const content = fs.readFileSync(out, 'utf8');
+  assert.ok(content.length > 0, 'TOML output should not be empty');
+  // TOML sections start with [sectionName]
+  assert.match(content, /\[meta\]/);
 });
