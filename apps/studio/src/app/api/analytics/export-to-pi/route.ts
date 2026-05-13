@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     const piDashboardData = transformToPiFormat(analyticsData, agent);
 
     // 7. Get Pi credentials
-    let piCredentials = { appId: piAppId, apiKey: piApiKey };
+    const piCredentials = { appId: piAppId, apiKey: piApiKey };
     
     if (!piAppId || !piApiKey) {
       // Try to get from agent config or user credentials

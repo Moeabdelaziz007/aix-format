@@ -197,7 +197,8 @@ async function verifyStripePayment(proof: PaymentProof): Promise<boolean> {
       return false;
     }
     
-    const stripe = require('stripe')(STRIPE_SECRET_KEY);
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(STRIPE_SECRET_KEY);
     
     // Retrieve checkout session
     const session = await stripe.checkout.sessions.retrieve(proof.transactionId);

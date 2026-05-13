@@ -31,8 +31,10 @@ export function GlobalVoiceFAB() {
     if (holdTimer.current) clearTimeout(holdTimer.current);
     if (holding.current) {
       stopListening();
+    } else if (isOpen) {
+      close();
     } else {
-      isOpen ? close() : open();
+      open();
     }
     holding.current = false;
   }, [isOpen, open, close, stopListening]);

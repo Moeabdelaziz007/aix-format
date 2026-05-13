@@ -1,5 +1,5 @@
-import React from 'react';
 "use client";
+import React from 'react';
 
 import { useParams } from "next/navigation";
 import { useLocalAgents } from "@/hooks/useLocalAgents";

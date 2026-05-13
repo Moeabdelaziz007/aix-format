@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     // In production, we scan for keys matching 'zkkyc:*'
     // For this hardened version, we'll implement a safe pattern
     
-    let prunedCount = 0;
+    const prunedCount = 0;
     // Real implementation: This would trigger a worker or background scan
     // For now, we return a success signal that the admin triggered the flow
 

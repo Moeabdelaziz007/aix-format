@@ -173,7 +173,8 @@ async function createStripeSession(
   cost: { amount: number; currency: string }
 ): Promise<string> {
   try {
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],

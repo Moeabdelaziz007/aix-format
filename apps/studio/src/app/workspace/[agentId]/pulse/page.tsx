@@ -34,7 +34,7 @@ export default function PulsePage() {
   // ── SSE connection ─────────────────────────────────────────────────────
   useEffect(() => {
     let es: EventSource | null = null;
-    let demo: NodeJS.Timeout | null = null;
+    const demo: NodeJS.Timeout | null = null;
 
     try {
       es = new EventSource(`/api/pulse/stream?agentId=${agentId}`);

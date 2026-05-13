@@ -65,7 +65,7 @@ async function runTraining(agent: DQNAgent, episodes: number, taskType: string):
     convergenceEpisode: -1
   };
 
-  let rewardWindow: number[] = [];
+  const rewardWindow: number[] = [];
   const windowSize = 10;
 
   for (let episode = 0; episode < episodes; episode++) {

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { 
   ShieldCheck, 
   Key, 

@@ -96,7 +96,11 @@ export function VoiceCommandProvider({ children }: { children: React.ReactNode }
   // ── Keyboard shortcut ────────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.code === "Space") { e.preventDefault(); isOpen ? close() : open(); }
+      if (e.ctrlKey && e.code === "Space") {
+        e.preventDefault();
+        if (isOpen) close();
+        else open();
+      }
       if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);

@@ -199,7 +199,6 @@ export function SetupWizard() {
                     <FileJson className="w-6 h-6 text-[var(--color-primary)]" />
                   </div>
                   <div>
-                    {/* eslint-disable-next-line react-hooks/refs */}
                     <p className="text-white font-medium">{agentNameRef.current || "Agent Payload"}</p>
                     <p className="text-xs text-[var(--color-primary)]">.aix generated successfully</p>
                   </div>
@@ -230,7 +229,6 @@ export function SetupWizard() {
                 <h3 className="text-2xl font-bold text-white mb-2">Agent Deployed!</h3>
                 <p className="text-[var(--color-on-surface-variant)] text-sm px-4">
                   Your agent{" "}
-                  {/* eslint-disable-next-line react-hooks/refs */}
                   <span className="text-[var(--color-primary)]">{agentNameRef.current}</span>{" "}
                   has been signed with your Pi Identity and is now active on the Sovereign Network.
                 </p>
@@ -250,7 +248,6 @@ export function SetupWizard() {
         onClose={closeKycModal}
         onSign={handleSign}
         isSigning={isSigning}
-        // eslint-disable-next-line react-hooks/refs
         agentName={agentNameRef.current || "Agent Payload"}
       />
     </>

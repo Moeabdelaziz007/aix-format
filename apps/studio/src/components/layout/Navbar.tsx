@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Typography } from "@/components/shared/Typography";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,

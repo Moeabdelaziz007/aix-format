@@ -1,8 +1,9 @@
-import Image from 'next/image';
 'use client';
 
+import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from '@/components/shared/Badge';
 import { 
   X, 
   Download, 
