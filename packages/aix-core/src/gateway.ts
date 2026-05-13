@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 import { health } from './health.js';
 import { CuriosityEngine } from './curiosity.js';
-import { archiveWisdom } from './brain.js';
-import { AgentSelfReview } from './AgentSelfReview.js';
+import { archiveWisdom, AgentSelfReview } from './brain.js';
 import { AgentRuntimeEngine } from './agent-runtime.js';
 import { GroqProvider, ToolRegistry } from './llm/index.js';
 import { mcpGate } from './mcp-gate.js';

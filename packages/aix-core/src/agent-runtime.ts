@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { kv, KEYS } from './memory/storage.js';
 import { health } from './health.js';
-import { AgentSelfReview } from './AgentSelfReview.js';
+import { AgentSelfReview } from './brain.js';
 import { LLMProvider, AgentRuntimeConfig, ToolRegistry } from './llm/index.js';
 import { SovereignEntity } from './base.js';
 import { MCPGate } from './mcp-gate.js';

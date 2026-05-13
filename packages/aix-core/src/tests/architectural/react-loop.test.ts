@@ -39,7 +39,7 @@ describe('AIX ReAct Loop - Architectural Integrity', () => {
     
     // Mock the storage/brain to prevent actual DB calls if necessary, 
     // but here we just check the result if the engine returns it or 
-    // we could spy on AgentSelfReview.store
+    // we could spy on AgentSelfReview.record
     const engine = new AgentRuntimeEngine('test-agent', 'TestBot', llm, {});
 
     const task: AgentTask = {
