@@ -155,6 +155,25 @@ importers:
 
   packages/axiom-health: {}
 
+  packages/axiom-identity:
+    dependencies:
+      '@axiom/schema':
+        specifier: workspace:*
+        version: link:../axiom-schema
+      '@noble/ed25519':
+        specifier: ^2.3.0
+        version: 2.3.0
+      '@noble/hashes':
+        specifier: ^1.8.0
+        version: 1.8.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.7
+        version: 20.19.39
+      typescript:
+        specifier: ^5.4.5
+        version: 5.9.3
+
   packages/axiom-lint: {}
 
   packages/axiom-schema:
@@ -669,6 +688,9 @@ packages:
 
   '@next/bundle-analyzer@16.2.4':
     resolution: {integrity: sha512-EAA9xTDv0P1IiUcZaASJJPkNDjRvL7OMTha6XN8MBzALYGfn7I52Mn7vRiyjVfNrtUPi2qiacY+eFVXe3lKCXA==}
+
+  '@noble/ed25519@2.3.0':
+    resolution: {integrity: sha512-M7dvXL2B92/M7dw9+gzuydL8qn/jiqNHaoR3Q+cb1q1GHV7uwE17WCyFMG+Y+TZb5izcaXk5TdJRrDUxHXL78A==}
 
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
@@ -3237,6 +3259,8 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  '@noble/ed25519@2.3.0': {}
 
   '@noble/hashes@1.8.0': {}
 

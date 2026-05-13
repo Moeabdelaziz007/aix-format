@@ -10,6 +10,7 @@ packages:
   - 'packages/aix-core'
   - 'packages/aix-rust-core'
   - 'packages/aix-zkkyc'
+  - 'packages/axiom-identity'
   - 'packages/axiom-schema'
   - 'packages/mcp-gateway'
   - 'packages/mcp-server'
