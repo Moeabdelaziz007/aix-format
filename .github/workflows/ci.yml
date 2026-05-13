@@ -3,8 +3,22 @@ name: CI — Build Gate
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '**/*.mdx'
+      - 'LICENSE'
+      - 'LICENSE.md'
+      - 'COPYRIGHT.md'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '**/*.mdx'
+      - 'LICENSE'
+      - 'LICENSE.md'
+      - 'COPYRIGHT.md'
 
 concurrency:
   group: ci-${{ github.ref }}
