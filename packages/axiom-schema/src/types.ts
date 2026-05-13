@@ -66,16 +66,31 @@ export interface Signature {
 
 // ── meta ──────────────────────────────────────────────────────────────────────
 
+/**
+ * One entry in `meta.lineage`. The schema requires `parent_id` and
+ * forbids additional fields (`additionalProperties: false`), so the
+ * type tracks that contract exactly. `parent_id` is a DID or UUID
+ * pointing at the parent agent; `relationship` enumerates how this
+ * agent derives from it; `timestamp` records when the link was
+ * established; `signature` carries an optional cryptographic proof
+ * of lineage signed by the parent.
+ */
 export interface MetaLineageEntry {
-  version: SemVer;
-  parent_version?: SemVer;
-  created: ISODateTime;
-  notes?: string;
+  parent_id: string;
+  relationship?: 'fork' | 'clone' | 'ancestor' | 'template';
+  timestamp?: ISODateTime;
+  signature?: string;
 }
 
 export interface AIXMeta {
   version: SemVer;
-  format_version?: '1.0' | '1.2' | '1.3';
+  /**
+   * AIX format version this manifest targets. Free-form per schema
+   * (examples include `1.3` and `0.369.0`); validators MAY warn on
+   * disagreement with the top-level `aix_version` shorthand. Prefer
+   * SemVer where possible.
+   */
+  format_version?: string;
   id: UUIDv4 | DID;
   name: string;
   description?: string;
