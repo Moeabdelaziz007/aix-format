@@ -91,7 +91,7 @@ The AIX Protocol itself is composed of three internal tiers:
 |:---:|:---|:---|:---:|
 | 🟢 **L1** | [`aix-format`](https://github.com/Moeabdelaziz007/aix-format) | **Protocol** · Universal Agent Passport · DID · Manifest · ABOM · TrustChain | **You are here** |
 | ⚪ **L2** | [`iqra`](https://github.com/Moeabdelaziz007/iqra) | **Runtime** · Sovereign AI OS · 7 Loops · MCTS · Damir · MissionControl | [→ Read](https://github.com/Moeabdelaziz007/iqra) |
-| ⚪ **L3** | [`aix-agent-skills`](https://github.com/Moeabdelaziz007/aix-agent-skills) | **Marketplace** · 58 Skills · 7 Layers · Constitutional Runtime | [→ Read](https://github.com/Moeabdelaziz007/aix-agent-skills) |
+| ⚪ **L3** | [`aix-agent-skills`](https://github.com/Moeabdelaziz007/aix-agent-skills) | **Marketplace** · 7 Layers · Constitutional Runtime · TrustChain | [→ Read](https://github.com/Moeabdelaziz007/aix-agent-skills) |
 
 > The three repositories are **one project in three layers**. The protocol is the contract, the runtime is the engine, the marketplace is the catalog. Same constitution, same TrustChain, same palette, same author.
 
