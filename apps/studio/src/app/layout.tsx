@@ -12,6 +12,10 @@ import { VoiceCommandProvider } from '@/components/providers/VoiceCommandProvide
 import { SovereignAetherClient } from '@/components/studio/SovereignAetherClient';
 import { GlobalVoiceCommandPalette } from '@/components/studio/GlobalVoiceCommandPalette';
 import { GlobalVoiceFAB } from '@/components/studio/GlobalVoiceFAB';
+import { validateEnv } from '@/lib/env';
+
+// Run environment validation on startup
+validateEnv();
 
 const manrope = Manrope({
   subsets: ["latin"],
