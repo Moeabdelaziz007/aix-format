@@ -20,3 +20,21 @@ test('canonicalization rejects circular references', () => {
   obj.self = obj;
   assert.throws(() => canonicalizeForSigning(obj), /CANON_CIRCULAR_REFERENCE/);
 });
+
+test('canonicalization rejects non-finite numbers', () => {
+  assert.throws(() => canonicalizeForSigning({ num: NaN }), /CANON_NON_FINITE_NUMBER/);
+  assert.throws(() => canonicalizeForSigning({ num: Infinity }), /CANON_NON_FINITE_NUMBER/);
+});
+
+test('canonicalization rejects top-level non-objects', () => {
+  assert.throws(() => canonicalizeForSigning("string"), /CANON_INVALID_ROOT/);
+  assert.throws(() => canonicalizeForSigning([]), /CANON_INVALID_ROOT/);
+  assert.throws(() => canonicalizeForSigning(null), /CANON_INVALID_ROOT/);
+});
+
+test('canonicalization rejects unsupported types explicitly', () => {
+  assert.throws(() => canonicalizeForSigning({ a: Symbol('a') }), /CANON_UNSUPPORTED_TYPE/);
+  assert.throws(() => canonicalizeForSigning({ b: 10n }), /CANON_UNSUPPORTED_TYPE/);
+  assert.throws(() => canonicalizeForSigning({ c: undefined }), /CANON_UNSUPPORTED_TYPE/);
+  assert.throws(() => canonicalizeForSigning({ d: () => {} }), /CANON_UNSUPPORTED_TYPE/);
+});
