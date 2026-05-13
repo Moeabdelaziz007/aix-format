@@ -1,0 +1,57 @@
+# Dependabot configuration for aix-format (L1 Protocol).
+#
+# Self-evolving stack: weekly automated PRs for security and minor/patch
+# version bumps across every ecosystem this repo touches. Per AIX Sovereign
+# Stack quick-win-#2 (proactive maintenance): we pull dependency updates
+# rather than wait for a CVE to bite us.
+#
+# Conventions:
+#   - All update PRs land Mondays UTC.
+#   - Minor+patch updates are grouped per ecosystem so review noise stays
+#     low (one PR per ecosystem per week instead of fifteen).
+#   - Major updates are opt-in: dependabot opens them as separate PRs so
+#     they go through human review explicitly.
+#   - PRs target `main` and use commit-message-prefix that matches the
+#     stack's Conventional Commits convention.
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    labels:
+      - "dependencies"
+      - "automated"
+    groups:
+      production-minor-patch:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-minor-patch:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+      - "ci"

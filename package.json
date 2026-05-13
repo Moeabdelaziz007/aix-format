@@ -16,6 +16,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:node": "node --test tests/e2e/*.test.js",
+    "test:all": "npm run test && npm run test:e2e:node",
     "validate": "node bin/aix-validate.js",
     "validate:examples": "node bin/aix-validate.js examples/persona-agent.aix && node bin/aix-validate.js examples/tool-agent.aix && node bin/aix-validate.js examples/hybrid-agent.aix",
     "validate:env": "vite-node scripts/validate-env.ts",
@@ -105,16 +107,17 @@
     "packages/aix-core",
     "packages/aix-rust-core",
     "packages/aix-zkkyc",
+    "packages/axiom-schema",
     "packages/mcp-gateway",
     "packages/mcp-server",
     "packages/pi-kyc"
   ],
   "dependencies": {
-    "@ai-sdk/google": "^1.0.0",
+    "@ai-sdk/google": "^3.0.73",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@octokit/rest": "^20.0.0",
-    "@upstash/redis": "^1.37.0",
-    "ai": "^4.0.0",
+    "@upstash/redis": "^1.38.0",
+    "ai": "^6.0.182",
     "framer-motion": "^11.11.0",
     "js-yaml": "^4.1.1",
     "lucide-react": "^0.474.0",
@@ -127,14 +130,14 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.2.4",
-    "@playwright/test": "^1.50.0",
-    "@tailwindcss/postcss": "^4.2.4",
+    "@next/bundle-analyzer": "^16.2.6",
+    "@playwright/test": "^1.60.0",
+    "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^3.0.0",
     "ajv": "^8.12.0",
     "json-schema-to-typescript": "^15.0.4",
-    "typescript": "^5.4.5",
+    "typescript": "^6.0.3",
     "vitest": "^3.0.4"
   },
   "packageManager": "pnpm@9.15.4"

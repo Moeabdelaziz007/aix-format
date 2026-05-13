@@ -1,0 +1,76 @@
+{
+  "name": "@axiom/identity",
+  "version": "1.3.0",
+  "description": "Canonical AIX identity primitives: Axiom DID translator, Ed25519 sign/verify, RFC 8785 JCS canonicalization, and Pi Network domain-claim flow. Edge-safe, no native bindings.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./canonical": {
+      "types": "./dist/canonical.d.ts",
+      "default": "./dist/canonical.js"
+    },
+    "./ed25519": {
+      "types": "./dist/ed25519.d.ts",
+      "default": "./dist/ed25519.js"
+    },
+    "./did": {
+      "types": "./dist/did.d.ts",
+      "default": "./dist/did.js"
+    },
+    "./pi": {
+      "types": "./dist/pi.d.ts",
+      "default": "./dist/pi.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "aix",
+    "axiom",
+    "identity",
+    "did",
+    "ed25519",
+    "jcs",
+    "rfc-8785",
+    "pi-network",
+    "sovereign-protocol"
+  ],
+  "sideEffects": false,
+  "license": "Apache-2.0",
+  "author": "Mohamed H Abdelaziz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Moeabdelaziz007/aix-format.git",
+    "directory": "packages/axiom-identity"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "@axiom/schema": "workspace:*",
+    "@noble/ed25519": "^2.3.0",
+    "@noble/hashes": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "tsx": "^4.19.2",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

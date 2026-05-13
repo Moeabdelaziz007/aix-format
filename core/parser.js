@@ -364,6 +364,12 @@ export class AIXParser {
 
   timingSafeEqualHex(a, b) {
     if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    // Length must be even for a hex-encoded byte string. Buffer.from('zz', 'hex')
+    // silently produces a zero-byte buffer instead of throwing, so without an
+    // explicit hex check two malformed strings would compare as 'equal' empty
+    // buffers and timingSafeEqualHex would falsely return true.
+    if (a.length % 2 !== 0) return false;
+    if (!/^[0-9a-fA-F]+$/.test(a) || !/^[0-9a-fA-F]+$/.test(b)) return false;
     try {
       return crypto.timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
     } catch {

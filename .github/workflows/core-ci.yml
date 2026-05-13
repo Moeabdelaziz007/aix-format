@@ -1,0 +1,128 @@
+name: Core CI (@axiom/schema + @axiom/identity)
+
+# The canonical core packages must satisfy four contracts on every PR:
+#   1. Lint clean       (dogfood axiom-lint on the canonical sources).
+#   2. Typecheck clean  (tsc --noEmit; emitted .d.ts files compile).
+#   3. Unit smoke green (round-trip sign/verify, DID translation,
+#                        canonical JSON byte equality, schema-version
+#                        constants match).
+#   4. Cross-package contract honoured (@axiom/identity sees the same
+#      `AXIOM_AUTHORITY` value that `@axiom/schema` exports; the
+#      generated types.gen.ts shape matches the rich types.ts surface
+#      on the load-bearing fields).
+#
+# Scoped to the canonical core paths so docs PRs and downstream
+# package work do not retrigger the whole stack.
+
+on:
+  pull_request:
+    paths:
+      - 'packages/axiom-schema/**'
+      - 'packages/axiom-identity/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/core-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/axiom-schema/**'
+      - 'packages/axiom-identity/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/core-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint canonical core
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run axiom-lint on @axiom/schema and @axiom/identity
+        run: |
+          node --experimental-strip-types packages/axiom-lint/bin/axiom-lint.js \
+            packages/axiom-schema packages/axiom-identity \
+            --fail-on error
+
+  typecheck:
+    name: Typecheck (${{ matrix.package }})
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - axiom-schema
+          - axiom-identity
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: tsc --noEmit on ${{ matrix.package }}
+        run: |
+          cd packages/${{ matrix.package }}
+          npx tsc --noEmit
+
+  unit-smoke:
+    name: Unit smoke (${{ matrix.package }})
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - axiom-schema
+          - axiom-identity
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run ${{ matrix.package }} smoke tests
+        run: |
+          cd packages/${{ matrix.package }}
+          if [ -d test ]; then
+            # tsx loader so `.js` import specifiers (the form needed by
+            # Node ESM at runtime in the published dist) resolve to the
+            # original `.ts` sources during the in-tree CI run.
+            node --import tsx --test test/*.test.ts
+          else
+            echo "No test/ directory for ${{ matrix.package }} — skipping."
+          fi
+
+  contract:
+    name: Cross-package contract (@axiom/identity ⇄ @axiom/schema)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run cross-package contract suite
+        run: |
+          cd packages/axiom-identity
+          node --import tsx --test test/contract.test.ts

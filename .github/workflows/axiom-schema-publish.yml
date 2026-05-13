@@ -1,0 +1,86 @@
+name: "@axiom/schema autopublish on tag"
+
+# Publishes @axiom/schema to npm when a tag matching the pattern
+# `axiom-schema-v*` is pushed (e.g. `axiom-schema-v1.3.0`). The tag
+# version MUST match the version field in
+# `packages/axiom-schema/package.json` exactly; the publish step
+# verifies this and fails on mismatch.
+#
+# Required repository secret:
+#   NPM_TOKEN — npm token with publish access to the @axiom scope.
+#
+# Manual smoke-test trigger via `workflow_dispatch` is also available
+# for re-publishing after a token rotation or scope handover.
+
+on:
+  push:
+    tags:
+      - 'axiom-schema-v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run npm publish --dry-run only (no actual publish)'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+
+permissions:
+  contents: read
+  id-token: write  # for npm provenance attestations
+
+jobs:
+  publish:
+    name: publish to npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: npm-publish
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify tag matches package.json#version
+        if: github.event_name == 'push'
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#axiom-schema-v}"
+          PKG_VERSION=$(node -p "require('./packages/axiom-schema/package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag version '$TAG_VERSION' does not match package.json version '$PKG_VERSION'"
+            exit 1
+          fi
+          echo "✓ Tag $GITHUB_REF_NAME matches package.json#version $PKG_VERSION"
+
+      - name: Regenerate types from schema (codegen)
+        working-directory: packages/axiom-schema
+        run: pnpm run codegen
+
+      - name: Build
+        working-directory: packages/axiom-schema
+        run: pnpm run build
+
+      - name: Publish (dry-run on manual trigger by default)
+        working-directory: packages/axiom-schema
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "Dry run: skipping actual publish."
+            npm publish --dry-run --access public --provenance
+          else
+            npm publish --access public --provenance
+          fi

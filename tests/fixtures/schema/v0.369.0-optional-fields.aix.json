@@ -1,0 +1,69 @@
+{
+  "aix_version": "0.369.0",
+  "meta": {
+    "description": "Fixture exercising every optional field introduced in AIX v0.369.0 schema bump: aix_version, skills[].safety_score, identity_layer.zk_proof, identity_layer.pi_uid_anchor, economics.wallets[].x402_endpoint. Must validate against schemas/aix.schema.json with zero errors.",
+    "version": "1.0.0",
+    "id": "did:axiom:axiomid.app:v0369-optional-fields-fixture",
+    "name": "v0.369.0 Optional Fields Fixture",
+    "created": "2026-05-13T00:00:00Z",
+    "author": "Mohamed Abdelaziz",
+    "format_version": "0.369.0"
+  },
+  "persona": {
+    "role": "Schema fixture",
+    "instructions": "This manifest exists only to exercise the optional fields added in v0.369.0."
+  },
+  "security": {
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "identity_layer": {
+    "id": "did:axiom:axiomid.app:v0369-optional-fields-fixture",
+    "authority": "axiomid.app",
+    "issuedAt": "2026-05-13T00:00:00Z",
+    "pi_uid_anchor": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "zk_proof": {
+      "proof": {
+        "pi_a": ["1", "2", "1"],
+        "pi_b": [["3", "4"], ["5", "6"], ["1", "0"]],
+        "pi_c": ["7", "8", "1"],
+        "protocol": "groth16",
+        "curve": "bn128"
+      },
+      "publicSignals": ["1"],
+      "nullifier": "f7c3bc1d808e04732adf679965ccc34ca7ae3441",
+      "timestamp": "2026-05-13T00:00:00Z",
+      "circuit": "pkyc-v1"
+    }
+  },
+  "skills": [
+    {
+      "name": "read_only_index",
+      "description": "Read-only vector index lookup, fully sandboxed.",
+      "safety_score": 10
+    },
+    {
+      "name": "send_email",
+      "description": "Send transactional email via SMTP.",
+      "safety_score": 4
+    },
+    {
+      "name": "execute_shell",
+      "description": "Run arbitrary shell commands. Never enabled in autonomous runs.",
+      "enabled": false,
+      "safety_score": 0
+    }
+  ],
+  "economics": {
+    "wallets": [
+      {
+        "chain": "base",
+        "address": "0x1234567890abcdef1234567890abcdef12345678",
+        "provider": "coinbase-agentkit",
+        "x402_endpoint": "https://pay.example.com/x402/agent-v0369"
+      }
+    ]
+  }
+}

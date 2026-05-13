@@ -1,129 +1,36 @@
-# 🧬 AIX Meta-Loop Scripts
+# AIX Scripts
 
-Automated tools for self-improving codebase maintenance and deployment.
+Operational scripts that live alongside the protocol source. The Studio
+app and its Vercel deployment pipeline used to live in this repo and
+several scripts here targeted `apps/studio/`. The Studio code has since
+moved out, so this directory is now scoped to protocol-side tooling only.
 
----
+## Active scripts
 
-## 📁 Scripts Overview
+The full list lives in this directory; this README only documents the
+non-obvious ones. Most scripts are self-describing via their filename
+and the comment block at the top.
 
-### 1. `meta-loop-cleaner.sh` - Code Quality Scanner
-**Purpose:** Scan codebase for 10 common code quality issues and anti-patterns.
+- `agent-sign.js` / `agent-verify.js` — Ed25519 sign/verify for AIX
+  manifests. Used by the `tests/e2e/sign-verify.test.js` and
+  `tests/e2e/full-lifecycle.test.js` suites.
+- `health-score.ts` / `health-trend.js` — repo health scoring used
+  by the `health:check` npm script.
+- `dead-code-scan.sh` — wrapped by the `dead-code:scan` npm script.
+- `schema-type-sync.ts` — drift detection between
+  `schemas/aix.schema.json` and `packages/aix-types/index.d.ts`.
+  See AGENTS.md for the codegen ratchet rules.
+- `validate-env.ts` — environment validation, wrapped by
+  `validate:env` and `env:check`.
 
-**Features:**
-- ✅ Detects 10 code smell patterns
-- ✅ Dry-run mode for safe scanning
-- ✅ Aggressive mode for auto-fixes
-- ✅ Detailed statistics
+## Removed (no longer in this repo)
 
-**Usage:**
-```bash
-# Make executable
-chmod +x scripts/meta-loop-cleaner.sh
+- `vercel-auto-fix.sh` — the Vercel auto-fix loop targeted
+  `apps/studio/src/` which is no longer part of this repository.
+  Removed alongside the rest of the Vercel deploy setup.
+- `webpack-fix.sh` — same: targeted `apps/studio/` webpack errors.
+- `meta-loop-cleaner.sh` — previously documented but the file was
+  never committed.
 
-# Scan only (no changes)
-./scripts/meta-loop-cleaner.sh --dry-run
-
-# Scan and auto-fix
-./scripts/meta-loop-cleaner.sh --aggressive
-
-# Both modes
-./scripts/meta-loop-cleaner.sh --dry-run --aggressive
-```
-
-**What it detects:**
-1. **Dangerous Type Assertions** - `as unknown` usage
-2. **Missing Error Handling** - Empty catch blocks
-3. **Console.log in Production** - Debug statements
-4. **TODO/FIXME Comments** - Unfinished work
-5. **Duplicate Imports** - Same import twice
-6. **Unused Variables** - Declared but never used
-7. **Long Functions** - Functions >100 lines
-8. **Magic Numbers** - Hardcoded values
-9. **Circular Dependencies** - Excessive parent imports
-10. **Missing TypeScript Types** - `: any` and `: unknown`
-
-**Output:**
-- `meta-loop-YYYYMMDD-HHMMSS.log` - Scan results
-
----
-
-## 🚀 Quick Start Guide
-
-### First Time Setup
-
-1. **Install dependencies:**
-```bash
-cd apps/studio
-pnpm install
-```
-
-2. **Make scripts executable:**
-```bash
-chmod +x scripts/*.sh
-```
-
-### Typical Workflow
-
-#### Scenario 1: Code Quality Check Before Commit
-```bash
-# Scan for issues
-./scripts/meta-loop-cleaner.sh --dry-run
-
-# Fix automatically
-./scripts/meta-loop-cleaner.sh --aggressive
-
-# Review changes
-git diff
-```
-
----
-
-## 📊 Current Codebase Stats
-
-- **Total Lines:** 36,194
-- **Total Files:** ~150 (TS/TSX)
-- **Average Lines/File:** ~241
-
----
-
-## 🔧 Troubleshooting
-
-### Script won't run
-```bash
-# Make sure it's executable
-chmod +x scripts/meta-loop-cleaner.sh
-
-# Check bash is available
-which bash
-```
-
----
-
-## 🎯 Best Practices
-
-1. **Always run dry-run first** before aggressive mode
-2. **Review auto-fixes** before committing
-3. **Keep logs** for debugging
-4. **Run cleaner** before every PR
-
----
-
-## 🤝 Contributing
-
-When adding new auto-fix strategies:
-- ✅ Always test in dry-run mode first
-- ✅ Add detailed logging
-- ✅ Handle edge cases
-- ✅ Update this README
-
----
-
-## 📚 Related Documentation
-
-- [Critical Fixes Applied](../docs/CRITICAL_FIXES_APPLIED.md)
-- [Next Steps Guide](../NEXT_STEPS.md)
-- [Fixes Summary](../FIXES_SUMMARY.md)
-
----
-
-**Made with ❤️ by AIX Evolution Mode**
+If you maintain the Studio repo and need any of these back, recover
+them from `git log -- scripts/<file>` in this repo's history.

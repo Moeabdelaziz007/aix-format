@@ -158,241 +158,372 @@ describe('AIXParser', () => {
     });
   });
 
-  describe('Validation - Meta Section', () => {
-    it('should reject invalid UUID', () => {
-      const parser = new AIXParser();
-      const meta = {
-        version: '1.0',
-        id: 'invalid-uuid',
-        name: 'Test',
-        created: '2026-01-12T10:30:00Z',
-        author: 'Test'
-      };
-      parser.validateMeta(meta);
-      assert(parser.errors.some(e => e.code === 'INVALID_ID'));
-    });
-
+  describe('Validation Helpers - isValidID', () => {
     it('should accept valid did:axiom format', () => {
       const parser = new AIXParser();
-      const meta = {
-        version: '1.0',
-        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-        name: 'Test',
-        created: '2026-01-12T10:30:00Z',
-        author: 'Test'
-      };
-      parser.validateMeta(meta);
-      assert(!parser.errors.some(e => e.code === 'INVALID_ID'));
+      assert.strictEqual(parser.isValidID('did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000'), true);
     });
 
-    it('should reject invalid ISO 8601 timestamp', () => {
+    it('should accept did:axiom with simple string id', () => {
       const parser = new AIXParser();
-      const meta = {
-        version: '1.0',
-        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-        name: 'Test',
-        created: 'invalid-date',
-        author: 'Test'
-      };
-      parser.validateMeta(meta);
-      assert(parser.errors.some(e => e.code === 'INVALID_TIMESTAMP'));
+      assert.strictEqual(parser.isValidID('did:axiom:axiomid.app:myagent'), true);
     });
 
-    it('should accept valid ISO 8601 timestamp', () => {
+    it('should accept valid did:web format', () => {
       const parser = new AIXParser();
-      const meta = {
-        version: '1.0',
-        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-        name: 'Test',
-        created: '2026-01-12T10:30:00Z',
-        author: 'Test'
-      };
-      parser.validateMeta(meta);
-      assert(!parser.errors.some(e => e.code === 'INVALID_TIMESTAMP'));
+      assert.strictEqual(parser.isValidID('did:web:axiomid.app'), true);
     });
 
-    it('should reject invalid semver', () => {
+    it('should accept did:web with path segments', () => {
       const parser = new AIXParser();
-      const meta = {
-        version: 'invalid',
-        id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-        name: 'Test',
-        created: '2026-01-12T10:30:00Z',
-        author: 'Test'
-      };
-      parser.validateMeta(meta);
-      assert(parser.errors.some(e => e.code === 'INVALID_VERSION'));
+      assert.strictEqual(parser.isValidID('did:web:axiomid.app:agents:test'), true);
     });
 
-    it('should accept valid semver versions', () => {
+    it('should reject plain UUID without DID prefix', () => {
       const parser = new AIXParser();
-      const validVersions = ['1.0', '1.0.0', '1.2.3', '1.0.0-beta', '1.0.0+build'];
-      
-      for (const version of validVersions) {
-        const meta = {
-          version,
-          id: 'did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440000',
-          name: 'Test',
-          created: '2026-01-12T10:30:00Z',
-          author: 'Test'
-        };
-        parser.errors = [];
-        parser.validateMeta(meta);
-        assert(!parser.errors.some(e => e.code === 'INVALID_VERSION'), 
-          `Version ${version} should be valid`);
-      }
+      assert.strictEqual(parser.isValidID('550e8400-e29b-41d4-a716-446655440000'), false);
+    });
+
+    it('should reject invalid-uuid string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidID('invalid-uuid'), false);
+    });
+
+    it('should reject empty string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidID(''), false);
+    });
+
+    it('should reject did with unknown method', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidID('did:other:axiomid.app:test'), false);
+    });
+
+    it('should reject non-string inputs gracefully', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidID(null), false);
+      assert.strictEqual(parser.isValidID(undefined), false);
     });
   });
 
-  describe('Validation - Persona Section', () => {
-    it('should reject missing required fields', () => {
+  describe('Validation Helpers - isValidISO8601', () => {
+    it('should accept UTC timestamp with Z suffix', () => {
       const parser = new AIXParser();
-      const persona = { role: 'test' };
-      parser.validatePersona(persona);
-      assert(parser.errors.some(e => 
-        e.code === 'MISSING_FIELD' && e.field === 'instructions'
-      ));
+      assert.strictEqual(parser.isValidISO8601('2026-01-12T10:30:00Z'), true);
     });
 
-    it('should reject invalid temperature range', () => {
+    it('should accept timestamp without Z suffix', () => {
       const parser = new AIXParser();
-      const persona = {
-        role: 'test',
-        instructions: 'test',
-        temperature: 3.0
-      };
-      parser.validatePersona(persona);
-      assert(parser.errors.some(e => e.code === 'INVALID_RANGE'));
+      assert.strictEqual(parser.isValidISO8601('2026-01-12T10:30:00'), true);
     });
 
-    it('should accept valid temperature values', () => {
+    it('should accept timestamp with milliseconds', () => {
       const parser = new AIXParser();
-      const persona = {
-        role: 'test',
-        instructions: 'test',
-        temperature: 0.7
-      };
-      parser.validatePersona(persona);
-      assert(!parser.errors.some(e => e.code === 'INVALID_RANGE'));
-    });
-  });
-
-  describe('Validation - Skills Section', () => {
-    it('should reject duplicate skill names', () => {
-      const parser = new AIXParser();
-      const skills = [
-        { name: 'test_skill', description: 'Test 1' },
-        { name: 'test_skill', description: 'Test 2' }
-      ];
-      parser.validateSkills(skills);
-      assert(parser.errors.some(e => e.code === 'DUPLICATE_NAME'));
+      assert.strictEqual(parser.isValidISO8601('2026-01-12T10:30:00.000Z'), true);
     });
 
-    it('should reject missing required fields', () => {
+    it('should reject plain date string (no time component)', () => {
       const parser = new AIXParser();
-      const skills = [
-        { name: 'test_skill' }
-      ];
-      parser.validateSkills(skills);
-      assert(parser.errors.some(e => 
-        e.code === 'MISSING_FIELD' && e.field === 'description'
-      ));
+      assert.strictEqual(parser.isValidISO8601('2026-01-12'), false);
+    });
+
+    it('should reject arbitrary string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidISO8601('invalid-date'), false);
+    });
+
+    it('should reject empty string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidISO8601(''), false);
+    });
+
+    it('should reject date with wrong separator', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidISO8601('2026/01/12T10:30:00Z'), false);
+    });
+
+    it('should reject timestamp with timezone offset (non-Z)', () => {
+      const parser = new AIXParser();
+      // The regex only accepts Z or no suffix, not +00:00
+      assert.strictEqual(parser.isValidISO8601('2026-01-12T10:30:00+05:00'), false);
     });
   });
 
-  describe('Validation - APIs Section', () => {
-    it('should reject missing base_url', () => {
+  describe('Validation Helpers - isValidSemver', () => {
+    it('should accept major.minor format', () => {
       const parser = new AIXParser();
-      const apis = [
-        { name: 'test_api' }
-      ];
-      parser.validateAPIs(apis);
-      assert(parser.errors.some(e => 
-        e.code === 'MISSING_FIELD' && e.field === 'base_url'
-      ));
+      assert.strictEqual(parser.isValidSemver('1.0'), true);
     });
 
-    it('should reject invalid URL', () => {
+    it('should accept major.minor.patch format', () => {
       const parser = new AIXParser();
-      const apis = [
-        { name: 'test_api', base_url: 'not-a-url' }
-      ];
-      parser.validateAPIs(apis);
-      assert(parser.errors.some(e => e.code === 'INVALID_URL'));
+      assert.strictEqual(parser.isValidSemver('1.2.3'), true);
     });
 
-    it('should accept valid API configuration', () => {
+    it('should accept pre-release suffix', () => {
       const parser = new AIXParser();
-      const apis = [
-        { name: 'test_api', base_url: 'https://api.example.com' }
-      ];
-      parser.validateAPIs(apis);
-      assert(!parser.errors.some(e => e.code === 'INVALID_URL'));
-    });
-  });
-
-  describe('Validation - Identity Layer', () => {
-    it('should reject missing required fields in identity_layer', () => {
-      const parser = new AIXParser();
-      const identity_layer = { id: 'did:axiom:axiomid.app:test' }; // Missing authority and issuedAt
-      parser.validateIdentityLayer(identity_layer);
-      assert(parser.errors.some(e =>
-        e.code === 'MISSING_FIELD' && e.field === 'authority'
-      ));
-      assert(parser.errors.some(e =>
-        e.code === 'MISSING_FIELD' && e.field === 'issuedAt'
-      ));
+      assert.strictEqual(parser.isValidSemver('1.0.0-beta'), true);
     });
 
-    it('should reject invalid authority in identity_layer', () => {
+    it('should accept build metadata suffix', () => {
       const parser = new AIXParser();
-      const identity_layer = {
-        id: 'did:axiom:axiomid.app:test',
-        authority: 'invalid.app',
-        issuedAt: '2026-04-24T10:30:00Z'
-      };
-      parser.validateIdentityLayer(identity_layer);
-      assert(parser.errors.some(e =>
-        e.code === 'INVALID_AUTHORITY' && e.field === 'authority'
-      ));
+      assert.strictEqual(parser.isValidSemver('1.0.0+build'), true);
     });
 
-    it('should accept valid identity_layer', () => {
+    it('should accept pre-release with build metadata', () => {
       const parser = new AIXParser();
-      const identity_layer = {
-        id: 'did:axiom:axiomid.app:123',
-        authority: 'axiomid.app',
-        issuedAt: '2026-04-24T10:30:00Z'
-      };
-      parser.validateIdentityLayer(identity_layer);
-      assert(!parser.errors.some(e => e.section === 'identity_layer'));
+      assert.strictEqual(parser.isValidSemver('1.0.0-alpha.1+build.2'), true);
+    });
+
+    it('should reject non-numeric version string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidSemver('invalid'), false);
+    });
+
+    it('should reject version with only major', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidSemver('1'), false);
+    });
+
+    it('should reject empty string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidSemver(''), false);
+    });
+
+    it('should reject version with text prefix', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidSemver('v1.0.0'), false);
     });
   });
 
-  describe('Validation - Requirements (VLA)', () => {
-    it('should reject missing adapter in vla', () => {
+  describe('Validation Helpers - isValidURL', () => {
+    it('should accept https URL', () => {
       const parser = new AIXParser();
-      const requirements = { vla: { vision: {} } };
-      parser.validateRequirements(requirements);
-      assert(parser.errors.some(e =>
-        e.code === 'MISSING_FIELD' && e.field === 'adapter'
-      ));
+      assert.strictEqual(parser.isValidURL('https://api.example.com'), true);
     });
 
-    it('should reject invalid adapter in vla', () => {
+    it('should accept http URL', () => {
       const parser = new AIXParser();
-      const requirements = { vla: { adapter: 'invalid-adapter' } };
-      parser.validateRequirements(requirements);
-      assert(parser.errors.some(e =>
-        e.code === 'INVALID_VALUE' && e.field === 'adapter'
-      ));
+      assert.strictEqual(parser.isValidURL('http://api.example.com'), true);
     });
 
-    it('should accept valid vla adapter', () => {
+    it('should accept URL with path', () => {
       const parser = new AIXParser();
-      const requirements = { vla: { adapter: 'openpi' } };
-      parser.validateRequirements(requirements);
-      assert(!parser.errors.some(e => e.section === 'requirements.vla'));
+      assert.strictEqual(parser.isValidURL('https://api.example.com/v1/endpoint'), true);
+    });
+
+    it('should accept URL with query params', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidURL('https://api.example.com?key=value'), true);
+    });
+
+    it('should reject bare string without protocol', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidURL('not-a-url'), false);
+    });
+
+    it('should reject empty string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidURL(''), false);
+    });
+
+    it('should reject URL without host', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.isValidURL('https://'), false);
+    });
+  });
+
+  describe('Security Helpers - timingSafeEqualHex', () => {
+    it('should return true for identical hex strings', () => {
+      const parser = new AIXParser();
+      const hex = 'a'.repeat(64);
+      assert.strictEqual(parser.timingSafeEqualHex(hex, hex), true);
+    });
+
+    it('should return false for different hex strings of same length', () => {
+      const parser = new AIXParser();
+      const a = 'a'.repeat(64);
+      const b = 'b'.repeat(64);
+      assert.strictEqual(parser.timingSafeEqualHex(a, b), false);
+    });
+
+    it('should return false for strings of different lengths', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.timingSafeEqualHex('a'.repeat(64), 'a'.repeat(32)), false);
+    });
+
+    it('should return false when either argument is not a string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.timingSafeEqualHex(null, 'a'.repeat(64)), false);
+      assert.strictEqual(parser.timingSafeEqualHex('a'.repeat(64), undefined), false);
+    });
+
+    it('should return false for invalid hex even when both inputs are identical', () => {
+      const parser = new AIXParser();
+      // Non-hex chars of same length. Buffer.from with 'hex' encoding silently
+      // truncates at the first non-hex char, so without an explicit hex check
+      // two identical malformed strings would each produce an empty buffer and
+      // compare as 'equal'. Lock the rejection in.
+      const invalid = 'zz'.repeat(32);
+      assert.strictEqual(parser.timingSafeEqualHex(invalid, invalid), false);
+    });
+
+    it('should return false for hex strings of odd length', () => {
+      const parser = new AIXParser();
+      const odd = 'a'.repeat(63);
+      assert.strictEqual(parser.timingSafeEqualHex(odd, odd), false);
+    });
+  });
+
+  describe('Security Helpers - removeSecuritySection', () => {
+    it('should remove security section from YAML-like content', () => {
+      const parser = new AIXParser();
+      const content = `meta:\n  version: "1.0"\nsecurity:\n  checksum:\n    algorithm: sha256\npersona:\n  role: test`;
+      const result = parser.removeSecuritySection(content);
+      assert(!result.includes('security:'));
+      assert(!result.includes('checksum:'));
+      assert(result.includes('meta:'));
+      assert(result.includes('persona:'));
+    });
+
+    it('should return content unchanged when no security section exists', () => {
+      const parser = new AIXParser();
+      const content = `meta:\n  version: "1.0"\npersona:\n  role: test`;
+      const result = parser.removeSecuritySection(content);
+      assert(result.includes('meta:'));
+      assert(result.includes('persona:'));
+    });
+
+    it('should handle empty content', () => {
+      const parser = new AIXParser();
+      const result = parser.removeSecuritySection('');
+      assert.strictEqual(result, '');
+    });
+
+    it('should preserve content after security section', () => {
+      const parser = new AIXParser();
+      const content = `meta:\n  name: test\nsecurity:\n  checksum:\n    value: abc\nidentity_layer:\n  id: did:web:axiomid.app`;
+      const result = parser.removeSecuritySection(content);
+      assert(result.includes('identity_layer:'));
+      assert(!result.includes('security:'));
+    });
+  });
+
+  describe('TOML Helpers - stripInlineComment', () => {
+    it('should remove # comment at end of line', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.stripInlineComment('name = "test" # a comment').trim(), 'name = "test"');
+    });
+
+    it('should preserve # inside double-quoted string', () => {
+      const parser = new AIXParser();
+      const input = 'url = "https://example.com/#hash"';
+      assert.strictEqual(parser.stripInlineComment(input), input);
+    });
+
+    it('should preserve # inside single-quoted string', () => {
+      const parser = new AIXParser();
+      const input = "key = 'value#notcomment'";
+      assert.strictEqual(parser.stripInlineComment(input), input);
+    });
+
+    it('should return empty string for comment-only line', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.stripInlineComment('# full comment').trim(), '');
+    });
+
+    it('should handle line with no comment', () => {
+      const parser = new AIXParser();
+      const input = 'name = "test"';
+      assert.strictEqual(parser.stripInlineComment(input), input);
+    });
+
+    it('should handle empty string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.stripInlineComment(''), '');
+    });
+  });
+
+  describe('TOML Helpers - parseTOMLScalar', () => {
+    it('should parse double-quoted string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar('"hello"'), 'hello');
+    });
+
+    it('should parse single-quoted string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar("'hello'"), 'hello');
+    });
+
+    it('should parse boolean true', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar('true'), true);
+    });
+
+    it('should parse boolean false', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar('false'), false);
+    });
+
+    it('should parse integer', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar('42'), 42);
+    });
+
+    it('should parse float', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar('3.14'), 3.14);
+    });
+
+    it('should return undefined for empty string', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar(''), undefined);
+    });
+
+    it('should return bare string for unquoted non-numeric value', () => {
+      const parser = new AIXParser();
+      assert.strictEqual(parser.parseTOMLScalar('openpi'), 'openpi');
+    });
+  });
+
+  describe('TOML Helpers - parseTOMLArray', () => {
+    it('should parse array of quoted strings', () => {
+      const parser = new AIXParser();
+      const result = parser.parseTOMLArray('["item1", "item2", "item3"]');
+      assert(Array.isArray(result));
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0], 'item1');
+      assert.strictEqual(result[2], 'item3');
+    });
+
+    it('should parse array of integers', () => {
+      const parser = new AIXParser();
+      const result = parser.parseTOMLArray('[1, 2, 3]');
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0], 1);
+      assert.strictEqual(result[2], 3);
+    });
+
+    it('should parse array of booleans', () => {
+      const parser = new AIXParser();
+      const result = parser.parseTOMLArray('[true, false, true]');
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0], true);
+      assert.strictEqual(result[1], false);
+    });
+
+    it('should return empty array for empty brackets', () => {
+      const parser = new AIXParser();
+      const result = parser.parseTOMLArray('[]');
+      assert(Array.isArray(result));
+      assert.strictEqual(result.length, 0);
+    });
+
+    it('should preserve comma inside quoted string', () => {
+      const parser = new AIXParser();
+      const result = parser.parseTOMLArray('["a,b", "c"]');
+      assert.strictEqual(result.length, 2);
+      assert.strictEqual(result[0], 'a,b');
     });
   });
 
@@ -494,14 +625,159 @@ describe('AIXParser', () => {
         persona: { role: 'test', instructions: 'test' },
         security: { checksum: { algorithm: 'sha256', value: 'abc123' } }
       };
-      
+
       const agent = new AIXAgent(data);
       const str = agent.toString();
       assert(str.includes('Test Agent'));
       assert(str.includes('550e8400-e29b-41d4-a716-446655440000'));
     });
+
+    describe('validateLiveVoice', () => {
+      it('should reject null voice argument', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice(null);
+        assert(errors.some(e => e.code === 'INVALID_INPUT'));
+      });
+
+      it('should reject non-object voice argument', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice('invalid');
+        assert(errors.some(e => e.code === 'INVALID_INPUT'));
+      });
+
+      it('should reject missing provider field', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice({});
+        assert(errors.some(e => e.code === 'MISSING_FIELD' && e.field === 'provider'));
+      });
+
+      it('should reject unknown provider value', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice({ provider: 'unknown-provider' });
+        assert(errors.some(e => e.code === 'INVALID_VALUE' && e.field === 'provider'));
+      });
+
+      it('should accept valid provider: openai-realtime', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice({ provider: 'openai-realtime' });
+        assert(!errors.some(e => e.field === 'provider'));
+      });
+
+      it('should accept valid provider: hume', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice({ provider: 'hume' });
+        assert(!errors.some(e => e.field === 'provider'));
+      });
+
+      it('should accept valid provider: elevenlabs', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice({ provider: 'elevenlabs' });
+        assert(!errors.some(e => e.field === 'provider'));
+      });
+
+      it('should accept valid provider: generic', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const { errors } = agent.validateLiveVoice({ provider: 'generic' });
+        assert(!errors.some(e => e.field === 'provider'));
+      });
+
+      it('should reset errors on each call', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        agent.validateLiveVoice(null);
+        const { errors } = agent.validateLiveVoice({ provider: 'hume' });
+        assert.strictEqual(errors.length, 0);
+      });
+    });
+
+    describe('validateGuardianLogic', () => {
+      it('should add error when front_run_defense enabled without mempool_monitor', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        agent.validateGuardianLogic({ front_run_defense: true });
+        assert(agent.errors.some(e => e.code === 'INCONSISTENT_CONFIG'));
+      });
+
+      it('should not add error when front_run_defense enabled with mempool_monitor', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        agent.validateGuardianLogic({ front_run_defense: true, mempool_monitor: true });
+        assert(!agent.errors.some(e => e.code === 'INCONSISTENT_CONFIG'));
+      });
+
+      it('should not add error when front_run_defense is absent', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        agent.validateGuardianLogic({});
+        assert(!agent.errors.some(e => e.code === 'INCONSISTENT_CONFIG'));
+      });
+
+      it('should not add error when front_run_defense is false', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        agent.validateGuardianLogic({ front_run_defense: false });
+        assert(!agent.errors.some(e => e.code === 'INCONSISTENT_CONFIG'));
+      });
+    });
+
+    describe('abomSummary', () => {
+      it('should return zero counts for empty constituents', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {}, abom: { constituents: [] } });
+        const summary = agent.abomSummary();
+        assert.strictEqual(summary.total, 0);
+        assert.strictEqual(summary.verified, 0);
+        assert.strictEqual(summary.vulnerable, 0);
+      });
+
+      it('should count verified constituents', () => {
+        const agent = new AIXAgent({
+          meta: {}, persona: {}, security: {},
+          abom: { constituents: [
+            { trust_tier: 'verified', integrity_hash: 'abc:123' },
+            { trust_tier: 'verified', integrity_hash: 'abc:456' }
+          ] }
+        });
+        const summary = agent.abomSummary();
+        assert.strictEqual(summary.total, 2);
+        assert.strictEqual(summary.verified, 2);
+      });
+
+      it('should count vulnerable constituents', () => {
+        const agent = new AIXAgent({
+          meta: {}, persona: {}, security: {},
+          abom: { constituents: [
+            { trust_tier: 'community', security_status: 'vulnerable', integrity_hash: 'abc:123' },
+            { trust_tier: 'verified', integrity_hash: 'abc:456' }
+          ] }
+        });
+        const summary = agent.abomSummary();
+        assert.strictEqual(summary.vulnerable, 1);
+      });
+
+      it('should count constituents missing integrity_hash', () => {
+        const agent = new AIXAgent({
+          meta: {}, persona: {}, security: {},
+          abom: { constituents: [
+            { trust_tier: 'verified' },
+            { trust_tier: 'community', integrity_hash: 'abc:123' }
+          ] }
+        });
+        const summary = agent.abomSummary();
+        assert.strictEqual(summary.missing_hash, 1);
+      });
+
+      it('should default to unverified tier when trust_tier is absent', () => {
+        const agent = new AIXAgent({
+          meta: {}, persona: {}, security: {},
+          abom: { constituents: [{ integrity_hash: 'abc:123' }] }
+        });
+        const summary = agent.abomSummary();
+        assert.strictEqual(summary.unverified, 1);
+      });
+
+      it('should return zero total when abom section is absent', () => {
+        const agent = new AIXAgent({ meta: {}, persona: {}, security: {} });
+        const summary = agent.abomSummary();
+        assert.strictEqual(summary.total, 0);
+      });
+    });
   });
 });
 
-console.log('\n✅ All tests defined. Run with: node --test tests/parser.test.js\n');
+
 

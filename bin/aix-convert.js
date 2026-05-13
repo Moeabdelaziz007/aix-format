@@ -89,7 +89,11 @@ const parser = new AIXParser();
 
 try {
   console.log(`📖 Reading ${inputPath}...`);
-  const agent = parser.parseFile(resolvedInput);
+  // parser.parseFile is async; without await, `agent` is a Promise
+  // and agent.meta.name resolves to undefined, which used to throw
+  // "Cannot read properties of undefined (reading 'name')" on every
+  // conversion. ESM at this Node version supports top-level await.
+  const agent = await parser.parseFile(resolvedInput);
   
   console.log(`✅ Parsed successfully`);
   console.log(`   Agent: ${agent.meta.name}`);
