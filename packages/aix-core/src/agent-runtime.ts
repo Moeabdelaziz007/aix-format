@@ -110,6 +110,7 @@ export class AgentRuntimeEngine {
       taskId: task.taskId,
       step: 0,
       scratchpad: [],
+      notes: [],
       mood: 'curious',
       status: 'thinking',
       startTime: Date.now(),
@@ -249,7 +250,7 @@ export class AgentRuntimeEngine {
 
       // RULE 3: TrustChain (Fixed argument order)
       const trustChain = getTrustChain();
-      });
+      await trustChain.append(this.runtime.agentId, "TASK_COMPLETE", { taskId: task.taskId });
 
       // 🌀 TRUTH SYNTHESIS (Round 34): Final check to merge external research with internal code audit
       const finalTruthPrompt = `Synthesize a 'Sovereign Truth' report based on the results: "${result}" for task: "${task.description}".
@@ -327,6 +328,8 @@ export class AgentRuntimeEngine {
       // Simulated: in real environment, this would swap the provider instance
       await this.emitState('agent:routing', `Switching to ${currentModel} based on task complexity.`);
 
+      let prompt = "Prompt Placeholder";
+      let thought = "Thought Placeholder";
       // 🚀 PREDICTIVE TOOL LOADING (Round 28): Use Acceleration Templates
       const acceleration = this.context?.memories.find(m => m.startsWith('[ACCELERATION_TEMPLATE]'));
       const promptHeader = acceleration ? `\n[SYSTEM_SUGGESTION]: Consider using this proven shortcut: ${acceleration}\n` : '';
@@ -629,7 +632,7 @@ Next Thought: `;
         const principlePrompt = `I have completed 5 rounds. Here are my tactical notes: ${this.runtime.notes.slice(-5).join(' | ')}.
         Extract one deep "Sovereign Principle" that should govern all future actions for this task. (Max 15 words)`;
         const principle = await this.llm.complete(principlePrompt);
-        if (!this.context) this.context = { memories: [] };
+        if (!this.context) this.context = { memories: [], skills: [], instructions: "" };
         this.context.memories.push(`[PRINCIPLE] ${principle}`);
         await this.emitState('agent:principle_evolved', `Sovereign Principle evolved: ${principle}`);
       }
@@ -643,14 +646,14 @@ Next Thought: `;
         What was the "Golden Path" or shortcut taken? 
         Express as a 1-sentence acceleration template for future agents.`;
         const shortcut = await this.llm.complete(shortcutPrompt);
-        if (!this.context) this.context = { memories: [] };
+        if (!this.context) this.context = { memories: [], skills: [], instructions: "" };
         this.context.memories.push(`[ACCELERATION_TEMPLATE] ${shortcut}`);
         await this.emitState('agent:template_extracted', `Acceleration template archived: ${shortcut}`);
       }
 
       // 🌀 SOVEREIGN GUIDE: Dynamic Documentation for future Agents
       const guidePath = '/Users/cryptojoker710/.gemini/antigravity/brain/2a220e83-c88c-457d-86a3-72498a9d5319/sovereign_guide.json';
-      const existingGuide = await this.readGuide(guidePath);
+      const existingGuide = await (this as any).readGuide(guidePath);
       const updatedGuide = {
         ...existingGuide,
         [task.taskId]: {
@@ -659,7 +662,7 @@ Next Thought: `;
           note
         }
       };
-      await this.writeGuide(guidePath, updatedGuide);
+      await (this as any).writeGuide(guidePath, updatedGuide);
     } catch (e) {
       console.warn('⚠️ Memory consolidation failed:', e);
     }

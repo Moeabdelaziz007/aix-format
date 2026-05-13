@@ -29,18 +29,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Run Core Tests
-        run: npm test
+        run: pnpm test
         env:
           CI: true
 
@@ -56,7 +58,7 @@ jobs:
           done
 
       - name: Validate All Examples
-        run: npm run validate:examples
+        run: pnpm run validate:examples
 
       - name: Identity Compliance Check
         run: |
@@ -98,10 +100,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: NPM Security Audit
         run: |
@@ -161,10 +163,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Check for Outdated Packages
         run: |

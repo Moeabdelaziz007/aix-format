@@ -18,6 +18,11 @@ on:
     - cron: '0 0 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   dead-code-archaeology:
     name: Scan for Orphaned Exports
