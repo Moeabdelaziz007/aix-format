@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fs from 'node:fs/promises';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { scanAgent } from '../core/abom-scanner.ts';
+import { scanAgent } from '../core/abom-scanner.js';
 
 test('E2E Sync: Schema ↔ Manifest ↔ Detective', async (t) => {
   const ajv = new Ajv({ allErrors: true });
