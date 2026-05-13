@@ -3,7 +3,7 @@
 # Created by Mohamed H Abdelaziz - AMRIKYY AI Solutions 2026
 
 meta:
-  version: "1.0"
+  version: "1.0.0"
   id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440002"
   name: "Web Scraper Pro"
   description: "Advanced web scraping agent with content analysis capabilities"
@@ -15,6 +15,11 @@ meta:
   homepage: "https://amrikyy.ai/agents/web-scraper"
   language: "en"
   framework: "python"
+
+identity_layer:
+  id: "did:axiom:axiomid.app:550e8400-e29b-41d4-a716-446655440002"
+  authority: "axiomid.app"
+  issuedAt: "2026-01-12T10:30:00Z"
 
 persona:
   role: "web scraping specialist"
@@ -129,14 +134,6 @@ memory:
     enabled: true
     storage: "file"
     max_workflows: 10
-  
-  persistence:
-    enabled: true
-    backend: "file"
-    config:
-      directory: "./web_scraper_memory"
-      format: "json"
-      compress: true
 
 requirements:
   hardware:
