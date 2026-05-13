@@ -56,7 +56,13 @@ if (subcommand === 'apply' || subcommand === 'diff') {
   const paths = [];
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === '--approve') approve = args[++i];
+    if (a === '--approve') {
+      approve = args[++i];
+      if (approve === undefined) {
+        console.error('apply: --approve requires a token argument');
+        usage();
+      }
+    }
     else if (a === '--json') json = true;
     else paths.push(resolve(a));
   }

@@ -14,7 +14,7 @@
 // sentinel-autofix introduced.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export interface Fix {
   /** Stable id, mirrors a corresponding lint rule where applicable. */
@@ -108,9 +108,14 @@ export function mintApprovalToken(): { token: string; sha: string } {
 export function validateApprovalToken(supplied: string, recordedSha: string): boolean {
   if (!supplied || !supplied.startsWith(TOKEN_PREFIX)) return false;
   const sha = createHash('sha256').update(supplied).digest('hex');
-  // Constant-time compare to keep the door closed under timing probes.
-  return sha.length === recordedSha.length &&
-    sha.split('').every((c, i) => c === recordedSha[i]);
+  // True constant-time compare via node:crypto.timingSafeEqual. The earlier
+  // .every() pattern short-circuited on first mismatch and leaked the
+  // matching prefix length through timing, contradicting the design contract.
+  // timingSafeEqual requires equal-length inputs, so we length-check first
+  // (length itself is not secret: it is a fixed property of the SHA-256
+  // hex encoding).
+  if (sha.length !== recordedSha.length) return false;
+  return timingSafeEqual(Buffer.from(sha), Buffer.from(recordedSha));
 }
 
 // --- runner ---------------------------------------------------------------

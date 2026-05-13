@@ -50,16 +50,25 @@ export function deadCodeScore(repoRoot: string, sourceFiles: string[]): SubScore
       exports.push({ symbol: m[1], file: f });
     }
   }
+
+  // Tokenise the corpus exactly once into an identifier frequency map.
+  // Previously we ran one regex per exported symbol over the full corpus,
+  // which is O(N exports × M bytes). The new approach is a single linear
+  // scan that splits on /\b/ and counts every JS-identifier-shaped token,
+  // turning the inner loop into an O(1) map lookup.
   const corpus = allText.join('\n');
-  const unused: Array<{ symbol: string; file: string }> = [];
-  for (const e of exports) {
-    // Count occurrences of the symbol across the entire corpus. We need >= 2
-    // (the declaration itself + at least one importer). Use word-boundary
-    // regex so substrings of larger identifiers don't count.
-    const re = new RegExp(`\\b${e.symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
-    const count = (corpus.match(re) ?? []).length;
-    if (count < 2) unused.push(e);
+  const idRe = /[A-Za-z_$][\w$]*/g;
+  const frequency = new Map<string, number>();
+  let tok: RegExpExecArray | null;
+  while ((tok = idRe.exec(corpus)) !== null) {
+    const id = tok[0];
+    frequency.set(id, (frequency.get(id) ?? 0) + 1);
   }
+
+  // An export is "likely dead" if its symbol appears less than twice across
+  // the entire corpus (declaration + at least one importer).
+  const unused = exports.filter(e => (frequency.get(e.symbol) ?? 0) < 2);
+
   const total = exports.length;
   const score = total === 0 ? 100 : Math.round((1 - unused.length / total) * 100);
   return {

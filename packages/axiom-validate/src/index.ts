@@ -6,10 +6,35 @@
 // produced them. Every checker is a pure function over file paths + content.
 
 import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
 export type ValidationSeverity = 'error' | 'warning';
+
+// One Ajv instance shared across every validateAgainstSchema call. Building
+// a new Ajv on each call (the previous shape) re-imported every format,
+// recompiled the schema, and dominated runtime on large fixture batches.
+const sharedAjv = new Ajv2020({ strict: false, allErrors: true });
+(addFormats as unknown as (a: unknown) => void)(sharedAjv);
+
+// Compiled-validator cache keyed by the canonical SHA-256 of the schema
+// JSON. Two callers passing structurally-identical schemas share the same
+// compiled function, which is the common case when validateManifestFiles
+// loops over a directory of fixtures.
+const validatorCache = new Map<string, ReturnType<typeof sharedAjv.compile>>();
+
+function getValidator(schema: object) {
+  const key = createHash('sha256')
+    .update(JSON.stringify(schema))
+    .digest('hex');
+  let v = validatorCache.get(key);
+  if (!v) {
+    v = sharedAjv.compile(schema);
+    validatorCache.set(key, v);
+  }
+  return v;
+}
 
 export interface ValidationFinding {
   checker: string;
@@ -32,16 +57,15 @@ function emptyReport(): ValidationReport {
 
 // --- 1. Schema validation -------------------------------------------------
 
-/** Validate one manifest (already parsed) against an Ajv-compiled schema. */
+/** Validate one manifest (already parsed) against an Ajv-compiled schema.
+ *  Uses the module-level sharedAjv + validatorCache so a tight loop over
+ *  many fixtures with the same schema pays the compile cost exactly once. */
 export function validateAgainstSchema(
   schema: object,
   manifest: unknown,
   filePath = '<inline>',
 ): ValidationFinding[] {
-  const ajv = new Ajv2020({ strict: false, allErrors: true });
-  // ajv-formats v3 default export is the addFormats function.
-  (addFormats as unknown as (a: unknown) => void)(ajv);
-  const validate = ajv.compile(schema);
+  const validate = getValidator(schema);
   const ok = validate(manifest);
   if (ok) return [];
   return (validate.errors ?? []).map(err => ({
