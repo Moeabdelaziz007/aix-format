@@ -34,9 +34,6 @@
       ],
       "@studio/*": [
         "apps/studio/src/*"
-      ],
-      "@types/aix": [
-        "types/aix.d.ts"
       ]
     }
   },
