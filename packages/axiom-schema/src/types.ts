@@ -107,6 +107,8 @@ export interface AIXMeta {
   tags?: string[];
   icon?: string;
   lineage?: MetaLineageEntry[];
+  /** Meta is `additionalProperties: true`, so extension keys are allowed. */
+  [extra: string]: unknown;
 }
 
 // ── persona ───────────────────────────────────────────────────────────────────
