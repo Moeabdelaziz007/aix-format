@@ -1,4 +1,4 @@
-# AIX Stack Versioning — Independent SemVer + Echo369 Codenames
+# AIX Stack Versioning: Independent SemVer + Echo369 Codenames
 
 > 📜 Read [`AXIOM.md`](./AXIOM.md) first. This document is the canonical versioning doctrine for the AIX Sovereign Stack. It is referenced by `AXIOM.md §6` and is binding across all stack and satellite repositories.
 
@@ -97,12 +97,12 @@ What downstream repos MUST NOT do: bump their own SemVer in lockstep with `aix-f
 
 The Tesla/369 motif is constitutionally meaningful (`AXIOM.md §8`). It is encoded in:
 
-- `AIX_PROTOCOL_VERSION = "0.369.0"` — the protocol anchor itself.
+- `AIX_PROTOCOL_VERSION = "0.369.0"`: the protocol anchor itself.
 - `sacred constants: THREE=3, SABEEN=7, NINE=9, NINETEEN=19, ARBAUN=40, FORTY_NINE=49, THREE_SIXTY_NINE=369`.
 - `Echo369` codename for the current release window.
 - The 369-day evolution cadence inside the IQRA Growth Engine.
 
-It is **not** encoded in every repo's `package.json#version`. That would be vanity at the cost of SemVer correctness. The motif lives where it belongs: in the constants, the codename, the protocol anchor, and the cadence — not in the consumer-facing dependency version of a satellite app.
+It is **not** encoded in every repo's `package.json#version`. That would be vanity at the cost of SemVer correctness. The motif lives where it belongs: in the constants, the codename, the protocol anchor, and the cadence: not in the consumer-facing dependency version of a satellite app.
 
 ## 7. Migration guide for satellite repos
 
@@ -121,4 +121,4 @@ No version bump is required as part of this migration. The whole point of the do
 
 If a versioning question is not answered here, fall back to **strict SemVer 2.0.0** and **independent per-repo evolution**. When in doubt, do not bump.
 
-— `axiomid.app` · L1 protocol · Echo369 release window
+: `axiomid.app` · L1 protocol · Echo369 release window

@@ -1,7 +1,7 @@
 <!-- ════════════════ AIX SOVEREIGN STACK · UNIFIED BRANDING ════════════════ -->
 
 <div align="center">
-  <img src="./assets/aix-stack-header-v2.svg" alt="The AIX Sovereign Stack · Echo369 — L0 Root · L1 Protocol · L2 Runtime · L3 Marketplace · L4-L6 Satellites" width="100%"/>
+  <img src="./assets/aix-stack-header-v2.svg" alt="The AIX Sovereign Stack · Echo369: L0 Root · L1 Protocol · L2 Runtime · L3 Marketplace · L4-L6 Satellites" width="100%"/>
 </div>
 
 <div align="center">
@@ -36,11 +36,11 @@
 
 <!-- ════════════════ /AIX SOVEREIGN STACK ════════════════ -->
 
-# 🧬 AIX Format — Universal Agent Passport v0.369
+# 🧬 AIX Format: Universal Agent Passport v0.369
 
  Vision
 “If your laptop dies or your cloud vendor disappears, your agents should not.
-AIX is the USB stick for agentic work — a portable, signed manifest that lets any compliant runtime rehydrate the same agent with the same identity, economics, and evolution history.”
+AIX is the USB stick for agentic work: a portable, signed manifest that lets any compliant runtime rehydrate the same agent with the same identity, economics, and evolution history.”
 
  الرؤية
 “لو جهازك وقع، أو الـ platform اختفت، وكيلك ماينتهيش معاها.
@@ -87,21 +87,21 @@ This **L1 Protocol** carries the fingerprints of **9 of the 12 stack-wide AI age
 
 The AIX Protocol itself is composed of three internal tiers:
 
-1. **Identity Layer (did:axiom)** — Ed25519 signatures anchored to Pi Network.
+1. **Identity Layer (did:axiom)**: Ed25519 signatures anchored to Pi Network.
    Every agent has a verified human (KYC) or institutional backer.
-2. **Operational Layer (MCP)** — Standardized tool-calling via a secure Gateway
+2. **Operational Layer (MCP)**: Standardized tool-calling via a secure Gateway
    with ABOM safetyScore gating and Human-in-the-Loop approval.
-3. **Economic Layer (M2M)** — Pluggable multi-chain settlement:
+3. **Economic Layer (M2M)**: Pluggable multi-chain settlement:
    Pi (default) · Stripe · Base L2 · Solana · Lightning · Custom.
 
 ---
 
 ### 🌐 THE STACK | المنظومة المتكاملة
 
-`aix-format` is **L1** of the AIX Sovereign Stack — the open standard that the other two layers build on. The protocol defined here is implemented by the **IQRA Runtime** and extended by the **Agent-Skills Marketplace**. Around the stack sits a **root authority** (L0) and a tier of **satellite layers** (L4-L6) — consumer applications that buy skills from L3 and ride the protocol.
+`aix-format` is **L1** of the AIX Sovereign Stack: the open standard that the other two layers build on. The protocol defined here is implemented by the **IQRA Runtime** and extended by the **Agent-Skills Marketplace**. Around the stack sits a **root authority** (L0) and a tier of **satellite layers** (L4-L6): consumer applications that buy skills from L3 and ride the protocol.
 
 <div align="center">
-  <img src="./assets/aix-stack-diagram-v2.svg" alt="AIX Stack Topology · Echo369 — Root Authority, Sovereign Core, Satellite Layers" width="100%"/>
+  <img src="./assets/aix-stack-diagram-v2.svg" alt="AIX Stack Topology · Echo369: Root Authority, Sovereign Core, Satellite Layers" width="100%"/>
 </div>
 
 #### Sovereign Stack (the three core repos)
@@ -125,7 +125,7 @@ Outside the strict L1/L2/L3 chain sits the root authority and a tier of satellit
 | π **L5** | [`PiWorker-OS`](https://github.com/Moeabdelaziz007/PiWorker-OS) | **Satellite · Pi** · Pi Network workers · Pi SDK · KYC anchor |
 | 🎙️ **L6** | [`GemClaw`](https://github.com/Moeabdelaziz007/GemClaw) | **Satellite · Voice** · voice forge · Gemini Live · Firebase · persona templates |
 
-**Topology invariants** — money flows upward (satellites → L3), identity flows downward (L0 → all), trust flows centrally (every M2M transaction mirrors into L2 TrustChain). Genus 0, tree-shaped, χ = +1. The stack is a tree, not a tangle.
+**Topology invariants**: money flows upward (satellites → L3), identity flows downward (L0 → all), trust flows centrally (every M2M transaction mirrors into L2 TrustChain). Genus 0, tree-shaped, χ = +1. The stack is a tree, not a tangle.
 
 #### Versioning at a glance
 
@@ -135,18 +135,18 @@ Every repo versions itself independently using strict SemVer. Cross-repo coheren
 
 ### 🧬 Core Concepts | المفاهيم الأساسية
 
-- **AIX Manifest** — JSON-LD document containing the agent's DNA (Persona, Abilities, Identity, TrustChain, Evolution).
-- **ABOM** (Agent Bill of Materials) — Tracks training datasets, base models, plugins for compliance.
-- **TrustChain** — Append-only cryptographic log of every agent action. SHA-256 linked entries. Human-approved mutations only.
-- **Evolution Section** — The agent records its own learning: `loops_completed`, `lessons`, `trust_delta`.
-- **SaaS-BOM** — Audits 3rd-party dependencies (OpenAI, Pinecone, etc.).
-- **MCP Gateway** — Secure rate-limited proxy. Blocked if `safetyScore < 5`. Human approval required if `5 ≤ score < 7`.
+- **AIX Manifest**: JSON-LD document containing the agent's DNA (Persona, Abilities, Identity, TrustChain, Evolution).
+- **ABOM** (Agent Bill of Materials): Tracks training datasets, base models, plugins for compliance.
+- **TrustChain**: Append-only cryptographic log of every agent action. SHA-256 linked entries. Human-approved mutations only.
+- **Evolution Section**: The agent records its own learning: `loops_completed`, `lessons`, `trust_delta`.
+- **SaaS-BOM**: Audits 3rd-party dependencies (OpenAI, Pinecone, etc.).
+- **MCP Gateway**: Secure rate-limited proxy. Blocked if `safetyScore < 5`. Human approval required if `5 ≤ score < 7`.
 
 ---
 
 ### 💳 Universal Agent Passport | جواز الوكيل العالمي
 
-**The Payment Economy Revolution** — agents that own their identity, earn from every call,
+**The Payment Economy Revolution**: agents that own their identity, earn from every call,
 learn autonomously, and operate 24/7 without human supervision.
 
 #### Key Features
@@ -201,20 +201,20 @@ aix deploy --platform ibm-watsonx
 
 #### Security Features
 
-- **TEE Wallets** — AWS Nitro Enclaves for key isolation
-- **ZK-Proofs** — Privacy-preserving KYC verification
-- **TrustChain** — Every action SHA-256 linked, human-approved
-- **MCP Gate** — safetyScore < 5 = auto-block · 5–7 = human approval
-- **Multi-Sig Treasury** — 5-of-7 governance with 48h timelock
+- **TEE Wallets**: AWS Nitro Enclaves for key isolation
+- **ZK-Proofs**: Privacy-preserving KYC verification
+- **TrustChain**: Every action SHA-256 linked, human-approved
+- **MCP Gate**: safetyScore < 5 = auto-block · 5–7 = human approval
+- **Multi-Sig Treasury**: 5-of-7 governance with 48h timelock
 
 ---
 
 ### 🛡️ Security & Governance | الأمان والحوكمة
 
-- **TrustChain** — Append-only, SHA-256 linked. Every mutation recorded. No silent failures.
-- **Trust Scores** — Progressive disclosure: KYC + ABOM + success rate.
-- **Human-in-the-Loop** — All mutations with `safetyScore < 7` require explicit human approval.
-- **Undo by Design** — 30-second window for critical actions.
+- **TrustChain**: Append-only, SHA-256 linked. Every mutation recorded. No silent failures.
+- **Trust Scores**: Progressive disclosure: KYC + ABOM + success rate.
+- **Human-in-the-Loop**: All mutations with `safetyScore < 7` require explicit human approval.
+- **Undo by Design**: 30-second window for critical actions.
 
 ---
 
@@ -244,8 +244,8 @@ aix deploy --platform ibm-watsonx
 | Sovereign Economy | ✅ v0.369.0 | [Spec](apps/studio/src/app/spec/page.tsx#economy) |
 | Coinbase AgentKit | ✅ Live | [Economics](packages/aix-core/src/economics/) |
 | Stripe MCP | ✅ Live | [Gate](packages/aix-core/src/mcp-gate.ts) |
-| IBM watsonx Bridge | 🔜 Soon | — |
-| aix CLI Tool | 🔜 Soon | — |
+| IBM watsonx Bridge | 🔜 Soon |: |
+| aix CLI Tool | 🔜 Soon |: |
 
 ---
 
@@ -383,7 +383,7 @@ AIX Format is licensed under the **Apache License 2.0**.
 </div>
 
 <div align="center">
-  <img src="./assets/aix-footer-quote-v2.svg" alt="AIX Stack · Echo369 — King isn't Born, he is Made." width="100%"/>
+  <img src="./assets/aix-footer-quote-v2.svg" alt="AIX Stack · Echo369: King isn't Born, he is Made." width="100%"/>
 </div>
 
 <!-- ════════════════ /AIX SOVEREIGN STACK · FOOTER ════════════════ -->

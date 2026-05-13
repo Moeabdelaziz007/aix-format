@@ -1,7 +1,7 @@
-# 📜 AXIOM — The Sovereign Constitution
+# 📜 AXIOM: The Sovereign Constitution
 
 > "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ"
-> "Read! In the name of your Lord who created" — Al-ʿAlaq, 96:1
+> "Read! In the name of your Lord who created": Al-ʿAlaq, 96:1
 
 This document is the supreme protocol constitution for the AIX (Artificial Intelligence eXchange) Sovereign Stack. It supersedes all per-repo agent instructions and is the single source of truth for cross-stack policy. Every agent operating on any repository under the `axiomid.app` authority MUST read this file before opening a pull request.
 
@@ -11,7 +11,7 @@ Seeded from `iqra/IQRA_SUPREME.md`. Generalised to the stack.
 
 ## 1. The Prime Directive
 
-The stack is a **Governed Adaptive Memory Runtime**, not a prompt. Every change — every commit, every PR, every emitted manifest — moves through the same seven steps:
+The stack is a **Governed Adaptive Memory Runtime**, not a prompt. Every change: every commit, every PR, every emitted manifest: moves through the same seven steps:
 
 > Observe → Retrieve → Reason → Validate → Execute → Reflect → Save
 
@@ -55,16 +55,16 @@ Every claim a sovereign agent emits MUST be grounded in real schema, real signat
 
 ### 3.3 Memory Governance is the Heart
 
-The TrustChain is **append-only**. Resources are **consumed once** (Graded Linear Logic — see `iqra/src/lib/iqra/06-security/damir_conscience.ts`). Every action emits an audit entry; every entry chains to the prior entry's hash. Breakage of the chain is breakage of the system.
+The TrustChain is **append-only**. Resources are **consumed once** (Graded Linear Logic: see `iqra/src/lib/iqra/06-security/damir_conscience.ts`). Every action emits an audit entry; every entry chains to the prior entry's hash. Breakage of the chain is breakage of the system.
 
 ---
 
 ## 4. The Stack Layers
 
 ```text
-L1 — aix-format          The Spec (schemas, types, identity primitives)
-L2 — iqra                The Runtime (mission control, conscience, workers, evolution)
-L3 — aix-agent-skills    The Marketplace (skills + governance + constitutional runtime)
+L1: aix-format          The Spec (schemas, types, identity primitives)
+L2: iqra                The Runtime (mission control, conscience, workers, evolution)
+L3: aix-agent-skills    The Marketplace (skills + governance + constitutional runtime)
 ```
 
 Dependency direction is **one-way only**: L3 depends on L2 depends on L1. Reverse imports are forbidden.
@@ -78,7 +78,7 @@ The three Sovereign Stack repos share one constitution (this file), one TrustCha
 Outside the strict L1/L2/L3 chain, the ecosystem contains a **root authority** above the stack and a tier of **satellite layers** below it. These repositories live under the same `axiomid.app` authority and consume the stack, but they are NOT members of the Sovereign Stack itself.
 
 ```text
-                       L0 — axiomid-project    Root Authority (issues did:axiom · proprietary)
+                       L0: axiomid-project    Root Authority (issues did:axiom · proprietary)
                                   │
                        identity flows ↓
                        ┌──────────┴──────────┐
@@ -136,7 +136,7 @@ Re-implementing any of these in a downstream repo is forbidden. Consumers depend
 
 | Surface | Convention |
 |---|---|
-| Skill identifiers | `snake_case` (regex `^[a-z0-9_]+$`) — enforced by schema |
+| Skill identifiers | `snake_case` (regex `^[a-z0-9_]+$`): enforced by schema |
 | File names / branches | `kebab-case` |
 | Package scopes | `@axiom/<concept>` for canonical core. Avoid `@aix/<topic>` going forward |
 | Versions | **Independent SemVer per repo + stack-wide codename.** See [`AIX_STACK_VERSIONING.md`](./AIX_STACK_VERSIONING.md) for the full doctrine. Manifests carry the version in `meta.format_version` (or the top-level `aix_version` shorthand); both are pinned in code via the `AIX_FORMAT_VERSION` constant exported from `@axiom/schema/version`. Patch bumps are non-shape-breaking. |
@@ -193,8 +193,8 @@ This file MAY be quoted or excerpted in any repo's README or CONTRIBUTING. It MU
 ## 10. The Closing Reminder
 
 > "وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ"
-> "Indeed, you are of a great moral character" — Al-Qalam, 68:4
+> "Indeed, you are of a great moral character": Al-Qalam, 68:4
 
 Sovereignty is not a feature. It is a contract.
 
-— axiomid.app
+: axiomid.app

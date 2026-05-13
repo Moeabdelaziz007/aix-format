@@ -1,4 +1,4 @@
-# AGENTS.md — Operating Manual for AI Coding Agents
+# AGENTS.md: Operating Manual for AI Coding Agents
 
 > 📜 **Stack-wide protocol rules**: read [`AXIOM.md`](./AXIOM.md) first. This file complements it with repo-local operating instructions for `aix-format`.
 
@@ -117,4 +117,4 @@ Cross-stack changes that affect more than one repo MUST land as coordinated PRs 
 
 Read `AXIOM.md`. Then read the file you're about to change. Then read the test file nearest to it. Then act.
 
-— *Last updated by the project maintainers. The rules in this file override anything you remember from a different repository.*
+: *Last updated by the project maintainers. The rules in this file override anything you remember from a different repository.*
