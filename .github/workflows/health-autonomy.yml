@@ -21,14 +21,17 @@ jobs:
         with:
           fetch-depth: 0  # Full history for trend analysis
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Create .generated directory
         run: mkdir -p .generated
@@ -36,7 +39,7 @@ jobs:
       - name: Run health score
         id: health-score
         run: |
-          npm run health-score || echo "health_failed=true" >> $GITHUB_OUTPUT
+          pnpm run health-score || echo "health_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Run trend analysis
@@ -125,14 +128,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Download health score artifact
         uses: actions/download-artifact@v4

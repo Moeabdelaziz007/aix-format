@@ -30,17 +30,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run Core Tests
-        run: npm test
+        run: pnpm test
         env:
           CI: true
 
@@ -56,7 +59,7 @@ jobs:
           done
 
       - name: Validate All Examples
-        run: npm run validate:examples
+        run: pnpm run validate:examples
 
       - name: Identity Compliance Check
         run: |
@@ -94,19 +97,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: NPM Security Audit
         run: |
-          echo "▶ Running npm audit..."
-          npm audit --json > /tmp/audit-report.json || true
+          echo "▶ Running pnpm audit..."
+          pnpm audit --json > /tmp/audit-report.json || true
           node -e "
             const report = require('/tmp/audit-report.json');
             const vulns = report.metadata?.vulnerabilities || {};
@@ -157,19 +163,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Check for Outdated Packages
         run: |
           echo "▶ Checking for outdated dependencies..."
-          npm outdated --json > /tmp/outdated.json || true
+          # pnpm outdated --format json emits an object keyed by package
+          # with shape { current, latest, ... } so the shape used by the
+          # downstream node check stays compatible with the npm version.
+          pnpm outdated --format json > /tmp/outdated.json || true
           node -e "
             const data = require('/tmp/outdated.json');
             const pkgs = Object.keys(data);
@@ -182,6 +194,6 @@ jobs:
                 console.log('  -', pkg + ':', d.current, '->', d.latest);
               });
               console.log('');
-              console.log('ℹ️  Run: npm update or create a PR with updates.');
+              console.log('ℹ️  Run: pnpm update or create a PR with updates.');
             }
           "
