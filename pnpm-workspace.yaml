@@ -1,6 +1,18 @@
 packages:
   - 'apps/*'
-  - 'packages/*'
+  # List packages explicitly instead of 'packages/*' because three
+  # entries in packages/ are not Node packages and lack package.json:
+  #   - packages/aix-agency  (Go module, has go.mod)
+  #   - packages/aix-dna     (Rust crate, has Cargo.toml)
+  #   - packages/aix-types   (TypeScript .d.ts only, resolved via tsconfig path alias)
+  # Globbing them in caused 'ENOENT package.json' warnings on every
+  # `pnpm install` and made the workspace view of the repo wrong.
+  - 'packages/aix-core'
+  - 'packages/aix-rust-core'
+  - 'packages/aix-zkkyc'
+  - 'packages/mcp-gateway'
+  - 'packages/mcp-server'
+  - 'packages/pi-kyc'
 
 onlyBuiltDependencies:
   - esbuild

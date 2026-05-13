@@ -102,7 +102,12 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/aix-core",
+    "packages/aix-rust-core",
+    "packages/aix-zkkyc",
+    "packages/mcp-gateway",
+    "packages/mcp-server",
+    "packages/pi-kyc"
   ],
   "dependencies": {
     "@ai-sdk/google": "^1.0.0",
