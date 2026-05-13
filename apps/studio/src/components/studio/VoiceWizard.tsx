@@ -49,7 +49,12 @@ export function VoiceWizard({
               <p className="text-sm text-zinc-400">Describe your agent to get started</p>
             </div>
           </div>
-          <button className="button" variant="ghost" size="icon" onClick={onClose} className="text-zinc-400 hover:text-white">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="text-zinc-400 hover:text-white"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -107,15 +112,17 @@ export function VoiceWizard({
 
                 {/* Status & Last Message */}
                 <div className="space-y-4 max-w-md mx-auto">
-                  <span className="badge" variant="outline" className={`${
-                    isListening ? "border-red-500 text-red-500 bg-red-500/5" :
-                    isProcessing ? "border-purple-500 text-purple-500 bg-purple-500/5" :
-                    isSpeaking ? "border-blue-500 text-blue-500 bg-blue-500/5" :
-                    "border-zinc-800 text-zinc-500"
-                  }`}>
-                    {isListening ? "LISTENING..." : 
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${
+                      isListening ? "border-red-500 text-red-500 bg-red-500/5" :
+                      isProcessing ? "border-purple-500 text-purple-500 bg-purple-500/5" :
+                      isSpeaking ? "border-blue-500 text-blue-500 bg-blue-500/5" :
+                      "border-zinc-800 text-zinc-500"
+                    }`}
+                  >
+                    {isListening ? "LISTENING..." :
                      isProcessing ? "THINKING..." :
-                     isSpeaking ? "WIZARD SPEAKING..." : 
+                     isSpeaking ? "WIZARD SPEAKING..." :
                      "HOLD TO TALK"}
                   </span>
                   
@@ -153,16 +160,17 @@ export function VoiceWizard({
                 </div>
 
                 <div className="flex gap-4">
-                  <button className="button"
-                    variant="outline" 
-                    className="flex-1 border-zinc-800 hover:bg-zinc-900"
+                  <button
+                    type="button"
                     onClick={() => onComplete(manifest)}
+                    className="flex-1 border border-zinc-800 hover:bg-zinc-900 rounded-md px-4 py-2 text-sm font-medium text-white"
                   >
                     Edit Details
                   </button>
-                  <button className="button"
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  <button
+                    type="button"
                     onClick={() => onDeploy(manifest)}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 text-sm font-semibold"
                   >
                     Deploy Agent
                   </button>
@@ -178,7 +186,7 @@ export function VoiceWizard({
             Powered by Groq Whisper & Gemini 2.0 Flash
           </p>
         </div>
-      </div>
+      </Card>
     </motion.div>
   );
 }
