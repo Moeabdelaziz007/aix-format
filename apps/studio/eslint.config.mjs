@@ -1,6 +1,10 @@
 import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+// eslint-config-next ships these subpaths without a package.json
+// "exports" map, so Node's ESM resolver requires the explicit .js
+// extension. Without it, ESLint 9 on Node 22 fails with
+// ERR_MODULE_NOT_FOUND on first run.
+import nextVitals from "eslint-config-next/core-web-vitals.js";
+import nextTs from "eslint-config-next/typescript.js";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
