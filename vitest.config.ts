@@ -10,9 +10,12 @@ export default defineConfig({
     // The tests/e2e/ folder is excluded here because those tests use
     // node:test and are run by the dedicated test:e2e:node script.
     include: ['tests/**/*.test.{js,ts}', 'packages/**/*.test.{js,ts}'],
+    // Use **/node_modules/** to also catch transitively-installed test files
+    // that ship inside dependency packages (zod ships its own tests, etc.).
+    // The plain 'node_modules/**' pattern only matches the top-level dir.
     exclude: [
-      'node_modules/**',
-      'dist/**',
+      '**/node_modules/**',
+      '**/dist/**',
       'apps/studio/.next/**',
       'tests/e2e/**',
     ],
@@ -28,8 +31,8 @@ export default defineConfig({
         'apps/*/src/**/*.{js,ts}',
       ],
       exclude: [
-        'node_modules/**',
-        'dist/**',
+        '**/node_modules/**',
+        '**/dist/**',
         'apps/studio/.next/**',
         '**/*.d.ts',
         '**/*.gen.ts',
