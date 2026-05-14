@@ -32,7 +32,7 @@ concurrency:
 jobs:
   drift-check:
     name: regenerate and diff
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
