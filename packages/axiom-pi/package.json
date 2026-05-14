@@ -1,10 +1,15 @@
 {
-  "name": "@aix/pi-kyc",
-  "version": "0.369.0",
-  "description": "Pi Network KYC integration for AIX format (Legacy wrapper for @axiom/pi)",
+  "name": "@axiom/pi",
+  "version": "1.4.0",
+  "description": "Sovereign Pi Network integration for AIX: Auth, KYC, and Payments.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
@@ -12,8 +17,7 @@
   },
   "dependencies": {
     "@aix/core": "workspace:*",
-    "@axiom/pi": "workspace:*",
-    "axios": "^1.16.1",
+    "@axiom/identity": "workspace:*",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -22,11 +26,12 @@
     "vitest": "^3.0.4"
   },
   "keywords": [
+    "aix",
     "pi-network",
     "kyc",
-    "aix",
-    "blockchain"
+    "payment",
+    "identity"
   ],
-  "author": "AIX Team",
-  "license": "MIT"
+  "author": "Mohamed H Abdelaziz",
+  "license": "Apache-2.0"
 }

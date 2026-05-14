@@ -2,6 +2,8 @@
  * Pi Network Connect Flow (T-F1)
  * Implements E2E authentication flow using Pi SDK.
  * Ref: RFC Pi-Connect-001
+ *
+ * Note: This module is intended for browser use only.
  */
 
 export interface PiUser {
@@ -14,6 +16,8 @@ export interface PiAuthResponse {
   user: PiUser;
 }
 
+declare const window: any;
+
 export class PiConnectFlow {
   private static sdkInitialized = false;
 
@@ -25,13 +29,13 @@ export class PiConnectFlow {
     if (typeof window === 'undefined') return false;
     
     // Check if Pi SDK is loaded via <script> tag
-    if (!(window as any).Pi) {
+    if (!window.Pi) {
       console.warn('[Pi-Connect] Pi SDK not found. Please ensure you are in the Pi Browser.');
       return false;
     }
 
     try {
-      await (window as any).Pi.init({ version: '2.0', sandbox: process.env.NODE_ENV !== 'production' });
+      await window.Pi.init({ version: '2.0', sandbox: process.env.NODE_ENV !== 'production' });
       this.sdkInitialized = true;
       return true;
     } catch (error) {
@@ -52,7 +56,7 @@ export class PiConnectFlow {
     const scopes = ['username', 'payments']; // Standard scopes
     
     return new Promise((resolve, reject) => {
-      (window as any).Pi.authenticate(scopes, (onIncompletePayment: any) => {
+      window.Pi.authenticate(scopes, (onIncompletePayment: any) => {
         // Handle incomplete payments if necessary (hidden pattern)
         console.log('[Pi-Connect] Incomplete payment detected:', onIncompletePayment);
       })
