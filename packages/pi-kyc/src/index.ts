@@ -185,3 +185,74 @@ export class AxiomPi {
     }
   }
 }
+
+// --- Payment Logic ---
+
+export const PiPaymentSchema = z.object({
+  identifier: z.string(),
+  amount: z.number(),
+  memo: z.string(),
+  metadata: z.record(z.any()),
+  status: z.enum(['pending', 'approved', 'completed', 'cancelled']),
+  txid: z.string().optional(),
+});
+
+export type PiPayment = z.infer<typeof PiPaymentSchema>;
+
+export class PiPaymentService {
+  private apiUrl: string = "https://api.minepi.com/v2";
+  private apiKey: string;
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  /**
+   * Approves a payment on the Pi Platform.
+   */
+  async approvePayment(paymentId: string): Promise<boolean> {
+    if (!this.apiKey) {
+      throw new Error("[PiPaymentService] Missing API Key");
+    }
+
+    try {
+      const response = await fetch(`${this.apiUrl}/payments/${paymentId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return response.ok;
+    } catch (e) {
+      console.error("[PiPaymentService] Approval Error:", e);
+      return false;
+    }
+  }
+
+  /**
+   * Completes a payment on the Pi Platform after blockchain confirmation.
+   */
+  async completePayment(paymentId: string, txid: string): Promise<boolean> {
+    if (!this.apiKey) {
+      throw new Error("[PiPaymentService] Missing API Key");
+    }
+
+    try {
+      const response = await fetch(`${this.apiUrl}/payments/${paymentId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ txid }),
+      });
+
+      return response.ok;
+    } catch (e) {
+      console.error("[PiPaymentService] Completion Error:", e);
+      return false;
+    }
+  }
+}
