@@ -21,6 +21,7 @@ packages:
   - 'packages/axiom-validate'
   - 'packages/axiom-health'
   - 'packages/axiom-autofix'
+  - 'packages/axiom-pi'
 
 onlyBuiltDependencies:
   - esbuild

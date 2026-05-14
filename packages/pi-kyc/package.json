@@ -11,9 +11,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@aix/core": "workspace:*",
     "axios": "^1.16.1",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "@axiom/pi": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

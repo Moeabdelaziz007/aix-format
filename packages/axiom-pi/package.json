@@ -1,0 +1,24 @@
+{
+  "name": "@axiom/pi",
+  "version": "0.1.0",
+  "description": "Pi Network integration — auth, KYC, payment, and domain claim for the AIX Sovereign Stack",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.8"
+  },
+  "keywords": ["pi-network", "kyc", "payment", "axiom", "aix"],
+  "author": "Mohamed Abdelaziz",
+  "license": "Apache-2.0"
+}
