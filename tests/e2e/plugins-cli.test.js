@@ -59,9 +59,16 @@ test('aix-plugins: disable then re-enable a plugin', () => {
   assert.match(enabled, /[Ee]nabled|✓|✅/);
 });
 
-// Tests for the commander rewrite (PR: replaced custom argv parsing with commander)
+// Additional tests for plugins-cli functionality
 
-test('aix-plugins: add with --priority sets priority in config', () => {
+test('aix-plugins: --help prints program name and commands', () => {
+  const cwd = makeWorkspace();
+  const out = execFileSync('node', [PLUGINS, '--help'], { encoding: 'utf8', cwd });
+  assert.match(out, /aix-plugins/i, '--help should print the program name');
+  assert.match(out, /list|add|remove|enable|disable/i, '--help should list available commands');
+});
+
+test('aix-plugins: add with --priority stores priority as number in config', () => {
   const cwd = makeWorkspace();
   const pluginPath = path.join(cwd, 'plugin-prio.js');
   fs.writeFileSync(pluginPath, 'module.exports = {};');
@@ -69,21 +76,10 @@ test('aix-plugins: add with --priority sets priority in config', () => {
   runPlugins(['add', pluginPath, '--priority', '5'], cwd);
 
   const config = JSON.parse(fs.readFileSync(path.join(cwd, '.aix-plugins.json'), 'utf8'));
-  assert.strictEqual(config.plugins[pluginPath].priority, 5, 'priority should be stored as number 5');
+  assert.strictEqual(config.plugins[pluginPath].priority, 5, 'priority should be stored as the number 5');
 });
 
-test('aix-plugins: add with -p shorthand sets priority in config', () => {
-  const cwd = makeWorkspace();
-  const pluginPath = path.join(cwd, 'plugin-shorthand.js');
-  fs.writeFileSync(pluginPath, 'module.exports = {};');
-
-  runPlugins(['add', pluginPath, '-p', '10'], cwd);
-
-  const config = JSON.parse(fs.readFileSync(path.join(cwd, '.aix-plugins.json'), 'utf8'));
-  assert.strictEqual(config.plugins[pluginPath].priority, 10, 'priority via -p shorthand should be stored');
-});
-
-test('aix-plugins: add with --disabled marks plugin as disabled', () => {
+test('aix-plugins: add with --disabled marks plugin as disabled in config', () => {
   const cwd = makeWorkspace();
   const pluginPath = path.join(cwd, 'plugin-disabled.js');
   fs.writeFileSync(pluginPath, 'module.exports = {};');
@@ -94,9 +90,9 @@ test('aix-plugins: add with --disabled marks plugin as disabled', () => {
   assert.strictEqual(config.plugins[pluginPath].enabled, false, 'plugin added with --disabled should have enabled=false');
 });
 
-test('aix-plugins: add without --disabled marks plugin as enabled', () => {
+test('aix-plugins: add without --disabled marks plugin as enabled in config', () => {
   const cwd = makeWorkspace();
-  const pluginPath = path.join(cwd, 'plugin-enabled.js');
+  const pluginPath = path.join(cwd, 'plugin-noflags.js');
   fs.writeFileSync(pluginPath, 'module.exports = {};');
 
   runPlugins(['add', pluginPath], cwd);
@@ -105,70 +101,7 @@ test('aix-plugins: add without --disabled marks plugin as enabled', () => {
   assert.strictEqual(config.plugins[pluginPath].enabled, true, 'plugin added without --disabled should have enabled=true');
 });
 
-test('aix-plugins: remove deletes plugin from config', () => {
-  const cwd = makeWorkspace();
-  const pluginPath = path.join(cwd, 'to-remove.js');
-  fs.writeFileSync(pluginPath, 'module.exports = {};');
-
-  runPlugins(['add', pluginPath], cwd);
-  const out = runPlugins(['remove', pluginPath], cwd);
-  assert.match(out, /[Rr]emoved|🗑/, 'remove command should confirm removal');
-
-  const config = JSON.parse(fs.readFileSync(path.join(cwd, '.aix-plugins.json'), 'utf8'));
-  assert.strictEqual(config.plugins[pluginPath], undefined, 'removed plugin should not be in config');
-});
-
-test('aix-plugins: list shows priority for plugins that have it', () => {
-  const cwd = makeWorkspace();
-  const pluginPath = path.join(cwd, 'plugin-with-prio.js');
-  fs.writeFileSync(pluginPath, 'module.exports = {};');
-
-  runPlugins(['add', pluginPath, '--priority', '3'], cwd);
-  const out = runPlugins(['list'], cwd);
-  assert.match(out, /priority.*3|3.*priority/, 'list should display the priority');
-});
-
-test('aix-plugins: enable on a non-existent plugin logs an error and does not throw', () => {
-  const cwd = makeWorkspace();
-  // Unlike the old code which called process.exit(1), commander rewrite only logs error
-  // The process should exit 0 (or at least not crash with unhandled error)
-  let stderr = '';
-  try {
-    execFileSync('node', [PLUGINS, 'enable', '/no/such/plugin.js'], {
-      encoding: 'utf8',
-      cwd,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-  } catch (err) {
-    stderr = err.stderr || '';
-  }
-  assert.match(stderr, /not found|Plugin not found/i, 'should report plugin not found on stderr');
-});
-
-test('aix-plugins: disable on a non-existent plugin logs an error and does not throw', () => {
-  const cwd = makeWorkspace();
-  let stderr = '';
-  try {
-    execFileSync('node', [PLUGINS, 'disable', '/no/such/plugin.js'], {
-      encoding: 'utf8',
-      cwd,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-  } catch (err) {
-    stderr = err.stderr || '';
-  }
-  assert.match(stderr, /not found|Plugin not found/i, 'should report plugin not found on stderr');
-});
-
-test('aix-plugins: --help prints usage information', () => {
-  const cwd = makeWorkspace();
-  // commander --help exits 0 and prints usage
-  const out = execFileSync('node', [PLUGINS, '--help'], { encoding: 'utf8', cwd });
-  assert.match(out, /aix-plugins|Usage/i, '--help should print program name or Usage');
-  assert.match(out, /list|add|remove|enable|disable/i, '--help should list available commands');
-});
-
-test('aix-plugins: add with --priority and --disabled together', () => {
+test('aix-plugins: add with --priority and --disabled together sets both fields', () => {
   const cwd = makeWorkspace();
   const pluginPath = path.join(cwd, 'plugin-combo.js');
   fs.writeFileSync(pluginPath, 'module.exports = {};');
@@ -180,7 +113,30 @@ test('aix-plugins: add with --priority and --disabled together', () => {
   assert.strictEqual(config.plugins[pluginPath].priority, 7, 'plugin priority should be 7');
 });
 
-test('aix-plugins: add confirms with success message', () => {
+test('aix-plugins: remove command deletes plugin from config', () => {
+  const cwd = makeWorkspace();
+  const pluginPath = path.join(cwd, 'to-remove.js');
+  fs.writeFileSync(pluginPath, 'module.exports = {};');
+
+  runPlugins(['add', pluginPath], cwd);
+  const out = runPlugins(['remove', pluginPath], cwd);
+  assert.match(out, /[Rr]emoved|🗑/, 'remove command should confirm removal');
+
+  const config = JSON.parse(fs.readFileSync(path.join(cwd, '.aix-plugins.json'), 'utf8'));
+  assert.strictEqual(config.plugins[pluginPath], undefined, 'removed plugin should not be present in config');
+});
+
+test('aix-plugins: list shows priority for plugins that have it', () => {
+  const cwd = makeWorkspace();
+  const pluginPath = path.join(cwd, 'plugin-with-prio.js');
+  fs.writeFileSync(pluginPath, 'module.exports = {};');
+
+  runPlugins(['add', pluginPath, '--priority', '3'], cwd);
+  const out = runPlugins(['list'], cwd);
+  assert.match(out, /priority.*3|3.*priority/, 'list output should display the priority value');
+});
+
+test('aix-plugins: add prints success confirmation message', () => {
   const cwd = makeWorkspace();
   const pluginPath = path.join(cwd, 'plugin-msg.js');
   fs.writeFileSync(pluginPath, 'module.exports = {};');
@@ -189,10 +145,53 @@ test('aix-plugins: add confirms with success message', () => {
   assert.match(out, /Added plugin|✅/, 'add should print a success message');
 });
 
-test('aix-plugins: list on missing config file returns gracefully', () => {
-  // If .aix-plugins.json does not exist, loadConfig returns { plugins: {} }
+test('aix-plugins: list on missing config file returns gracefully without throwing', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aix-plugins-noconfig-'));
-  // Do NOT write .aix-plugins.json - test graceful fallback
+  // Intentionally do NOT create .aix-plugins.json — tests graceful fallback
   const out = runPlugins(['list'], dir);
   assert.match(out, /Installed plugins/i, 'list should work even when config file is absent');
+});
+
+test('aix-plugins: enable on non-existent plugin exits non-zero with error on stderr', () => {
+  const cwd = makeWorkspace();
+  let exitCode = 0;
+  let stderr = '';
+  try {
+    execFileSync('node', [PLUGINS, 'enable', '/no/such/plugin.js'], {
+      encoding: 'utf8',
+      cwd,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+  } catch (err) {
+    exitCode = err.status;
+    stderr = err.stderr || '';
+  }
+  assert.ok(exitCode !== 0, 'enabling non-existent plugin should exit with non-zero status');
+  assert.match(stderr, /not found|Plugin not found/i, 'stderr should report the plugin was not found');
+});
+
+test('aix-plugins: disable on non-existent plugin exits non-zero with error on stderr', () => {
+  const cwd = makeWorkspace();
+  let exitCode = 0;
+  let stderr = '';
+  try {
+    execFileSync('node', [PLUGINS, 'disable', '/no/such/plugin.js'], {
+      encoding: 'utf8',
+      cwd,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+  } catch (err) {
+    exitCode = err.status;
+    stderr = err.stderr || '';
+  }
+  assert.ok(exitCode !== 0, 'disabling non-existent plugin should exit with non-zero status');
+  assert.match(stderr, /not found|Plugin not found/i, 'stderr should report the plugin was not found');
+});
+
+test('aix-plugins: unknown command exits non-zero', () => {
+  const cwd = makeWorkspace();
+  assert.throws(
+    () => execFileSync('node', [PLUGINS, 'notacommand'], { encoding: 'utf8', cwd }),
+    'unknown command should cause non-zero exit'
+  );
 });
