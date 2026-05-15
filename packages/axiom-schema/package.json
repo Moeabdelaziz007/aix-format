@@ -1,6 +1,6 @@
 {
   "name": "@axiom/schema",
-  "version": "1.3.0",
+  "version": "0.1.0",
   "description": "Canonical AIX manifest JSON Schema and TypeScript types. Single source of truth for the AIX (Artificial Intelligence eXchange) Sovereign Protocol.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

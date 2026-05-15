@@ -17,5 +17,9 @@
     "node": ">=22"
   },
   "license": "MIT",
-  "files": ["src", "bin", "README.md"]
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ]
 }
