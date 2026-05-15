@@ -179,6 +179,22 @@ importers:
 
   packages/axiom-lint: {}
 
+  packages/axiom-pi:
+    dependencies:
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.19.17
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.17)(@vitest/ui@2.1.9)(jsdom@20.0.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))(lightningcss@1.32.0)
+
   packages/axiom-schema:
     devDependencies:
       '@types/node':
@@ -243,9 +259,9 @@ importers:
 
   packages/pi-kyc:
     dependencies:
-      '@aix/core':
+      '@axiom/pi':
         specifier: workspace:*
-        version: link:../aix-core
+        version: link:../axiom-pi
       axios:
         specifier: ^1.16.1
         version: 1.16.1
@@ -2625,6 +2641,11 @@ packages:
   type-is@2.0.1:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
+
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
 
   typescript@6.0.3:
     resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
@@ -5261,6 +5282,8 @@ snapshots:
       content-type: 1.0.5
       media-typer: 1.1.0
       mime-types: 3.0.2
+
+  typescript@5.9.3: {}
 
   typescript@6.0.3: {}
 

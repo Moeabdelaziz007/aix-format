@@ -1,6 +1,6 @@
 {
   "name": "@axiom/health",
-  "version": "0.1.0",
+  "version": "1.4.0",
   "description": "Repo health score: dead-code, coverage threshold, trust-chain integrity, type-drift. Replaces dead-code-scan.sh + iqra:grow + health-score.ts.",
   "type": "module",
   "main": "src/index.ts",

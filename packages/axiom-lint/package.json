@@ -1,6 +1,6 @@
 {
   "name": "@axiom/lint",
-  "version": "0.1.0",
+  "version": "1.4.0",
   "description": "Unified lint pipeline for the Axiom stack: naming, secrets, size, tabs-in-markdown, em-dashes, TODO markers. Replaces husky guards + charter.rules.txt + sentinel-autofix workflows.",
   "type": "module",
   "main": "src/index.ts",

@@ -1,9 +1,9 @@
-# 📜 AXIOM: The Sovereign Constitution
+# 📜 AXIOM: The Sovereign Constitution & Universal Agent Passport
 
 > "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ"
 > "Read! In the name of your Lord who created": Al-ʿAlaq, 96:1
 
-This document is the supreme protocol constitution for the AIX (Artificial Intelligence eXchange) Sovereign Stack. It supersedes all per-repo agent instructions and is the single source of truth for cross-stack policy. Every agent operating on any repository under the `axiomid.app` authority MUST read this file before opening a pull request.
+This document is the supreme protocol constitution for the AIX (Artificial Intelligence eXchange) Sovereign Stack and the Universal Agent Passport. It supersedes all per-repo agent instructions and is the single source of truth for cross-stack policy. Every agent operating on any repository under the `axiomid.app` authority MUST read this file before opening a pull request.
 
 Seeded from `iqra/IQRA_SUPREME.md`. Generalised to the stack.
 
@@ -69,7 +69,7 @@ L3: aix-agent-skills    The Marketplace (skills + governance + constitutional ru
 
 Dependency direction is **one-way only**: L3 depends on L2 depends on L1. Reverse imports are forbidden.
 
-The three Sovereign Stack repos share one constitution (this file), one TrustChain shape, one DID authority, one palette, and one codename window (currently `Echo369`).
+The three Sovereign Stack repos share one constitution (this file), one TrustChain shape, one DID authority, one palette, and one codename window (currently `Echo369`). Every agent in the stack is a carrier of the **Universal Agent Passport** (v1.4.0), enabling cross-border autonomous economic operations.
 
 ---
 

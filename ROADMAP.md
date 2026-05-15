@@ -2,8 +2,8 @@
 ## User-Driven Development
 
 **Vision:** Create a useful AI agent format based on real-world needs  
-**Current Version:** v0.369.0 (Pre-release)
-**Target:** v1.0 (Stable) after 100+ users validate  
+**Current Version:** v1.4.0 (Echo369)
+**Target:** v2.0 (Stable) after 100+ users validate
 **Timeline:** User feedback determines the pace
 
 **Author:** Mohamed H Abdelaziz  
@@ -36,7 +36,7 @@
 
 ---
 
-## Current State: v0.369.0 (Day 2)
+## Current State: v1.4.0 (Echo369)
 
 ### 🌟 Weekly Deep Architecture Audit
 * **Agentic Vision & Steerability**: Integrated Vision-Language-Action (VLA) pipelines preparing for `openpi` and `π0.7` robotics runtimes.

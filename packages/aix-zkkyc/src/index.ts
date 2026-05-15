@@ -14,8 +14,11 @@ export type { ZKProof, VerificationResult } from './ProofVerifier';
 export { NullifierRegistry, ProofReplayError } from './NullifierRegistry';
 export type { NullifierRecord } from './NullifierRegistry';
 
+export * from './schemas';
+
 import crypto from 'crypto';
 import { Redis } from '@upstash/redis';
+import { IdentityClaimsSchema, pKYCProofSchema } from './schemas';
 
 const globalRegistry = new NullifierRegistry();
 
@@ -43,6 +46,7 @@ try {
 const fallbackRevokedNullifiers = new Set<string>();
 
 export async function generateProof(claims: IdentityClaims): Promise<pKYCProof> {
+    IdentityClaimsSchema.parse(claims);
     const blindingFactor = crypto.randomBytes(32).toString('hex');
     const rawData = `${claims.name}|${claims.dob}|${claims.jurisdiction}`;
     const commitment = crypto.createHash('sha256').update(rawData + blindingFactor).digest('hex');
@@ -60,6 +64,12 @@ export async function generateProof(claims: IdentityClaims): Promise<pKYCProof> 
 
 export async function verifyProof(token: string, publicParams: string): Promise<boolean> {
     const decoded = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
+
+    // Validate decoded structure if it contains nullifier
+    if (decoded.nullifier) {
+        pKYCProofSchema.pick({ nullifier: true }).parse({ nullifier: decoded.nullifier });
+    }
+
     const proofHash = decoded.nullifier || crypto.createHash('sha256').update(token).digest('hex');
 
     const isUsed = await globalRegistry.isNullified(proofHash);

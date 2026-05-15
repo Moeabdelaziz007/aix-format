@@ -1,6 +1,6 @@
 {
   "name": "aix-mcp-server",
-  "version": "0.369.0",
+  "version": "1.4.0",
   "description": "Universal MCP Server for AIX Agent Discovery, ABOM Risk Scanning, and Blackbox Auditing",
   "type": "module",
   "main": "dist/index.js",

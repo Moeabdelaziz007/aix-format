@@ -1,6 +1,6 @@
 {
   "name": "@aix/rust-core",
-  "version": "0.369.0",
+  "version": "1.4.0",
   "description": "High-performance Rust core for AIX agent framework",
   "main": "index.node",
   "types": "index.d.ts",

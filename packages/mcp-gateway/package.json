@@ -1,6 +1,6 @@
 {
   "name": "@aix-format/mcp-gateway",
-  "version": "0.369.0",
+  "version": "1.4.0",
   "description": "Secure gateway for AIX MCP interactions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@axiom/validate",
-  "version": "0.1.0",
+  "version": "1.4.0",
   "description": "Validate AIX manifests, generated types drift, golden fixtures, and skill markdown shape. Replaces aix-validate.js + schema-type-sync.ts + schema_sentinel.py.",
   "type": "module",
   "main": "src/index.ts",

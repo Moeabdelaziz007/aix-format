@@ -1,5 +1,6 @@
 import { groth16 } from 'snarkjs';
 import { NullifierRegistry } from './NullifierRegistry';
+import { ZKProofSchema } from './schemas';
 
 /**
  * ZK Proof structure for groth16 verification
@@ -53,18 +54,21 @@ export class ProofVerifier {
    */
   async verify(proof: ZKProof): Promise<VerificationResult> {
     try {
-      // Step 1: Validate nullifier format (must be 64-character hex string)
-      if (!this.isValidNullifier(proof.nullifier)) {
+      // Step 1: Validate input using Zod
+      const validatedProof = ZKProofSchema.safeParse(proof);
+      if (!validatedProof.success) {
         return {
           valid: false,
-          error: 'Nullifier must be a 64-character hexadecimal string',
+          error: validatedProof.error.errors[0].message,
           errorCode: 'INVALID_NULLIFIER'
         };
       }
 
+      const { nullifier, timestamp, publicSignals, proof: grothProof } = validatedProof.data;
+
       // Step 2: Check timestamp recency (reject proofs older than maxProofAge)
       const now = Date.now();
-      const proofAge = now - proof.timestamp;
+      const proofAge = now - timestamp;
       
       if (proofAge > this.maxProofAge) {
         return {
@@ -75,7 +79,7 @@ export class ProofVerifier {
       }
 
       // Step 3: Check for replay attacks using NullifierRegistry
-      const isReplayed = await this.registry.isNullified(proof.nullifier);
+      const isReplayed = await this.registry.isNullified(nullifier);
       if (isReplayed) {
         return {
           valid: false,
@@ -87,8 +91,8 @@ export class ProofVerifier {
       // Step 4: Perform cryptographic verification using groth16
       const isValid = await groth16.verify(
         this.verificationKey,
-        proof.publicSignals,
-        proof.proof
+        publicSignals,
+        grothProof
       );
 
       if (!isValid) {
@@ -101,15 +105,15 @@ export class ProofVerifier {
 
       // Step 5: Register nullifier to prevent replay attacks
       await this.registry.registerNullifier(
-        proof.nullifier,
+        nullifier,
         'zkkyc-agent', // agentId - could be extracted from publicSignals if needed
-        proof.timestamp
+        timestamp
       );
 
       // Success!
       return {
         valid: true,
-        nullifier: proof.nullifier
+        nullifier: nullifier
       };
 
     } catch (error: any) {

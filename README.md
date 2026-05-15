@@ -9,7 +9,7 @@
 [![AIX Stack](https://img.shields.io/badge/AIX%20STACK-Echo369-39FF14?style=for-the-badge&labelColor=050505)](./AXIOM.md)
 [![Spec](https://img.shields.io/badge/SPEC-AIX%2F1.0-39FF14?style=for-the-badge&labelColor=050505)](./AXIOM.md)
 [![Layer](https://img.shields.io/badge/LAYER-L1%20%C2%B7%20PROTOCOL-39FF14?style=for-the-badge&labelColor=050505)](https://github.com/Moeabdelaziz007/aix-format)
-[![Version](https://img.shields.io/badge/version-v0.369.0-39FF14?style=for-the-badge&labelColor=050505)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.4.0-39FF14?style=for-the-badge&labelColor=050505)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/LICENSE-Apache%202.0-39FF14?style=for-the-badge&labelColor=050505)](./LICENSE)
 
 </div>
@@ -36,15 +36,15 @@
 
 <!-- ════════════════ /AIX SOVEREIGN STACK ════════════════ -->
 
-# 🧬 AIX Format: Universal Agent Passport v0.369
+# 🧬 AIX Format: Universal Agent Passport v1.4.0 (Echo369)
 
  Vision
 “If your laptop dies or your cloud vendor disappears, your agents should not.
-AIX is the USB stick for agentic work: a portable, signed manifest that lets any compliant runtime rehydrate the same agent with the same identity, economics, and evolution history.”
+AIX is the Universal Agent Passport: a portable, signed manifest that lets any compliant runtime rehydrate the same agent with the same identity, economics, and evolution history.”
 
  الرؤية
 “لو جهازك وقع، أو الـ platform اختفت، وكيلك ماينتهيش معاها.
-AIX هو فلاشـة الوكلاء: ملف واحد موقَّع يشيل هوية الوكيل، اقتصاده، وتاريخه التطوري، وتقدر تشغّله على أي نظام يدعم معيار AIX.”
+AIX هو جواز سفر الوكلاء العالمي: ملف واحد موقَّع يشيل هوية الوكيل، اقتصاده، وتاريخه التطوري، وتقدر تشغّله على أي نظام يدعم معيار AIX.”
 
 
 
@@ -158,8 +158,8 @@ learn autonomously, and operate 24/7 without human supervision.
 | **Fiat On/Off Ramps** | Stripe, PayPal, PYUSD | ✅ v1.0.0 |
 | **DeFi Strategies** | Flash loans, arbitrage, yield | 🔄 Beta |
 | **Platform Adapters** | OpenClaw, Hermes, AIX_Ks, IBM watsonx | 🔄 Beta |
-| **TrustChain Audit** | Immutable per-action log | ✅ v0.369.0 |
-| **Evolution Tracking** | Agent self-improvement manifest | ✅ v0.369.0 |
+| **TrustChain Audit** | Immutable per-action log | ✅ v1.4.0 |
+| **Evolution Tracking** | Agent self-improvement manifest | ✅ v1.4.0 |
 
 #### Payment Layer Architecture
 
@@ -238,10 +238,10 @@ aix deploy --platform ibm-watsonx
 | MCP Registry | ✅ Live | [Registry](docs/MCP_GATEWAY.md) |
 | ABOM Scanner | ✅ Live | [Security](docs/SECURITY.md) |
 | KYC Identity | ✅ Live | [Spec](docs/AIX_SPEC.md) |
-| TrustChain Module | ✅ v0.369.0 | [Module](packages/aix-core/src/trust-chain/) |
-| Evolution Tracking | ✅ v0.369.0 | [Schema](schemas/aix.schema.json) |
-| ABOM → MCP Gate | ✅ v0.369.0 | [Gate](core/mcp-gate.ts) |
-| Sovereign Economy | ✅ v0.369.0 | [Spec](apps/studio/src/app/spec/page.tsx#economy) |
+| TrustChain Module | ✅ v1.4.0 | [Module](packages/aix-core/src/trust-chain/) |
+| Evolution Tracking | ✅ v1.4.0 | [Schema](schemas/aix.schema.json) |
+| ABOM → MCP Gate | ✅ v1.4.0 | [Gate](core/mcp-gate.ts) |
+| Sovereign Economy | ✅ v1.4.0 | [Spec](apps/studio/src/app/spec/page.tsx#economy) |
 | Coinbase AgentKit | ✅ Live | [Economics](packages/aix-core/src/economics/) |
 | Stripe MCP | ✅ Live | [Gate](packages/aix-core/src/mcp-gate.ts) |
 | IBM watsonx Bridge | 🔜 Soon |: |
@@ -354,7 +354,7 @@ This **L1 Protocol** carries the fingerprints of **9 of the 12 stack-wide AI age
 
 <img src="https://img.shields.io/badge/Built%20with-1%20Human%20%2B%209%20AI%20Agents-6366f1?style=for-the-badge"/>
 &nbsp;
-<img src="https://img.shields.io/badge/Version-v0.369.0-8b5cf6?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Version-v1.4.0-8b5cf6?style=for-the-badge"/>
 &nbsp;
 <img src="https://img.shields.io/badge/License-Apache%202.0-10b981?style=for-the-badge"/>
 </div>

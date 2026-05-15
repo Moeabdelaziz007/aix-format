@@ -1,6 +1,6 @@
 {
   "name": "@axiom/identity",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Canonical AIX identity primitives: Axiom DID translator, Ed25519 sign/verify, RFC 8785 JCS canonicalization, and Pi Network domain-claim flow. Edge-safe, no native bindings.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
