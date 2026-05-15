@@ -18,7 +18,13 @@
     "typescript": "^5.9.3",
     "vitest": "^2.1.8"
   },
-  "keywords": ["pi-network", "kyc", "payment", "axiom", "aix"],
+  "keywords": [
+    "pi-network",
+    "kyc",
+    "payment",
+    "axiom",
+    "aix"
+  ],
   "author": "Mohamed Abdelaziz",
   "license": "Apache-2.0"
 }
