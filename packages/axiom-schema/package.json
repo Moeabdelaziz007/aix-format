@@ -55,7 +55,7 @@
   "devDependencies": {
     "@types/node": "^20.12.7",
     "json-schema-to-typescript": "^15.0.4",
-    "tsx": "^4.19.2",
+    "tsx": "^4.22.1",
     "typescript": "^6.0.3"
   },
   "engines": {
